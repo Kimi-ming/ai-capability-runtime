@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 十五个子系统
+## 二十个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -33,6 +33,11 @@ OpenCap 负责能力治理。
 | MCP 接口 | Host 兼容表面 | `docs/design/mcp-interface-v1.md` | tools/list + tools/call |
 | 错误模型 | 一致失败语义 | `docs/design/error-model-v1.md` | OpenCapError 分类 |
 | 隐私保留 | 本地数据边界 | `docs/security/privacy-retention-v1.md` | 脱敏和保留规则 |
+| 能力分类 | Registry 可导航性 | `docs/ecosystem/capability-taxonomy.md` | 分类和粒度规则 |
+| Host 兼容 | 跨 Host 稳定性 | `docs/ecosystem/host-compatibility-matrix.md` | 兼容性记录模板 |
+| 开源边界 | OSS 与 Cloud 分工 | `docs/ecosystem/open-core-boundary.md` | open-core 约束 |
+| 社区协作 | 外部贡献路径 | `docs/community/contributor-journey.md` | contributor journey |
+| 可观测指标 | 质量和生态反馈 | `docs/operations/observability-metrics-v1.md` | 本地指标和未来 OTel 映射 |
 
 ## 系统闭环
 
@@ -104,6 +109,9 @@ Governance Surface
 | State dir 默认 `<cwd>/opencap.local`，可由 flag/env 覆盖 | 已接受 |
 | MCP V1 只实现 tools，确认不可用时返回 `confirmation_required` | 已接受 |
 | CLI/Runtime/MCP 使用统一错误模型 | 已接受 |
+| V1 默认不上传遥测，只保留本地 audit log | 已接受 |
+| OSS 核心必须能独立运行，Cloud 不得成为主路径依赖 | 已接受 |
+| 大型设计变化走 RFC，接受后进入 ADR | 已接受 |
 
 ## 设计成熟度
 
@@ -121,3 +129,7 @@ Governance Surface
 | 本地状态 | 清晰 | T010/T014 实现 helper |
 | MCP 接口 | 清晰 | T070-T073 实现 bridge |
 | 错误模型 | 清晰 | T013/T137 实现错误测试 |
+| 生态分类 | 清晰 | T140/T141 落到 registry docs |
+| Host 兼容 | 框架清晰 | T127 维护矩阵 |
+| 社区协作 | 清晰 | PR/issue templates 已添加 |
+| 可观测指标 | 边界清晰 | V1 从 audit log 派生 |

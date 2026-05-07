@@ -11,6 +11,9 @@ README.md
       -> docs/product/strategy.md
       -> docs/product/use-cases.md
       -> docs/product/capability-lifecycle.md
+      -> docs/ecosystem/capability-taxonomy.md
+      -> docs/ecosystem/host-compatibility-matrix.md
+      -> docs/ecosystem/open-core-boundary.md
       -> docs/SPEC.md
       -> docs/ARCHITECTURE.md
       -> docs/design/domain-model.md
@@ -31,7 +34,12 @@ README.md
       -> docs/security/privacy-retention-v1.md
       -> docs/operations/release-readiness.md
       -> docs/operations/ci-security-baseline.md
+      -> docs/operations/observability-metrics-v1.md
+      -> docs/community/contributor-journey.md
+      -> docs/community/capability-review-checklist.md
+      -> docs/community/rfc-process.md
       -> docs/planning/v1-implementation-plan.md
+      -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
       -> docs/TASKS.md
       -> docs/TESTING.md
@@ -50,11 +58,11 @@ README.md
 1. `README.md`
 2. `docs/SYSTEM.md`
 3. `docs/introduction.md`
-3. `docs/product/strategy.md`
-4. `docs/product/use-cases.md`
-5. `docs/SPEC.md`
-6. `docs/ARCHITECTURE.md`
-7. `docs/ROADMAP.md`
+4. `docs/product/strategy.md`
+5. `docs/product/use-cases.md`
+6. `docs/SPEC.md`
+7. `docs/ARCHITECTURE.md`
+8. `docs/ROADMAP.md`
 
 ### 准备开始开发
 
@@ -89,6 +97,9 @@ README.md
 | `docs/product/strategy.md` | 产品定位、战略边界、系统分层 | 定位或商业/生态判断变化时 |
 | `docs/product/use-cases.md` | 用户角色、场景、用户任务 | 用户场景或验收口径变化时 |
 | `docs/product/capability-lifecycle.md` | Capability 治理状态机 | install/review/audit 状态变化时 |
+| `docs/ecosystem/capability-taxonomy.md` | Capability 分类和粒度 | Registry 分类或命名规则变化时 |
+| `docs/ecosystem/host-compatibility-matrix.md` | Host 兼容性记录 | MCP Host 测试结果变化时 |
+| `docs/ecosystem/open-core-boundary.md` | OSS 与未来 Cloud 边界 | 商业化或托管能力边界变化时 |
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/ARCHITECTURE.md` | 模块边界、数据流、约束 | 包职责、数据流、边界变化时 |
 | `docs/design/domain-model.md` | 领域对象和不变量 | 类型、状态对象、日志字段变化时 |
@@ -109,6 +120,10 @@ README.md
 | `docs/security/privacy-retention-v1.md` | 隐私和数据保留 | 日志保留、数据删除或脱敏规则变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
+| `docs/operations/observability-metrics-v1.md` | 可观测性和指标 | audit/metrics/OTel 映射变化时 |
+| `docs/community/contributor-journey.md` | 贡献者路径 | 贡献流程变化时 |
+| `docs/community/capability-review-checklist.md` | Capability PR 评审 | Registry review 规则变化时 |
+| `docs/community/rfc-process.md` | RFC 流程 | 设计治理流程变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

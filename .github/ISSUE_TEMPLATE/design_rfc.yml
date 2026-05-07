@@ -1,0 +1,26 @@
+name: Design / RFC proposal
+description: Propose a design change that may need an RFC or ADR
+title: "design: "
+labels: ["design"]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What problem does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Sketch the design, compatibility, and rollout.
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks
+      description: Security, compatibility, or migration risks.
+    validations:
+      required: false

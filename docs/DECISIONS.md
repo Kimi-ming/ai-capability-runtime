@@ -21,12 +21,15 @@
 | 0013 | 本地状态和配置路径 | 已接受 | state dir 使用 flag/env/cwd 优先级。 |
 | 0014 | MCP Interface V1 | 已接受 | V1 只实现 tools，确认不可用返回 `confirmation_required`。 |
 | 0015 | 错误模型 V1 | 已接受 | CLI/Runtime/MCP 使用统一错误分类。 |
+| 0016 | V1 可观测性边界 | 已接受 | V1 只做本地 audit log，不默认上传遥测。 |
+| 0017 | 开源核心与未来 Cloud 边界 | 已接受 | OSS 核心必须独立运行，Cloud 只能增强。 |
+| 0018 | RFC 与社区治理流程 | 已接受 | 大型设计变化走 RFC，接受后进入 ADR。 |
 
 ## 下一批需要决策的问题
 
-- 0016：版本签名和 npm provenance 策略。
-- 0017：OpenAPI adapter 的人工 review 边界。
-- 0018：未来远程 Runtime 的 OAuth authorization 边界。
+- 0019：版本签名和 npm provenance 策略。
+- 0020：OpenAPI adapter 的人工 review 边界。
+- 0021：未来远程 Runtime 的 OAuth authorization 边界。
 
 ## 决策写法
 

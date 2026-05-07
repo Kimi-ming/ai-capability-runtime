@@ -99,3 +99,7 @@ T001：让 opencap validate 调用真实 schema 校验
 ## 实现前接口契约已补齐
 
 已新增 CLI 契约、本地状态、配置模型、MCP 接口、错误模型、隐私与数据保留、CI 安全基线和 V1 实施计划。ADR 0013-0015 已接受。下一步 T001 可以直接按 `docs/design/cli-contract-v1.md` 和 `docs/design/error-model-v1.md` 实现，不需要再临场定义命令行为。
+
+## 生态、社区和可观测性体系已补齐
+
+已新增 Capability 分类、Host 兼容性矩阵、开源核心边界、贡献者路径、Capability Review Checklist、RFC 流程、可观测性指标和 Open Questions；新增 GitHub PR/issue templates；ADR 0016-0018 已接受。下一步仍是 T001，文档体系已经足够支撑进入实现阶段。

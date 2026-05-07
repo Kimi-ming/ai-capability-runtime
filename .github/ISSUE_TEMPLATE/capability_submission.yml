@@ -1,0 +1,33 @@
+name: Capability submission
+description: Propose or submit a new OpenCap Capability
+title: "capability: "
+labels: ["capability", "registry"]
+body:
+  - type: input
+    id: capability_id
+    attributes:
+      label: Capability id
+      placeholder: github.create_issue
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Behavior
+      description: What external action or data access does this Capability perform?
+    validations:
+      required: true
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Permissions and risk
+      description: List resources, actions, risk level, and required credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Tests
+      description: Describe dry-run or mock tests included.
+    validations:
+      required: false

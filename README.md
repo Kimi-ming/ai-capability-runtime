@@ -123,6 +123,14 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 ## 关键文档
 
 - [体系蓝图](docs/SYSTEM.md)
+- [Capability 分类体系](docs/ecosystem/capability-taxonomy.md)
+- [Host 兼容性矩阵](docs/ecosystem/host-compatibility-matrix.md)
+- [开源核心与未来 Cloud 边界](docs/ecosystem/open-core-boundary.md)
+- [贡献者路径](docs/community/contributor-journey.md)
+- [Capability 评审清单](docs/community/capability-review-checklist.md)
+- [RFC 流程](docs/community/rfc-process.md)
+- [可观测性和指标 V1](docs/operations/observability-metrics-v1.md)
+- [Open Questions](docs/planning/open-questions.md)
 - [CLI 契约 V1](docs/design/cli-contract-v1.md)
 - [本地状态 V1](docs/design/local-state-v1.md)
 - [配置模型 V1](docs/design/configuration-v1.md)

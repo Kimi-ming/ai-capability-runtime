@@ -71,3 +71,10 @@
 | RQ-025 | 错误模型统一 | `docs/design/error-model-v1.md` | T013, T137 | error mapping tests |
 | RQ-026 | 隐私保留规则明确 | `docs/security/privacy-retention-v1.md` | T041, T092, T138 | redaction/log tests |
 | RQ-027 | CI 安全基线明确 | `docs/operations/ci-security-baseline.md` | T101, T139 | GitHub Actions checks |
+
+| RQ-028 | Capability 分类清晰 | `docs/ecosystem/capability-taxonomy.md` | T140 | registry docs review |
+| RQ-029 | Host 兼容性可追踪 | `docs/ecosystem/host-compatibility-matrix.md` | T127, T142 | host test records |
+| RQ-030 | 贡献路径清晰 | `docs/community/contributor-journey.md` | T141 | PR template/checklist |
+| RQ-031 | RFC 治理清晰 | `docs/community/rfc-process.md` | T144 | RFC template |
+| RQ-032 | 可观测性边界清晰 | `docs/operations/observability-metrics-v1.md` | T143 | audit-derived metrics |
+| RQ-033 | OSS/Cloud 边界清晰 | `docs/ecosystem/open-core-boundary.md` | T120 | ADR 0017 |

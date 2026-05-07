@@ -34,6 +34,10 @@
 | R012 | Low | Open | 任务清单很长，维护成本升高 | 使用 traceability matrix 和 milestone gates 管理 | T111 |
 | R013 | Medium | Open | Capability 生命周期没有落入 CLI 输出，后续可能退化成目录项目 | `docs/product/capability-lifecycle.md`；后续实现 Trust Card/List 字段 | T125 |
 | R014 | High | Mitigated | 审计日志写入失败时是否阻断写操作未实现，可能导致不可追踪执行 | ADR 0010：非只读调用审计不可用时不执行 | T040, T128 |
+| R015 | Medium | Mitigated | 外部贡献者不知道如何提交 Capability，导致 Registry 难以扩展 | 贡献者路径、Capability Review Checklist、GitHub templates | T141 |
+| R016 | Medium | Mitigating | Host 行为差异导致 MCP demo 在不同 Host 上不一致 | Host compatibility matrix，后续维护测试记录 | T127, T142 |
+| R017 | Medium | Mitigated | 未来 Cloud 边界不清会削弱开源信任 | ADR 0017；open-core boundary 文档 | T120 |
+| R018 | Low | Mitigated | 默认远程遥测会破坏 local-first 预期 | ADR 0016：V1 默认不上传遥测 | T143 |
 
 ## 当前最高优先级风险
 

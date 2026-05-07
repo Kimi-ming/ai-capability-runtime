@@ -102,6 +102,11 @@
 - T137 P1：实现错误模型和 exit code tests。
 - T138 P2：增加 privacy retention 文档测试或 lint。
 - T139 P1：CI 安全基线 workflow。
+- T140 P1：把 Capability 分类落入 Registry 指南。
+- T141 P1：把 Capability Review Checklist 接入 PR 流程。
+- T142 P2：维护 Host compatibility test records。
+- T143 P2：从 audit log 派生本地指标命令草案。
+- T144 P2：补充 RFC 模板文件。
 
 ### 已完成
 
@@ -112,6 +117,7 @@
 - 已完成：T117 P0：产品、协议、数据、安全体系化蓝图。
 - 已完成：T118 P0：收敛 V1 执行、策略、审计和供应链关键决策。
 - 已完成：T119 P0：补齐实现前接口契约和运行模型。
+- 已完成：T120 P0：补齐生态、社区和可观测性体系。
 
 
 ---
@@ -1047,6 +1053,32 @@ ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'y
 - T070-T073 的 MCP tools/confirmation 行为明确。
 - T013/T137 的错误分类和 exit code 明确。
 - 发布前 CI/security baseline 明确。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T120 P0：补齐生态、社区和可观测性体系
+
+- [x] T120 P0：补齐生态、社区和可观测性体系
+
+已完成：新增 Capability 分类、Host 兼容性矩阵、开源核心边界、贡献者路径、Capability Review Checklist、RFC 流程、可观测性指标、Open Questions 和生态调研；新增 GitHub issue/PR templates；新增 ADR 0016-0018。
+
+验收标准：
+
+- Registry 能力分类和粒度规则清晰。
+- 外部贡献者路径清晰。
+- Capability PR 有评审清单。
+- 大型设计变化有 RFC 流程。
+- V1 可观测性边界清楚，默认无远程遥测。
+- OSS/Cloud 边界清楚。
 
 验证：
 
