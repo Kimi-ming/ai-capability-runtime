@@ -136,6 +136,12 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 - [开发任务总表](docs/TASKS.md)
 - [测试策略](docs/TESTING.md)
 - [当前状态交接](docs/HANDOFF.md)
+- [文档地图](docs/INDEX.md)
+- [开发工作流](docs/WORKFLOW.md)
+- [需求追踪矩阵](docs/planning/traceability-matrix.md)
+- [V1 里程碑门禁](docs/planning/v1-milestones.md)
+- [风险登记](docs/RISKS.md)
+- [术语表](docs/GLOSSARY.md)
 
 ## 开源治理
 

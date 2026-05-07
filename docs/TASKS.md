@@ -68,6 +68,7 @@
 - T103 P1：临时目录测试工具。
 - T112 P1：README 跟随实现更新。
 - T113 P1：新增贡献者上手教程。
+- T116 P1：维护术语表和文档索引。
 - T120 P1：定义 alpha release checklist。
 - T121 P1：CHANGELOG。
 
@@ -90,6 +91,8 @@
 
 - 已完成：T110 P0：中文文档体系。
 - 已完成：T111 P0：开发任务体系。
+- 已完成：T115 P0：体系化项目管理文档。
+
 
 ---
 
@@ -918,3 +921,34 @@ V1 handler：
 ### Q004 `[?]` Secret Resolver V1 是否只支持 env
 
 当前文档倾向 env-only，但实现前应明确错误提示和扩展接口。
+
+### T115 P0：体系化项目管理文档
+
+- [x] T115 P0：体系化项目管理文档
+
+目标：把任务清单升级为可导航、可追踪、可门禁、可交接的开发体系。
+
+交付物：
+
+- `docs/INDEX.md`
+- `docs/WORKFLOW.md`
+- `docs/planning/v1-milestones.md`
+- `docs/planning/traceability-matrix.md`
+- `docs/RISKS.md`
+- `docs/TASK_TEMPLATE.md`
+- `docs/GLOSSARY.md`
+
+验收标准：
+
+- 文档地图能说明不同角色该读什么
+- 追踪矩阵能连接需求、任务和测试
+- 里程碑文档能给出阶段退出门禁
+- 风险登记能覆盖当前主要技术风险
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+git diff --check
+```
