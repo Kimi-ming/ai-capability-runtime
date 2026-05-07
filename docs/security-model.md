@@ -1,35 +1,32 @@
-# Security Model
+# 安全模型
 
-OpenCap provides permission boundaries, audit logs, and verification metadata.
-It does not guarantee that every third-party Capability is safe.
+OpenCap 提供权限边界、审计日志和验证元数据。它不保证每个第三方 Capability 都绝对安全。
 
-## Threats
+## 威胁
 
-OpenCap should defend against:
+OpenCap 应重点防御：
 
-- overbroad permissions
-- hidden network calls
-- unreviewed destructive actions
-- prompt-driven misuse of write tools
-- secret leakage
-- untraceable AI actions
-- confusing or misleading Capability descriptions
+- 权限过宽
+- 隐藏外部调用
+- 未评审的破坏性操作
+- 模型被 prompt 诱导后误用写工具
+- 密钥泄露
+- 无法追踪的 AI 行动
+- Capability 描述误导用户
 
-## Controls
+## V1 控制措施
 
-V1 controls:
+- manifest 校验
+- 显式权限声明
+- 基于风险的策略决策
+- 高风险操作的人类确认机制
+- 环境变量凭据
+- 调用日志
+- Registry 评审清单
 
-- manifest validation
-- explicit permission declarations
-- risk-based policy decisions
-- human confirmation for risky operations
-- environment-scoped secrets
-- invocation logs
-- registry review checklist
+## 密钥处理
 
-## Secret Handling
-
-V1 may support environment variable credentials:
+V1 可以支持环境变量凭据：
 
 ```yaml
 auth:
@@ -38,21 +35,27 @@ auth:
   env: GITHUB_TOKEN
 ```
 
-Runtime logs must never write raw secret values.
+Runtime 日志绝不能写入原始密钥。
 
-## Logging
+## 日志脱敏
 
-Logs should prefer redaction and hashing for sensitive inputs. A full input log
-can be useful for debugging, but it creates privacy risk. The default should be
-safe for local development.
+默认应脱敏或哈希敏感输入。字段名包含以下内容时应默认脱敏：
 
-## Out of Scope for V1
+- `token`
+- `secret`
+- `password`
+- `api_key`
+- `authorization`
 
-- sandboxing arbitrary code execution
-- hosted multi-tenant isolation
-- formal verification
-- payment execution
-- remote secret vaults
-- enterprise SSO and RBAC
+即使调用被拒绝，也必须记录策略决策。
 
-These are future concerns, not V1 blockers.
+## V1 不解决的问题
+
+- 任意代码执行 sandbox
+- 托管多租户隔离
+- 形式化验证
+- 支付执行
+- 远程 Secret Vault
+- 企业 SSO 和 RBAC
+
+这些是未来问题，不是 V1 阻塞项。

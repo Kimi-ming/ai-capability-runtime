@@ -1,25 +1,24 @@
 # github.create_issue
 
-Create a GitHub issue from structured input.
+根据结构化输入创建 GitHub Issue。
 
-## Risk
+## 风险
 
 `write`
 
-This Capability creates external state in a GitHub repository. The default
-OpenCap policy should ask before execution.
+该 Capability 会在 GitHub 仓库中创建外部状态。OpenCap 默认策略应在执行前请求确认。
 
-## Auth
+## 认证
 
-Set:
+设置：
 
 ```bash
 GITHUB_TOKEN=...
 ```
 
-The token must be scoped to create issues in the target repository.
+Token 必须有权限在目标仓库创建 issue。
 
-## Example Input
+## 输入示例
 
 ```json
 {

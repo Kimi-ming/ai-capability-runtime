@@ -1,48 +1,43 @@
 # OpenCap
 
-OpenCap is an open-source capability layer for AI-native applications.
+OpenCap 是一个面向 AI 原生应用的开源能力层。
 
-It lets developers define APIs, tools, data sources, and services as AI-callable
-Capabilities, then install and run them across MCP-compatible hosts with
-permissions, audit logs, and verification metadata.
+它让开发者可以把 API、工具、数据源和业务服务定义成 AI 可调用的 Capability，并通过统一的本地或自托管 Runtime 完成安装、授权、调用、审计和验证。
 
-OpenCap does not try to be an Agent, a chat app, or a marketplace frontend. It
-provides the standard, runtime, registry, and toolchain that allow Agents to
-safely act in the real world.
+OpenCap 不做智能体，不做聊天入口，也不做一个中心化工具市场。它要做的是 AI 时代的能力标准、运行时、注册表和开发者工具链。
 
-## Why OpenCap?
+## 为什么需要 OpenCap
 
-AI models are getting better at reasoning, but they still need controlled access
-to real systems:
+大模型越来越会推理，但模型本身不能安全地直接操作真实世界。它仍然需要访问：
 
-- APIs and SaaS tools
-- private data sources
-- account-scoped permissions
-- secrets and credentials
-- write operations
-- audit trails
-- verification and trust metadata
+- API 和 SaaS 工具
+- 私有数据源
+- 用户账户权限
+- 密钥和凭据
+- 写操作和外部消息发送
+- 调用日志和审计记录
+- 能力验证与信任信息
 
-OpenCap provides:
+OpenCap 提供：
 
-- a standard Capability Manifest
-- a local or self-hosted Capability Runtime
-- MCP-compatible tool exposure
-- permission policies
-- invocation logs
-- a Git-based Capability Registry
-- developer CLI and SDK foundations
+- Capability Manifest 标准
+- 本地优先的 Capability Runtime
+- MCP 兼容的工具暴露方式
+- 权限策略
+- 调用日志
+- Git-based Capability Registry
+- 开发者 CLI 和 SDK 基础
 
-## Design Principles
+## 设计原则
 
-1. Capability-first, not Agent-first.
-2. Local-first, cloud-optional.
-3. Permissioned by default.
-4. Every invocation must be auditable.
-5. Protocol-compatible, not vendor-locked.
-6. Registry is community-governed.
+1. 能力优先，而不是智能体优先。
+2. 本地优先，云端可选。
+3. 默认受权限约束。
+4. 每一次调用都必须可审计。
+5. 兼容开放协议，不绑定单一厂商。
+6. Registry 由社区治理。
 
-## Core Loop
+## 核心流程
 
 ```text
 Capability Manifest
@@ -60,23 +55,23 @@ External API call
 Audit Log
 ```
 
-## Repository Layout
+## 仓库结构
 
 ```text
-docs/        Project documentation
-rfcs/        Design proposals for standards and runtime behavior
-packages/    Spec, CLI, runtime, MCP bridge, SDK, and adapters
-apps/        Console and future registry web surfaces
-registry/    Git-based community Capability Registry
-examples/    Example Capabilities and host configuration
+docs/        项目文档、需求、架构、审查和决策记录
+rfcs/        标准和运行时行为的设计提案
+packages/    spec、cli、runtime、mcp、sdk 和 adapters
+apps/        本地 Console 与未来 Registry Web
+registry/    Git-based 社区 Capability Registry
+examples/    Capability 示例和 MCP Host 配置示例
 ```
 
-## V1 Scope
+## V1 范围
 
-The first useful version of OpenCap should prove one end-to-end flow:
+V1 要证明一个最小闭环：
 
 ```text
-developer writes manifest.yml
+开发者写 manifest.yml
         |
 opencap validate
         |
@@ -84,34 +79,35 @@ opencap install
         |
 opencap serve --mcp
         |
-AI host calls a tool
+AI Host 调用工具
         |
-OpenCap checks policy
+OpenCap 检查策略
         |
-OpenCap executes the external API call
+OpenCap 执行 HTTP Capability
         |
-OpenCap writes an invocation log
+OpenCap 写入审计日志
 ```
 
-V1 starts with these sample Capabilities:
+V1 只支持 `type: http` 的 Capability。`mcp` 和 `local` 类型留到后续 RFC。
+
+第一批示例能力：
 
 - `github.create_issue`
 - `github.search_repo`
 - `vercel.get_deployments`
 - `http.request_demo`
 
-## Quick Start
+## 快速开始
 
-This repository currently contains the V1 framework and documentation. The first
-implementation target is the CLI/runtime path:
+当前仓库已经包含 V1 项目骨架和文档。第一阶段实现目标是 CLI 和 Runtime 闭环。
 
 ```bash
 pnpm install
-pnpm --filter @opencap/spec validate
+pnpm validate
 pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.create_issue
 ```
 
-After the runtime is implemented, an MCP-compatible host should be able to load:
+Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 
 ```json
 {
@@ -124,25 +120,26 @@ After the runtime is implemented, an MCP-compatible host should be able to load:
 }
 ```
 
-## Documentation
+## 关键文档
 
-- [Introduction](docs/introduction.md)
-- [Getting Started](docs/getting-started.md)
+- [项目介绍](docs/introduction.md)
+- [快速入门](docs/getting-started.md)
 - [Capability Manifest](docs/capability-manifest.md)
-- [Permission Model](docs/permission-model.md)
-- [Runtime Architecture](docs/runtime-architecture.md)
-- [Registry Guidelines](docs/registry-guidelines.md)
-- [Security Model](docs/security-model.md)
-- [Roadmap](docs/roadmap.md)
+- [权限模型](docs/permission-model.md)
+- [Runtime 架构](docs/runtime-architecture.md)
+- [Registry 指南](docs/registry-guidelines.md)
+- [安全模型](docs/security-model.md)
+- [路线图](docs/roadmap.md)
+- [V1 需求](docs/planning/v1-requirements.md)
+- [V1 架构](docs/planning/v1-architecture.md)
+- [技术方案审查](docs/reviews/technical-plan-review-2026-05-07.md)
 
-## Governance
+## 开源治理
 
-OpenCap is designed as an open standard and open runtime. See:
-
-- [Contributing](CONTRIBUTING.md)
-- [Governance](GOVERNANCE.md)
-- [Security](SECURITY.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [贡献指南](CONTRIBUTING.md)
+- [治理说明](GOVERNANCE.md)
+- [安全政策](SECURITY.md)
+- [行为准则](CODE_OF_CONDUCT.md)
 
 ## License
 

@@ -1,42 +1,36 @@
-# Governance
+# 治理说明
 
-OpenCap is designed as an open standard and open runtime for AI-callable
-Capabilities.
+OpenCap 是面向 AI 原生能力层的开放标准和开源 Runtime。
 
-## Project Roles
+## 项目角色
 
-- contributors propose code, docs, registry entries, and RFCs
-- maintainers review changes and manage releases
-- security reviewers evaluate risk-sensitive registry entries and runtime changes
-- core maintainers make final calls on compatibility and governance decisions
+- 贡献者：提交代码、文档、Registry 条目和 RFC
+- 维护者：评审变更并管理发布
+- 安全评审者：评估安全敏感的 Runtime 和 Registry 变化
+- 核心维护者：处理兼容性、治理和路线图决策
 
-## Decision Making
+## 决策方式
 
-OpenCap uses lazy consensus for routine changes. Maintainers may request an RFC
-when a change affects:
+常规变更采用 lazy consensus。涉及以下内容时，维护者可以要求 RFC：
 
-- manifest compatibility
-- permission semantics
-- registry trust levels
-- runtime invocation behavior
-- MCP or host-facing interfaces
+- manifest 兼容性
+- 权限语义
+- Registry 信任等级
+- Runtime 调用行为
+- MCP 或 Host-facing 接口
 
-## Registry Governance
+## Registry 治理
 
-The registry is community-maintained and Git-based. Registry inclusion means a
-Capability has passed project-defined checks. It is not a blanket endorsement of
-the third-party service or maintainer.
+Registry 是 Git-based 社区注册表。进入 Registry 表示条目通过了项目定义的检查，但不代表 OpenCap 对第三方服务或维护者做绝对背书。
 
-OpenCap may remove or downgrade registry entries that:
+以下情况可能导致条目被移除或降级：
 
-- request misleading permissions
-- hide external calls
-- fail validation
-- are abandoned and security-sensitive
-- violate project conduct rules
+- 权限声明误导用户
+- 隐藏外部调用
+- 校验失败
+- 安全敏感但长期无人维护
+- 违反项目行为准则
 
-## Commercial Use
+## 商业使用
 
-The open-source project is OpenCap. A future hosted or enterprise distribution
-may exist separately, but the core standard, runtime, and registry governance
-should remain usable without a hosted service.
+开源项目名为 OpenCap。未来可以存在托管版或企业版，但核心标准、Runtime 和 Registry 治理应保持无需托管服务也能使用。

@@ -1,6 +1,5 @@
-# MCP Host Example
+# MCP Host 示例
 
-After `opencap serve --mcp` is implemented, MCP-compatible hosts should be able
-to use one OpenCap runtime instead of one MCP server per external service.
+`opencap serve --mcp` 实现后，MCP-compatible Host 可以只接一个 OpenCap Runtime，而不是为每个外部服务分别配置 MCP Server。
 
-Use `mcp.json` as a host configuration example.
+`mcp.json` 是 Host 配置示例。

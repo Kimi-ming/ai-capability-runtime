@@ -1,16 +1,14 @@
-# Ecosystem Scan
+# 生态调研
 
-Date: 2026-05-07
+日期：2026-05-07
 
-This scan summarizes the external standards, products, and design signals that
-shape OpenCap V1.
+本文记录影响 OpenCap V1 的外部标准、产品和设计信号。
 
-## Research Question
+## 调研问题
 
-Where should OpenCap sit in the AI-native ecosystem if it wants to be open-source
-infrastructure rather than another Agent, marketplace, or chat UI?
+如果 OpenCap 要成为开源基础设施，而不是另一个 Agent、市场或聊天 UI，它应该处在 AI 原生生态的哪一层？
 
-## Sources Reviewed
+## 调研来源
 
 - OpenAI Apps SDK: https://developers.openai.com/apps-sdk
 - OpenAI Apps SDK MCP server concept: https://developers.openai.com/apps-sdk/concepts/mcp-server
@@ -27,69 +25,56 @@ infrastructure rather than another Agent, marketplace, or chat UI?
 - Open Policy Agent: https://www.openpolicyagent.org/docs/latest
 - OpenTelemetry semantic conventions: https://opentelemetry.io/docs/specs/semconv/
 
-## Key Findings
+## 核心发现
 
-### MCP Is the Tool and Context Protocol
+### MCP 是工具和上下文协议
 
-MCP defines the server-side primitives that hosts and models use:
+MCP 定义了 Host 和模型使用的服务端原语：
 
-- Prompts are user-controlled.
-- Resources are application-controlled.
-- Tools are model-controlled.
+- Prompts 由用户控制
+- Resources 由应用控制
+- Tools 由模型控制
 
-This maps directly to OpenCap's scope: Capabilities should primarily expose
-tool-like actions, but they may also carry resource and prompt metadata later.
+OpenCap 的 Capability 主要对应 tool-like actions，未来可以扩展资源和提示元数据。
 
-### The Official MCP Registry Is Metadata, Not Runtime Governance
+### 官方 MCP Registry 是元数据层，不是 Runtime 治理层
 
-The official MCP Registry is a centralized metadata repository for publicly
-accessible MCP servers. It standardizes discovery, namespace management,
-installation metadata, and server configuration.
+官方 MCP Registry 是公开 MCP Server 的元数据仓库，重点是发现、命名空间、安装元数据和 server 配置。
 
-This means OpenCap should not compete as a simple directory. The strategic gap is
-runtime governance:
+这说明 OpenCap 不应该做简单目录，而应该补 runtime governance：
 
-- install selected Capabilities
-- apply local policy
-- manage secrets
-- execute or proxy calls
-- record audit logs
-- expose a stable host-facing gateway
+- 安装选中的 Capability
+- 应用本地策略
+- 管理密钥
+- 执行或代理调用
+- 记录审计日志
+- 暴露稳定 Host-facing gateway
 
-### Apps SDK Confirms MCP as an App Substrate
+### Apps SDK 证明 MCP 正在成为 App 基底
 
-OpenAI Apps SDK uses MCP to keep server, model, and UI in sync. A minimal app
-server lists tools, handles tool calls, and returns structured content or
-components.
+OpenAI Apps SDK 用 MCP 同步 server、model 和 UI。一个最小 app server 会列出 tools、处理 tool calls，并返回结构化内容或组件。
 
-OpenCap should not try to become an Apps SDK competitor. It should make it
-easier to publish and govern the tool surface that an app or agent host can call.
+OpenCap 不应该和 Apps SDK 竞争，而应该治理 app 或 agent host 可以调用的 tool surface。
 
-### Security Is a Product Surface, Not an Implementation Detail
+### 安全是产品表面，不是实现细节
 
-OpenAI Apps SDK guidance emphasizes least privilege, explicit user consent,
-server-side validation, audit logs, redaction, and human confirmation for
-irreversible operations.
+OpenAI Apps SDK 文档强调最小权限、显式用户同意、服务端校验、审计日志、脱敏，以及不可逆操作的人类确认。
 
-MCP authorization guidance also creates several design constraints:
+MCP 授权也带来约束：
 
-- STDIO transports should retrieve credentials from the environment.
-- HTTP transports should follow MCP authorization.
-- tokens must be audience-bound and validated.
-- token passthrough is forbidden.
-- OAuth flows should use PKCE and metadata discovery.
+- STDIO transport 应从环境读取凭据
+- HTTP transport 应遵循 MCP authorization
+- token 必须 audience-bound 并被校验
+- 禁止 token passthrough
+- OAuth flow 应使用 PKCE 和 metadata discovery
 
-OpenCap V1 should avoid pretending to solve all auth modes. It should start with
-local env-based credentials for STDIO/local runtime and document the future HTTP
-authorization model separately.
+OpenCap V1 不应该假装解决全部 auth 模式。它应从本地 env-based credentials 开始，并单独记录未来 HTTP authorization 设计。
 
-### A2A Is Complementary, Not Competitive
+### A2A 是互补协议，不是竞争对象
 
-A2A is an open standard for communication between independent agents. It focuses
-on capability discovery between agents, task lifecycle, artifacts, streaming, and
-secure collaboration.
+A2A 解决独立 Agent 之间的通信、任务生命周期、artifact、streaming 和安全协作。
 
-OpenCap should position itself below or beside A2A:
+OpenCap 应定位在 A2A 之下或旁边：
 
 ```text
 A2A: agent-to-agent collaboration
@@ -97,11 +82,9 @@ MCP: host-to-tool/resource protocol
 OpenCap: capability runtime, permission, install, audit, verification
 ```
 
-### Policy and Telemetry Should Reuse Existing Mental Models
+### 策略和遥测应复用成熟心智模型
 
-Open Policy Agent provides a mature policy-as-code model that separates policy
-decision-making from policy enforcement. OpenCap should not implement Rego in
-V1, but it should borrow the architecture:
+Open Policy Agent 将策略决策和策略执行分离。OpenCap V1 不引入 Rego，但应借鉴架构：
 
 ```text
 Policy Enforcement Point: runtime executor
@@ -110,20 +93,17 @@ Input: host, capability, permissions, arguments, user, environment
 Decision: allow, ask, deny
 ```
 
-OpenTelemetry semantic conventions provide a shared language for traces, logs,
-metrics, and generative AI operations. OpenCap's invocation logs should begin
-with a simple local schema, but names should be compatible with future OTel
-export.
+OpenTelemetry 提供 traces、logs、metrics 和生成式 AI 操作的共享语言。OpenCap V1 先使用简单本地日志 schema，但字段命名应便于未来导出到 OTel。
 
-## Strategic Implication
+## 战略结论
 
-OpenCap should be:
+OpenCap 应该是：
 
 ```text
 Capability Manifest + Local Runtime + Policy Engine + Audit Log + Registry Toolchain
 ```
 
-OpenCap should not be:
+OpenCap 不应该是：
 
 ```text
 MCP server directory
@@ -134,9 +114,9 @@ Centralized API marketplace
 Hosted-only automation platform
 ```
 
-## V1 Design Direction
+## V1 设计方向
 
-V1 should optimize for one credible local loop:
+V1 优先验证一个可信本地闭环：
 
 ```text
 manifest.yml
@@ -145,15 +125,15 @@ manifest.yml
   -> opencap serve --mcp
   -> host calls github_create_issue
   -> runtime checks policy
-  -> runtime asks or allows
+  -> runtime asks or blocks
   -> runtime executes HTTP call
   -> runtime writes invocation log
 ```
 
-The architecture should leave room for:
+架构应为后续留下空间：
 
 - MCP registry compatibility
-- A2A agent capability cards later
-- OpenAPI adapter later
-- OPA/Rego-style policy later
-- OpenTelemetry export later
+- A2A agent capability cards
+- OpenAPI adapter
+- OPA/Rego-style policy
+- OpenTelemetry export

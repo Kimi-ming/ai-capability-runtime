@@ -1,9 +1,8 @@
-# Runtime Architecture
+# Runtime 架构
 
-The OpenCap Runtime is the local or self-hosted service that executes installed
-Capabilities.
+OpenCap Runtime 是执行已安装 Capability 的本地或自托管服务。
 
-## High-Level Flow
+## 高层流程
 
 ```text
 AI Host
@@ -13,61 +12,60 @@ MCP / HTTP / SDK
 OpenCap Runtime
   |
 Policy Engine
-Secret Manager
+Secret Resolver
 Capability Executor
 Audit Logger
   |
 External APIs / MCP Servers / Databases / SaaS Tools
 ```
 
-## Runtime Responsibilities
+## Runtime 职责
 
-The runtime must:
+Runtime 必须：
 
-- load installed Capabilities
-- expose them as MCP tools
-- validate input
-- evaluate permission policies
-- load scoped secrets
-- execute Capabilities
-- validate outputs
-- write invocation logs
-- return structured results
+- 加载已安装 Capability
+- 将它们暴露为 MCP tools
+- 校验输入
+- 执行权限策略
+- 读取限定作用域的密钥
+- 执行 Capability
+- 校验或归一化输出
+- 写入调用日志
+- 返回结构化结果
 
-## Components
+## 组件
 
 ### Capability Loader
 
-Reads manifests from the local installation directory and validates them against
-the OpenCap schema.
+从本地安装目录读取 manifest，并用 OpenCap schema 校验。
 
 ### MCP Gateway
 
-Exposes each installed Capability as an MCP tool. Tool names should be derived
-from the Capability id.
+将每个已安装 Capability 暴露成 MCP tool。工具名由 Capability id 稳定生成。
 
 ### Policy Engine
 
-Evaluates declared permissions against local policy rules and returns `allow`,
-`ask`, or `deny`.
+将权限声明和本地策略规则匹配，返回 `allow`、`ask` 或 `deny`。
 
-### Secret Manager
+### Confirmation Handler
 
-Loads credentials from approved locations. V1 may use environment variables. A
-later version should support OS keychains and scoped secret storage.
+处理 `ask` 决策。MCP 模式下不能直接终端交互；如果 client 不支持 elicitation，应返回 `confirmation_required`。
 
-### Capability Executor
+### Secret Resolver
 
-Runs the Capability implementation. V1 focuses on HTTP execution.
+从允许的位置读取凭据。V1 可以先支持环境变量；后续再支持系统 Keychain 或 Secret Vault。
+
+### HTTP Executor
+
+执行 V1 的 HTTP Capability。
 
 ### Audit Logger
 
-Writes every invocation to local SQLite storage. Logs must be queryable by CLI
-and Console.
+把每次调用写入本地 SQLite。CLI 和 Console 都应能查询这些日志。
 
-## Local State
+## 本地状态
 
-V1 should use a local state directory:
+V1 使用本地目录：
 
 ```text
 opencap.local/
@@ -77,4 +75,4 @@ opencap.local/
   secrets/
 ```
 
-`opencap.local/` is ignored by git.
+`opencap.local/` 不应提交到 git。

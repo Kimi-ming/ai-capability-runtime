@@ -1,22 +1,22 @@
 # vercel.get_deployments
 
-List recent Vercel deployments for a project.
+列出某个 Vercel 项目的近期 deployments。
 
-## Risk
+## 风险
 
 `read_only`
 
-This Capability reads deployment metadata and does not change external state.
+该 Capability 只读取 deployment metadata，不改变外部状态。
 
-## Auth
+## 认证
 
-Set:
+设置：
 
 ```bash
 VERCEL_TOKEN=...
 ```
 
-## Example Input
+## 输入示例
 
 ```json
 {

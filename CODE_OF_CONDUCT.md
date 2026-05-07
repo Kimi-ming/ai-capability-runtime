@@ -1,14 +1,13 @@
-# Code of Conduct
+# 行为准则
 
-OpenCap is a technical community for building safe AI-native infrastructure.
+OpenCap 是一个建设安全 AI 原生基础设施的技术社区。
 
-Participants are expected to:
+参与者应当：
 
-- be respectful and direct
-- argue from evidence
-- assume good intent while addressing real risk
-- avoid harassment, threats, and personal attacks
-- disclose conflicts of interest in registry and security discussions
+- 尊重他人，表达直接但不过度攻击
+- 基于证据讨论技术问题
+- 默认善意，同时认真处理真实风险
+- 避免骚扰、威胁和人身攻击
+- 在 Registry 和安全讨论中披露利益冲突
 
-Maintainers may moderate issues, discussions, pull requests, and registry entries
-to keep the project useful and safe.
+维护者可以对 issue、discussion、pull request 和 registry 条目进行管理，以保持项目健康和有用。

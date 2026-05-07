@@ -1,9 +1,8 @@
 # Capability Manifest
 
-The Capability Manifest is the core OpenCap standard. It describes an action or
-data source that an AI host can call through the OpenCap runtime.
+Capability Manifest 是 OpenCap 的核心标准。它描述一个 AI Host 可以通过 OpenCap Runtime 调用的行动或数据能力。
 
-## Required Fields
+## 必填字段
 
 ```yaml
 id: github.create_issue
@@ -19,58 +18,58 @@ execution: {}
 metadata: {}
 ```
 
-## Identity
+## 身份
 
-`id` must be globally stable inside a registry.
+`id` 在 registry 中必须稳定。
 
-Recommended format:
+推荐格式：
 
 ```text
 provider.action_name
 ```
 
-Examples:
+示例：
 
 - `github.create_issue`
 - `vercel.get_deployments`
 - `notion.create_page`
 
-## Type
+## 类型
 
-V1 supports:
+V1 只支持：
 
-- `http`: execute an HTTP request
+- `http`：执行 HTTP 请求
 
-Future versions may add `mcp` and `local` after separate design review.
+`mcp` 和 `local` 类型会在后续 RFC 中单独设计。
 
-## Input and Output
+## 输入和输出
 
-`input` and `output` use JSON Schema.
+`input` 和 `output` 使用 JSON Schema。
 
-Input schema is used to:
+输入 schema 用于：
 
-- expose tool arguments to AI hosts
-- validate runtime calls
-- render confirmation prompts
-- create test fixtures
+- 向 AI Host 暴露工具参数
+- 在 Runtime 调用前校验参数
+- 渲染确认信息
+- 生成测试样例
 
-Output schema is used to:
+输出 schema 用于：
 
-- validate tool results
-- document return values
-- help hosts reason about follow-up actions
+- 校验工具结果
+- 记录返回值结构
+- 帮助 Host 决定后续动作
 
-## Auth
+## 认证
 
-Auth declares what credential the runtime needs.
+`auth` 声明 Runtime 需要什么凭据。
 
-V1 auth types:
+V1 认证类型：
 
 - `none`
 - `api_key`
-- `oauth2`
+- `oauth2`（声明保留，完整 OAuth 不属于 V1 实现范围）
 
-Example:
+示例：
 
 ```yaml
 auth:
@@ -79,9 +78,9 @@ auth:
   env: GITHUB_TOKEN
 ```
 
-## Permissions
+## 权限
 
-Permissions declare what external resources the Capability may touch.
+权限声明 Capability 会触碰什么外部资源。
 
 ```yaml
 permissions:
@@ -91,16 +90,16 @@ permissions:
     confirmation: ask
 ```
 
-Each permission must include:
+每个权限必须包含：
 
 - `resource`
 - `action`
 - `risk`
 - `confirmation`
 
-## Execution
+## 执行
 
-HTTP Capabilities declare how the runtime calls the external endpoint.
+HTTP Capability 声明 Runtime 如何调用外部端点。
 
 ```yaml
 execution:
@@ -109,11 +108,11 @@ execution:
   timeout_ms: 10000
 ```
 
-Template variables come from validated input.
+模板变量来自通过校验的输入。
 
-## Metadata
+## 元数据
 
-Metadata helps registry reviewers and users evaluate the Capability.
+元数据帮助 Registry 评审者和用户评估 Capability。
 
 ```yaml
 metadata:

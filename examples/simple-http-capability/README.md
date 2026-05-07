@@ -1,15 +1,15 @@
 # Simple HTTP Capability
 
-This example shows the smallest useful OpenCap Capability shape.
+这个示例展示最小可用的 OpenCap Capability 形态。
 
-It declares:
+它声明了：
 
-- one required input field
-- one read-only permission
-- no auth
-- one HTTP GET execution target
+- 一个必填输入字段
+- 一个只读权限
+- 不需要认证
+- 一个 HTTP GET 执行目标
 
-Run validation from the repository root:
+从仓库根目录运行校验：
 
 ```bash
 pnpm validate

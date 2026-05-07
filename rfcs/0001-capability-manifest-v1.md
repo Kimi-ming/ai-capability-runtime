@@ -1,44 +1,42 @@
-# RFC 0001: Capability Manifest V1
+# RFC 0001：Capability Manifest V1
 
-## Status
+## 状态
 
-Draft
+草案
 
-## Summary
+## 摘要
 
-Define the first stable shape of an OpenCap Capability Manifest.
+定义 OpenCap Capability Manifest 的第一个稳定形态。
 
-## Motivation
+## 动机
 
-AI hosts need a predictable way to understand what a tool does, what input it
-requires, what output it returns, what permissions it needs, and how it executes.
+AI Host 需要一种可预测方式理解工具能做什么、需要什么输入、返回什么输出、需要哪些权限，以及如何执行。
 
-Without a manifest standard, every Agent or host must integrate tools one by one.
+如果没有 manifest 标准，每个 Agent 或 Host 都必须逐个集成工具。
 
-## Proposal
+## 提案
 
-An OpenCap Capability Manifest must include:
+OpenCap Capability Manifest 必须包含：
 
-- identity
-- description
-- version
-- type
-- input schema
-- output schema
-- auth declaration
-- permission declaration
-- execution declaration
-- metadata
+- 身份
+- 描述
+- 版本
+- 类型
+- 输入 schema
+- 输出 schema
+- 认证声明
+- 权限声明
+- 执行声明
+- 元数据
 
-V1 should support HTTP execution first.
+V1 只支持 HTTP execution。
 
-## Compatibility
+## 兼容性
 
-The manifest should map cleanly to MCP tool metadata, while preserving OpenCap's
-permission and audit semantics.
+Manifest 应能映射到 MCP tool metadata，同时保留 OpenCap 的权限和审计语义。
 
-## Open Questions
+## 待解决问题
 
-- Should manifest ids be globally namespaced?
-- Should output schema be required for all Capabilities?
-- Should registry trust metadata live inside the manifest or beside it?
+- manifest id 是否需要全局命名空间？
+- output schema 是否必须对所有 Capability 强制？
+- Registry trust metadata 应放在 manifest 内还是旁边？

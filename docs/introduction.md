@@ -1,75 +1,69 @@
-# Introduction
+# 项目介绍
 
-OpenCap is an open-source capability layer for AI-native applications.
+OpenCap 是一个面向 AI 原生应用的开源能力层。
 
-It gives developers a standard way to describe real-world actions as
-AI-callable Capabilities, and gives users a runtime that can install, authorize,
-execute, and audit those Capabilities.
+它让开发者可以用标准格式描述真实世界能力，并让用户通过本地或自托管 Runtime 安装、授权、执行和审计这些能力。
 
-## What OpenCap Is
+## OpenCap 是什么
 
-OpenCap is:
+OpenCap 包含：
 
-- a Capability Manifest standard
-- a local or self-hosted runtime
-- an MCP-compatible gateway
-- a permission and policy system
-- an invocation log
-- a Git-based registry
-- a developer toolchain
+- Capability Manifest 标准
+- 本地或自托管 Runtime
+- MCP 兼容网关
+- 权限和策略系统
+- 调用日志
+- Git-based Registry
+- 开发者工具链
 
-## What OpenCap Is Not
+## OpenCap 不是什么
 
-OpenCap is not:
+OpenCap 不是：
 
-- an Agent marketplace
-- an AI chat app
-- a general automation platform
-- an API marketplace
-- a model provider
-- a hosted-only SaaS product
+- Agent 市场
+- AI 聊天应用
+- 通用自动化平台
+- API marketplace
+- 模型提供商
+- 只能云端运行的 SaaS
 
-The core idea is simple:
+一句话：
 
 ```text
-Models reason.
-Agents plan.
-OpenCap lets them safely act.
+模型负责思考。
+Agent 负责规划。
+OpenCap 负责让它们安全行动。
 ```
 
-## The Capability Unit
+## Capability 是核心对象
 
-The central object in OpenCap is the Capability.
+Capability 是一个可声明、可授权、可测试、可审计的行动单元。它可以包装 HTTP API、SaaS 操作、数据源，未来也可以包装 MCP 工具或本地能力。
 
-A Capability is a declared, permissioned, testable unit of action. It can wrap an
-HTTP endpoint, an API call, an MCP server tool, a data source, or a local
-command. Each Capability includes:
+每个 Capability 包含：
 
-- identity and version
-- input and output schema
-- auth requirements
-- permissions and risk level
-- execution behavior
-- tests and trust metadata
+- 身份和版本
+- 输入/输出 schema
+- 认证需求
+- 权限和风险等级
+- 执行方式
+- 测试和信任元数据
 
-## Why Capabilities Instead of Agents?
+## 为什么不是 Agent-first
 
-Agents are orchestration logic. They decide what to do next. Capabilities are the
-safe action surface that Agents can call.
+Agent 是编排逻辑，负责决定下一步做什么。Capability 是安全行动面，负责把真实世界能力暴露给 Agent。
 
-This distinction matters because:
+这很重要，因为：
 
-- models and Agent frameworks will change quickly
-- APIs, accounts, permissions, logs, and trust records persist
-- teams need policy control around actions, not only around prompts
-- multiple hosts should be able to use the same action surface
+- 模型和 Agent 框架会快速变化
+- API、账户、权限、日志和信任记录会长期存在
+- 团队真正需要治理的是“能做什么动作”
+- 同一个能力应该能被多个 Host 使用
 
-## V1 Outcome
+## V1 成功标准
 
-The V1 system should let one AI host invoke one real Capability through the
-OpenCap runtime with permission checks and audit logs.
+V1 要让一个 AI Host 通过 OpenCap Runtime 调用一个真实 Capability，并留下权限决策和审计日志。
 
-The first complete demo target is:
+第一条完整 demo：
 
 ```text
 AI Host -> OpenCap MCP Runtime -> github.create_issue -> GitHub API -> Audit Log

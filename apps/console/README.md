@@ -1,12 +1,11 @@
 # OpenCap Console
 
-The Console is the planned local UI for OpenCap.
+Console 是计划中的 OpenCap 本地 UI。
 
-V1 view scope:
+V1 视图范围：
 
-- installed Capabilities
-- policies
-- invocation logs
+- 已安装 Capabilities
+- 策略
+- 调用日志
 
-The Console should be local-first and optional. The CLI and runtime must remain
-usable without it.
+Console 必须是本地优先且可选的。CLI 和 Runtime 不能依赖 Console 才能使用。

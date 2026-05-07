@@ -1,12 +1,12 @@
 # GitHub Issue Capability
 
-This example points to the registry entry:
+该示例对应 Registry 条目：
 
 ```text
 registry/developer-tools/github.create_issue/
 ```
 
-It is the V1 proof-of-work Capability because it exercises:
+它是 V1 的关键 proof-of-work，因为它覆盖：
 
 - auth
 - write permission
@@ -14,7 +14,7 @@ It is the V1 proof-of-work Capability because it exercises:
 - external API execution
 - invocation logging
 
-Expected command flow:
+预期命令流程：
 
 ```bash
 opencap install github.create_issue

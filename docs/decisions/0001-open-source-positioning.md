@@ -1,38 +1,36 @@
-# Decision 0001: Open-source Positioning
+# 决策 0001：开源定位
 
-Date: 2026-05-07
+日期：2026-05-07
 
-## Status
+## 状态
 
-Accepted
+已接受
 
-## Context
+## 背景
 
-The project could be positioned as:
+项目可以定位成：
 
-- an Agent platform
-- an MCP marketplace
-- an API marketplace
-- a hosted automation product
-- a capability runtime and governance layer
+- Agent 平台
+- MCP marketplace
+- API marketplace
+- 托管自动化产品
+- capability runtime and governance layer
 
-External research shows that MCP already has an official registry for server
-metadata, OpenAI Apps SDK uses MCP as its app/tool substrate, and A2A is focused
-on agent-to-agent collaboration.
+外部调研显示：MCP 已经有官方 registry，OpenAI Apps SDK 使用 MCP 作为 app/tool 基底，A2A 专注 agent-to-agent 协作。
 
-## Decision
+## 决策
 
-OpenCap will position itself as:
+OpenCap 定位为：
 
 ```text
-an open-source capability runtime and governance layer for AI-native applications
+面向 AI 原生应用的开源 Capability Runtime 和治理层
 ```
 
-It will not position itself as a generic Agent builder or marketplace.
+它不定位为通用 Agent builder 或 marketplace。
 
-## Consequences
+## 影响
 
-OpenCap V1 must prioritize:
+V1 必须优先：
 
 - manifest standard
 - local runtime
@@ -41,10 +39,10 @@ OpenCap V1 must prioritize:
 - registry validation
 - MCP compatibility
 
-OpenCap V1 should defer:
+V1 暂缓：
 
 - hosted cloud platform
 - commercial marketplace
 - agent orchestration
 - visual workflow builder
-- broad UI surface
+- large UI surface

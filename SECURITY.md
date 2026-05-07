@@ -1,39 +1,37 @@
-# Security Policy
+# 安全政策
 
-OpenCap exists to make AI-driven tool use safer, more auditable, and easier to
-reason about. It does not guarantee that every third-party Capability is safe.
+OpenCap 的目标是让 AI 调用外部工具时更安全、更可审计、更容易推理。它提供权限边界、调用日志和验证元数据，但不保证每个第三方 Capability 都绝对安全。
 
-## Security Goals
+## 安全目标
 
-- explicit permissions for every Capability
-- policy checks before execution
-- human confirmation for risky actions
-- scoped secrets
-- immutable invocation logs
-- clear trust metadata for registry entries
+- 每个 Capability 都必须声明权限
+- 执行前必须经过策略检查
+- 高风险操作需要人工确认或明确拒绝
+- 密钥必须被限定作用域
+- 调用日志必须可追踪
+- Registry 条目必须有清晰的信任信息
 
-## Risk Categories
+## 风险类型
 
-OpenCap V1 recognizes these risk categories:
+- `read_only`：只读，不改变外部状态
+- `write`：创建或更新外部状态
+- `external_send`：向外部系统或人员发送内容
+- `destructive`：删除、覆盖或难以恢复的操作
+- `financial`：付款、扣费、交易或订阅
+- `code_execution`：执行本地或远程代码/命令
+- `secret_access`：读取、返回、转换或暴露密钥材料
 
-- `read_only`: reads data without changing external state
-- `write`: creates or updates external state
-- `external_send`: sends messages or content to people or external systems
-- `destructive`: deletes, overwrites, or performs hard-to-reverse actions
-- `financial`: spends money, moves money, buys, sells, or subscribes
-- `code_execution`: executes local or remote code or commands
-- `secret_access`: reads or handles secrets, tokens, or credentials
+普通 API 调用中由 Runtime 使用凭据，不等于 Capability 拥有 `secret_access` 权限。
 
-## Reporting a Vulnerability
+## 漏洞报告
 
-Please do not open a public issue for suspected vulnerabilities.
+请不要在公开 issue 中提交安全漏洞。
 
-Send a private report to the project maintainers with:
+请私下联系维护者，并提供：
 
-- affected component
-- reproduction steps
-- expected impact
-- suggested mitigation if known
+- 受影响组件
+- 复现步骤
+- 影响范围
+- 已知缓解方案
 
-The project will acknowledge reports, investigate, and publish advisories when
-appropriate.
+项目会确认报告、调查问题，并在需要时发布安全公告。

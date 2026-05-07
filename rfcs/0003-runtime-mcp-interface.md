@@ -1,41 +1,42 @@
-# RFC 0003: Runtime MCP Interface
+# RFC 0003：Runtime MCP 接口
 
-## Status
+## 状态
 
-Draft
+草案
 
-## Summary
+## 摘要
 
-Define how OpenCap exposes installed Capabilities to MCP-compatible hosts.
+定义 OpenCap 如何把已安装 Capability 暴露给 MCP-compatible Host。
 
-## Motivation
+## 动机
 
-Users should not need to install one MCP server per external service. OpenCap can
-act as a single MCP gateway that exposes installed Capabilities as tools.
+用户不应该为每个外部服务安装一个 MCP Server。OpenCap 可以作为单一 MCP Gateway，把已安装 Capability 暴露为 tools。
 
-## Proposal
+## 提案
 
-`opencap serve --mcp` starts an MCP server.
+`opencap serve --mcp` 启动 MCP Server。
 
-For each installed Capability:
+对每个已安装 Capability：
 
-- expose one MCP tool
-- use the Capability input schema as the tool input schema
-- include permission metadata in the tool description where possible
-- validate input before execution
-- route invocation through the policy engine
-- write an audit log
+- 暴露一个 MCP tool
+- 使用 Capability input schema 作为 tool input schema
+- 尽可能在 tool description 中包含权限元数据
+- 执行前校验输入
+- 调用必须经过 policy engine
+- 写入审计日志
 
-## Tool Naming
+## 工具命名
 
-Tool names should derive from Capability ids. For example:
+工具名来自 Capability id。例如：
 
 ```text
 github.create_issue -> github_create_issue
 ```
 
-## Open Questions
+V1 必须检测命名冲突并 fail fast。
 
-- How should host identity be captured?
-- How should confirmation prompts be implemented across different hosts?
-- Should OpenCap expose a separate introspection tool for installed Capabilities?
+## 待解决问题
+
+- 如何捕获 Host identity？
+- 不同 Host 中确认 prompt 如何实现？
+- 是否需要额外 introspection tool 显示已安装 Capabilities？

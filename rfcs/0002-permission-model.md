@@ -1,22 +1,20 @@
-# RFC 0002: Permission Model
+# RFC 0002：权限模型
 
-## Status
+## 状态
 
-Draft
+草案
 
-## Summary
+## 摘要
 
-Define how OpenCap declares, evaluates, and audits Capability permissions.
+定义 OpenCap 如何声明、评估和审计 Capability 权限。
 
-## Motivation
+## 动机
 
-AI-driven actions need a stronger permission model than ordinary API calls. A
-model can choose actions dynamically, and users need clear boundaries around what
-those actions can change.
+AI 驱动的行动比普通 API 调用更需要权限模型。模型会动态选择行动，用户必须清楚这些行动能改变什么。
 
-## Proposal
+## 提案
 
-Each Capability declares one or more permissions:
+每个 Capability 声明一个或多个权限：
 
 ```yaml
 permissions:
@@ -26,15 +24,15 @@ permissions:
     confirmation: ask
 ```
 
-The runtime evaluates these permissions against local policy and returns one of:
+Runtime 根据本地策略评估权限，并返回：
 
 - `allow`
 - `ask`
 - `deny`
 
-## Risk Levels
+## 风险类型
 
-V1 risk categories:
+V1 风险类型：
 
 - `read_only`
 - `write`
@@ -44,12 +42,12 @@ V1 risk categories:
 - `code_execution`
 - `secret_access`
 
-## Audit
+## 审计
 
-Every invocation records the permission decision and confirmation outcome.
+每次调用都要记录策略决策和确认结果。
 
-## Open Questions
+## 待解决问题
 
-- Should policy rules match on host identity?
-- Should policy rules match on input values?
-- How should one-time confirmations be stored?
+- 策略规则是否应匹配 Host identity？
+- 策略规则是否应匹配输入值？
+- 一次性确认应如何存储？

@@ -1,6 +1,12 @@
 # MCP Proxy Adapter
 
-Planned adapter for wrapping an existing MCP tool as an OpenCap Capability.
+MCP Proxy Adapter 是未来能力，用于把已有 MCP tool 包装成 OpenCap Capability。
 
-This lets OpenCap add permissions, policy checks, trust metadata, and audit logs
-around tools that already exist in the MCP ecosystem.
+这样 OpenCap 可以在已有 MCP 工具外层增加：
+
+- 权限声明
+- 策略检查
+- 信任元数据
+- 调用日志
+
+该 adapter 不属于 V1 实现范围。

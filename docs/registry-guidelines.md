@@ -1,9 +1,8 @@
-# Registry Guidelines
+# Registry 指南
 
-The OpenCap Registry is Git-based. Developers submit Capabilities through pull
-requests, and CI validates the manifest and tests.
+OpenCap Registry 使用 Git-based 模式。开发者通过 Pull Request 提交 Capability，CI 负责校验 manifest 和测试样例。
 
-## Directory Layout
+## 目录结构
 
 ```text
 registry/
@@ -15,47 +14,46 @@ registry/
         basic.yml
 ```
 
-## Entry Requirements
+## 条目要求
 
-Every registry entry must include:
+每个 Registry 条目必须包含：
 
 - `manifest.yml`
 - `README.md`
-- at least one test under `tests/`
-- explicit permissions
-- risk declarations
-- maintainer metadata
-- license metadata
+- `tests/` 下至少一个测试
+- 明确权限声明
+- 风险等级
+- 维护者信息
+- 许可证信息
 
-## Review Checklist
+## 评审清单
 
-Reviewers should check:
+评审者应检查：
 
-- the manifest is valid
-- the description matches the execution behavior
-- permissions are not broader than required
-- risk levels are honest
-- external endpoints are declared
-- tests cover at least one successful invocation
-- README explains setup and expected result
+- manifest 是否合法
+- 描述是否匹配真实执行行为
+- 权限是否过宽
+- 风险等级是否诚实
+- 外部端点是否清楚声明
+- 测试是否覆盖至少一个成功调用
+- README 是否说明配置和预期结果
 
-## Trust Levels
+## 信任等级
 
-| Level | Meaning |
+| 等级 | 含义 |
 | --- | --- |
-| `experimental` | Early entry, not reviewed beyond basic structure. |
-| `listed` | Schema-valid and accepted into the registry. |
-| `tested` | Includes tests that pass in CI or mock validation. |
-| `verified` | Maintainer or service ownership is verified. |
-| `official` | Maintained by the OpenCap core team. |
+| `experimental` | 实验性条目，未做深度评审。 |
+| `listed` | schema 合法并被接受进入 registry。 |
+| `tested` | 有测试并通过 CI 或 mock validation。 |
+| `verified` | 维护者身份或服务所有权已验证。 |
+| `official` | 由 OpenCap 核心团队维护。 |
 
-## Installation
+## 安装
 
-The intended V1 install flow is:
+V1 预期安装方式：
 
 ```bash
 opencap install github.create_issue
 ```
 
-The CLI should resolve the registry entry, copy or link the manifest into local
-state, and make it available to the runtime.
+CLI 应解析 registry 条目，把 manifest 或完整 Capability 目录复制到本地状态目录，并让 Runtime 可以加载。

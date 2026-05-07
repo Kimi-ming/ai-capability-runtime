@@ -1,85 +1,70 @@
-# Skills Scan
+# Skills 调研
 
-Date: 2026-05-07
+日期：2026-05-07
 
-This document records the skills and workflows used or considered during the
-early OpenCap architecture stage.
+本文记录 OpenCap 早期架构阶段使用或评估过的 skills 和工作流。
 
-## Local Skills Used
+## 已使用的本地 Skills
 
 ### find-skills
 
-Purpose:
+用途：
 
-- discover external agent skills that may help with MCP, runtime, security, and
-  architecture work.
+- 搜索 MCP、runtime、安全和架构相关的 agent skills。
 
-How it was used:
+结果：
 
-- searched the public skills ecosystem for MCP/runtime/security skills.
+- `mapbox/mapbox-agent-skills@mapbox-mcp-runtime-patterns` 相关，安装量 418。
+- `omer-metin/skills-for-antigravity@mcp-security` 相关，但安装量较低。
+- `hack23/cia@mcp-gateway-security` 相关，但安装量较低。
 
-Result:
+决策：
 
-- `mapbox/mapbox-agent-skills@mapbox-mcp-runtime-patterns` appeared relevant
-  with 418 installs.
-- `omer-metin/skills-for-antigravity@mcp-security` appeared relevant but had low
-  install count.
-- `hack23/cia@mcp-gateway-security` appeared relevant but had low install count.
-
-Decision:
-
-- do not install any new skill yet.
-- rely on official MCP, OpenAI, A2A, OPA, and OpenTelemetry documentation for
-  architecture decisions.
-- revisit `mapbox-mcp-runtime-patterns` if we need implementation patterns for
-  MCP runtime behavior.
+- 暂不安装新 skill。
+- 架构决策优先依据官方 MCP、OpenAI、A2A、OPA 和 OpenTelemetry 文档。
+- 如果后续需要 MCP Runtime 实现模式，再评估 `mapbox-mcp-runtime-patterns`。
 
 ### documentation-writer
 
-Purpose:
+用途：
 
-- keep project documentation organized by audience and goal.
+- 用 Diátaxis 思路组织文档。
 
-How it maps to OpenCap docs:
+映射：
 
-- tutorials: `docs/getting-started.md`
-- how-to: `docs/registry-guidelines.md`
-- reference: `docs/capability-manifest.md`
-- explanation: `docs/introduction.md`, `docs/runtime-architecture.md`,
-  `docs/security-model.md`
+- 教程：`docs/getting-started.md`
+- 操作指南：`docs/registry-guidelines.md`
+- 参考：`docs/capability-manifest.md`
+- 解释：`docs/introduction.md`、`docs/runtime-architecture.md`、`docs/security-model.md`
 
 ### openai-docs
 
-Purpose:
+用途：
 
-- use official OpenAI documentation when evaluating Apps SDK, AgentKit, Agents
-  SDK, MCP connectors, and security guidance.
+- 评估 Apps SDK、AgentKit、Agents SDK、MCP connectors 和安全建议时，优先使用 OpenAI 官方文档。
 
-OpenCap implication:
+OpenCap 影响：
 
-- OpenCap should integrate with OpenAI-facing MCP/App surfaces, but it should not
-  become an OpenAI-only project.
+- OpenCap 应能对接 OpenAI 生态里的 MCP/App 表面。
+- 但 OpenCap 不应成为 OpenAI-only 项目。
 
-## Skills to Add Later
+## 后续可能新增的 Skills
 
-Consider adding or creating skills for:
+可考虑新增或创建：
 
-- MCP implementation review
-- runtime security review
-- policy engine design
-- registry submission review
+- MCP 实现审查
+- Runtime 安全审查
+- Policy Engine 设计
+- Registry 提交流程评审
 - OpenTelemetry instrumentation
-- CLI UX review
+- CLI UX 评审
 
-## Internal Team Practices
+## 内部团队角色
 
-Until dedicated skills exist, the project should use these standing roles during
-design reviews:
+在专门 skills 出现前，设计评审时使用这些工作角色：
 
-- product architect: scope and user value
-- protocol architect: MCP/A2A/OpenAPI compatibility
-- security reviewer: auth, policy, secrets, audit
-- runtime engineer: local state, execution, install flow
-- DX reviewer: CLI, examples, docs, contribution flow
-
-These are working roles, not separate products.
+- 产品架构：范围和用户价值
+- 协议架构：MCP/A2A/OpenAPI 兼容性
+- 安全评审：auth、policy、secrets、audit
+- Runtime 工程：本地状态、执行、安装流程
+- DX 评审：CLI、examples、docs、贡献流程

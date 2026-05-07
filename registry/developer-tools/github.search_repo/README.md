@@ -1,14 +1,14 @@
 # github.search_repo
 
-Search GitHub repositories, issues, or code.
+搜索 GitHub 仓库、issues 或代码。
 
-## Risk
+## 风险
 
 `read_only`
 
-This Capability reads GitHub data and does not change external state.
+该 Capability 只读取 GitHub 数据，不改变外部状态。
 
-## Example Input
+## 输入示例
 
 ```json
 {

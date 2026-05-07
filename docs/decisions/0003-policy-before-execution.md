@@ -1,43 +1,39 @@
-# Decision 0003: Policy Before Execution
+# 决策 0003：执行前必须经过策略
 
-Date: 2026-05-07
+日期：2026-05-07
 
-## Status
+## 状态
 
-Accepted
+已接受
 
-## Context
+## 背景
 
-AI hosts can dynamically decide to call tools. The runtime cannot assume that a
-tool call is safe because the model chose it.
+AI Host 可以动态决定调用工具。Runtime 不能因为模型选择了某个工具，就默认这个调用安全。
 
-OpenAI Apps SDK guidance emphasizes least privilege, explicit consent, server
-validation, human confirmation for irreversible operations, and audit logs. MCP
-security guidance also warns against token passthrough and confused-deputy
-patterns.
+OpenAI Apps SDK 强调最小权限、明确同意、服务端校验、不可逆操作的人类确认和审计日志。MCP 安全建议也强调禁止 token passthrough 和 confused-deputy 风险。
 
-## Decision
+## 决策
 
-Every OpenCap invocation must pass through policy evaluation before execution.
+OpenCap 的每一次调用必须在执行前经过策略评估。
 
-The policy decision must be one of:
+策略决策只能是：
 
 - `allow`
 - `ask`
 - `deny`
 
-The default decision is `ask`.
+默认决策是 `ask`。
 
-## Consequences
+## 影响
 
-Every executor must accept a policy decision and must not bypass it.
+每个 executor 都必须接收策略决策，不能绕过策略。
 
-The audit log must record:
+审计日志必须记录：
 
-- requested Capability
-- declared risk
-- decision
-- confirmation result when applicable
-- execution status
+- 请求的 Capability
+- 声明的风险
+- 策略决策
+- 确认结果
+- 执行状态
 
-This makes policy and audit part of the core product, not optional middleware.
+策略和审计是核心产品能力，不是可选中间件。

@@ -1,55 +1,51 @@
-# Contributing to OpenCap
+# 贡献指南
 
-OpenCap welcomes contributions to the standard, runtime, registry, docs, and
-tooling. The project is early, so high-quality design feedback is as valuable as
-code.
+OpenCap 欢迎标准、Runtime、Registry、文档和工具链方面的贡献。项目还在早期，清晰的设计反馈和代码同样重要。
 
-## Contribution Areas
+## 可以贡献什么
 
 - Capability Manifest schema
-- permission model and policy behavior
-- runtime and MCP interface
-- CLI commands
-- registry entries
-- adapters for OpenAPI, HTTP, MCP, and CLI tools
-- documentation and examples
+- 权限模型和策略行为
+- Runtime 与 MCP 接口
+- CLI 命令
+- Registry 条目
+- OpenAPI、HTTP、MCP、CLI adapters
+- 文档、示例和测试
 
-## Capability Registry Requirements
+## Registry 条目要求
 
-Every registry Capability must include:
+每个 Capability 条目必须包含：
 
 - `manifest.yml`
 - `README.md`
-- at least one test case under `tests/`
-- declared permissions and risk level
-- maintainer and license metadata
-- no hidden external network calls beyond what the manifest declares
-- no destructive default behavior
+- `tests/` 下至少一个测试样例
+- 明确声明权限和风险等级
+- 维护者信息和许可证
+- 不隐藏 manifest 未声明的外部调用
+- 默认不执行破坏性操作
 
-## Review Levels
+## Capability 信任等级
 
-Registry entries can progress through these trust levels:
+- `experimental`：实验性条目，只做基础结构检查
+- `listed`：通过 schema 校验并进入 registry
+- `tested`：有测试并通过验证
+- `verified`：维护者身份或服务所有权已验证
+- `official`：由 OpenCap 核心团队维护
 
-- `experimental`: early community entry
-- `listed`: passes schema validation
-- `tested`: includes passing tests
-- `verified`: maintainer identity or ownership is verified
-- `official`: maintained by the OpenCap core team
+## RFC 流程
 
-## RFC Process
+以下变化需要 RFC：
 
-Use an RFC for changes that affect compatibility or ecosystem behavior:
+- manifest 兼容性变化
+- 权限语义变化
+- Runtime API 变化
+- MCP 暴露方式变化
+- Registry 治理规则变化
+- 信任元数据变化
 
-- manifest schema
-- permission semantics
-- runtime APIs
-- MCP exposure
-- registry governance
-- trust metadata
+新增 RFC 时，在 `rfcs/` 下使用下一个编号。
 
-Create a new file under `rfcs/` using the next numeric prefix.
-
-## Local Development
+## 本地开发
 
 ```bash
 pnpm install
@@ -57,5 +53,4 @@ pnpm build
 pnpm test
 ```
 
-The implementation is intentionally small and TypeScript-first so contributors
-can inspect the full system without a large infrastructure setup.
+项目坚持小而清晰的 TypeScript-first 结构，方便贡献者理解完整系统。

@@ -1,45 +1,41 @@
-# Decision 0002: Local-first Runtime
+# 决策 0002：本地优先 Runtime
 
-Date: 2026-05-07
+日期：2026-05-07
 
-## Status
+## 状态
 
-Accepted
+已接受
 
-## Context
+## 背景
 
-OpenCap could start as a hosted service, but hosted infrastructure would force
-early decisions around accounts, billing, multi-tenancy, cloud security, and
-commercial distribution.
+OpenCap 可以从托管服务开始，但这会过早引入账户、计费、多租户、云安全和商业分发等问题。
 
-The open-source wedge is stronger if developers can run a local runtime and
-connect it to MCP-compatible hosts.
+作为开源项目，更好的切入点是让开发者在本地运行 Runtime，并把它接入 MCP-compatible Host。
 
-## Decision
+## 决策
 
-OpenCap V1 will be local-first.
+OpenCap V1 本地优先。
 
-The runtime state will live under:
+Runtime 状态位于：
 
 ```text
 opencap.local/
 ```
 
-The first supported auth mode for external APIs will be environment-variable API
-keys for local development.
+V1 的第一种外部 API 认证方式是本地开发环境中的环境变量 API key。
 
-## Consequences
+## 影响
 
-Benefits:
+好处：
 
-- easy to clone and try
-- simpler threat model
-- no hosted account dependency
-- aligns with open-source adoption
+- 易于 clone 和试用
+- 威胁模型更简单
+- 不依赖托管账户
+- 更符合开源采用路径
 
-Tradeoffs:
+代价：
 
-- no shared team policies in V1
-- no remote registry install analytics
-- no hosted OAuth broker in V1
-- user must manage local environment secrets
+- V1 没有团队共享策略
+- 没有远程安装分析
+- 没有托管 OAuth broker
+- 用户需要管理本地环境密钥

@@ -1,125 +1,114 @@
-# V1 Requirements
+# V1 需求
 
-OpenCap V1 is a local-first proof of the capability runtime model.
+OpenCap V1 是 capability runtime 模型的本地优先验证版。
 
-## Product Thesis
+## 产品假设
 
-AI hosts and agents need a controlled way to call real-world capabilities.
+AI Host 和 Agent 需要一种受控方式调用真实世界能力。
 
-The valuable open-source layer is not another Agent and not another directory.
-It is the local runtime that can install, authorize, execute, verify, and audit
-Capabilities.
+有价值的开源层不是另一个 Agent，也不是另一个目录，而是可以安装、授权、执行、验证和审计 Capability 的本地 Runtime。
 
-## Target Users
+## 目标用户
 
-### Primary
+### 主要用户
 
-Developers building AI agents, ChatGPT apps, Claude/Cursor workflows, or internal
-automation hosts who need a safer way to expose external tools.
+构建 AI Agent、ChatGPT Apps、Claude/Cursor 工作流或企业内部自动化 Host 的开发者。
 
-### Secondary
+### 次要用户
 
-Open-source maintainers and platform teams who want a Git-based registry and a
-review process for AI-callable tools.
+希望用 Git-based Registry 和评审流程管理 AI-callable tools 的开源维护者和平台团队。
 
-## V1 User Stories
+## V1 用户故事
 
-### Developer Defines a Capability
+### 开发者定义 Capability
 
-As a developer, I can write a `manifest.yml` that describes an HTTP capability,
-including input, output, auth, permissions, execution, and metadata.
+开发者可以写一个 `manifest.yml` 描述 HTTP Capability，包括输入、输出、认证、权限、执行和元数据。
 
-Acceptance criteria:
+验收标准：
 
-- manifest validates against `manifest.schema.json`
-- validation errors identify the broken field
-- schema supports `http` capabilities
+- manifest 能通过 `manifest.schema.json` 校验
+- 校验错误能指出具体字段
+- schema 明确只支持 V1 的 `http` Capability
 
-### Developer Installs a Capability
+### 开发者安装 Capability
 
-As a developer, I can install a registry Capability into a local OpenCap runtime.
+开发者可以把 registry 中的 Capability 安装到本地 OpenCap Runtime。
 
-Acceptance criteria:
+验收标准：
 
-- `opencap install github.create_issue` resolves a local registry entry
-- installed manifests are stored under `opencap.local/installed`
-- `opencap list` shows installed Capabilities
+- `opencap install github.create_issue` 能解析本地 registry 条目
+- 已安装 manifest 存到 `opencap.local/installed`
+- `opencap list` 能显示已安装 Capability
 
-### Host Calls a Capability Through MCP
+### Host 通过 MCP 调用 Capability
 
-As an AI host user, I can configure one OpenCap MCP server and see installed
-Capabilities as tools.
+AI Host 用户可以配置一个 OpenCap MCP Server，并看到已安装 Capability 作为工具。
 
-Acceptance criteria:
+验收标准：
 
-- `opencap serve --mcp` starts a local MCP server
-- installed Capabilities are exposed as MCP tools
-- MCP tool input schema is derived from the manifest
-- tool names are deterministic
+- `opencap serve --mcp` 启动本地 MCP server
+- 已安装 Capability 暴露为 MCP tools
+- MCP tool input schema 来自 manifest
+- tool name 稳定且冲突时 fail fast
 
-### Runtime Evaluates Policy
+### Runtime 执行策略判断
 
-As a user, I can define local policy so read-only actions can run automatically
-and write actions require confirmation.
+用户可以定义本地策略，让只读操作自动允许，让写操作需要确认。
 
-Acceptance criteria:
+验收标准：
 
-- default policy is `ask`
-- `read_only` may be configured as `allow`
-- `write` may be configured as `ask`
-- denied calls are not executed
+- 默认策略是 `ask`
+- `read_only` 可配置为 `allow`
+- `write` 可配置为 `ask`
+- `deny` 的调用不执行
+- `ask` 在 MCP 模式下不使用终端 prompt
 
-### Runtime Executes HTTP Capability
+### Runtime 执行 HTTP Capability
 
-As a host, I can call an installed HTTP Capability and receive structured output.
+Host 可以调用已安装 HTTP Capability，并得到结构化输出。
 
-Acceptance criteria:
+验收标准：
 
-- input is validated before execution
-- templated URL values come from validated input
-- API key can be read from an environment variable
-- runtime applies timeout
-- output is JSON when possible
+- 执行前校验输入
+- URL 模板变量来自已校验输入
+- API key 可从环境变量读取
+- 请求有 timeout
+- 结果尽量归一化为 JSON
 
-### Runtime Writes Audit Logs
+### Runtime 写入审计日志
 
-As a user, I can inspect what Capabilities were called and what decisions were
-made.
+用户可以查看 Capability 被谁调用、策略如何决策、执行是否成功。
 
-Acceptance criteria:
+验收标准：
 
-- every invocation writes a log entry
-- logs include capability id, version, timestamp, policy decision, status, and
-  duration
-- logs redact secrets
-- `opencap logs` displays recent invocations
+- 每次调用写入日志
+- 日志包含 capability id、version、timestamp、policy decision、status、duration
+- 日志脱敏密钥和敏感字段
+- `opencap logs` 显示近期调用
 
-## Non-Goals for V1
+## V1 非目标
 
-- hosted cloud runtime
-- multi-tenant accounts
-- payments
-- full OAuth implementation
-- arbitrary local command execution
-- browser UI for the console
-- A2A server implementation
-- marketplace ranking or search
-- signature verification
-- enterprise RBAC
+- 托管云 Runtime
+- 多租户账户体系
+- 支付
+- 完整 OAuth 实现
+- 任意本地命令执行
+- Console 浏览器 UI
+- A2A server 实现
+- marketplace 排名或搜索
+- 签名验证
+- 企业 RBAC
 
-## V1 Demo Scenario
+## V1 Demo
 
 ```text
-Install github.create_issue.
-Start opencap serve --mcp.
-Connect an MCP-compatible host.
-Ask the host to create a GitHub issue.
-OpenCap validates input, asks for confirmation, executes the GitHub API call,
-and logs the invocation.
+安装 github.create_issue。
+启动 opencap serve --mcp。
+连接 MCP-compatible Host。
+让 Host 创建一个 GitHub issue。
+OpenCap 校验输入、请求确认、调用 GitHub API，并记录审计日志。
 ```
 
-## Success Criteria
+## 成功标准
 
-OpenCap V1 is successful when a developer can clone the repo, install
-dependencies, validate sample Capabilities, run the local MCP runtime, and
-successfully execute one real write Capability with an audit log.
+开发者能 clone 仓库、安装依赖、校验示例 Capability、运行本地 MCP Runtime，并成功执行一个真实写操作 Capability，同时看到审计日志。
