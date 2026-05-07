@@ -129,10 +129,13 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 - [Runtime 架构](docs/runtime-architecture.md)
 - [Registry 指南](docs/registry-guidelines.md)
 - [安全模型](docs/security-model.md)
-- [路线图](docs/roadmap.md)
+- [路线图](docs/ROADMAP.md)
 - [V1 需求](docs/planning/v1-requirements.md)
 - [V1 架构](docs/planning/v1-architecture.md)
 - [技术方案审查](docs/reviews/technical-plan-review-2026-05-07.md)
+- [开发任务总表](docs/TASKS.md)
+- [测试策略](docs/TESTING.md)
+- [当前状态交接](docs/HANDOFF.md)
 
 ## 开源治理
 
