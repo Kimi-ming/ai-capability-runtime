@@ -17,6 +17,7 @@ README.md
       -> docs/ecosystem/registry-distribution.md
       -> docs/ecosystem/interoperability-profiles.md
       -> docs/ecosystem/oauth-and-remote-runtime-boundary.md
+      -> docs/ecosystem/capability-graph-v1.md
       -> docs/SPEC.md
       -> docs/spec/versioning-and-compatibility.md
       -> docs/spec/manifest-evolution.md
@@ -34,6 +35,8 @@ README.md
       -> docs/design/secret-resolver-v1.md
       -> docs/design/execution-semantics-v1.md
       -> docs/design/retry-and-idempotency-v1.md
+      -> docs/design/composition-boundary-v1.md
+      -> docs/design/multi-step-execution-boundary.md
       -> docs/design/http-execution-v1.md
       -> docs/design/policy-dsl-v1.md
       -> docs/design/audit-log-v1.md
@@ -51,6 +54,7 @@ README.md
       -> docs/operations/package-publishing-v1.md
       -> docs/operations/credential-lifecycle.md
       -> docs/operations/failure-recovery-runbook.md
+      -> docs/operations/composition-failure-runbook.md
       -> docs/operations/ci-security-baseline.md
       -> docs/operations/observability-metrics-v1.md
       -> docs/community/contributor-journey.md
@@ -129,6 +133,7 @@ README.md
 | `docs/ecosystem/registry-distribution.md` | Registry 分发模型 | 安装来源、索引、镜像、签名策略变化时 |
 | `docs/ecosystem/interoperability-profiles.md` | Host/协议互操作 profile | 兼容性声明、Host 记录或协议 profile 变化时 |
 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | 远程 Runtime OAuth 边界 | HTTP/Cloud/remote runtime 授权设计变化时 |
+| `docs/ecosystem/capability-graph-v1.md` | 能力图 | provider/resource/output 关系和组合风险变化时 |
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/spec/versioning-and-compatibility.md` | 版本和公共契约兼容性 | 公共契约或版本策略变化时 |
 | `docs/spec/manifest-evolution.md` | Manifest schema 演进 | schema 迁移或新 capability type 变化时 |
@@ -145,6 +150,8 @@ README.md
 | `docs/design/secret-resolver-v1.md` | 密钥解析器契约 | auth provider、secret placement 或 resolver 行为变化时 |
 | `docs/design/execution-semantics-v1.md` | 执行语义 | outcome、side effect、request_started 或状态模型变化时 |
 | `docs/design/retry-and-idempotency-v1.md` | 重试与幂等 | retry policy、idempotency key 或重复调用规则变化时 |
+| `docs/design/composition-boundary-v1.md` | 组合边界 | composition profile、workflow 边界或组合不变量变化时 |
+| `docs/design/multi-step-execution-boundary.md` | 多步执行边界 | step outcome、composition outcome 或 compensation 变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
 | `docs/design/http-execution-v1.md` | HTTP body/auth/outbound 执行规则 | HTTP manifest 或 executor 变化时 |
 | `docs/design/policy-dsl-v1.md` | 本地 policy 文件格式 | Policy parser/engine 变化时 |
@@ -163,6 +170,7 @@ README.md
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
 | `docs/operations/credential-lifecycle.md` | 凭据生命周期 Runbook | token 创建、轮换、撤销或泄露响应流程变化时 |
 | `docs/operations/failure-recovery-runbook.md` | 失败恢复手册 | timeout、unknown outcome、reconcile 或 compensation 流程变化时 |
+| `docs/operations/composition-failure-runbook.md` | 组合失败恢复 | partial/unknown composition、manual review 或补偿流程变化时 |
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
 | `docs/operations/observability-metrics-v1.md` | 可观测性和指标 | audit/metrics/OTel 映射变化时 |
 | `docs/community/contributor-journey.md` | 贡献者路径 | 贡献流程变化时 |

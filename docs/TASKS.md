@@ -133,6 +133,15 @@
 - T171 P2：Duplicate invocation detector 草案。
 - T172 P2：Reconcile hint manifest field。
 - T173 P2：Execution evidence conformance record。
+- T175 P2：Composition context audit fields。
+- T176 P2：Composition profile RFC。
+- T177 P2：Step-level consent tests for composition。
+- T178 P2：Plan hash and evidence chain 草案。
+- T179 P2：Capability graph metadata RFC。
+- T180 P2：Risk amplification review checklist。
+- T181 P2：Registry graph index 草案。
+- T182 P2：Compensation capability review rules。
+- T183 P2：Composition failure recovery smoke tests。
 
 ### 已完成
 
@@ -151,6 +160,7 @@
 - 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
 - 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
 - 已完成：T174 P0：补齐执行可靠性、副作用安全和失败恢复体系。
+- 已完成：T184 P0：补齐组合边界、能力图和多步执行体系。
 
 
 ---
@@ -1215,6 +1225,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - outcome、request_started、retryAttempt、providerRequestId 等执行证据字段清晰。
 - failure recovery runbook 明确请求前失败、请求后失败、5xx/429、timeout unknown 的恢复路径。
 - idempotency key 支持被定义为后续 RFC，不混入 V1 主路径。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T184 P0：补齐组合边界、能力图和多步执行体系
+
+- [x] T184 P0：补齐组合边界、能力图和多步执行体系
+
+已完成：新增组合边界、能力图、多步执行边界、组合失败恢复、组合/Saga 调研，并新增 ADR 0032-0034。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- V1 明确不内置 workflow runtime。
+- 多步组合中每一步都必须独立 policy、consent、secret、execution、audit。
+- compositionId/planHash 只作为 evidence，不作为授权。
+- compensation 被定义为独立 Capability invocation，不是隐式 rollback。
+- 能力图作为 registry 元数据和风险放大分析基础，而不是自动执行许可。
 
 验证：
 

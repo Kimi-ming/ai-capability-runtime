@@ -165,6 +165,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - Security conformance 覆盖 secret redaction、secret resolver ordering、outbound policy、token passthrough 禁止。
 - MCP conformance 覆盖 tools/list、tools/call、confirmation_required 和 tool name collision。
 - Execution conformance 覆盖 request_started、outcome、retryAttempt、unknown_after_timeout 和 execution evidence redaction。
+- Composition conformance 覆盖 compositionId、step-level consent、planHash 只作 evidence、compensation 独立授权。
 
 ## CI 目标
 

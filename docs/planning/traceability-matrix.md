@@ -99,3 +99,7 @@
 | RQ-051 | 重试与幂等受控 | `docs/design/retry-and-idempotency-v1.md` | T169, T170 | retry/idempotency tests |
 | RQ-052 | 失败恢复可操作 | `docs/operations/failure-recovery-runbook.md` | T171, T172 | recovery smoke/reconcile review |
 | RQ-053 | 执行证据可证明 | `docs/quality/execution-evidence-v1.md` | T173 | conformance evidence record |
+| RQ-054 | 组合边界清晰 | `docs/design/composition-boundary-v1.md` | T176, T177 | composition profile review |
+| RQ-055 | 能力图可表达关系和风险 | `docs/ecosystem/capability-graph-v1.md` | T179, T180, T181 | graph metadata/review tests |
+| RQ-056 | 多步执行不掩盖单步证据 | `docs/design/multi-step-execution-boundary.md` | T175, T178 | evidence chain tests |
+| RQ-057 | 组合失败恢复可操作 | `docs/operations/composition-failure-runbook.md` | T182, T183 | recovery smoke tests |

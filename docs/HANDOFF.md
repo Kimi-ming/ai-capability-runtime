@@ -128,3 +128,10 @@ T001：让 opencap validate 调用真实 schema 校验
 已新增执行语义、重试与幂等、失败恢复 Runbook、执行证据和执行可靠性调研。ADR 0030-0031 已接受。V1 明确不自动重试非幂等写操作；请求发出后的 timeout 必须记录为 `unknown_after_timeout`，不能说成“未执行”。
 
 下一步仍然是 T001。进入 HTTP executor 相关任务时，必须把 request_started、outcome、retryAttempt、providerRequestId 等字段作为 audit/evidence 设计的一部分。
+
+
+## 组合边界、能力图和多步执行体系已补齐
+
+已新增组合边界、能力图、多步执行边界、组合失败恢复和组合/Saga 调研。ADR 0032-0034 已接受。V1 明确不内置 workflow runtime；未来组合中的每一步都必须独立经过 policy、consent、secret、execution 和 audit；compensation 是独立 Capability，不是隐式 rollback。
+
+下一步仍然是 T001。后续进入 runtime 实现时，要避免把 compositionId、planHash 或 workflow-level consent 当成授权来源。

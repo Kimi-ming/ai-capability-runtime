@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 三十九个子系统
+## 四十四个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -57,6 +57,11 @@ OpenCap 负责能力治理。
 | 重试与幂等 | 防止重复副作用 | `docs/design/retry-and-idempotency-v1.md` | retry/idempotency rules |
 | 失败恢复 | 状态未知时指导恢复 | `docs/operations/failure-recovery-runbook.md` | recovery runbook |
 | 执行证据 | 证明调用发生了什么 | `docs/quality/execution-evidence-v1.md` | evidence fields |
+| 组合边界 | 防止滑向 Agent Builder | `docs/design/composition-boundary-v1.md` | composition invariants |
+| 能力图 | 描述能力关系和风险放大 | `docs/ecosystem/capability-graph-v1.md` | graph metadata 草案 |
+| 多步执行 | 定义 step outcome 和补偿边界 | `docs/design/multi-step-execution-boundary.md` | multi-step outcome model |
+| 组合失败恢复 | 指导 partial/unknown/manual review | `docs/operations/composition-failure-runbook.md` | recovery runbook |
+| 组合调研 | Saga/workflow 边界依据 | `docs/research/composition-and-saga-scan-2026-05-07.md` | research notes |
 
 ## 系统闭环
 
@@ -114,6 +119,8 @@ Governance Surface
 - V1 secret 只来自 manifest 声明的 env var。
 - V1 不自动重试非幂等写操作。
 - 请求发出后的 timeout 必须标为未知结果，而不是未执行。
+- 多步组合中的每一步都必须独立 policy、consent 和 audit。
+- Compensation 是独立 Capability，不是隐式 rollback。
 - 写操作审计不可用时不得执行。
 - 任意 URL 能力默认高风险，需要 outbound policy 兜底。
 - Registry trust level 不能覆盖用户本地 policy。
@@ -149,6 +156,9 @@ Governance Surface
 | 远程 Runtime OAuth 必须走新 Profile | 已接受 |
 | V1 不自动重试非幂等写操作 | 已接受 |
 | 请求发出后的超时是未知结果 | 已接受 |
+| V1 不内置 Workflow Runtime | 已接受 |
+| 组合中的每一步都必须独立 Policy、Consent、Audit | 已接受 |
+| Compensation 是独立 Capability，不是隐式 Rollback | 已接受 |
 
 ## 设计成熟度
 
@@ -189,3 +199,8 @@ Governance Surface
 | 重试与幂等 | 清晰 | T169 走 manifest RFC |
 | 失败恢复 | 清晰 | T172 增加 reconcile hint |
 | 执行证据 | 清晰 | T173 接入 conformance record |
+| 组合边界 | 清晰 | T176 走 composition profile RFC |
+| 能力图 | 清晰 | T179 定义 graph metadata RFC |
+| 多步执行 | 清晰 | T175/T178 增加 evidence chain |
+| 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
+| 组合调研 | 完成 | 后续 RFC 参考 |

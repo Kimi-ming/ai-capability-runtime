@@ -49,6 +49,10 @@
 | R027 | High | Mitigating | 非幂等写操作自动 retry 导致重复副作用 | ADR 0030；retry/idempotency tests | T169, T170 |
 | R028 | High | Mitigating | 请求已发出后 timeout 被误报为未执行 | ADR 0031；unknown outcome audit tests | T168 |
 | R029 | Medium | Mitigating | 执行失败缺少 provider request id、retryAttempt、outcome 等证据 | execution evidence 文档；audit 字段扩展 | T167, T173 |
+| R030 | High | Mitigating | OpenCap 误扩展成 Workflow/Agent Builder，削弱能力层定位 | ADR 0032；composition boundary | T176 |
+| R031 | High | Mitigating | 组合级确认绕过单步高风险确认 | ADR 0033；step-level consent tests | T177 |
+| R032 | High | Mitigating | compensation 被误认为自动 rollback，造成错误安全预期 | ADR 0034；composition failure runbook | T182, T183 |
+| R033 | Medium | Mitigating | 能力组合造成风险放大但 registry review 看不见 | capability graph；risk amplification checklist | T179, T180 |
 
 ## 当前最高优先级风险
 
@@ -59,7 +63,8 @@
 5. R023：token passthrough 禁止的实现验证
 6. R024：Secret Resolver 调用顺序验证
 7. R028：timeout unknown outcome 审计语义
-8. R006：依赖安装和 workspace 构建验证
+8. R031：组合级确认绕过单步确认
+9. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

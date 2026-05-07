@@ -37,14 +37,18 @@
 | 0029 | 远程 Runtime OAuth 必须走新 Profile | 已接受 | remote runtime auth 不能复用 V1 env 模型。 |
 | 0030 | V1 不自动重试非幂等写操作 | 已接受 | POST/PATCH 写操作默认 max attempts 为 1。 |
 | 0031 | 请求发出后的超时是未知结果 | 已接受 | timeout after request 记录为 `unknown_after_timeout`。 |
+| 0032 | V1 不内置 Workflow Runtime | 已接受 | OpenCap 保持能力治理层，不做工作流引擎。 |
+| 0033 | 组合中的每一步都必须独立 Policy、Consent、Audit | 已接受 | compositionId/planHash 只作为 evidence。 |
+| 0034 | Compensation 是独立 Capability，不是隐式 Rollback | 已接受 | 补偿动作需要独立 manifest 和确认。 |
 
 ## 下一批需要决策的问题
 
-- 0032：OpenAPI adapter 的人工 review 边界。
-- 0033：Registry index signing 具体格式。
-- 0034：MCP elicitation profile 是否进入 v0.2。
-- 0035：macOS Keychain / external vault provider 是否进入 v0.2。
-- 0036：Idempotency-Key manifest field 是否进入 v0.2。
+- 0035：OpenAPI adapter 的人工 review 边界。
+- 0036：Registry index signing 具体格式。
+- 0037：MCP elicitation profile 是否进入 v0.2。
+- 0038：macOS Keychain / external vault provider 是否进入 v0.2。
+- 0039：Idempotency-Key manifest field 是否进入 v0.2。
+- 0040：Composition profile 是否进入 v0.3。
 
 ## 决策写法
 
