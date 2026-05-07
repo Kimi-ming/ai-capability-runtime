@@ -90,3 +90,8 @@
 | RQ-042 | 互操作声明可证明 | `docs/ecosystem/interoperability-profiles.md` | T154, T156, T157 | host evidence records |
 | RQ-043 | 一致性测试成体系 | `docs/quality/conformance-suite-v1.md` | T153 | conformance record checks |
 | RQ-044 | Agentic 风险转控制和测试 | `docs/security/agentic-risk-mapping.md` | T128, T155 | abuse-case smoke tests |
+| RQ-045 | 身份授权边界清晰 | `docs/security/identity-and-auth-model.md` | T090, T159, T163 | auth boundary negative tests |
+| RQ-046 | Secret Resolver 行为稳定 | `docs/design/secret-resolver-v1.md` | T159, T164 | resolver ordering + redaction tests |
+| RQ-047 | 凭据生命周期可操作 | `docs/operations/credential-lifecycle.md` | T162, T165 | runbook smoke + README review |
+| RQ-048 | 最小权限评审可执行 | `docs/security/least-privilege-review.md` | T161, T165 | registry lint/review checklist |
+| RQ-049 | 远程 OAuth 不污染 V1 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | T163 | RFC/ADR review |

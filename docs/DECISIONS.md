@@ -32,13 +32,16 @@
 | 0024 | 兼容性声明必须绑定 Interoperability Profile | 已接受 | profile、Host、版本和证据一起记录。 |
 | 0025 | Capability Package V1 使用目录契约 | 已接受 | registry package 必须有 manifest、README、tests。 |
 | 0026 | Agentic 风险必须映射为控制和测试 | 已接受 | 高优先级风险进入 negative tests/conformance。 |
+| 0027 | V1 只实现 env-based downstream credentials | 已接受 | Secret Resolver V1 只读声明 env var。 |
+| 0028 | 禁止 token passthrough | 已接受 | Host/client/input token 不能作为下游 provider token。 |
+| 0029 | 远程 Runtime OAuth 必须走新 Profile | 已接受 | remote runtime auth 不能复用 V1 env 模型。 |
 
 ## 下一批需要决策的问题
 
-- 0027：OpenAPI adapter 的人工 review 边界。
-- 0028：未来远程 Runtime 的 OAuth authorization 边界。
-- 0029：Registry index signing 具体格式。
-- 0030：MCP elicitation profile 是否进入 v0.2。
+- 0030：OpenAPI adapter 的人工 review 边界。
+- 0031：Registry index signing 具体格式。
+- 0032：MCP elicitation profile 是否进入 v0.2。
+- 0033：macOS Keychain / external vault provider 是否进入 v0.2。
 
 ## 决策写法
 

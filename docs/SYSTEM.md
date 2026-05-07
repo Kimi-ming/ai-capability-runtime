@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 三十个子系统
+## 三十五个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -48,6 +48,11 @@ OpenCap 负责能力治理。
 | 互操作 Profile | 兼容性证据化 | `docs/ecosystem/interoperability-profiles.md` | MCP/Registry profile |
 | 一致性测试 | 生态可验证 | `docs/quality/conformance-suite-v1.md` | conformance groups |
 | Agentic 风险 | 安全风险转测试 | `docs/security/agentic-risk-mapping.md` | risk-to-control map |
+| 身份授权 | 明确代表谁调用 | `docs/security/identity-and-auth-model.md` | identity/auth boundary |
+| Secret Resolver | 安全解析凭据 | `docs/design/secret-resolver-v1.md` | env provider 契约 |
+| 凭据生命周期 | 凭据创建/轮换/撤销 | `docs/operations/credential-lifecycle.md` | runbook |
+| 最小权限评审 | 防止过宽 scopes | `docs/security/least-privilege-review.md` | review checklist |
+| 远程 OAuth 边界 | 防止未来授权混乱 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | future auth profile 边界 |
 
 ## 系统闭环
 
@@ -101,6 +106,8 @@ Governance Surface
 - Policy Engine 不做交互，Confirmation Handler 不做执行。
 - Secret Resolver 不把密钥原文交给日志或工具输出。
 - `deny` 和未确认的 `ask` 不得解析密钥、不得执行。
+- Host/client/input token 不得作为下游 provider token 使用。
+- V1 secret 只来自 manifest 声明的 env var。
 - 写操作审计不可用时不得执行。
 - 任意 URL 能力默认高风险，需要 outbound policy 兜底。
 - Registry trust level 不能覆盖用户本地 policy。
@@ -131,6 +138,9 @@ Governance Surface
 | 兼容性声明必须绑定 Interoperability Profile | 已接受 |
 | Capability Package V1 使用目录契约 | 已接受 |
 | Agentic 风险必须映射为控制和测试 | 已接受 |
+| V1 只实现 env-based downstream credentials | 已接受 |
+| 禁止 token passthrough | 已接受 |
+| 远程 Runtime OAuth 必须走新 Profile | 已接受 |
 
 ## 设计成熟度
 
@@ -162,3 +172,8 @@ Governance Surface
 | 互操作 Profile | 清晰 | T154 维护 evidence records |
 | 一致性测试 | 清晰 | T153 建立 suite skeleton |
 | Agentic 风险 | 清晰 | T155 转成 abuse-case smoke tests |
+| 身份授权 | 清晰 | T159/T163 按边界实现或 RFC |
+| Secret Resolver | 清晰 | T159 实现 env provider |
+| 凭据生命周期 | 清晰 | T162/T165 补操作验证和指南 |
+| 最小权限评审 | 清晰 | T161 接入 Registry lint/review |
+| 远程 OAuth 边界 | 清晰 | T163 走 RFC，不进 V1 主路径 |

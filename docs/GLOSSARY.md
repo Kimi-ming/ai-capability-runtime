@@ -18,6 +18,8 @@
 | Confirmation | 确认 | 对 `ask` 决策的人类确认流程。 |
 | Executor | 执行器 | 真正执行 HTTP 请求或未来其他能力的模块。 |
 | Secret Resolver | 密钥解析器 | 从 env 或未来 keychain 读取凭据的模块。 |
+| Credential Reference | 凭据引用 | 指向 secret 来源的非敏感名称，例如 `GITHUB_TOKEN`。 |
+| Token Passthrough | Token 透传 | 把发给一个资源的 token 转发给另一个资源使用，OpenCap 禁止这种行为。 |
 | Elicitation | MCP 确认/补充信息机制 | MCP client 支持时可用于确认 `ask`。 |
 
 ## 文档用词约定

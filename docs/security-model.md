@@ -24,6 +24,13 @@ OpenCap 应重点防御：
 - 调用日志
 - Registry 评审清单
 
+## 详细边界文档
+
+- `docs/security/identity-and-auth-model.md`：身份、授权链和 token passthrough 边界。
+- `docs/design/secret-resolver-v1.md`：Secret Resolver 输入、输出、调用顺序和 dry-run 行为。
+- `docs/operations/credential-lifecycle.md`：凭据创建、轮换、撤销和泄露响应。
+- `docs/security/least-privilege-review.md`：Capability auth scopes 最小权限评审。
+
 ## 密钥处理
 
 V1 可以支持环境变量凭据：

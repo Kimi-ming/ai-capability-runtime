@@ -124,6 +124,11 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 
 - [体系蓝图](docs/SYSTEM.md)
 - [互操作 Profiles](docs/ecosystem/interoperability-profiles.md)
+- [身份与授权模型](docs/security/identity-and-auth-model.md)
+- [Secret Resolver V1](docs/design/secret-resolver-v1.md)
+- [凭据生命周期 Runbook](docs/operations/credential-lifecycle.md)
+- [最小权限评审](docs/security/least-privilege-review.md)
+- [OAuth 与远程 Runtime 边界](docs/ecosystem/oauth-and-remote-runtime-boundary.md)
 - [确认与同意模型 V1](docs/design/confirmation-and-consent-v1.md)
 - [Capability Package V1](docs/design/capability-package-v1.md)
 - [Conformance Suite V1](docs/quality/conformance-suite-v1.md)

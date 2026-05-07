@@ -42,6 +42,10 @@
 | R020 | Medium | Mitigating | 泛泛声明兼容 MCP/Host 可能导致用户误判可用性 | ADR 0024；Interoperability profiles 和 evidence records | T153, T154 |
 | R021 | Medium | Mitigating | Registry package 只有 manifest，缺少 README/tests 会降低 review 质量 | ADR 0025；Capability Package V1 目录契约 | T151, T158 |
 | R022 | High | Mitigating | Agentic AI 风险停留在文档层，未转化为测试会造成安全承诺落空 | ADR 0026；Agentic risk mapping 和 conformance negative tests | T128, T155 |
+| R023 | High | Mitigating | Host/client/input token 被误用为下游 provider token | ADR 0028；token passthrough negative tests | T090, T159, T164 |
+| R024 | High | Mitigating | Secret Resolver 在 deny/ask 未确认前读取凭据 | ADR 0027；resolver ordering tests | T159, T164 |
+| R025 | Medium | Mitigating | Capability 请求过宽 provider 权限，用户难以判断 | least-privilege review；provider permission mapping | T161, T165 |
+| R026 | Medium | Mitigating | 未来 remote runtime 复用本地 env 假设导致 OAuth 边界混乱 | ADR 0029；remote OAuth profile RFC | T163 |
 
 ## 当前最高优先级风险
 
@@ -49,7 +53,9 @@
 2. R003：任意 URL/outbound policy 实现
 3. R019：确认摘要和 consent receipt 实现
 4. R008：MCP elicitation 兼容性
-5. R006：依赖安装和 workspace 构建验证
+5. R023：token passthrough 禁止的实现验证
+6. R024：Secret Resolver 调用顺序验证
+7. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

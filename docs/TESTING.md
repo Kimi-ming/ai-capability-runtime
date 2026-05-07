@@ -71,6 +71,18 @@ pnpm build
 - audit log 对成功、失败、拒绝都写入
 - redaction/hash 正确
 
+### Secret Resolver
+
+必须覆盖：
+
+- `deny`、`ask declined`、`confirmation_required` 不调用 Secret Resolver
+- dry-run 默认不读取 secret 原值
+- env var 缺失返回 `SecretMissingError`
+- bearer/header placement 不泄露 secret
+- query placement 被拒绝
+- input token 不能替代 manifest auth
+- audit log 只记录 env var 名称和 redacted summary
+
 ### HTTP Executor
 
 必须覆盖：
@@ -145,7 +157,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - Manifest conformance 覆盖合法和非法 manifest。
 - Runtime conformance 证明所有调用经过 validation/policy/confirmation/audit。
 - Consent conformance 证明 `ask` 不会在无确认通道时执行。
-- Security conformance 覆盖 secret redaction、outbound policy、token passthrough 禁止。
+- Security conformance 覆盖 secret redaction、secret resolver ordering、outbound policy、token passthrough 禁止。
 - MCP conformance 覆盖 tools/list、tools/call、confirmation_required 和 tool name collision。
 
 ## CI 目标

@@ -119,6 +119,13 @@
 - T156 P2：MCP elicitation profile RFC。
 - T157 P2：A2A Agent Card mapping RFC。
 - T158 P1：Trust Card generation rules。
+- T159 P0：实现 Secret Resolver V1 env provider。
+- T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
+- T161 P1：实现 least-privilege auth lint。
+- T162 P2：补充 credential lifecycle smoke/runbook 验证。
+- T163 P2：Remote Runtime OAuth profile RFC。
+- T164 P1：实现 secret resolution ordering 和 audit evidence tests。
+- T165 P2：GitHub fine-grained token setup guide。
 
 ### 已完成
 
@@ -135,6 +142,7 @@
 - 已完成：T123 P2：npm package 发布预案。
 - 已完成：T149 P0：补齐演进、发布和兼容性体系。
 - 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
+- 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
 
 
 ---
@@ -1148,6 +1156,32 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - Conformance suite 覆盖 manifest/package/runtime/policy/consent/audit/http/mcp/registry/security。
 - Agentic AI 风险能映射到 OpenCap 控制和后续测试任务。
 - 修正 T124 编号冲突，已完成的演进发布体系改为 T149。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T166 P0：补齐身份、授权和凭据生命周期体系
+
+- [x] T166 P0：补齐身份、授权和凭据生命周期体系
+
+已完成：新增身份与授权模型、Secret Resolver V1、凭据生命周期 Runbook、最小权限评审、OAuth 与远程 Runtime 边界、身份授权调研，并新增 ADR 0027-0029。同步更新 README、INDEX、SYSTEM、DECISIONS、RISKS、TESTING、追踪矩阵、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- V1 下游凭据来源限定为 manifest 声明的 env var。
+- Host/client/input token 不能作为下游 provider token。
+- Secret Resolver 的输入、输出、调用顺序和 dry-run 行为清晰。
+- 凭据创建、配置、轮换、撤销和泄露响应流程清晰。
+- Capability least-privilege review 有可执行检查项。
+- 远程 Runtime OAuth 被明确排除在 V1 主路径外，后续必须走 profile/RFC。
 
 验证：
 

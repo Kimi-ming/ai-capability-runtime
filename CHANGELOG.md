@@ -14,6 +14,7 @@ The project follows Semantic Versioning after `1.0.0`. During `0.x`, public cont
 - GitHub issue and pull request templates.
 - Initial registry examples for developer-tool capabilities.
 - Interoperability profiles, consent model, capability package contract, conformance suite, and agentic risk mapping docs.
+- Identity/auth model, Secret Resolver contract, credential lifecycle runbook, least-privilege review, and remote OAuth boundary docs.
 
 ### Changed
 

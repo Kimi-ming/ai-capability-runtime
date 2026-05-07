@@ -65,22 +65,23 @@ V1 行为：
 
 - CLI interactive：可用终端确认。
 - CLI non-interactive：返回 confirmation required。
-- MCP with elicitation：通过 elicitation 请求用户确认。
-- MCP without elicitation：返回 `confirmation_required` tool result。
+- MCP V1：返回 `confirmation_required` tool result，不依赖 elicitation。
+- MCP elicitation future：只有在 profile/RFC 接受后，才能作为确认通道。
 
 边界：不改变 policy 决策，只解析用户是否同意本次调用。
 
 ### Secret Resolver
 
-输入：manifest auth、environment。
+输入：manifest auth、environment、execution target。
 
-输出：resolved credential handle 或 header fragment。
+输出：resolved credential handle 或 executor-private header fragment。
 
 边界：
 
 - 不把 secret 原文交给 Audit Logger。
 - 不把 MCP client token 透传给下游 API。
-- V1 只支持 env API key/token。
+- V1 只支持 manifest 声明的 env API key/token。
+- dry-run 默认不读取 secret 原值。
 
 ### HTTP Executor
 

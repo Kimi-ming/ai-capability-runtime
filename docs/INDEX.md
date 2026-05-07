@@ -16,6 +16,7 @@ README.md
       -> docs/ecosystem/open-core-boundary.md
       -> docs/ecosystem/registry-distribution.md
       -> docs/ecosystem/interoperability-profiles.md
+      -> docs/ecosystem/oauth-and-remote-runtime-boundary.md
       -> docs/SPEC.md
       -> docs/spec/versioning-and-compatibility.md
       -> docs/spec/manifest-evolution.md
@@ -30,6 +31,7 @@ README.md
       -> docs/design/sdk-and-adapter-boundary.md
       -> docs/design/capability-package-v1.md
       -> docs/design/confirmation-and-consent-v1.md
+      -> docs/design/secret-resolver-v1.md
       -> docs/design/http-execution-v1.md
       -> docs/design/policy-dsl-v1.md
       -> docs/design/audit-log-v1.md
@@ -41,8 +43,11 @@ README.md
       -> docs/security/privacy-retention-v1.md
       -> docs/security/signing-and-provenance-roadmap.md
       -> docs/security/agentic-risk-mapping.md
+      -> docs/security/identity-and-auth-model.md
+      -> docs/security/least-privilege-review.md
       -> docs/operations/release-readiness.md
       -> docs/operations/package-publishing-v1.md
+      -> docs/operations/credential-lifecycle.md
       -> docs/operations/ci-security-baseline.md
       -> docs/operations/observability-metrics-v1.md
       -> docs/community/contributor-journey.md
@@ -95,6 +100,8 @@ README.md
 6. `docs/planning/traceability-matrix.md`
 7. `docs/security/agentic-risk-mapping.md`
 8. `docs/quality/conformance-suite-v1.md`
+9. `docs/security/identity-and-auth-model.md`
+10. `docs/security/least-privilege-review.md`
 
 ### 做发布准备
 
@@ -117,6 +124,7 @@ README.md
 | `docs/ecosystem/open-core-boundary.md` | OSS 与未来 Cloud 边界 | 商业化或托管能力边界变化时 |
 | `docs/ecosystem/registry-distribution.md` | Registry 分发模型 | 安装来源、索引、镜像、签名策略变化时 |
 | `docs/ecosystem/interoperability-profiles.md` | Host/协议互操作 profile | 兼容性声明、Host 记录或协议 profile 变化时 |
+| `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | 远程 Runtime OAuth 边界 | HTTP/Cloud/remote runtime 授权设计变化时 |
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/spec/versioning-and-compatibility.md` | 版本和公共契约兼容性 | 公共契约或版本策略变化时 |
 | `docs/spec/manifest-evolution.md` | Manifest schema 演进 | schema 迁移或新 capability type 变化时 |
@@ -130,6 +138,7 @@ README.md
 | `docs/design/sdk-and-adapter-boundary.md` | SDK 和 Adapter 边界 | SDK/adapters 进入主路径或新增类型时 |
 | `docs/design/capability-package-v1.md` | Capability package 目录契约 | Registry package 结构或 Trust Card 变化时 |
 | `docs/design/confirmation-and-consent-v1.md` | 确认与同意模型 | policy ask、confirmation channel 或 audit receipt 变化时 |
+| `docs/design/secret-resolver-v1.md` | 密钥解析器契约 | auth provider、secret placement 或 resolver 行为变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
 | `docs/design/http-execution-v1.md` | HTTP body/auth/outbound 执行规则 | HTTP manifest 或 executor 变化时 |
 | `docs/design/policy-dsl-v1.md` | 本地 policy 文件格式 | Policy parser/engine 变化时 |
@@ -142,8 +151,11 @@ README.md
 | `docs/security/privacy-retention-v1.md` | 隐私和数据保留 | 日志保留、数据删除或脱敏规则变化时 |
 | `docs/security/signing-and-provenance-roadmap.md` | 签名和 provenance 路线 | 发布签名、SBOM、registry signing 变化时 |
 | `docs/security/agentic-risk-mapping.md` | Agentic 风险映射 | Agentic abuse cases、控制或测试映射变化时 |
+| `docs/security/identity-and-auth-model.md` | 身份与授权模型 | Host、Runtime、provider 或凭据边界变化时 |
+| `docs/security/least-privilege-review.md` | 最小权限评审 | auth scopes、provider 权限或 Registry review 变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
+| `docs/operations/credential-lifecycle.md` | 凭据生命周期 Runbook | token 创建、轮换、撤销或泄露响应流程变化时 |
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
 | `docs/operations/observability-metrics-v1.md` | 可观测性和指标 | audit/metrics/OTel 映射变化时 |
 | `docs/community/contributor-journey.md` | 贡献者路径 | 贡献流程变化时 |
