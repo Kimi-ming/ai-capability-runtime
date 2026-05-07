@@ -46,6 +46,9 @@
 | R024 | High | Mitigating | Secret Resolver 在 deny/ask 未确认前读取凭据 | ADR 0027；resolver ordering tests | T159, T164 |
 | R025 | Medium | Mitigating | Capability 请求过宽 provider 权限，用户难以判断 | least-privilege review；provider permission mapping | T161, T165 |
 | R026 | Medium | Mitigating | 未来 remote runtime 复用本地 env 假设导致 OAuth 边界混乱 | ADR 0029；remote OAuth profile RFC | T163 |
+| R027 | High | Mitigating | 非幂等写操作自动 retry 导致重复副作用 | ADR 0030；retry/idempotency tests | T169, T170 |
+| R028 | High | Mitigating | 请求已发出后 timeout 被误报为未执行 | ADR 0031；unknown outcome audit tests | T168 |
+| R029 | Medium | Mitigating | 执行失败缺少 provider request id、retryAttempt、outcome 等证据 | execution evidence 文档；audit 字段扩展 | T167, T173 |
 
 ## 当前最高优先级风险
 
@@ -55,7 +58,8 @@
 4. R008：MCP elicitation 兼容性
 5. R023：token passthrough 禁止的实现验证
 6. R024：Secret Resolver 调用顺序验证
-7. R006：依赖安装和 workspace 构建验证
+7. R028：timeout unknown outcome 审计语义
+8. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

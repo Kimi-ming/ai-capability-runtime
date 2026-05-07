@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 三十五个子系统
+## 三十九个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -53,6 +53,10 @@ OpenCap 负责能力治理。
 | 凭据生命周期 | 凭据创建/轮换/撤销 | `docs/operations/credential-lifecycle.md` | runbook |
 | 最小权限评审 | 防止过宽 scopes | `docs/security/least-privilege-review.md` | review checklist |
 | 远程 OAuth 边界 | 防止未来授权混乱 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | future auth profile 边界 |
+| 执行语义 | 表达副作用和结果状态 | `docs/design/execution-semantics-v1.md` | outcome/state model |
+| 重试与幂等 | 防止重复副作用 | `docs/design/retry-and-idempotency-v1.md` | retry/idempotency rules |
+| 失败恢复 | 状态未知时指导恢复 | `docs/operations/failure-recovery-runbook.md` | recovery runbook |
+| 执行证据 | 证明调用发生了什么 | `docs/quality/execution-evidence-v1.md` | evidence fields |
 
 ## 系统闭环
 
@@ -108,6 +112,8 @@ Governance Surface
 - `deny` 和未确认的 `ask` 不得解析密钥、不得执行。
 - Host/client/input token 不得作为下游 provider token 使用。
 - V1 secret 只来自 manifest 声明的 env var。
+- V1 不自动重试非幂等写操作。
+- 请求发出后的 timeout 必须标为未知结果，而不是未执行。
 - 写操作审计不可用时不得执行。
 - 任意 URL 能力默认高风险，需要 outbound policy 兜底。
 - Registry trust level 不能覆盖用户本地 policy。
@@ -141,6 +147,8 @@ Governance Surface
 | V1 只实现 env-based downstream credentials | 已接受 |
 | 禁止 token passthrough | 已接受 |
 | 远程 Runtime OAuth 必须走新 Profile | 已接受 |
+| V1 不自动重试非幂等写操作 | 已接受 |
+| 请求发出后的超时是未知结果 | 已接受 |
 
 ## 设计成熟度
 
@@ -177,3 +185,7 @@ Governance Surface
 | 凭据生命周期 | 清晰 | T162/T165 补操作验证和指南 |
 | 最小权限评审 | 清晰 | T161 接入 Registry lint/review |
 | 远程 OAuth 边界 | 清晰 | T163 走 RFC，不进 V1 主路径 |
+| 执行语义 | 清晰 | T167 落入类型和 audit 字段 |
+| 重试与幂等 | 清晰 | T169 走 manifest RFC |
+| 失败恢复 | 清晰 | T172 增加 reconcile hint |
+| 执行证据 | 清晰 | T173 接入 conformance record |

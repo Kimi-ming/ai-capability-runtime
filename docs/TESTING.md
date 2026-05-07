@@ -96,6 +96,11 @@ pnpm build
 - resolved URL 写入审计字段
 - outbound policy 阻断 localhost/private IP/metadata service
 - 审计失败不执行写操作
+- POST/PATCH 写操作默认不自动 retry
+- timeout after request 返回 `unknown_after_timeout`
+- provider request id 进入 audit evidence
+- retryAttempt 记录正确
+- dry-run 不产生 request_started evidence
 
 ### `@opencap/mcp`
 
@@ -159,6 +164,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - Consent conformance 证明 `ask` 不会在无确认通道时执行。
 - Security conformance 覆盖 secret redaction、secret resolver ordering、outbound policy、token passthrough 禁止。
 - MCP conformance 覆盖 tools/list、tools/call、confirmation_required 和 tool name collision。
+- Execution conformance 覆盖 request_started、outcome、retryAttempt、unknown_after_timeout 和 execution evidence redaction。
 
 ## CI 目标
 

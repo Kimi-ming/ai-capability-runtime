@@ -32,6 +32,8 @@ README.md
       -> docs/design/capability-package-v1.md
       -> docs/design/confirmation-and-consent-v1.md
       -> docs/design/secret-resolver-v1.md
+      -> docs/design/execution-semantics-v1.md
+      -> docs/design/retry-and-idempotency-v1.md
       -> docs/design/http-execution-v1.md
       -> docs/design/policy-dsl-v1.md
       -> docs/design/audit-log-v1.md
@@ -48,6 +50,7 @@ README.md
       -> docs/operations/release-readiness.md
       -> docs/operations/package-publishing-v1.md
       -> docs/operations/credential-lifecycle.md
+      -> docs/operations/failure-recovery-runbook.md
       -> docs/operations/ci-security-baseline.md
       -> docs/operations/observability-metrics-v1.md
       -> docs/community/contributor-journey.md
@@ -56,6 +59,7 @@ README.md
       -> docs/community/maintainer-guide.md
       -> docs/quality/quality-gates.md
       -> docs/quality/conformance-suite-v1.md
+      -> docs/quality/execution-evidence-v1.md
       -> docs/planning/v1-implementation-plan.md
       -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
@@ -139,6 +143,8 @@ README.md
 | `docs/design/capability-package-v1.md` | Capability package 目录契约 | Registry package 结构或 Trust Card 变化时 |
 | `docs/design/confirmation-and-consent-v1.md` | 确认与同意模型 | policy ask、confirmation channel 或 audit receipt 变化时 |
 | `docs/design/secret-resolver-v1.md` | 密钥解析器契约 | auth provider、secret placement 或 resolver 行为变化时 |
+| `docs/design/execution-semantics-v1.md` | 执行语义 | outcome、side effect、request_started 或状态模型变化时 |
+| `docs/design/retry-and-idempotency-v1.md` | 重试与幂等 | retry policy、idempotency key 或重复调用规则变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
 | `docs/design/http-execution-v1.md` | HTTP body/auth/outbound 执行规则 | HTTP manifest 或 executor 变化时 |
 | `docs/design/policy-dsl-v1.md` | 本地 policy 文件格式 | Policy parser/engine 变化时 |
@@ -156,6 +162,7 @@ README.md
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
 | `docs/operations/credential-lifecycle.md` | 凭据生命周期 Runbook | token 创建、轮换、撤销或泄露响应流程变化时 |
+| `docs/operations/failure-recovery-runbook.md` | 失败恢复手册 | timeout、unknown outcome、reconcile 或 compensation 流程变化时 |
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
 | `docs/operations/observability-metrics-v1.md` | 可观测性和指标 | audit/metrics/OTel 映射变化时 |
 | `docs/community/contributor-journey.md` | 贡献者路径 | 贡献流程变化时 |
@@ -164,6 +171,7 @@ README.md
 | `docs/community/maintainer-guide.md` | 维护者手册 | review、release、安全响应规则变化时 |
 | `docs/quality/quality-gates.md` | 质量门禁 | milestone gate 或 release gate 变化时 |
 | `docs/quality/conformance-suite-v1.md` | 一致性测试体系 | conformance profile、测试分组或 release evidence 变化时 |
+| `docs/quality/execution-evidence-v1.md` | 执行证据 | audit evidence、request/response/outcome 字段变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

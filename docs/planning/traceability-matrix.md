@@ -95,3 +95,7 @@
 | RQ-047 | 凭据生命周期可操作 | `docs/operations/credential-lifecycle.md` | T162, T165 | runbook smoke + README review |
 | RQ-048 | 最小权限评审可执行 | `docs/security/least-privilege-review.md` | T161, T165 | registry lint/review checklist |
 | RQ-049 | 远程 OAuth 不污染 V1 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | T163 | RFC/ADR review |
+| RQ-050 | 执行语义稳定 | `docs/design/execution-semantics-v1.md` | T167, T168 | outcome/audit tests |
+| RQ-051 | 重试与幂等受控 | `docs/design/retry-and-idempotency-v1.md` | T169, T170 | retry/idempotency tests |
+| RQ-052 | 失败恢复可操作 | `docs/operations/failure-recovery-runbook.md` | T171, T172 | recovery smoke/reconcile review |
+| RQ-053 | 执行证据可证明 | `docs/quality/execution-evidence-v1.md` | T173 | conformance evidence record |

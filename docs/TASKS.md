@@ -126,6 +126,13 @@
 - T163 P2：Remote Runtime OAuth profile RFC。
 - T164 P1：实现 secret resolution ordering 和 audit evidence tests。
 - T165 P2：GitHub fine-grained token setup guide。
+- T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
+- T168 P1：实现 unknown outcome audit tests。
+- T169 P2：Retry/idempotency manifest RFC。
+- T170 P2：实现 retry policy tests。
+- T171 P2：Duplicate invocation detector 草案。
+- T172 P2：Reconcile hint manifest field。
+- T173 P2：Execution evidence conformance record。
 
 ### 已完成
 
@@ -143,6 +150,7 @@
 - 已完成：T149 P0：补齐演进、发布和兼容性体系。
 - 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
 - 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
+- 已完成：T174 P0：补齐执行可靠性、副作用安全和失败恢复体系。
 
 
 ---
@@ -1188,6 +1196,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 ```bash
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T174 P0：补齐执行可靠性、副作用安全和失败恢复体系
+
+- [x] T174 P0：补齐执行可靠性、副作用安全和失败恢复体系
+
+已完成：新增执行语义、重试与幂等、失败恢复、执行证据、执行可靠性调研，并新增 ADR 0030-0031。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- 非幂等写操作 V1 不自动 retry。
+- 请求发出后的 timeout 被建模为 `unknown_after_timeout`。
+- outcome、request_started、retryAttempt、providerRequestId 等执行证据字段清晰。
+- failure recovery runbook 明确请求前失败、请求后失败、5xx/429、timeout unknown 的恢复路径。
+- idempotency key 支持被定义为后续 RFC，不混入 V1 主路径。
+
+验证：
+
+```bash
 git diff --check
 node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
 ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"

@@ -35,13 +35,16 @@
 | 0027 | V1 只实现 env-based downstream credentials | 已接受 | Secret Resolver V1 只读声明 env var。 |
 | 0028 | 禁止 token passthrough | 已接受 | Host/client/input token 不能作为下游 provider token。 |
 | 0029 | 远程 Runtime OAuth 必须走新 Profile | 已接受 | remote runtime auth 不能复用 V1 env 模型。 |
+| 0030 | V1 不自动重试非幂等写操作 | 已接受 | POST/PATCH 写操作默认 max attempts 为 1。 |
+| 0031 | 请求发出后的超时是未知结果 | 已接受 | timeout after request 记录为 `unknown_after_timeout`。 |
 
 ## 下一批需要决策的问题
 
-- 0030：OpenAPI adapter 的人工 review 边界。
-- 0031：Registry index signing 具体格式。
-- 0032：MCP elicitation profile 是否进入 v0.2。
-- 0033：macOS Keychain / external vault provider 是否进入 v0.2。
+- 0032：OpenAPI adapter 的人工 review 边界。
+- 0033：Registry index signing 具体格式。
+- 0034：MCP elicitation profile 是否进入 v0.2。
+- 0035：macOS Keychain / external vault provider 是否进入 v0.2。
+- 0036：Idempotency-Key manifest field 是否进入 v0.2。
 
 ## 决策写法
 
