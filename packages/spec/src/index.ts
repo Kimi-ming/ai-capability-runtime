@@ -7,7 +7,7 @@ export type RiskLevel =
   | "code_execution"
   | "secret_access";
 
-export type CapabilityType = "http" | "mcp" | "local";
+export type CapabilityType = "http";
 
 export interface CapabilityPermission {
   resource: string;

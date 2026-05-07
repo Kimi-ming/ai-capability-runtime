@@ -40,10 +40,8 @@ Examples:
 V1 supports:
 
 - `http`: execute an HTTP request
-- `mcp`: proxy an MCP tool
-- `local`: execute a local command or SDK implementation
 
-Only `http` is expected in the first runtime milestone.
+Future versions may add `mcp` and `local` after separate design review.
 
 ## Input and Output
 
