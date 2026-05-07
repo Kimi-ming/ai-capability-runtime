@@ -1,0 +1,22 @@
+{
+  "name": "@opencap/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "OpenCap developer CLI.",
+  "bin": {
+    "opencap": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

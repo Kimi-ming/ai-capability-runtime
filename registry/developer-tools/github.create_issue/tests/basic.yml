@@ -1,0 +1,16 @@
+name: creates an issue payload
+input:
+  owner: opencap
+  repo: opencap
+  title: Add runtime permission engine
+  body: Track the V1 policy engine implementation.
+  labels:
+    - runtime
+    - v0.1
+expect:
+  request:
+    method: POST
+    url: https://api.github.com/repos/opencap/opencap/issues
+  permission:
+    risk: write
+    decision: ask

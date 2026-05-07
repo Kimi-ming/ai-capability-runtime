@@ -1,0 +1,50 @@
+id: vercel.get_deployments
+name: Get Vercel Deployments
+description: List recent Vercel deployments for a project.
+version: 0.1.0
+type: http
+
+input:
+  type: object
+  required:
+    - project_id
+  properties:
+    project_id:
+      type: string
+      description: Vercel project id.
+    limit:
+      type: number
+      description: Maximum number of deployments to return.
+
+output:
+  type: object
+  properties:
+    deployments:
+      type: array
+      items:
+        type: object
+
+auth:
+  type: api_key
+  provider: vercel
+  env: VERCEL_TOKEN
+  scopes:
+    - deployments:read
+
+permissions:
+  - resource: vercel.deployment
+    action: read
+    risk: read_only
+    confirmation: allow
+
+execution:
+  method: GET
+  url: https://api.vercel.com/v6/deployments?projectId={{project_id}}&limit={{limit}}
+  timeout_ms: 10000
+
+metadata:
+  category: developer-tools
+  maintainer: opencap
+  license: MIT
+  trust_level: experimental
+  homepage: https://vercel.com/docs/rest-api/reference/endpoints/deployments

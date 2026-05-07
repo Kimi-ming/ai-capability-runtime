@@ -1,0 +1,10 @@
+{
+  "name": "@opencap/registry-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Future web surface for browsing OpenCap registry entries.",
+  "scripts": {
+    "build": "echo registry web app is not implemented yet",
+    "lint": "echo registry web app is not implemented yet"
+  }
+}

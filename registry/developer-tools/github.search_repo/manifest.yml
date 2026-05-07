@@ -1,0 +1,54 @@
+id: github.search_repo
+name: Search GitHub Repository
+description: Search code, issues, or repository metadata through the GitHub API.
+version: 0.1.0
+type: http
+
+input:
+  type: object
+  required:
+    - query
+  properties:
+    query:
+      type: string
+      description: GitHub search query.
+    kind:
+      type: string
+      enum:
+        - repositories
+        - issues
+        - code
+      description: Search target.
+
+output:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        type: object
+
+auth:
+  type: api_key
+  provider: github
+  env: GITHUB_TOKEN
+  scopes:
+    - read
+
+permissions:
+  - resource: github.search
+    action: read
+    risk: read_only
+    confirmation: allow
+
+execution:
+  method: GET
+  url: https://api.github.com/search/{{kind}}?q={{query}}
+  timeout_ms: 10000
+
+metadata:
+  category: developer-tools
+  maintainer: opencap
+  license: MIT
+  trust_level: experimental
+  homepage: https://docs.github.com/en/rest/search

@@ -1,0 +1,20 @@
+{
+  "name": "@opencap/mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "MCP bridge for OpenCap runtime.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@opencap/runtime": "workspace:*",
+    "@opencap/spec": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

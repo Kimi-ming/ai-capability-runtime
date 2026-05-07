@@ -1,0 +1,11 @@
+name: searches repositories
+input:
+  query: opencap runtime
+  kind: repositories
+expect:
+  request:
+    method: GET
+    url: https://api.github.com/search/repositories?q=opencap runtime
+  permission:
+    risk: read_only
+    decision: allow

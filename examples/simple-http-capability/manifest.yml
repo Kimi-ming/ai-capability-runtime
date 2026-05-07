@@ -1,0 +1,39 @@
+id: example.simple_http
+name: Simple HTTP Example
+description: Minimal read-only HTTP Capability example.
+version: 0.1.0
+type: http
+
+input:
+  type: object
+  required:
+    - url
+  properties:
+    url:
+      type: string
+
+output:
+  type: object
+  properties:
+    status:
+      type: number
+
+auth:
+  type: none
+
+permissions:
+  - resource: http.request
+    action: read
+    risk: read_only
+    confirmation: allow
+
+execution:
+  method: GET
+  url: "{{url}}"
+  timeout_ms: 5000
+
+metadata:
+  category: examples
+  maintainer: opencap
+  license: MIT
+  trust_level: experimental

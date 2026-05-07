@@ -1,0 +1,23 @@
+{
+  "name": "@opencap/spec",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "OpenCap Capability Manifest schema and validation tools.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "validate": "node src/validate-manifests.mjs ../../registry"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

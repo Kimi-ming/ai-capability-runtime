@@ -1,0 +1,67 @@
+id: github.create_issue
+name: Create GitHub Issue
+description: Create a GitHub issue from structured input.
+version: 0.1.0
+type: http
+
+input:
+  type: object
+  required:
+    - owner
+    - repo
+    - title
+    - body
+  properties:
+    owner:
+      type: string
+      description: GitHub repository owner.
+    repo:
+      type: string
+      description: GitHub repository name.
+    title:
+      type: string
+      description: Issue title.
+    body:
+      type: string
+      description: Issue body.
+    labels:
+      type: array
+      items:
+        type: string
+      description: Optional issue labels.
+
+output:
+  type: object
+  required:
+    - issue_url
+    - issue_number
+  properties:
+    issue_url:
+      type: string
+    issue_number:
+      type: number
+
+auth:
+  type: api_key
+  provider: github
+  env: GITHUB_TOKEN
+  scopes:
+    - issues:write
+
+permissions:
+  - resource: github.issue
+    action: create
+    risk: write
+    confirmation: ask
+
+execution:
+  method: POST
+  url: https://api.github.com/repos/{{owner}}/{{repo}}/issues
+  timeout_ms: 10000
+
+metadata:
+  category: developer-tools
+  maintainer: opencap
+  license: MIT
+  trust_level: experimental
+  homepage: https://docs.github.com/en/rest/issues/issues

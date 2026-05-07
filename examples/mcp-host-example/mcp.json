@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "opencap": {
+      "command": "opencap",
+      "args": ["serve", "--mcp"]
+    }
+  }
+}

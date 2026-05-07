@@ -1,0 +1,10 @@
+{
+  "name": "@opencap/console",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local OpenCap console for installed Capabilities, policies, and logs.",
+  "scripts": {
+    "build": "echo console app is not implemented yet",
+    "lint": "echo console app is not implemented yet"
+  }
+}

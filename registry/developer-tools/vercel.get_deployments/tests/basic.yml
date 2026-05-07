@@ -1,0 +1,11 @@
+name: lists deployments
+input:
+  project_id: prj_123
+  limit: 5
+expect:
+  request:
+    method: GET
+    url: https://api.vercel.com/v6/deployments?projectId=prj_123&limit=5
+  permission:
+    risk: read_only
+    decision: allow

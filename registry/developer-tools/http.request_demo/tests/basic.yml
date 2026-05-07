@@ -1,0 +1,10 @@
+name: performs a read-only request
+input:
+  url: https://example.com
+expect:
+  request:
+    method: GET
+    url: https://example.com
+  permission:
+    risk: read_only
+    decision: allow

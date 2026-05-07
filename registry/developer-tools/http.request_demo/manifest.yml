@@ -1,0 +1,43 @@
+id: http.request_demo
+name: HTTP Request Demo
+description: Demonstrate a safe read-only HTTP request Capability.
+version: 0.1.0
+type: http
+
+input:
+  type: object
+  required:
+    - url
+  properties:
+    url:
+      type: string
+      description: URL to request.
+
+output:
+  type: object
+  properties:
+    status:
+      type: number
+    body:
+      type: object
+
+auth:
+  type: none
+
+permissions:
+  - resource: http.request
+    action: read
+    risk: read_only
+    confirmation: allow
+
+execution:
+  method: GET
+  url: "{{url}}"
+  timeout_ms: 10000
+
+metadata:
+  category: developer-tools
+  maintainer: opencap
+  license: MIT
+  trust_level: experimental
+  homepage: https://opencap.dev

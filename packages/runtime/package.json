@@ -1,0 +1,19 @@
+{
+  "name": "@opencap/runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "OpenCap local and self-hosted Capability runtime.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@opencap/spec": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
