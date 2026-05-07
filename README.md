@@ -122,6 +122,15 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 
 ## 关键文档
 
+- [体系蓝图](docs/SYSTEM.md)
+- [HTTP 执行设计 V1](docs/design/http-execution-v1.md)
+- [Policy DSL V1](docs/design/policy-dsl-v1.md)
+- [Audit Log V1](docs/design/audit-log-v1.md)
+- [Registry Test Format V1](docs/design/registry-test-format-v1.md)
+- [Outbound Policy V1](docs/security/outbound-policy-v1.md)
+- [供应链治理](docs/security/supply-chain-governance.md)
+- [项目运行模型](docs/operations/operating-model.md)
+- [风险和治理补充调研](docs/research/risk-governance-scan-2026-05-07.md)
 - [产品战略](docs/product/strategy.md)
 - [用户场景](docs/product/use-cases.md)
 - [Capability 生命周期](docs/product/capability-lifecycle.md)

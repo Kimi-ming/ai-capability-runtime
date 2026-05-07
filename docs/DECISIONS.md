@@ -13,14 +13,18 @@
 | 0005 | V1 只支持 HTTP Capability | 已接受 | schema 和 Runtime V1 只承认 `type: http`。 |
 | 0006 | V1 审计日志使用 SQLite | 已接受 | SQLite 作为本地默认审计日志存储。 |
 | 0007 | Capability 生命周期治理 | 已接受 | 用生命周期状态串联标准、Registry、Runtime 和审计。 |
+| 0008 | HTTP body 与 API key placement | 已接受 | V1 支持 JSON body 模板和显式 auth placement。 |
+| 0009 | Policy DSL V1 | 已接受 | 使用顶层 `default/rules`，规则按顺序匹配。 |
+| 0010 | 审计不可用时的执行策略 | 已接受 | 非只读调用审计不可用时不执行。 |
+| 0011 | 最小 Outbound Policy | 已接受 | 阻断私网/localhost/metadata，用户输入 host 需显式允许。 |
+| 0012 | Registry Test Format V1 | 已接受 | `tests/*.yml` 使用 validate/dry_run 格式。 |
 
 ## 下一批需要决策的问题
 
-- 0008：`opencap.local/` 默认路径是否可配置？
-- 0009：Policy 文件格式是否使用顶层 `default/rules` 还是 `policies.default/rules`？
-- 0010：HTTP body 模板如何声明？
-- 0011：Registry test format 的稳定字段。
-- 0012：MCP elicitation 兼容策略。
+- 0013：`opencap.local/` 默认路径是否可配置？
+- 0014：MCP elicitation 兼容策略。
+- 0015：版本签名和 npm provenance 策略。
+- 0016：OpenAPI adapter 的人工 review 边界。
 
 ## 决策写法
 

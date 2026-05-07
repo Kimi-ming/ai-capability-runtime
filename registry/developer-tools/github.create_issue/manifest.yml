@@ -45,6 +45,8 @@ auth:
   type: api_key
   provider: github
   env: GITHUB_TOKEN
+  placement:
+    type: bearer
   scopes:
     - issues:write
 
@@ -57,6 +59,12 @@ permissions:
 execution:
   method: POST
   url: https://api.github.com/repos/{{owner}}/{{repo}}/issues
+  body:
+    type: json
+    fields:
+      title: "{{title}}"
+      body: "{{body}}"
+      labels: "{{labels}}"
   timeout_ms: 10000
 
 metadata:

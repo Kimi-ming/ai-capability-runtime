@@ -58,3 +58,9 @@
 | RQ-014 | Runtime 契约清晰 | `docs/design/runtime-contracts.md` | T117, T124 | 类型和单元测试 |
 | RQ-015 | 安全威胁可追踪 | `docs/security/threat-model.md` | T093, T128 | abuse-case smoke tests |
 | RQ-016 | 发布质量可门禁 | `docs/operations/release-readiness.md` | T117, T126 | release checklist |
+
+| RQ-017 | HTTP body/auth 可执行 | `docs/design/http-execution-v1.md` | T053, T130, T131 | schema + executor tests |
+| RQ-018 | Policy DSL 格式稳定 | `docs/design/policy-dsl-v1.md` | T030, T031 | parser/engine tests |
+| RQ-019 | 审计失败策略明确 | `docs/design/audit-log-v1.md` | T040, T132 | audit preflight tests |
+| RQ-020 | 出站网络受控 | `docs/security/outbound-policy-v1.md` | T055, T091, T133 | outbound policy tests |
+| RQ-021 | Registry tests 可验证 | `docs/design/registry-test-format-v1.md` | T004, T080 | registry test schema |

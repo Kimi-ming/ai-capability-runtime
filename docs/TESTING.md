@@ -76,9 +76,12 @@ pnpm build
 - URL 模板渲染
 - GET 请求 dry-run
 - POST JSON body
+- `auth.placement: bearer` 生成 Authorization header 但日志不记录 secret
 - env API key 缺失报错
 - timeout 设置
 - resolved URL 写入审计字段
+- outbound policy 阻断 localhost/private IP/metadata service
+- 审计失败不执行写操作
 
 ### `@opencap/mcp`
 
@@ -141,6 +144,8 @@ opencap serve --mcp
 中期：
 
 - registry manifest validation
+- registry test format validation
+- OpenSSF Scorecard baseline
 - registry mock tests
 - CLI smoke tests
 

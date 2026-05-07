@@ -31,26 +31,27 @@ V1 默认策略是 `ask`。
 ## 策略示例
 
 ```yaml
-policies:
-  default: ask
+default: ask
+rules:
+  - id: allow-read-only
+    match:
+      risk: read_only
+    decision: allow
 
-  rules:
-    - match:
-        risk: read_only
-      decision: allow
+  - id: ask-write
+    match:
+      risk: write
+    decision: ask
 
-    - match:
-        risk: write
-      decision: ask
+  - id: deny-destructive
+    match:
+      risk: destructive
+    decision: deny
 
-    - match:
-        risk: destructive
-      decision: deny
-
-    - match:
-        risk: financial
-      decision: ask
-      require_human_confirmation: true
+  - id: ask-financial
+    match:
+      risk: financial
+    decision: ask
 ```
 
 ## 确认机制

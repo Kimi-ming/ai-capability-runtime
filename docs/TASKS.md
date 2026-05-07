@@ -92,6 +92,10 @@
 - T127 P2：维护 MCP Host 兼容性矩阵。
 - T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
 - T129 P2：补充 Registry 供应链 review 工作流。
+- T130 P1：实现 `auth.placement` schema 测试和 executor 映射。
+- T131 P1：实现 `execution.body.fields` 渲染测试。
+- T132 P1：实现 audit failure preflight 测试。
+- T133 P1：实现 outbound policy 私网阻断测试。
 
 ### 已完成
 
@@ -100,6 +104,7 @@
 - 已完成：T115 P0：体系化项目管理文档。
 - 已完成：T093 P2：威胁模型文档。
 - 已完成：T117 P0：产品、协议、数据、安全体系化蓝图。
+- 已完成：T118 P0：收敛 V1 执行、策略、审计和供应链关键决策。
 
 
 ---
@@ -994,4 +999,29 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
+```
+
+
+### T118 P0：收敛 V1 执行、策略、审计和供应链关键决策
+
+- [x] T118 P0：收敛 V1 执行、策略、审计和供应链关键决策
+
+已完成：新增体系蓝图、HTTP 执行设计、Policy DSL、Audit Log、Registry Test Format、Outbound Policy、供应链治理、项目运行模型和风险治理调研。新增 ADR 0008-0012，并更新 schema、GitHub Capability manifest、风险登记、测试策略、README、INDEX 和任务表。
+
+验收标准：
+
+- R002/R014 被 ADR 明确缓解。
+- R003/R004 进入明确设计和实现任务。
+- `github.create_issue` manifest 具备 JSON body 和 bearer token placement。
+- Policy DSL 格式唯一。
+- Registry test format 有稳定 V1 字段。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```

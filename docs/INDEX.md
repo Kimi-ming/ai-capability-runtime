@@ -7,6 +7,7 @@
 ```text
 README.md
   -> docs/INDEX.md
+      -> docs/SYSTEM.md
       -> docs/product/strategy.md
       -> docs/product/use-cases.md
       -> docs/product/capability-lifecycle.md
@@ -14,9 +15,16 @@ README.md
       -> docs/ARCHITECTURE.md
       -> docs/design/domain-model.md
       -> docs/design/runtime-contracts.md
+      -> docs/design/http-execution-v1.md
+      -> docs/design/policy-dsl-v1.md
+      -> docs/design/audit-log-v1.md
+      -> docs/design/registry-test-format-v1.md
       -> docs/protocols/protocol-positioning.md
       -> docs/security/threat-model.md
+      -> docs/security/outbound-policy-v1.md
+      -> docs/security/supply-chain-governance.md
       -> docs/operations/release-readiness.md
+      -> docs/operations/operating-model.md
       -> docs/TASKS.md
       -> docs/TESTING.md
       -> docs/HANDOFF.md
@@ -32,7 +40,8 @@ README.md
 ### 第一次了解项目
 
 1. `README.md`
-2. `docs/introduction.md`
+2. `docs/SYSTEM.md`
+3. `docs/introduction.md`
 3. `docs/product/strategy.md`
 4. `docs/product/use-cases.md`
 5. `docs/SPEC.md`
@@ -68,6 +77,7 @@ README.md
 
 | 文档 | 职责 | 什么时候更新 |
 | --- | --- | --- |
+| `docs/SYSTEM.md` | 全局体系蓝图和子系统地图 | 新增子系统或关键不变量变化时 |
 | `docs/product/strategy.md` | 产品定位、战略边界、系统分层 | 定位或商业/生态判断变化时 |
 | `docs/product/use-cases.md` | 用户角色、场景、用户任务 | 用户场景或验收口径变化时 |
 | `docs/product/capability-lifecycle.md` | Capability 治理状态机 | install/review/audit 状态变化时 |
@@ -75,9 +85,16 @@ README.md
 | `docs/ARCHITECTURE.md` | 模块边界、数据流、约束 | 包职责、数据流、边界变化时 |
 | `docs/design/domain-model.md` | 领域对象和不变量 | 类型、状态对象、日志字段变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
+| `docs/design/http-execution-v1.md` | HTTP body/auth/outbound 执行规则 | HTTP manifest 或 executor 变化时 |
+| `docs/design/policy-dsl-v1.md` | 本地 policy 文件格式 | Policy parser/engine 变化时 |
+| `docs/design/audit-log-v1.md` | 审计日志 schema 和失败策略 | 日志字段、脱敏或存储变化时 |
+| `docs/design/registry-test-format-v1.md` | Registry tests 格式 | tests schema 或 CI 行为变化时 |
 | `docs/protocols/protocol-positioning.md` | 外部协议定位 | MCP/A2A/OpenAPI/App SDK 策略变化时 |
 | `docs/security/threat-model.md` | 威胁模型和控制措施 | 新攻击面、新安全控制、风险变化时 |
+| `docs/security/outbound-policy-v1.md` | 出站网络安全策略 | HTTP 网络边界变化时 |
+| `docs/security/supply-chain-governance.md` | Registry 和发布供应链治理 | CI、review、release provenance 变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
+| `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |
 | `docs/HANDOFF.md` | 当前状态和下一步 | 每次任务结束时 |

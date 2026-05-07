@@ -76,7 +76,11 @@ auth:
   type: api_key
   provider: github
   env: GITHUB_TOKEN
+  placement:
+    type: bearer
 ```
+
+`api_key` 的 `placement` 必须显式声明。V1 支持 `bearer` 和 `header`，不支持 query token。
 
 ## 权限
 

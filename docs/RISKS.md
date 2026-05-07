@@ -21,9 +21,9 @@
 | ID | 等级 | 状态 | 风险 | 缓解措施 | 关联任务 |
 | --- | --- | --- | --- | --- | --- |
 | R001 | High | Mitigating | MCP STDIO 下 `ask` 如果用终端 prompt 会破坏协议 | ADR 0004；MCP 无 elicitation 时返回 `confirmation_required` | T032, T073 |
-| R002 | High | Open | HTTP request body 未设计，`github.create_issue` 无法真实发送正确 body | 设计 `execution.body` 或默认 body 策略 | T053 |
-| R003 | High | Open | `http.request_demo` 接受任意 URL，可能变成 SSRF/内网探测工具 | 标记 unsafe-by-default；增加 outbound policy | T055, T091 |
-| R004 | High | Open | 审计日志可能记录敏感输入或 token | redaction/hash helper；日志测试 | T041, T092 |
+| R002 | High | Mitigated | HTTP request body 未设计，`github.create_issue` 无法真实发送正确 body | ADR 0008；`execution.body.fields` 已写入设计和示例 manifest | T053 |
+| R003 | High | Mitigating | `http.request_demo` 接受任意 URL，可能变成 SSRF/内网探测工具 | ADR 0011；新增 outbound policy 文档，待实现阻断 | T055, T091 |
+| R004 | High | Mitigating | 审计日志可能记录敏感输入或 token | 新增 Audit Log V1 设计，待实现 redaction/hash 测试 | T041, T092 |
 | R005 | Medium | Mitigated | schema 曾半支持 mcp/local，与 V1 实现范围不一致 | ADR 0005；schema 已收敛 HTTP-only | T003 |
 | R006 | Medium | Open | 依赖未安装，pnpm workspace 可能首次 build/test 暴露问题 | M1 前安装依赖并提交 lockfile | T100 |
 | R007 | Medium | Mitigated | SQLite 作为 audit log 是否合适尚未正式决策 | ADR 0006 已接受；V1 使用 SQLite | T040, T042 |
@@ -33,15 +33,14 @@
 | R011 | Low | Open | 中文文档保留英文术语可能不统一 | 增加术语表 | T116 |
 | R012 | Low | Open | 任务清单很长，维护成本升高 | 使用 traceability matrix 和 milestone gates 管理 | T111 |
 | R013 | Medium | Open | Capability 生命周期没有落入 CLI 输出，后续可能退化成目录项目 | `docs/product/capability-lifecycle.md`；后续实现 Trust Card/List 字段 | T125 |
-| R014 | High | Open | 审计日志写入失败时是否阻断写操作未实现，可能导致不可追踪执行 | release gate 要求明确；安全默认写操作审计失败不执行 | T040, T128 |
+| R014 | High | Mitigated | 审计日志写入失败时是否阻断写操作未实现，可能导致不可追踪执行 | ADR 0010：非只读调用审计不可用时不执行 | T040, T128 |
 
 ## 当前最高优先级风险
 
-1. R002：HTTP body 设计
-2. R004：审计日志脱敏
-3. R014：审计不可用时的执行策略
-4. R008：MCP elicitation 兼容性
-5. R003：任意 URL 风险
+1. R004：审计日志脱敏实现
+2. R003：任意 URL/outbound policy 实现
+3. R008：MCP elicitation 兼容性
+4. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 
