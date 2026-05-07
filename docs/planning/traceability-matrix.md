@@ -79,9 +79,14 @@
 | RQ-032 | 可观测性边界清晰 | `docs/operations/observability-metrics-v1.md` | T143 | audit-derived metrics |
 | RQ-033 | OSS/Cloud 边界清晰 | `docs/ecosystem/open-core-boundary.md` | T120 | ADR 0017 |
 
-| RQ-034 | 版本兼容策略明确 | `docs/spec/versioning-and-compatibility.md` | T122, T124 | CHANGELOG/release checks |
-| RQ-035 | Manifest 演进可迁移 | `docs/spec/manifest-evolution.md` | T124 | schema migration review |
+| RQ-034 | 版本兼容策略明确 | `docs/spec/versioning-and-compatibility.md` | T122, T149 | CHANGELOG/release checks |
+| RQ-035 | Manifest 演进可迁移 | `docs/spec/manifest-evolution.md` | T149 | schema migration review |
 | RQ-036 | Registry 分发可追溯 | `docs/ecosystem/registry-distribution.md` | T147 | registry index RFC |
 | RQ-037 | SDK/Adapter 不污染 V1 主路径 | `docs/design/sdk-and-adapter-boundary.md` | T145, T146 | RFC/ADR review |
 | RQ-038 | 包发布供应链清晰 | `docs/operations/package-publishing-v1.md` | T123, T148 | trusted publishing workflow |
 | RQ-039 | 质量门禁可执行 | `docs/quality/quality-gates.md` | T126 | release checklist |
+| RQ-040 | Capability package 结构稳定 | `docs/design/capability-package-v1.md` | T151, T158 | package lint + trust card review |
+| RQ-041 | 用户确认可审计 | `docs/design/confirmation-and-consent-v1.md` | T152, T073 | consent receipt + confirmation_required tests |
+| RQ-042 | 互操作声明可证明 | `docs/ecosystem/interoperability-profiles.md` | T154, T156, T157 | host evidence records |
+| RQ-043 | 一致性测试成体系 | `docs/quality/conformance-suite-v1.md` | T153 | conformance record checks |
+| RQ-044 | Agentic 风险转控制和测试 | `docs/security/agentic-risk-mapping.md` | T128, T155 | abuse-case smoke tests |

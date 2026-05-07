@@ -19,7 +19,7 @@ node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/pac
 ### YAML 解析检查
 
 ```bash
-ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```
 
 ## 依赖安装后应支持的校验
@@ -135,6 +135,18 @@ opencap serve --mcp
 - `github.create_issue` 在 write policy 下不会静默执行
 - MCP 无 elicitation 时返回 `confirmation_required`
 - 审计日志记录未执行原因
+
+## Conformance Suite 目标
+
+V1 后续要把普通测试提升为 profile-driven conformance。测试分组见 `docs/quality/conformance-suite-v1.md`。
+
+最小要求：
+
+- Manifest conformance 覆盖合法和非法 manifest。
+- Runtime conformance 证明所有调用经过 validation/policy/confirmation/audit。
+- Consent conformance 证明 `ask` 不会在无确认通道时执行。
+- Security conformance 覆盖 secret redaction、outbound policy、token passthrough 禁止。
+- MCP conformance 覆盖 tools/list、tools/call、confirmation_required 和 tool name collision。
 
 ## CI 目标
 

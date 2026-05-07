@@ -15,6 +15,7 @@ README.md
       -> docs/ecosystem/host-compatibility-matrix.md
       -> docs/ecosystem/open-core-boundary.md
       -> docs/ecosystem/registry-distribution.md
+      -> docs/ecosystem/interoperability-profiles.md
       -> docs/SPEC.md
       -> docs/spec/versioning-and-compatibility.md
       -> docs/spec/manifest-evolution.md
@@ -27,6 +28,8 @@ README.md
       -> docs/design/mcp-interface-v1.md
       -> docs/design/error-model-v1.md
       -> docs/design/sdk-and-adapter-boundary.md
+      -> docs/design/capability-package-v1.md
+      -> docs/design/confirmation-and-consent-v1.md
       -> docs/design/http-execution-v1.md
       -> docs/design/policy-dsl-v1.md
       -> docs/design/audit-log-v1.md
@@ -37,6 +40,7 @@ README.md
       -> docs/security/supply-chain-governance.md
       -> docs/security/privacy-retention-v1.md
       -> docs/security/signing-and-provenance-roadmap.md
+      -> docs/security/agentic-risk-mapping.md
       -> docs/operations/release-readiness.md
       -> docs/operations/package-publishing-v1.md
       -> docs/operations/ci-security-baseline.md
@@ -46,6 +50,7 @@ README.md
       -> docs/community/rfc-process.md
       -> docs/community/maintainer-guide.md
       -> docs/quality/quality-gates.md
+      -> docs/quality/conformance-suite-v1.md
       -> docs/planning/v1-implementation-plan.md
       -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
@@ -88,6 +93,8 @@ README.md
 4. `docs/DECISIONS.md`
 5. `docs/RISKS.md`
 6. `docs/planning/traceability-matrix.md`
+7. `docs/security/agentic-risk-mapping.md`
+8. `docs/quality/conformance-suite-v1.md`
 
 ### 做发布准备
 
@@ -109,6 +116,7 @@ README.md
 | `docs/ecosystem/host-compatibility-matrix.md` | Host 兼容性记录 | MCP Host 测试结果变化时 |
 | `docs/ecosystem/open-core-boundary.md` | OSS 与未来 Cloud 边界 | 商业化或托管能力边界变化时 |
 | `docs/ecosystem/registry-distribution.md` | Registry 分发模型 | 安装来源、索引、镜像、签名策略变化时 |
+| `docs/ecosystem/interoperability-profiles.md` | Host/协议互操作 profile | 兼容性声明、Host 记录或协议 profile 变化时 |
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/spec/versioning-and-compatibility.md` | 版本和公共契约兼容性 | 公共契约或版本策略变化时 |
 | `docs/spec/manifest-evolution.md` | Manifest schema 演进 | schema 迁移或新 capability type 变化时 |
@@ -120,6 +128,8 @@ README.md
 | `docs/design/mcp-interface-v1.md` | MCP tools 映射和确认策略 | MCP bridge 行为变化时 |
 | `docs/design/error-model-v1.md` | 错误分类和映射 | 错误类型或 exit code 变化时 |
 | `docs/design/sdk-and-adapter-boundary.md` | SDK 和 Adapter 边界 | SDK/adapters 进入主路径或新增类型时 |
+| `docs/design/capability-package-v1.md` | Capability package 目录契约 | Registry package 结构或 Trust Card 变化时 |
+| `docs/design/confirmation-and-consent-v1.md` | 确认与同意模型 | policy ask、confirmation channel 或 audit receipt 变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
 | `docs/design/http-execution-v1.md` | HTTP body/auth/outbound 执行规则 | HTTP manifest 或 executor 变化时 |
 | `docs/design/policy-dsl-v1.md` | 本地 policy 文件格式 | Policy parser/engine 变化时 |
@@ -131,6 +141,7 @@ README.md
 | `docs/security/supply-chain-governance.md` | Registry 和发布供应链治理 | CI、review、release provenance 变化时 |
 | `docs/security/privacy-retention-v1.md` | 隐私和数据保留 | 日志保留、数据删除或脱敏规则变化时 |
 | `docs/security/signing-and-provenance-roadmap.md` | 签名和 provenance 路线 | 发布签名、SBOM、registry signing 变化时 |
+| `docs/security/agentic-risk-mapping.md` | Agentic 风险映射 | Agentic abuse cases、控制或测试映射变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
@@ -140,6 +151,7 @@ README.md
 | `docs/community/rfc-process.md` | RFC 流程 | 设计治理流程变化时 |
 | `docs/community/maintainer-guide.md` | 维护者手册 | review、release、安全响应规则变化时 |
 | `docs/quality/quality-gates.md` | 质量门禁 | milestone gate 或 release gate 变化时 |
+| `docs/quality/conformance-suite-v1.md` | 一致性测试体系 | conformance profile、测试分组或 release evidence 变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

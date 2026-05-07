@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 二十五个子系统
+## 三十个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -43,6 +43,11 @@ OpenCap 负责能力治理。
 | Registry 分发 | 可验证安装来源 | `docs/ecosystem/registry-distribution.md` | Git-based V1 registry |
 | SDK/Adapter 边界 | 防止范围膨胀 | `docs/design/sdk-and-adapter-boundary.md` | V1 非阻塞边界 |
 | 发布供应链 | 可验证发布 | `docs/operations/package-publishing-v1.md` | npm/provenance 预案 |
+| Capability 包 | 稳定 Registry 单元 | `docs/design/capability-package-v1.md` | package 目录契约 |
+| 确认与同意 | 可审计授权语义 | `docs/design/confirmation-and-consent-v1.md` | consent request/receipt |
+| 互操作 Profile | 兼容性证据化 | `docs/ecosystem/interoperability-profiles.md` | MCP/Registry profile |
+| 一致性测试 | 生态可验证 | `docs/quality/conformance-suite-v1.md` | conformance groups |
+| Agentic 风险 | 安全风险转测试 | `docs/security/agentic-risk-mapping.md` | risk-to-control map |
 
 ## 系统闭环
 
@@ -77,6 +82,7 @@ Trusted Computing Base V1
 - runtime invoke pipeline
 - policy engine
 - confirmation handler
+- consent request/receipt builder
 - secret resolver
 - audit logger
 
@@ -121,6 +127,10 @@ Governance Surface
 | V1 Registry 默认 Git-based，本地 install 不做远程下载 | 已接受 |
 | SDK/adapters 不阻塞 V1，且不能绕过 validation/policy/audit | 已接受 |
 | npm 发布优先 trusted publishing 和 provenance | 已接受 |
+| Consent 是 Runtime 拥有的可审计对象 | 已接受 |
+| 兼容性声明必须绑定 Interoperability Profile | 已接受 |
+| Capability Package V1 使用目录契约 | 已接受 |
+| Agentic 风险必须映射为控制和测试 | 已接受 |
 
 ## 设计成熟度
 
@@ -147,3 +157,8 @@ Governance Surface
 | Registry 分发 | 清晰 | V1 保持 Git-based |
 | SDK/Adapter | 边界清晰 | V1 不阻塞主路径 |
 | 发布供应链 | 清晰 | T123 制定 npm trusted publishing workflow |
+| Capability 包 | 清晰 | T151 做 package lint |
+| 确认与同意 | 清晰 | T152 落入 audit 字段和测试 |
+| 互操作 Profile | 清晰 | T154 维护 evidence records |
+| 一致性测试 | 清晰 | T153 建立 suite skeleton |
+| Agentic 风险 | 清晰 | T155 转成 abuse-case smoke tests |

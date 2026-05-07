@@ -123,6 +123,11 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 ## 关键文档
 
 - [体系蓝图](docs/SYSTEM.md)
+- [互操作 Profiles](docs/ecosystem/interoperability-profiles.md)
+- [确认与同意模型 V1](docs/design/confirmation-and-consent-v1.md)
+- [Capability Package V1](docs/design/capability-package-v1.md)
+- [Conformance Suite V1](docs/quality/conformance-suite-v1.md)
+- [Agentic 风险映射](docs/security/agentic-risk-mapping.md)
 - [版本和兼容性策略](docs/spec/versioning-and-compatibility.md)
 - [Manifest 演进策略](docs/spec/manifest-evolution.md)
 - [Registry 分发模型](docs/ecosystem/registry-distribution.md)

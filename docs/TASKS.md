@@ -111,6 +111,14 @@
 - T146 P2：OpenAPI adapter RFC 草案。
 - T147 P2：Registry index signing RFC 草案。
 - T148 P1：npm trusted publishing workflow 草案。
+- T151 P1：实现 Capability Package lint。
+- T152 P1：把 consent receipt 落入 audit log 字段和测试。
+- T153 P2：建立 conformance suite skeleton。
+- T154 P2：维护 Host compatibility evidence records。
+- T155 P2：把 Agentic abuse cases 转成 smoke tests。
+- T156 P2：MCP elicitation profile RFC。
+- T157 P2：A2A Agent Card mapping RFC。
+- T158 P1：Trust Card generation rules。
 
 ### 已完成
 
@@ -125,7 +133,8 @@
 - 已完成：T121 P1：CHANGELOG。
 - 已完成：T122 P2：版本策略。
 - 已完成：T123 P2：npm package 发布预案。
-- 已完成：T124 P0：补齐演进、发布和兼容性体系。
+- 已完成：T149 P0：补齐演进、发布和兼容性体系。
+- 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
 
 
 ---
@@ -136,12 +145,12 @@
 2. T002 spec validator API
 3. T010 local state helper
 4. T011 install/list
-5. T020 policy engine
-6. T030 audit log
-7. T040 HTTP executor dry-run
-8. T050 `opencap invoke`
-9. T060 MCP bridge
-10. T070 GitHub issue demo
+5. T020 Installed Capability Loader
+6. T030 Policy parser/engine
+7. T040 Audit log
+8. T050 HTTP executor dry-run
+9. T060 `opencap invoke`
+10. T070 MCP bridge
 
 ---
 
@@ -1099,9 +1108,9 @@ ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'y
 ```
 
 
-### T124 P0：补齐演进、发布和兼容性体系
+### T149 P0：补齐演进、发布和兼容性体系
 
-- [x] T124 P0：补齐演进、发布和兼容性体系
+- [x] T149 P0：补齐演进、发布和兼容性体系
 
 已完成：新增版本和兼容性策略、Manifest 演进策略、Registry 分发模型、SDK/Adapter 边界、包发布策略、签名和 provenance 路线图、质量门禁、维护者手册、发布调研，并新增 CHANGELOG。新增 ADR 0019-0022。
 
@@ -1113,6 +1122,32 @@ ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'y
 - SDK/adapters 不阻塞 V1 主路径。
 - npm trusted publishing/provenance 方向明确。
 - 质量门禁覆盖 schema/CLI/state/policy/audit/HTTP/MCP/registry/release。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系
+
+- [x] T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系
+
+已完成：新增互操作 Profiles、确认与同意模型、Capability Package V1、一致性测试体系、Agentic 风险映射、互操作与 Agentic security 调研，并新增 ADR 0023-0026。同步更新 README、INDEX、SYSTEM、DECISIONS、RISKS、TESTING、追踪矩阵和 HANDOFF。
+
+验收标准：
+
+- 兼容性声明必须绑定 profile 和 evidence record。
+- `ask` 的确认语义被建模为 Runtime-owned consent request/receipt。
+- Registry 中 Capability package 的最小目录契约清晰。
+- Conformance suite 覆盖 manifest/package/runtime/policy/consent/audit/http/mcp/registry/security。
+- Agentic AI 风险能映射到 OpenCap 控制和后续测试任务。
+- 修正 T124 编号冲突，已完成的演进发布体系改为 T149。
 
 验证：
 

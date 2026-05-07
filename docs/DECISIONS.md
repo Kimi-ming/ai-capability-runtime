@@ -28,12 +28,17 @@
 | 0020 | 包发布和 Provenance 策略 | 已接受 | 优先 npm trusted publishing 和 provenance。 |
 | 0021 | Registry 分发模型 | 已接受 | V1 Git-based，本地 install 不做远程下载。 |
 | 0022 | SDK 和 Adapter 边界 | 已接受 | SDK/adapters 不阻塞 V1，不绕过治理管线。 |
+| 0023 | Consent 是 Runtime 拥有的可审计对象 | 已接受 | ask 必须产生 consent request/receipt。 |
+| 0024 | 兼容性声明必须绑定 Interoperability Profile | 已接受 | profile、Host、版本和证据一起记录。 |
+| 0025 | Capability Package V1 使用目录契约 | 已接受 | registry package 必须有 manifest、README、tests。 |
+| 0026 | Agentic 风险必须映射为控制和测试 | 已接受 | 高优先级风险进入 negative tests/conformance。 |
 
 ## 下一批需要决策的问题
 
-- 0023：OpenAPI adapter 的人工 review 边界。
-- 0024：未来远程 Runtime 的 OAuth authorization 边界。
-- 0025：Registry index signing 具体格式。
+- 0027：OpenAPI adapter 的人工 review 边界。
+- 0028：未来远程 Runtime 的 OAuth authorization 边界。
+- 0029：Registry index signing 具体格式。
+- 0030：MCP elicitation profile 是否进入 v0.2。
 
 ## 决策写法
 
