@@ -81,3 +81,9 @@ T001：让 opencap validate 调用真实 schema 校验
 3. 添加 validate 单元测试和 CLI smoke test。
 4. 运行 `pnpm install && pnpm validate && pnpm test`。
 5. 更新 `docs/TASKS.md` 和本文件。
+
+## 本轮体系化补充
+
+已新增产品战略、用户场景、Capability 生命周期、领域模型、Runtime 契约、协议定位、威胁模型、发布门禁和协议生态补充调研。新增 ADR 0006/0007，并更新风险登记、任务表、README、INDEX、SPEC、ARCHITECTURE 和追踪矩阵。
+
+当前下一步仍然是 T001：让 `opencap validate` 调用真实 schema 校验。实现时应优先对齐 `docs/design/runtime-contracts.md` 和 `docs/product/capability-lifecycle.md`。

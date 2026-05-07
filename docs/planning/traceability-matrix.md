@@ -48,3 +48,13 @@
 | M4 HTTP Invoke | F6 | T050-T055, T060-T062 |
 | M5 MCP Bridge | F8 | T021, T070-T074 |
 | M6 GitHub Demo | F1-F8 | M1-M5 全部完成 |
+
+## 体系化补充追踪
+
+| 需求 | 说明 | 文档 | 任务 | 验证 |
+| --- | --- | --- | --- | --- |
+| RQ-012 | Capability 生命周期可治理 | `docs/product/capability-lifecycle.md` | T117, T125 | `check_docs.py`，后续 CLI list 测试 |
+| RQ-013 | 协议边界清晰 | `docs/protocols/protocol-positioning.md` | T117, T127 | 文档审查，后续 Host matrix |
+| RQ-014 | Runtime 契约清晰 | `docs/design/runtime-contracts.md` | T117, T124 | 类型和单元测试 |
+| RQ-015 | 安全威胁可追踪 | `docs/security/threat-model.md` | T093, T128 | abuse-case smoke tests |
+| RQ-016 | 发布质量可门禁 | `docs/operations/release-readiness.md` | T117, T126 | release checklist |

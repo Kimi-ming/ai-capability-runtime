@@ -196,3 +196,14 @@ V1 完成必须满足：
 - 至少有 validate/install/list/invoke/logs/serve 命令
 - CI 能跑 schema 和核心测试
 - README 和 `docs/HANDOFF.md` 反映当前真实状态
+
+## 系统化补充文档
+
+实现 V1 时还应参考：
+
+- `docs/product/strategy.md`：为什么 OpenCap 只做能力层和 Runtime 治理。
+- `docs/product/use-cases.md`：角色、场景和主路径验收。
+- `docs/product/capability-lifecycle.md`：Capability 从 Draft 到 Audited 的治理状态。
+- `docs/design/domain-model.md`：核心领域对象和不变量。
+- `docs/design/runtime-contracts.md`：Runtime 模块之间的输入输出契约。
+- `docs/security/threat-model.md`：安全资产、攻击路径和 V1 控制措施。

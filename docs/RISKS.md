@@ -26,19 +26,22 @@
 | R004 | High | Open | 审计日志可能记录敏感输入或 token | redaction/hash helper；日志测试 | T041, T092 |
 | R005 | Medium | Mitigated | schema 曾半支持 mcp/local，与 V1 实现范围不一致 | ADR 0005；schema 已收敛 HTTP-only | T003 |
 | R006 | Medium | Open | 依赖未安装，pnpm workspace 可能首次 build/test 暴露问题 | M1 前安装依赖并提交 lockfile | T100 |
-| R007 | Medium | Open | SQLite 作为 audit log 是否合适尚未正式决策 | 写 ADR 0006 | Q002 |
+| R007 | Medium | Mitigated | SQLite 作为 audit log 是否合适尚未正式决策 | ADR 0006 已接受；V1 使用 SQLite | T040, T042 |
 | R008 | Medium | Open | MCP SDK/Host 对 elicitation 支持不确定 | 技术 spike，确认 SDK 和目标 Host 行为 | T070, T073 |
 | R009 | Medium | Open | CLI install 覆盖本地目录可能误删用户状态 | 默认拒绝覆盖，`--force` 明确确认 | T011 |
 | R010 | Medium | Open | tool name 映射可能冲突 | 启动时 collision detection，保留原始 id | T021, T071 |
 | R011 | Low | Open | 中文文档保留英文术语可能不统一 | 增加术语表 | T116 |
 | R012 | Low | Open | 任务清单很长，维护成本升高 | 使用 traceability matrix 和 milestone gates 管理 | T111 |
+| R013 | Medium | Open | Capability 生命周期没有落入 CLI 输出，后续可能退化成目录项目 | `docs/product/capability-lifecycle.md`；后续实现 Trust Card/List 字段 | T125 |
+| R014 | High | Open | 审计日志写入失败时是否阻断写操作未实现，可能导致不可追踪执行 | release gate 要求明确；安全默认写操作审计失败不执行 | T040, T128 |
 
 ## 当前最高优先级风险
 
 1. R002：HTTP body 设计
 2. R004：审计日志脱敏
-3. R008：MCP elicitation 兼容性
-4. R003：任意 URL 风险
+3. R014：审计不可用时的执行策略
+4. R008：MCP elicitation 兼容性
+5. R003：任意 URL 风险
 
 ## 风险处理规则
 

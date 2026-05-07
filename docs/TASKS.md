@@ -86,12 +86,20 @@
 - T114 P2：新增架构图。
 - T122 P2：版本策略。
 - T123 P2：npm package 发布预案。
+- T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
+- T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
+- T126 P1：把发布门禁整理成可执行 release checklist。
+- T127 P2：维护 MCP Host 兼容性矩阵。
+- T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
+- T129 P2：补充 Registry 供应链 review 工作流。
 
 ### 已完成
 
 - 已完成：T110 P0：中文文档体系。
 - 已完成：T111 P0：开发任务体系。
 - 已完成：T115 P0：体系化项目管理文档。
+- 已完成：T093 P2：威胁模型文档。
+- 已完成：T117 P0：产品、协议、数据、安全体系化蓝图。
 
 
 ---
@@ -950,5 +958,40 @@ V1 handler：
 ```bash
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+git diff --check
+```
+
+
+### T093 P2：威胁模型文档
+
+- [x] T093 P2：威胁模型文档
+
+已完成：新增 `docs/security/threat-model.md`，覆盖资产、信任边界、攻击者模型、主要威胁、Abuse Cases、安全不变量和关联任务。
+
+验证：
+
+```bash
+git diff --check
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+```
+
+### T117 P0：产品、协议、数据、安全体系化蓝图
+
+- [x] T117 P0：产品、协议、数据、安全体系化蓝图
+
+已完成：新增产品战略、用户场景、Capability 生命周期、领域模型、Runtime 契约、协议定位、发布门禁和协议生态补充调研，并将它们接入 README、INDEX、SPEC、ARCHITECTURE、DECISIONS、RISKS。
+
+验收标准：
+
+- 新文档能回答 OpenCap 的定位、用户、对象、生命周期、运行时边界、协议边界、安全边界和发布标准。
+- README 和 `docs/INDEX.md` 能导航到新增文档。
+- ADR 索引包含新增决策。
+- 风险登记反映 SQLite 和生命周期相关风险状态。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```

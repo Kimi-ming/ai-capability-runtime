@@ -164,3 +164,13 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 - OpenAPI adapter
 - Console UI
 - self-hosted registry
+
+## 体系化设计文档
+
+架构实现时优先对齐以下文档：
+
+- `docs/design/domain-model.md`：对象、关系和不变量。
+- `docs/design/runtime-contracts.md`：Runtime 调用管线和模块契约。
+- `docs/protocols/protocol-positioning.md`：MCP、A2A、OpenAPI 和 Apps SDK 的边界。
+- `docs/security/threat-model.md`：安全边界和威胁控制。
+- `docs/operations/release-readiness.md`：发布门禁和质量要求。

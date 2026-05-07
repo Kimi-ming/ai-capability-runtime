@@ -11,15 +11,16 @@
 | 0003 | 执行前必须经过策略 | 已接受 | 所有调用先 policy 后 executor。 |
 | 0004 | MCP 确认策略 | 已接受 | MCP STDIO 不使用终端 prompt。 |
 | 0005 | V1 只支持 HTTP Capability | 已接受 | schema 和 Runtime V1 只承认 `type: http`。 |
+| 0006 | V1 审计日志使用 SQLite | 已接受 | SQLite 作为本地默认审计日志存储。 |
+| 0007 | Capability 生命周期治理 | 已接受 | 用生命周期状态串联标准、Registry、Runtime 和审计。 |
 
 ## 下一批需要决策的问题
 
-- 0006：Audit log 存储使用 SQLite 还是 append-only JSONL？
-- 0007：`opencap.local/` 默认路径是否可配置？
-- 0008：Policy 文件格式是否使用顶层 `default/rules` 还是 `policies.default/rules`？
-- 0009：HTTP body 模板如何声明？
-- 0010：Registry test format 的稳定字段。
-- 0011：MCP elicitation 兼容策略。
+- 0008：`opencap.local/` 默认路径是否可配置？
+- 0009：Policy 文件格式是否使用顶层 `default/rules` 还是 `policies.default/rules`？
+- 0010：HTTP body 模板如何声明？
+- 0011：Registry test format 的稳定字段。
+- 0012：MCP elicitation 兼容策略。
 
 ## 决策写法
 
