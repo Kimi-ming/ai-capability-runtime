@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 十个子系统
+## 十五个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -28,6 +28,11 @@ OpenCap 负责能力治理。
 | Audit Log | 事后追踪 | `docs/design/audit-log-v1.md` | SQLite log schema |
 | Registry 治理 | 供应链入口 | `docs/security/supply-chain-governance.md` | review + CI + trust |
 | 发布运营 | 可持续推进 | `docs/operations/operating-model.md` | 任务、ADR、风险、发布门禁 |
+| CLI 契约 | 稳定开发者体验 | `docs/design/cli-contract-v1.md` | 命令/输出/exit code |
+| 本地状态 | 可测试可删除状态 | `docs/design/local-state-v1.md` | state dir 结构 |
+| MCP 接口 | Host 兼容表面 | `docs/design/mcp-interface-v1.md` | tools/list + tools/call |
+| 错误模型 | 一致失败语义 | `docs/design/error-model-v1.md` | OpenCapError 分类 |
+| 隐私保留 | 本地数据边界 | `docs/security/privacy-retention-v1.md` | 脱敏和保留规则 |
 
 ## 系统闭环
 
@@ -96,6 +101,9 @@ Governance Surface
 | Policy DSL 使用顶层 `default/rules` | 已接受 |
 | 非只读调用审计失败时阻断执行 | 已接受 |
 | 任意用户输入 URL 需要 outbound policy | 已接受 |
+| State dir 默认 `<cwd>/opencap.local`，可由 flag/env 覆盖 | 已接受 |
+| MCP V1 只实现 tools，确认不可用时返回 `confirmation_required` | 已接受 |
+| CLI/Runtime/MCP 使用统一错误模型 | 已接受 |
 
 ## 设计成熟度
 
@@ -109,3 +117,7 @@ Governance Surface
 | MCP | 边界清晰 | T070/T073 做 SDK spike |
 | Registry | 规则清晰 | T080/T081/T129 实现 CI/review |
 | 发布治理 | 清晰 | T126 做 release checklist |
+| CLI 契约 | 清晰 | T001/T013 按契约实现 |
+| 本地状态 | 清晰 | T010/T014 实现 helper |
+| MCP 接口 | 清晰 | T070-T073 实现 bridge |
+| 错误模型 | 清晰 | T013/T137 实现错误测试 |

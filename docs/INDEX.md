@@ -15,6 +15,11 @@ README.md
       -> docs/ARCHITECTURE.md
       -> docs/design/domain-model.md
       -> docs/design/runtime-contracts.md
+      -> docs/design/cli-contract-v1.md
+      -> docs/design/local-state-v1.md
+      -> docs/design/configuration-v1.md
+      -> docs/design/mcp-interface-v1.md
+      -> docs/design/error-model-v1.md
       -> docs/design/http-execution-v1.md
       -> docs/design/policy-dsl-v1.md
       -> docs/design/audit-log-v1.md
@@ -23,7 +28,10 @@ README.md
       -> docs/security/threat-model.md
       -> docs/security/outbound-policy-v1.md
       -> docs/security/supply-chain-governance.md
+      -> docs/security/privacy-retention-v1.md
       -> docs/operations/release-readiness.md
+      -> docs/operations/ci-security-baseline.md
+      -> docs/planning/v1-implementation-plan.md
       -> docs/operations/operating-model.md
       -> docs/TASKS.md
       -> docs/TESTING.md
@@ -84,6 +92,11 @@ README.md
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/ARCHITECTURE.md` | 模块边界、数据流、约束 | 包职责、数据流、边界变化时 |
 | `docs/design/domain-model.md` | 领域对象和不变量 | 类型、状态对象、日志字段变化时 |
+| `docs/design/cli-contract-v1.md` | CLI 命令、输出、exit code 契约 | CLI 行为变化时 |
+| `docs/design/local-state-v1.md` | 本地状态路径和文件结构 | state dir 或 install 行为变化时 |
+| `docs/design/configuration-v1.md` | 配置来源和优先级 | flag/env/config 变化时 |
+| `docs/design/mcp-interface-v1.md` | MCP tools 映射和确认策略 | MCP bridge 行为变化时 |
+| `docs/design/error-model-v1.md` | 错误分类和映射 | 错误类型或 exit code 变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
 | `docs/design/http-execution-v1.md` | HTTP body/auth/outbound 执行规则 | HTTP manifest 或 executor 变化时 |
 | `docs/design/policy-dsl-v1.md` | 本地 policy 文件格式 | Policy parser/engine 变化时 |
@@ -93,7 +106,9 @@ README.md
 | `docs/security/threat-model.md` | 威胁模型和控制措施 | 新攻击面、新安全控制、风险变化时 |
 | `docs/security/outbound-policy-v1.md` | 出站网络安全策略 | HTTP 网络边界变化时 |
 | `docs/security/supply-chain-governance.md` | Registry 和发布供应链治理 | CI、review、release provenance 变化时 |
+| `docs/security/privacy-retention-v1.md` | 隐私和数据保留 | 日志保留、数据删除或脱敏规则变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
+| `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

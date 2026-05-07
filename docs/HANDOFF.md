@@ -95,3 +95,7 @@ T001：让 opencap validate 调用真实 schema 校验
 当前 High 风险中，R002 和 R014 已缓解，R003/R004 已进入明确实现任务。下一步仍是 T001：让 `opencap validate` 调用真实 schema 校验。
 
 本轮验证缺口：`pnpm` 和 `corepack` 在当前 shell 中不可用，`python jsonschema` 也未安装，因此未能运行 `pnpm validate` 或完整 JSON Schema 校验。已完成基础 JSON/YAML 解析和文档闭环检查。
+
+## 实现前接口契约已补齐
+
+已新增 CLI 契约、本地状态、配置模型、MCP 接口、错误模型、隐私与数据保留、CI 安全基线和 V1 实施计划。ADR 0013-0015 已接受。下一步 T001 可以直接按 `docs/design/cli-contract-v1.md` 和 `docs/design/error-model-v1.md` 实现，不需要再临场定义命令行为。

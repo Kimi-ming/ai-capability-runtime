@@ -207,3 +207,12 @@ V1 完成必须满足：
 - `docs/design/domain-model.md`：核心领域对象和不变量。
 - `docs/design/runtime-contracts.md`：Runtime 模块之间的输入输出契约。
 - `docs/security/threat-model.md`：安全资产、攻击路径和 V1 控制措施。
+
+## 实现契约补充
+
+V1 功能实现除本文需求外，还必须符合：
+
+- `docs/design/cli-contract-v1.md`：命令行为、stdout/stderr、exit code。
+- `docs/design/error-model-v1.md`：错误分类和用户可见消息。
+- `docs/design/local-state-v1.md`：本地状态目录行为。
+- `docs/design/mcp-interface-v1.md`：MCP 工具暴露和确认缺失行为。

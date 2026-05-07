@@ -55,12 +55,14 @@ pnpm build
 - `opencap install <id>` 多重匹配时报错
 - `opencap list` 空状态和有安装状态
 - exit code 正确
+- CLI stdout/stderr snapshot 符合 `docs/design/cli-contract-v1.md`
 
 ### `@opencap/runtime`
 
 必须覆盖：
 
 - state dir 初始化
+- `--state-dir` / `OPENCAP_STATE_DIR` / cwd precedence
 - installed capability loading
 - input validation
 - policy allow/ask/deny
@@ -92,6 +94,7 @@ pnpm build
 - tool input schema 透传
 - MCP call 路由到 runtime
 - `ask` 且无 elicitation 时返回 confirmation_required
+- error mapping 符合 `docs/design/error-model-v1.md`
 
 ## 手动 Smoke Test
 

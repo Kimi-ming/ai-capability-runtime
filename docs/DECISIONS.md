@@ -18,13 +18,15 @@
 | 0010 | 审计不可用时的执行策略 | 已接受 | 非只读调用审计不可用时不执行。 |
 | 0011 | 最小 Outbound Policy | 已接受 | 阻断私网/localhost/metadata，用户输入 host 需显式允许。 |
 | 0012 | Registry Test Format V1 | 已接受 | `tests/*.yml` 使用 validate/dry_run 格式。 |
+| 0013 | 本地状态和配置路径 | 已接受 | state dir 使用 flag/env/cwd 优先级。 |
+| 0014 | MCP Interface V1 | 已接受 | V1 只实现 tools，确认不可用返回 `confirmation_required`。 |
+| 0015 | 错误模型 V1 | 已接受 | CLI/Runtime/MCP 使用统一错误分类。 |
 
 ## 下一批需要决策的问题
 
-- 0013：`opencap.local/` 默认路径是否可配置？
-- 0014：MCP elicitation 兼容策略。
-- 0015：版本签名和 npm provenance 策略。
-- 0016：OpenAPI adapter 的人工 review 边界。
+- 0016：版本签名和 npm provenance 策略。
+- 0017：OpenAPI adapter 的人工 review 边界。
+- 0018：未来远程 Runtime 的 OAuth authorization 边界。
 
 ## 决策写法
 

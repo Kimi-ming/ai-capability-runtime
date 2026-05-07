@@ -123,6 +123,14 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 ## 关键文档
 
 - [体系蓝图](docs/SYSTEM.md)
+- [CLI 契约 V1](docs/design/cli-contract-v1.md)
+- [本地状态 V1](docs/design/local-state-v1.md)
+- [配置模型 V1](docs/design/configuration-v1.md)
+- [MCP 接口 V1](docs/design/mcp-interface-v1.md)
+- [错误模型 V1](docs/design/error-model-v1.md)
+- [隐私与数据保留 V1](docs/security/privacy-retention-v1.md)
+- [CI 和安全基线](docs/operations/ci-security-baseline.md)
+- [V1 实施计划](docs/planning/v1-implementation-plan.md)
 - [HTTP 执行设计 V1](docs/design/http-execution-v1.md)
 - [Policy DSL V1](docs/design/policy-dsl-v1.md)
 - [Audit Log V1](docs/design/audit-log-v1.md)

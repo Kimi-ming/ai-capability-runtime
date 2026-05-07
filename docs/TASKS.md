@@ -96,6 +96,12 @@
 - T131 P1：实现 `execution.body.fields` 渲染测试。
 - T132 P1：实现 audit failure preflight 测试。
 - T133 P1：实现 outbound policy 私网阻断测试。
+- T134 P1：按 CLI 契约补齐命令 snapshot tests。
+- T135 P1：按本地状态契约实现 state dir precedence tests。
+- T136 P1：按 MCP 接口契约增加 tool mapping tests。
+- T137 P1：实现错误模型和 exit code tests。
+- T138 P2：增加 privacy retention 文档测试或 lint。
+- T139 P1：CI 安全基线 workflow。
 
 ### 已完成
 
@@ -105,6 +111,7 @@
 - 已完成：T093 P2：威胁模型文档。
 - 已完成：T117 P0：产品、协议、数据、安全体系化蓝图。
 - 已完成：T118 P0：收敛 V1 执行、策略、审计和供应链关键决策。
+- 已完成：T119 P0：补齐实现前接口契约和运行模型。
 
 
 ---
@@ -1015,6 +1022,31 @@ git diff --check
 - `github.create_issue` manifest 具备 JSON body 和 bearer token placement。
 - Policy DSL 格式唯一。
 - Registry test format 有稳定 V1 字段。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T119 P0：补齐实现前接口契约和运行模型
+
+- [x] T119 P0：补齐实现前接口契约和运行模型
+
+已完成：新增 CLI 契约、本地状态、配置模型、MCP 接口、错误模型、隐私与数据保留、CI 安全基线和 V1 实施计划。新增 ADR 0013-0015，并更新 SYSTEM、README、INDEX、DECISIONS、任务、追踪矩阵和交接文档。
+
+验收标准：
+
+- T001 之后的 CLI 行为有明确 stdout/stderr/exit code。
+- T010/T014 的 state dir 解析规则明确。
+- T070-T073 的 MCP tools/confirmation 行为明确。
+- T013/T137 的错误分类和 exit code 明确。
+- 发布前 CI/security baseline 明确。
 
 验证：
 

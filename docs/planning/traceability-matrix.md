@@ -64,3 +64,10 @@
 | RQ-019 | 审计失败策略明确 | `docs/design/audit-log-v1.md` | T040, T132 | audit preflight tests |
 | RQ-020 | 出站网络受控 | `docs/security/outbound-policy-v1.md` | T055, T091, T133 | outbound policy tests |
 | RQ-021 | Registry tests 可验证 | `docs/design/registry-test-format-v1.md` | T004, T080 | registry test schema |
+
+| RQ-022 | CLI 行为稳定 | `docs/design/cli-contract-v1.md` | T013, T134 | CLI snapshot/exit tests |
+| RQ-023 | 本地状态可测试可删除 | `docs/design/local-state-v1.md` | T010, T014, T135 | state dir precedence tests |
+| RQ-024 | MCP Bridge 行为稳定 | `docs/design/mcp-interface-v1.md` | T070-T073, T136 | MCP mapping tests |
+| RQ-025 | 错误模型统一 | `docs/design/error-model-v1.md` | T013, T137 | error mapping tests |
+| RQ-026 | 隐私保留规则明确 | `docs/security/privacy-retention-v1.md` | T041, T092, T138 | redaction/log tests |
+| RQ-027 | CI 安全基线明确 | `docs/operations/ci-security-baseline.md` | T101, T139 | GitHub Actions checks |

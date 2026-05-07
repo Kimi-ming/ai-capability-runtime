@@ -174,3 +174,15 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 - `docs/protocols/protocol-positioning.md`：MCP、A2A、OpenAPI 和 Apps SDK 的边界。
 - `docs/security/threat-model.md`：安全边界和威胁控制。
 - `docs/operations/release-readiness.md`：发布门禁和质量要求。
+
+## 实现前接口契约
+
+进入代码实现时，还必须对齐：
+
+- `docs/design/cli-contract-v1.md`：CLI 命令、输出、exit code。
+- `docs/design/local-state-v1.md`：state dir、installed 目录和写入规则。
+- `docs/design/configuration-v1.md`：flag/env/state dir 配置优先级。
+- `docs/design/mcp-interface-v1.md`：MCP tools/list、tools/call 和 confirmation_required。
+- `docs/design/error-model-v1.md`：统一错误分类。
+- `docs/security/privacy-retention-v1.md`：日志隐私和数据保留。
+- `docs/planning/v1-implementation-plan.md`：V1 实施顺序。
