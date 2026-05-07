@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 二十个子系统
+## 二十五个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -38,6 +38,11 @@ OpenCap 负责能力治理。
 | 开源边界 | OSS 与 Cloud 分工 | `docs/ecosystem/open-core-boundary.md` | open-core 约束 |
 | 社区协作 | 外部贡献路径 | `docs/community/contributor-journey.md` | contributor journey |
 | 可观测指标 | 质量和生态反馈 | `docs/operations/observability-metrics-v1.md` | 本地指标和未来 OTel 映射 |
+| 版本兼容 | 长期演进秩序 | `docs/spec/versioning-and-compatibility.md` | SemVer 和公共契约 |
+| Manifest 演进 | Schema 可迁移 | `docs/spec/manifest-evolution.md` | schema 演进规则 |
+| Registry 分发 | 可验证安装来源 | `docs/ecosystem/registry-distribution.md` | Git-based V1 registry |
+| SDK/Adapter 边界 | 防止范围膨胀 | `docs/design/sdk-and-adapter-boundary.md` | V1 非阻塞边界 |
+| 发布供应链 | 可验证发布 | `docs/operations/package-publishing-v1.md` | npm/provenance 预案 |
 
 ## 系统闭环
 
@@ -112,6 +117,10 @@ Governance Surface
 | V1 默认不上传遥测，只保留本地 audit log | 已接受 |
 | OSS 核心必须能独立运行，Cloud 不得成为主路径依赖 | 已接受 |
 | 大型设计变化走 RFC，接受后进入 ADR | 已接受 |
+| `0.x` 可快速演进但 breaking changes 必须记录 | 已接受 |
+| V1 Registry 默认 Git-based，本地 install 不做远程下载 | 已接受 |
+| SDK/adapters 不阻塞 V1，且不能绕过 validation/policy/audit | 已接受 |
+| npm 发布优先 trusted publishing 和 provenance | 已接受 |
 
 ## 设计成熟度
 
@@ -133,3 +142,8 @@ Governance Surface
 | Host 兼容 | 框架清晰 | T127 维护矩阵 |
 | 社区协作 | 清晰 | PR/issue templates 已添加 |
 | 可观测指标 | 边界清晰 | V1 从 audit log 派生 |
+| 版本兼容 | 清晰 | CHANGELOG 已添加 |
+| Manifest 演进 | 清晰 | T001/T003 后继续收紧 schema |
+| Registry 分发 | 清晰 | V1 保持 Git-based |
+| SDK/Adapter | 边界清晰 | V1 不阻塞主路径 |
+| 发布供应链 | 清晰 | T123 制定 npm trusted publishing workflow |

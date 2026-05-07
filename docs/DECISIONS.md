@@ -24,12 +24,16 @@
 | 0016 | V1 可观测性边界 | 已接受 | V1 只做本地 audit log，不默认上传遥测。 |
 | 0017 | 开源核心与未来 Cloud 边界 | 已接受 | OSS 核心必须独立运行，Cloud 只能增强。 |
 | 0018 | RFC 与社区治理流程 | 已接受 | 大型设计变化走 RFC，接受后进入 ADR。 |
+| 0019 | 版本和兼容性策略 | 已接受 | `0.x` 也记录 breaking changes，1.0 后按 SemVer。 |
+| 0020 | 包发布和 Provenance 策略 | 已接受 | 优先 npm trusted publishing 和 provenance。 |
+| 0021 | Registry 分发模型 | 已接受 | V1 Git-based，本地 install 不做远程下载。 |
+| 0022 | SDK 和 Adapter 边界 | 已接受 | SDK/adapters 不阻塞 V1，不绕过治理管线。 |
 
 ## 下一批需要决策的问题
 
-- 0019：版本签名和 npm provenance 策略。
-- 0020：OpenAPI adapter 的人工 review 边界。
-- 0021：未来远程 Runtime 的 OAuth authorization 边界。
+- 0023：OpenAPI adapter 的人工 review 边界。
+- 0024：未来远程 Runtime 的 OAuth authorization 边界。
+- 0025：Registry index signing 具体格式。
 
 ## 决策写法
 

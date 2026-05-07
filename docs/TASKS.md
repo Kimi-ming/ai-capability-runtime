@@ -107,6 +107,10 @@
 - T142 P2：维护 Host compatibility test records。
 - T143 P2：从 audit log 派生本地指标命令草案。
 - T144 P2：补充 RFC 模板文件。
+- T145 P1：定义 package public exports。
+- T146 P2：OpenAPI adapter RFC 草案。
+- T147 P2：Registry index signing RFC 草案。
+- T148 P1：npm trusted publishing workflow 草案。
 
 ### 已完成
 
@@ -118,6 +122,10 @@
 - 已完成：T118 P0：收敛 V1 执行、策略、审计和供应链关键决策。
 - 已完成：T119 P0：补齐实现前接口契约和运行模型。
 - 已完成：T120 P0：补齐生态、社区和可观测性体系。
+- 已完成：T121 P1：CHANGELOG。
+- 已完成：T122 P2：版本策略。
+- 已完成：T123 P2：npm package 发布预案。
+- 已完成：T124 P0：补齐演进、发布和兼容性体系。
 
 
 ---
@@ -1088,4 +1096,30 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
 ruby -e "require 'yaml'; Dir['**/*.yml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T124 P0：补齐演进、发布和兼容性体系
+
+- [x] T124 P0：补齐演进、发布和兼容性体系
+
+已完成：新增版本和兼容性策略、Manifest 演进策略、Registry 分发模型、SDK/Adapter 边界、包发布策略、签名和 provenance 路线图、质量门禁、维护者手册、发布调研，并新增 CHANGELOG。新增 ADR 0019-0022。
+
+验收标准：
+
+- 公共契约和破坏性变化规则明确。
+- Manifest schema 演进有迁移规则。
+- V1 Registry 分发保持 Git-based、本地 install。
+- SDK/adapters 不阻塞 V1 主路径。
+- npm trusted publishing/provenance 方向明确。
+- 质量门禁覆盖 schema/CLI/state/policy/audit/HTTP/MCP/registry/release。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```
