@@ -167,3 +167,12 @@ T001：让 opencap validate 调用真实 schema 校验
 下一步仍然是 T001。后续进入 HTTP executor、MCP bridge 和 audit 实现时，要把 result envelope、structuredContent、output validation、sanitizer warning、content digest 和 taint labels 作为实现主线。
 
 本轮验证：`audit_docs.py` 显示文档数 183、任务总数 100、已完成 17、未完成 83；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+
+## 输入数据治理、数据分类、外发策略和数据最小化体系已补齐
+
+已新增 Input Data Governance V1、Data Classification V1、Data Egress Policy V1、Input Provenance V1、Data Minimization and Redaction V1 和 Input Egress 调研。ADR 0047-0049 已接受。OpenCap 现在明确：tool input 在分类前是不可信数据；Data Egress Gate 必须在 Secret Resolver 和 Executor 前运行；Runtime 只外发 execution mapping 引用字段，不自动发送整个 input。
+
+下一步仍然是 T001。后续进入 validation、HTTP rendering、policy、confirmation、audit 和 dry-run 实现时，要把 input classification、field-level egress map、redacted egress preview、data classes 和 egress decision 作为主路径证据。
+
+本轮验证：`audit_docs.py` 显示文档数 192、任务总数 115、已完成 18、未完成 97；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

@@ -170,6 +170,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - Usage conformance 覆盖 quota/budget gate 在 secret 前运行、usage event 不含 input/output/secret、financial spend cap 阻断。
 - Prompt-surface conformance 覆盖 tool projection、description lint、schema poisoning negative fixtures、projection hash 和 runtime-generated risk summary。
 - Result conformance 覆盖 Result Envelope、structuredContent、output schema validation、provider raw text 不直出、result sanitizer、provenance/taint labels。
+- Input/egress conformance 覆盖 input classification、secret-like/PII/internal URL 检测、data egress gate 在 secret 前运行、field-level egress map、dry-run redacted preview。
 
 ## CI 目标
 

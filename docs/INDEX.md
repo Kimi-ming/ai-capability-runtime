@@ -43,6 +43,7 @@ README.md
       -> docs/design/quota-and-budget-policy-v1.md
       -> docs/design/tool-projection-v1.md
       -> docs/design/result-envelope-v1.md
+      -> docs/design/data-egress-policy-v1.md
       -> docs/design/composition-boundary-v1.md
       -> docs/design/multi-step-execution-boundary.md
       -> docs/design/http-execution-v1.md
@@ -54,6 +55,9 @@ README.md
       -> docs/security/outbound-policy-v1.md
       -> docs/security/supply-chain-governance.md
       -> docs/security/privacy-retention-v1.md
+      -> docs/security/input-data-governance-v1.md
+      -> docs/security/data-classification-v1.md
+      -> docs/security/data-minimization-and-redaction-v1.md
       -> docs/security/signing-and-provenance-roadmap.md
       -> docs/security/agentic-risk-mapping.md
       -> docs/security/identity-and-auth-model.md
@@ -82,6 +86,7 @@ README.md
       -> docs/quality/model-visible-metadata-lint-v1.md
       -> docs/quality/output-validation-v1.md
       -> docs/quality/result-provenance-v1.md
+      -> docs/quality/input-provenance-v1.md
       -> docs/planning/v1-implementation-plan.md
       -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
@@ -176,6 +181,7 @@ README.md
 | `docs/design/quota-and-budget-policy-v1.md` | 配额与预算策略 | quota/budget gate、spend cap 或策略字段变化时 |
 | `docs/design/tool-projection-v1.md` | 模型可见工具投影 | MCP tools/list metadata、projection hash 或 tool description 模板变化时 |
 | `docs/design/result-envelope-v1.md` | 工具结果信封 | Result Envelope、MCP result shape、structuredContent 或 result status 变化时 |
+| `docs/design/data-egress-policy-v1.md` | 数据外发策略 | egress gate、data policy DSL 或 external provider data policy 变化时 |
 | `docs/design/composition-boundary-v1.md` | 组合边界 | composition profile、workflow 边界或组合不变量变化时 |
 | `docs/design/multi-step-execution-boundary.md` | 多步执行边界 | step outcome、composition outcome 或 compensation 变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
@@ -188,6 +194,9 @@ README.md
 | `docs/security/outbound-policy-v1.md` | 出站网络安全策略 | HTTP 网络边界变化时 |
 | `docs/security/supply-chain-governance.md` | Registry 和发布供应链治理 | CI、review、release provenance 变化时 |
 | `docs/security/privacy-retention-v1.md` | 隐私和数据保留 | 日志保留、数据删除或脱敏规则变化时 |
+| `docs/security/input-data-governance-v1.md` | 输入数据治理 | tool input 来源、分类、外发风险或确认摘要变化时 |
+| `docs/security/data-classification-v1.md` | 数据分类 | sensitive classes、PII/secret/source/internal URL 规则变化时 |
+| `docs/security/data-minimization-and-redaction-v1.md` | 数据最小化与脱敏 | execution mapping、redacted preview 或 dry-run egress preview 变化时 |
 | `docs/security/signing-and-provenance-roadmap.md` | 签名和 provenance 路线 | 发布签名、SBOM、registry signing 变化时 |
 | `docs/security/agentic-risk-mapping.md` | Agentic 风险映射 | Agentic abuse cases、控制或测试映射变化时 |
 | `docs/security/identity-and-auth-model.md` | 身份与授权模型 | Host、Runtime、provider 或凭据边界变化时 |
@@ -216,6 +225,7 @@ README.md
 | `docs/quality/model-visible-metadata-lint-v1.md` | 模型可见元数据 lint | description lint、schema text lint 或 negative fixtures 变化时 |
 | `docs/quality/output-validation-v1.md` | 输出校验 | output schema validation、normalization、selector 或 size limit 变化时 |
 | `docs/quality/result-provenance-v1.md` | 结果来源 | result provenance、taint label、content digest 或 transformation evidence 变化时 |
+| `docs/quality/input-provenance-v1.md` | 输入来源 | input source、field-level egress map、input hash 或 derived input evidence 变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

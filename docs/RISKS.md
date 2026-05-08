@@ -70,6 +70,11 @@
 | R048 | Medium | Mitigating | MCP Host 不保留 structuredContent，只把 text summary 给模型 | result delivery boundary；Host result compatibility records | T222, T226 |
 | R049 | High | Mitigating | Tool result 泄露 secret-like 字段到 MCP result 或 audit | result sanitizer；redaction/provenance tests | T223, T224, T230 |
 | R050 | Medium | Mitigating | 过大 provider response 污染上下文或造成成本/内存问题 | result limits；oversized result handling | T225 |
+| R051 | High | Mitigating | 模型生成 input 把 PII/客户数据/源码静默外发到第三方 provider | input governance；data egress gate | T234, T236, T238 |
+| R052 | High | Mitigating | ordinary input 中的 secret-like value 被当作业务字段发送 | data classification；egress deny before secret | T234, T235, T236 |
+| R053 | Medium | Mitigating | 未被 execution mapping 使用的 input 字段被整体 body 外发 | data minimization；field-level egress map | T240, T242 |
+| R054 | Medium | Mitigating | 用户确认时看不到将外发的数据类别和目标 provider | confirmation summary data classes | T238, T243 |
+| R055 | High | Mitigating | internal URL/source/config 通过普通字段外发，造成内部信息泄露 | data classification + outbound policy | T235, T236, T245 |
 
 ## 当前最高优先级风险
 
@@ -86,7 +91,9 @@
 11. R042：恶意 tool description 和 schema poisoning
 12. R046：provider raw output 直接进入模型上下文
 13. R047：output schema mismatch 被误报 success
-14. R006：依赖安装和 workspace 构建验证
+14. R051：模型生成 input 静默外发敏感数据
+15. R052：ordinary input 中的 secret-like value 被发送
+16. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

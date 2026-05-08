@@ -128,6 +128,9 @@ Runtime 加载后的能力对象，包含：
 ```text
 load manifest
   -> validate input
+  -> classify input
+  -> minimize input and build egress map
+  -> evaluate data egress policy
   -> evaluate policy
   -> resolve confirmation if needed
   -> resolve secrets
@@ -194,3 +197,8 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 ### Result 边界
 
 外部 provider response 不直接返回给 MCP Host。Runtime 必须先完成 output validation、redaction、sanitization 和 Result Envelope 生成，再由 CLI/MCP adapter 投递。
+
+
+### Data Egress 边界
+
+Input schema validation 之后，Runtime 必须先执行 input classification、data minimization 和 data egress policy。egress deny 不解析 secret、不发请求，且写入 redacted audit evidence。

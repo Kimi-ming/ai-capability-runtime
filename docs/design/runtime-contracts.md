@@ -124,16 +124,19 @@ V1 存储：SQLite。
 | --- | --- | --- | --- |
 | 1. load capability | id/path | manifest | 写 audit，返回 load error |
 | 2. validate input | schema/input | validated input | 写 audit，返回 validation error |
-| 3. build plan | manifest/input | invocation plan | 写 audit，返回 planning error |
-| 4. evaluate policy | plan/policy | decision | 写 audit，默认 ask 或返回 policy error |
-| 5. confirm | decision ask | confirmation result | 写 audit，不执行 |
-| 6. resolve secrets | auth/env | credential handle | 写 audit，不执行 |
-| 7. execute/dry-run | plan/credential | execution result | 写 audit，返回 execution error |
-| 8. normalize output | raw output | normalized output | 写 audit，返回 normalize error |
-| 9. validate output | normalized output/schema | validated output | 写 audit，返回 output validation error |
-| 10. sanitize result | validated output/error body | sanitized result | 写 audit，返回 sanitized summary |
-| 11. build result envelope | outcome/evidence/output | Result Envelope | 写 audit，返回 envelope error |
-| 12. audit | all context | log row | 返回主结果并警告 audit failure |
+| 3. classify input | validated input | data classification | 写 audit，返回 classification warning/error |
+| 4. build egress map | manifest/input | field-level egress map | 写 audit，返回 planning error |
+| 5. evaluate data egress | egress map/policy | egress decision | 写 audit，不解析 secret、不执行 |
+| 6. build plan | manifest/input | invocation plan | 写 audit，返回 planning error |
+| 7. evaluate policy | plan/policy | decision | 写 audit，默认 ask 或返回 policy error |
+| 8. confirm | decision ask | confirmation result | 写 audit，不执行 |
+| 9. resolve secrets | auth/env | credential handle | 写 audit，不执行 |
+| 10. execute/dry-run | plan/credential | execution result | 写 audit，返回 execution error |
+| 11. normalize output | raw output | normalized output | 写 audit，返回 normalize error |
+| 12. validate output | normalized output/schema | validated output | 写 audit，返回 output validation error |
+| 13. sanitize result | validated output/error body | sanitized result | 写 audit，返回 sanitized summary |
+| 14. build result envelope | outcome/evidence/output | Result Envelope | 写 audit，返回 envelope error |
+| 15. audit | all context | log row | 返回主结果并警告 audit failure |
 
 ## 错误分类
 

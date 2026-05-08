@@ -27,7 +27,7 @@ execution:
 
 ## URL 模板规则
 
-模板变量来自已通过 input schema 校验的输入。
+模板变量来自已通过 input schema 校验、input classification 和 data egress policy 的输入。
 
 规则：
 
@@ -49,6 +49,7 @@ body:
 
 渲染规则：
 
+- 只有 execution mapping 显式引用的 input 字段会被渲染和外发。
 - 值完全等于 `{{field}}` 时，保留原始 JSON 类型。
 - 字符串中包含 `{{field}}` 但不是完整变量时，按字符串插值处理。
 - 可选字段缺失且 body value 完全等于该变量时，省略该字段。
@@ -135,7 +136,7 @@ V1 不支持 query token。这样做是为了避免 token 出现在 URL、日志
 - policy decision
 - confirmation status
 
-Dry-run 仍然写 audit log，状态为 `dry_run`。
+Dry-run 仍然写 audit log，状态为 `dry_run`，并展示 redacted egress preview、fields sent 和 data classes。
 
 ## Output Normalization
 

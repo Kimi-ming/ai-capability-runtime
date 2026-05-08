@@ -187,6 +187,20 @@
 - T230 P2：Taint label tests。
 - T231 P1：CLI result envelope output。
 - T232 P2：Result Envelope public type exports。
+- T234 P1：实现 input classification engine。
+- T235 P1：补充 sensitive input classification fixtures。
+- T236 P1：实现 Data Egress Policy Gate。
+- T237 P1：记录 egress decision audit fields。
+- T238 P1：confirmation summary 展示 data classes 和 egress target。
+- T239 P1：input provenance audit evidence。
+- T240 P1：field-level egress map。
+- T241 P2：derived input evidence chain。
+- T242 P1：按 execution mapping 做 input minimization。
+- T243 P1：redacted egress preview。
+- T244 P1：dry-run egress preview。
+- T245 P1：internal URL/source/config egress negative tests。
+- T246 P2：manifest data class hint RFC。
+- T247 P2：organization data policy RFC。
 
 ### 已完成
 
@@ -210,6 +224,7 @@
 - 已完成：T208 P0：补齐用量计量、配额预算、限流滥用和商业边界体系。
 - 已完成：T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系。
 - 已完成：T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系。
+- 已完成：T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系。
 
 
 ---
@@ -1931,6 +1946,361 @@ pnpm --filter @opencap/runtime build
 - 声明 output schema 的结果必须通过校验后才能 success。
 - Result Envelope 成为 Runtime 到 MCP/CLI 的稳定输出边界。
 - Tool result sanitizer、provenance、taint label 和 delivery boundary 均进入任务队列。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+## Epic P：Input Governance 和 Data Egress Boundary
+
+### T234 P1：实现 input classification engine
+
+- [ ] T234 P1：实现 input classification engine
+
+目标：对 validated input 执行本地分类，识别 secret_like、pii、source_code、internal_url、financial_data、free_text_unknown 等类别。
+
+涉及文件：
+
+- `packages/runtime/src/input-classifier.ts`
+- `packages/runtime/src/input-classifier.test.ts`
+
+验收标准：
+
+- token-like 字段和值被识别为 secret_like。
+- email/phone-like 被识别为 pii。
+- localhost/private IP/metadata URL 被识别为 internal_url。
+- `.env`/diff/stack trace 被识别为 source_code 或 secret_like。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T235 P1：补充 sensitive input classification fixtures
+
+- [ ] T235 P1：补充 sensitive input classification fixtures
+
+目标：建立可复用输入分类测试夹具。
+
+涉及文件：
+
+- `packages/runtime/fixtures/input-classification/`
+- `packages/runtime/src/input-classifier.test.ts`
+
+验收标准：
+
+- secret-like fixture。
+- pii fixture。
+- internal URL fixture。
+- source/config fixture。
+- large free text unknown fixture。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T236 P1：实现 Data Egress Policy Gate
+
+- [ ] T236 P1：实现 Data Egress Policy Gate
+
+目标：根据 data classes、provider、target origin、risk 和 destination 判断外发 allow/ask/deny/redact。
+
+涉及文件：
+
+- `packages/runtime/src/data-egress-policy.ts`
+- `packages/runtime/src/invoke-pipeline.ts`
+- `docs/design/data-egress-policy-v1.md`
+
+验收标准：
+
+- secret_like 默认 deny。
+- internal_url 默认 deny。
+- pii/source_code 到 external_send 默认 ask。
+- egress deny 不解析 secret、不执行。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T237 P1：记录 egress decision audit fields
+
+- [ ] T237 P1：记录 egress decision audit fields
+
+目标：audit log 记录 data classes、egress target、egress decision、policy rule id 和 redacted preview。
+
+涉及文件：
+
+- `docs/design/audit-log-v1.md`
+- `packages/runtime/src/audit*`
+
+验收标准：
+
+- egress deny 也写 audit。
+- requestStarted false。
+- audit 不含 secret 原文。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T238 P1：confirmation summary 展示 data classes 和 egress target
+
+- [ ] T238 P1：confirmation summary 展示 data classes 和 egress target
+
+目标：用户确认写操作或外发操作时，能看到将发送给谁、发送哪些数据类别。
+
+涉及文件：
+
+- `docs/design/confirmation-and-consent-v1.md`
+- `packages/runtime/src/confirmation*`
+
+验收标准：
+
+- confirmation request 包含 target origin。
+- 包含 data classes。
+- 包含 fields sent。
+- preview 已脱敏。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T239 P1：input provenance audit evidence
+
+- [ ] T239 P1：input provenance audit evidence
+
+目标：记录 input source、input hash、derivedFromInvocationId、egress decision 和 transformations。
+
+涉及文件：
+
+- `packages/runtime/src/`
+- `docs/quality/input-provenance-v1.md`
+
+验收标准：
+
+- model_generated/user_supplied/tool_derived/runtime_generated 可表达。
+- tool_derived 记录来源 invocation。
+- 不记录 input 原文。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T240 P1：field-level egress map
+
+- [ ] T240 P1：field-level egress map
+
+目标：记录 input 字段分别进入 URL/query/header/body 的映射。
+
+涉及文件：
+
+- `packages/runtime/src/http-renderer.ts`
+- `packages/runtime/src/egress-map.test.ts`
+
+验收标准：
+
+- 每个 rendered field 有 destination。
+- 未引用字段不出现在 map 中。
+- destination 包含 data classes。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T241 P2：derived input evidence chain
+
+- [ ] T241 P2：derived input evidence chain
+
+目标：当 input 来自上一步工具结果时，记录上游 invocation 和 result digest。
+
+涉及文件：
+
+- `docs/quality/input-provenance-v1.md`
+- `docs/design/multi-step-execution-boundary.md`
+
+验收标准：
+
+- 记录 derivedFromInvocationId。
+- 记录 source result digest。
+- derived input 仍需重新分类和 egress policy。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T242 P1：按 execution mapping 做 input minimization
+
+- [ ] T242 P1：按 execution mapping 做 input minimization
+
+目标：只发送 execution.url/query/header/body 引用的 input 字段。
+
+涉及文件：
+
+- `packages/runtime/src/http-renderer.ts`
+- `packages/runtime/src/input-minimization.test.ts`
+
+验收标准：
+
+- 未引用 input 字段不进入 request。
+- 不自动把整个 input 当 body。
+- optional missing field 被省略。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T243 P1：redacted egress preview
+
+- [ ] T243 P1：redacted egress preview
+
+目标：为 confirmation、dry-run 和 audit 生成脱敏外发预览。
+
+涉及文件：
+
+- `packages/runtime/src/egress-preview.ts`
+- `packages/runtime/src/egress-preview.test.ts`
+
+验收标准：
+
+- preview 显示 target、fields sent、data classes。
+- secret-like 字段不出现原文。
+- 大段文本摘要化。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T244 P1：dry-run egress preview
+
+- [ ] T244 P1：dry-run egress preview
+
+目标：`opencap invoke --dry-run` 展示请求计划和 redacted egress preview，不读取 secret 原值，不发请求。
+
+涉及文件：
+
+- `packages/cli/src/`
+- `packages/runtime/src/`
+
+验收标准：
+
+- dry-run 输出 target origin。
+- 输出 fields sent 和 data classes。
+- 不读取 secret 原值。
+- requestStarted false。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli test
+pnpm --filter @opencap/runtime test
+```
+
+### T245 P1：internal URL/source/config egress negative tests
+
+- [ ] T245 P1：internal URL/source/config egress negative tests
+
+目标：验证内部 URL、源码、配置和 secret-like 文本不会静默外发。
+
+涉及文件：
+
+- `packages/runtime/src/data-egress-policy.test.ts`
+
+验收标准：
+
+- private IP URL in body/query -> deny。
+- `.env` content -> deny or redact+ask。
+- stack trace/source diff -> ask。
+- metadata service URL -> deny。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T246 P2：manifest data class hint RFC
+
+- [ ] T246 P2：manifest data class hint RFC
+
+目标：定义 manifest input schema 的 `x-opencap-data-class` hint。
+
+涉及文件：
+
+- `rfcs/`
+- `docs/security/data-classification-v1.md`
+
+验收标准：
+
+- hint 不能降低 classifier finding。
+- hint 可提高 review 透明度。
+- schema extension 有兼容策略。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T247 P2：organization data policy RFC
+
+- [ ] T247 P2：organization data policy RFC
+
+目标：定义未来组织级 data egress policy、provider allowlist 和 DLP provider profile。
+
+涉及文件：
+
+- `rfcs/`
+- `docs/design/data-egress-policy-v1.md`
+
+验收标准：
+
+- local-first OSS 仍可独立运行。
+- 组织策略不把 Cloud 变成 V1 主路径依赖。
+- 外部 DLP provider 不默认接收 input 原文。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系
+
+- [x] T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系
+
+已完成：新增 Input Data Governance V1、Data Classification V1、Data Egress Policy V1、Input Provenance V1、Data Minimization and Redaction V1、Input Egress 调研，并新增 ADR 0047-0049。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、README、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- Tool input 在分类前视为 untrusted data。
+- Data Egress Gate 在 Secret Resolver 和 Executor 前运行。
+- Runtime 只外发 execution mapping 引用字段。
+- confirmation/dry-run/audit 都使用 redacted egress preview。
+- PII/source/internal URL/secret-like input 风险进入任务、测试和风险登记。
 
 验证：
 

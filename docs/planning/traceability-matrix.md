@@ -121,3 +121,8 @@
 | RQ-073 | Tool result 不污染模型上下文 | `docs/security/tool-result-sanitization-v1.md` | T223, T229 | result sanitizer negative tests |
 | RQ-074 | 结果来源和转换可追踪 | `docs/quality/result-provenance-v1.md` | T224, T230 | provenance/taint tests |
 | RQ-075 | 结果投递不依赖 Host 安全行为 | `docs/ecosystem/result-delivery-boundary.md` | T226, T231 | Host result compatibility records |
+| RQ-076 | Tool input 外发前受治理 | `docs/security/input-data-governance-v1.md` | T234, T238 | input governance tests |
+| RQ-077 | 敏感数据可分类 | `docs/security/data-classification-v1.md` | T234, T235 | classification fixtures |
+| RQ-078 | Data Egress Gate 在 secret 前阻断 | `docs/design/data-egress-policy-v1.md` | T236, T237 | egress gate ordering tests |
+| RQ-079 | 输入来源和字段外发可追踪 | `docs/quality/input-provenance-v1.md` | T239, T240, T241 | provenance/evidence tests |
+| RQ-080 | Runtime 只外发必要字段 | `docs/security/data-minimization-and-redaction-v1.md` | T242, T243, T244 | minimization/dry-run preview tests |

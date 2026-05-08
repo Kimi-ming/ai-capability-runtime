@@ -38,6 +38,9 @@ ADR：`docs/decisions/0006-sqlite-audit-log-v1.md`。
 | `duration_ms` | integer | 耗时 |
 | `input_hash` | text | 原始输入稳定 hash |
 | `input_redacted_json` | text | 脱敏输入 |
+| `input_data_classes_json` | text | 输入数据分类摘要 |
+| `egress_decision` | text | allow/ask/deny/redact |
+| `egress_target_origin` | text | 外发目标 origin |
 | `output_redacted_json` | text | 脱敏输出 |
 | `resolved_url` | text | 脱敏 URL |
 | `error` | text | 错误摘要 |
@@ -105,4 +108,6 @@ error
 - validation error 写日志。
 - secret 字段脱敏。
 - input hash 稳定。
+- egress deny 不产生 request_started。
+- egress evidence 不含 input 原文或 secret-like value。
 - 非 read-only 审计不可用时 executor 不被调用。

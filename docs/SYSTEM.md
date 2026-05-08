@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 六十二个子系统
+## 六十七个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -80,6 +80,11 @@ OpenCap 负责能力治理。
 | 结果净化 | 净化 tool result prompt surface | `docs/security/tool-result-sanitization-v1.md` | result sanitizer |
 | 结果来源 | 记录结果来源和污染标记 | `docs/quality/result-provenance-v1.md` | result provenance |
 | 结果投递 | 适配 MCP/CLI/未来协议输出 | `docs/ecosystem/result-delivery-boundary.md` | delivery adapters |
+| 输入数据治理 | 管理 tool input 外发风险 | `docs/security/input-data-governance-v1.md` | input governance |
+| 数据分类 | 识别 secret/PII/source/internal URL | `docs/security/data-classification-v1.md` | classification rules |
+| Data Egress Policy | 执行前判断什么数据发给谁 | `docs/design/data-egress-policy-v1.md` | egress gate |
+| 输入来源证据 | 记录 input provenance 和 egress map | `docs/quality/input-provenance-v1.md` | input provenance |
+| 数据最小化 | 只外发 execution mapping 引用字段 | `docs/security/data-minimization-and-redaction-v1.md` | minimization/redaction |
 
 ## 系统闭环
 
@@ -92,6 +97,9 @@ Capability author
   -> runtime exposes MCP tool
   -> host calls tool
   -> input validation
+  -> input classification
+  -> data minimization
+  -> data egress policy
   -> policy decision
   -> confirmation if needed
   -> secret resolution
@@ -110,6 +118,7 @@ Untrusted / Semi-trusted
 - model-visible tool metadata candidates
 - external API responses
 - provider raw tool results
+- tool input before classification
 
 Trusted Computing Base V1
 - schema validator
@@ -124,6 +133,9 @@ Trusted Computing Base V1
 - result envelope builder
 - output validator
 - result sanitizer
+- input classifier
+- data egress policy gate
+- data minimizer
 
 Governance Surface
 - registry review
@@ -160,6 +172,9 @@ Governance Surface
 - Provider raw output 默认不得直接进入模型上下文。
 - 声明 output schema 的 Capability 必须先通过输出校验，才能返回 success。
 - MCP/CLI/未来 HTTP API 都只能从 Result Envelope 适配结果。
+- Tool input 在分类和最小化前不视为可外发数据。
+- Data Egress Gate 必须在 Secret Resolver 和 Executor 之前运行。
+- Runtime 只外发 execution mapping 引用字段，不自动发送整个 input。
 
 ## V1 关键收敛决策
 
@@ -207,6 +222,9 @@ Governance Surface
 | Result Envelope 是 Runtime 输出边界 | 已接受 |
 | Output Schema 校验通过后才能暴露 Success | 已接受 |
 | Provider Raw Output 默认不进入模型上下文 | 已接受 |
+| Data Egress Gate 必须在 Secret Resolution 前运行 | 已接受 |
+| Tool Input 分类前视为不可信数据 | 已接受 |
+| 数据最小化由 Runtime 拥有 | 已接受 |
 
 ## 设计成熟度
 
@@ -270,3 +288,8 @@ Governance Surface
 | 结果净化 | 清晰 | T223/T229 建立 sanitizer 和 negative fixtures |
 | 结果来源 | 清晰 | T224/T230 记录 provenance 和 taint labels |
 | 结果投递 | 清晰 | T226/T231 维护 Host/CLI 投递边界 |
+| 输入数据治理 | 清晰 | T234/T238 接入分类和确认摘要 |
+| 数据分类 | 清晰 | T234/T235 建立 classifier 和 fixtures |
+| Data Egress Policy | 清晰 | T236/T237 实现 gate 和 audit evidence |
+| 输入来源证据 | 清晰 | T239/T240/T241 记录 provenance 和 field egress map |
+| 数据最小化 | 清晰 | T242/T243/T244 落到 rendering/dry-run preview |

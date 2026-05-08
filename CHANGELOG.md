@@ -21,6 +21,7 @@ The project follows Semantic Versioning after `1.0.0`. During `0.x`, public cont
 - Usage metering, quota/budget policy, rate limit/abuse control, commerce boundary, and usage evidence docs.
 - Tool projection, prompt-surface security, discovery/selection boundary, and model-visible metadata lint docs.
 - Result envelope, output validation, tool result sanitization, result provenance, and result delivery boundary docs.
+- Input data governance, data classification, data egress policy, input provenance, and data minimization docs.
 
 ### Changed
 
