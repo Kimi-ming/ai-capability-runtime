@@ -8,6 +8,7 @@
 
 ### 新增
 
+- Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。
 - 整体设计二次审查，补齐工程缺口、成熟度评分和 T267-T276 补强任务。
 - 整体系统设计 V1，收敛五个平面、三条链路、Runtime Kernel、账本和卡片模型。
@@ -36,4 +37,4 @@
 ### 已知缺口
 
 - 命令行和运行时实现仍处于骨架阶段。
-- 当前本地 shell 缺少 `pnpm`，因此本环境尚未运行完整 workspace 验证。
+- `pnpm validate` 当前失败在 T001 范围内，原因是 AJV draft 2020-12 meta schema 尚未加载。

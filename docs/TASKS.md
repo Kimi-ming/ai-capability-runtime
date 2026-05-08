@@ -213,7 +213,6 @@
 - T258 P2：policy incident runbook。
 - T259 P2：decision log export。
 - T260 P1：policy governance conformance tests。
-- T267 P0：定义 Runtime Kernel public contract TypeScript 类型。
 - T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
 - T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
 - T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
@@ -254,6 +253,37 @@
 - 已完成：T265 P0：补齐整体系统设计 V1。
 - 已完成：T266 P0：完成整体设计二次审查和工程补强任务拆解。
 - 已完成：T277 P0：创建项目 conda 开发环境。
+- 已完成：T267 P0：定义 Runtime Kernel public contract 设计契约。
+
+### T267 P0：定义 Runtime Kernel public contract 设计契约
+
+- [x] T267 P0：定义 Runtime Kernel public contract 设计契约
+
+产出：
+
+- `docs/设计/runtime-kernel-contract-v1.md`
+- 文档入口、架构总览、体系蓝图和追踪矩阵已同步引用
+
+范围：
+
+- 固定 `RuntimeKernel`、`RuntimeContext`、`InvocationRequest`、`InvocationPlan`、`GateDecision`、`ConsentRequest`、`ConsentReceipt`、`SecretHandle`、`ResultEnvelope`、`RuntimeError` 和 evidence/audit 的公共形状。
+- 明确 CLI、MCP、未来 API 和 Console 只能通过 Runtime public contract 适配，不重新发明调用模型。
+- 明确 `invoke` 是唯一允许产生外部副作用的入口，`planInvocation` 不解析 secret、不发请求。
+
+后续：
+
+- T124/T145：把设计契约落入 `packages/runtime` TypeScript exports。
+- T268：补齐统一 Runtime Gate 接口和 Gate registry。
+- T220/T231：把 Result Envelope 落到 Runtime 和 CLI 输出。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+git diff --check
+```
+
 
 
 ---

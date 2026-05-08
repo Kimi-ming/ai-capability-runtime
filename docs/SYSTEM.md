@@ -29,6 +29,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | 整体系统设计 | 收敛五个平面和生态闭环 | `docs/设计/整体系统设计-v1.md` | Runtime Kernel + ledgers/cards model |
 | 整体设计审查 | 找出工程化缺口和补强路线 | `docs/评审/整体设计二次审查-2026-05-08.md` | T267-T276 follow-up tasks |
 | Runtime 核心 | 安全执行能力 | `docs/设计/runtime-contracts.md` | invoke pipeline |
+| Runtime Kernel 公共契约 | 统一 CLI/MCP/未来入口的调用语言 | `docs/设计/runtime-kernel-contract-v1.md` | RuntimeKernel、InvocationRequest、ResultEnvelope、GateDecision 形状 |
 | HTTP 执行 | 调用外部 API | `docs/设计/http-execution-v1.md` | body/auth/outbound 规则 |
 | Policy DSL | 执行前决策 | `docs/设计/policy-dsl-v1.md` | default/rules YAML |
 | Policy Decision Trace | 解释每次策略决策 | `docs/设计/policy-decision-trace-v1.md` | redacted trace object |
@@ -102,7 +103,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | --- | --- | --- |
 | 标准面 | Capability 描述、打包、测试和演进 | `docs/规范/capability-manifest.md`, `docs/设计/capability-package-v1.md` |
 | 控制面 | 安装、策略、确认、配额、生命周期和变更 | `docs/设计/policy-dsl-v1.md`, `docs/运营/policy-lifecycle-and-change-control.md` |
-| 执行面 | Runtime pipeline、executor、result envelope | `docs/设计/runtime-contracts.md`, `docs/设计/result-envelope-v1.md` |
+| 执行面 | Runtime pipeline、executor、result envelope | `docs/设计/runtime-kernel-contract-v1.md`, `docs/设计/runtime-contracts.md`, `docs/设计/result-envelope-v1.md` |
 | 信任面 | 审计、来源、撤销、安全公告和质量证据 | `docs/设计/audit-log-v1.md`, `docs/生态/trust-model-v1.md` |
 | 互操作面 | MCP、CLI、未来 A2A/Apps SDK/OpenAPI adapter | `docs/生态/interoperability-profiles.md`, `docs/协议/protocol-positioning.md` |
 
@@ -144,6 +145,7 @@ Untrusted / Semi-trusted
 Trusted Computing Base V1
 - schema validator
 - runtime invoke pipeline
+- Runtime Kernel public contract implementation
 - policy engine
 - policy decision trace builder
 - policy change ledger writer
@@ -209,6 +211,7 @@ Governance Surface
 | 决策 | 状态 |
 | --- | --- |
 | V1 只支持 `type: http` | 已接受 |
+| CLI/MCP/未来 API 必须通过 Runtime Kernel public contract 调用 | 已接受 |
 | Audit log 使用 SQLite | 已接受 |
 | Capability 生命周期作为治理主线 | 已接受 |
 | HTTP body 使用 `execution.body.fields` 模板 | 已接受 |

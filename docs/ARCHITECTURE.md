@@ -1,6 +1,6 @@
 # 架构总览：OpenCap V1
 
-本文是实现时的架构入口。整体系统模型见 `docs/设计/整体系统设计-v1.md`，详细实施架构见 `docs/规划/v1-architecture.md`。
+本文是实现时的架构入口。整体系统模型见 `docs/设计/整体系统设计-v1.md`，Runtime 对外公共语言见 `docs/设计/runtime-kernel-contract-v1.md`，详细实施架构见 `docs/规划/v1-architecture.md`。
 
 ## 架构原则
 
@@ -59,6 +59,7 @@ Runtime Core
 
 ### `@opencap/runtime`
 
+- Runtime Kernel public contract 类型
 - 本地状态路径
 - install/list/invoke 能力
 - policy evaluation
@@ -186,6 +187,7 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 架构实现时优先对齐以下文档：
 
 - `docs/设计/整体系统设计-v1.md`：五个平面、三条主链路、Runtime Kernel、账本和卡片模型。
+- `docs/设计/runtime-kernel-contract-v1.md`：Runtime Kernel 对 CLI、MCP 和未来入口暴露的公共契约。
 - `docs/设计/domain-model.md`：对象、关系和不变量。
 - `docs/设计/runtime-contracts.md`：Runtime 调用管线和模块契约。
 - `docs/协议/protocol-positioning.md`：MCP、A2A、OpenAPI 和 Apps SDK 的边界。

@@ -51,20 +51,16 @@ T001：让 opencap validate 调用真实 schema 校验
 
 ## 最近验证
 
-最近一次文档重写时运行过：
+项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。最近已运行过：
 
 - `git diff --check`
 - JSON 解析检查
 - YAML 解析检查
-
-尚未运行：
-
 - `pnpm install`
-- `pnpm validate`
-- `pnpm test`
 - `pnpm build`
+- `pnpm test`
 
-原因：当前任务主要是文档组织，没有安装依赖。
+当前已知：`pnpm validate` 失败在 T001 范围内，错误为 AJV 没有加载 `https://json-schema.org/draft/2020-12/schema`。
 
 ## 已知风险
 
@@ -249,3 +245,14 @@ pnpm install
 这台机器上 `conda run -n ai-capability-runtime node --version` 可能会因为 PATH 优先级拿到 Homebrew Node；激活环境后应确认 `which node` 指向 `/opt/anaconda3/envs/ai-capability-runtime/bin/node`。
 
 依赖已在该环境中安装，`pnpm-lock.yaml` 已生成。使用环境 PATH 运行时：`pnpm build` 通过，`pnpm test` 通过；`pnpm validate` 失败在 T001 范围内，错误为 AJV 没有加载 `https://json-schema.org/draft/2020-12/schema`。这说明环境问题已解除，下一步应修 validator。
+
+
+## Runtime Kernel 公共契约 V1 已补齐
+
+已新增 `docs/设计/runtime-kernel-contract-v1.md`，把整体系统设计中的 Runtime Kernel 进一步压成公共契约：`RuntimeKernel`、`RuntimeContext`、`InvocationRequest`、`InvocationPlan`、`GateDecision`、`ConsentRequest`、`ConsentReceipt`、`SecretHandle`、`ResultEnvelope`、`RuntimeError` 和 evidence/audit 形状已经明确。
+
+这轮设计的关键约束是：CLI、MCP、未来 HTTP API 和 Console 都只能围绕 Runtime public contract 做 adapter；`invoke` 是唯一允许产生外部副作用的入口；`planInvocation` 不解析 secret、不发外部请求；Host capability 只能影响展示和确认通道，不能降低 Runtime policy。
+
+T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：修正 `opencap validate` 的真实 schema 校验，尤其是 AJV draft 2020-12 meta schema 初始化问题。后续 T124/T145 再把本次契约落入 `packages/runtime` 的 TypeScript public exports。
+
+本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析、Markdown 相对链接检查和项目 conda 环境下的 `pnpm build` 通过。

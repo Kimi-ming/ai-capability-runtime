@@ -2,17 +2,18 @@
 
 本文是 OpenCap 文档的第一入口。项目当前处于 V1 前期架构设计和实现准备阶段，文档数量较多，阅读时不要从文件树随机打开，而应按本文路径进入。
 
-## 先读这 7 份
+## 先读这 8 份
 
 | 顺序 | 文档 | 作用 |
 | --- | --- | --- |
 | 1 | [体系蓝图](SYSTEM.md) | 了解 OpenCap 是什么、由哪些子系统组成。 |
 | 2 | [整体系统设计 V1](设计/整体系统设计-v1.md) | 理解五个平面、三条链路和 Runtime Kernel。 |
-| 3 | [产品规格](SPEC.md) | 明确 V1 做什么、不做什么。 |
-| 4 | [架构总览](ARCHITECTURE.md) | 了解 Runtime、CLI、MCP、Registry 的边界。 |
-| 5 | [当前状态交接](HANDOFF.md) | 接手当前工作，知道最近完成了什么。 |
-| 6 | [开发任务总表](TASKS.md) | 选择下一项可执行任务。 |
-| 7 | [验证策略](TESTING.md) | 知道任务完成前要跑哪些验证。 |
+| 3 | [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md) | 理解 CLI、MCP 和未来入口共享的运行时公共语言。 |
+| 4 | [产品规格](SPEC.md) | 明确 V1 做什么、不做什么。 |
+| 5 | [架构总览](ARCHITECTURE.md) | 了解 Runtime、CLI、MCP、Registry 的边界。 |
+| 6 | [当前状态交接](HANDOFF.md) | 接手当前工作，知道最近完成了什么。 |
+| 7 | [开发任务总表](TASKS.md) | 选择下一项可执行任务。 |
+| 8 | [验证策略](TESTING.md) | 知道任务完成前要跑哪些验证。 |
 
 ## 按目的阅读
 
@@ -36,6 +37,7 @@
 ### 我要审查架构
 
 - [整体系统设计 V1](设计/整体系统设计-v1.md)
+- [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md)
 - [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
 - [架构总览](ARCHITECTURE.md)
 - [运行时契约](设计/runtime-contracts.md)
@@ -47,6 +49,7 @@
 ### 我要实现 V1 主路径
 
 - [能力清单](规范/capability-manifest.md)
+- [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md)
 - [命令行契约 V1](设计/cli-contract-v1.md)
 - [本地状态 V1](设计/local-state-v1.md)
 - [策略 DSL V1](设计/policy-dsl-v1.md)

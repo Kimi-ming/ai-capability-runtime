@@ -21,6 +21,7 @@
 | [体系蓝图](SYSTEM.md) | 全局系统结构和子系统列表 | 新增子系统或全局不变量变化时 |
 | [产品规格](SPEC.md) | V1 范围和产品正确性 | 行为、范围或验收口径变化时 |
 | [整体系统设计 V1](设计/整体系统设计-v1.md) | 五个平面、三条链路、Runtime Kernel 和生态闭环 | 总体架构模型、扩展边界或生态阶段变化时 |
+| [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md) | Runtime 对 CLI/MCP/未来入口暴露的公共 request/result/error/evidence 语言 | Runtime public types、adapter 边界或 gate 顺序变化时 |
 | [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md) | 工程缺口、补强路线和成熟度评分 | 大设计补强、实现前架构审查或阶段复盘时 |
 | [架构总览](ARCHITECTURE.md) | 模块边界和主调用链 | Runtime/CLI/MCP/Registry 边界变化时 |
 | [开发任务总表](TASKS.md) | 任务队列和验收标准 | 每次新增、拆分、完成任务时 |
@@ -64,12 +65,13 @@
 ### 架构评审路径
 
 1. [整体系统设计 V1](设计/整体系统设计-v1.md)
-2. [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
-3. [架构总览](ARCHITECTURE.md)
-4. [运行时契约](设计/runtime-contracts.md)
-5. [决策索引](DECISIONS.md)
-6. [风险登记](RISKS.md)
-7. [一致性测试体系](质量/conformance-suite-v1.md)
+2. [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md)
+3. [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
+4. [架构总览](ARCHITECTURE.md)
+5. [运行时契约](设计/runtime-contracts.md)
+6. [决策索引](DECISIONS.md)
+7. [风险登记](RISKS.md)
+8. [一致性测试体系](质量/conformance-suite-v1.md)
 
 ### 实现任务路径
 

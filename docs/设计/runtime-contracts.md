@@ -1,6 +1,6 @@
 # 运行时契约
 
-本文定义 OpenCap Runtime 各模块的输入、输出和边界。实现时应把这些契约看作模块之间的稳定接口。
+本文定义 OpenCap Runtime 各模块的输入、输出和边界。实现时应把这些契约看作模块之间的稳定接口。Runtime 对 CLI、MCP 和未来入口暴露的公共类型契约见 `docs/设计/runtime-kernel-contract-v1.md`。
 
 ## Runtime 总入口
 
