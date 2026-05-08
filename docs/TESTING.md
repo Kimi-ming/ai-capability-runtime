@@ -55,7 +55,7 @@ pnpm build
 - `opencap install <id>` 多重匹配时报错
 - `opencap list` 空状态和有安装状态
 - exit code 正确
-- CLI stdout/stderr snapshot 符合 `docs/design/cli-contract-v1.md`
+- CLI stdout/stderr snapshot 符合 `docs/设计/cli-contract-v1.md`
 
 ### `@opencap/runtime`
 
@@ -111,7 +111,7 @@ pnpm build
 - tool input schema 透传
 - MCP call 路由到 runtime
 - `ask` 且无 elicitation 时返回 confirmation_required
-- error mapping 符合 `docs/design/error-model-v1.md`
+- error mapping 符合 `docs/设计/error-model-v1.md`
 
 ## 手动 Smoke Test
 
@@ -155,7 +155,7 @@ opencap serve --mcp
 
 ## Conformance Suite 目标
 
-V1 后续要把普通测试提升为 profile-driven conformance。测试分组见 `docs/quality/conformance-suite-v1.md`。
+V1 后续要把普通测试提升为 profile-driven conformance。测试分组见 `docs/质量/conformance-suite-v1.md`。
 
 最小要求：
 

@@ -86,7 +86,7 @@ T001：让 opencap validate 调用真实 schema 校验
 
 已新增产品战略、用户场景、Capability 生命周期、领域模型、Runtime 契约、协议定位、威胁模型、发布门禁和协议生态补充调研。新增 ADR 0006/0007，并更新风险登记、任务表、README、INDEX、SPEC、ARCHITECTURE 和追踪矩阵。
 
-当前下一步仍然是 T001：让 `opencap validate` 调用真实 schema 校验。实现时应优先对齐 `docs/design/runtime-contracts.md` 和 `docs/product/capability-lifecycle.md`。
+当前下一步仍然是 T001：让 `opencap validate` 调用真实 schema 校验。实现时应优先对齐 `docs/设计/runtime-contracts.md` 和 `docs/产品/capability-lifecycle.md`。
 
 ## V1 执行和治理关键决策已收敛
 
@@ -98,7 +98,7 @@ T001：让 opencap validate 调用真实 schema 校验
 
 ## 实现前接口契约已补齐
 
-已新增 CLI 契约、本地状态、配置模型、MCP 接口、错误模型、隐私与数据保留、CI 安全基线和 V1 实施计划。ADR 0013-0015 已接受。下一步 T001 可以直接按 `docs/design/cli-contract-v1.md` 和 `docs/design/error-model-v1.md` 实现，不需要再临场定义命令行为。
+已新增 CLI 契约、本地状态、配置模型、MCP 接口、错误模型、隐私与数据保留、CI 安全基线和 V1 实施计划。ADR 0013-0015 已接受。下一步 T001 可以直接按 `docs/设计/cli-contract-v1.md` 和 `docs/设计/error-model-v1.md` 实现，不需要再临场定义命令行为。
 
 ## 生态、社区和可观测性体系已补齐
 
@@ -193,9 +193,9 @@ T001：让 opencap validate 调用真实 schema 校验
 
 ## 中文文档入口、索引和规范已重新梳理
 
-已新增 `docs/README.md` 作为中文文档中心，新增 `docs/community/documentation-governance.md` 作为中文文档规范，并重写 `docs/INDEX.md` 为维护者索引。根 `README.md` 的长文档列表已收敛为关键入口，GitHub issue/PR 模板、AGENTS、CHANGELOG 和一批用户可见标题已中文化。
+已新增 `docs/README.md` 作为中文文档中心，新增 `docs/社区/documentation-governance.md` 作为中文文档规范，并重写 `docs/INDEX.md` 为维护者索引。根 `README.md` 的长文档列表已收敛为关键入口，GitHub issue/PR 模板、AGENTS、CHANGELOG 和一批用户可见标题已中文化。
 
-后续维护规则：README 只放少量关键入口；新人阅读从 `docs/README.md` 开始；维护者职责和目录规则看 `docs/INDEX.md`；新增文档前先看 `docs/community/documentation-governance.md`，优先更新旧文档而不是继续堆新文件。
+后续维护规则：README 只放少量关键入口；新人阅读从 `docs/README.md` 开始；维护者职责和目录规则看 `docs/INDEX.md`；新增文档前先看 `docs/社区/documentation-governance.md`，优先更新旧文档而不是继续堆新文件。
 
 `docs/` 根目录后来已做物理归位：普通教程、参考、规范和模板文档已经移动到对应子目录。后续继续移动文件时，必须同步更新链接并运行文档闭环检查。
 
@@ -203,8 +203,16 @@ T001：让 opencap validate 调用真实 schema 校验
 
 ## docs 根目录文件已物理归位
 
-已把 `docs/` 根目录从 22 个文件压到 13 个核心入口/状态文件。移动结果：`introduction.md` -> `docs/overview/`，`getting-started.md` -> `docs/guides/`，`capability-manifest.md` -> `docs/spec/`，`permission-model.md` 和 `security-model.md` -> `docs/security/`，`runtime-architecture.md` -> `docs/design/`，`registry-guidelines.md` 和 `documentation-governance.md` -> `docs/community/`，`TASK_TEMPLATE.md` -> `docs/planning/`。全仓引用已同步更新，`.DS_Store` 本地临时文件已清理。
+已把 `docs/` 根目录从 22 个文件压到 13 个核心入口/状态文件。移动结果：`introduction.md` -> `docs/概览/`，`getting-started.md` -> `docs/教程/`，`capability-manifest.md` -> `docs/规范/`，`permission-model.md` 和 `security-model.md` -> `docs/安全/`，`runtime-architecture.md` -> `docs/设计/`，`registry-guidelines.md` 和 `documentation-governance.md` -> `docs/社区/`，`TASK_TEMPLATE.md` -> `docs/规划/`。全仓引用已同步更新，`.DS_Store` 本地临时文件已清理。
 
 后续规则：`docs/` 根目录只放 `README/INDEX/SYSTEM/SPEC/ARCHITECTURE/TASKS/HANDOFF/TESTING/DECISIONS/RISKS/ROADMAP/WORKFLOW/GLOSSARY` 这类核心入口、状态和治理文件。普通说明文档必须进入子目录。
 
 本轮验证：`audit_docs.py` 显示文档数 203、任务总数 130、已完成 21、未完成 109；`check_docs.py`、`git diff --check`、JSON 解析、YAML 解析和 Markdown 相对链接检查通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+## docs 子目录结构已中文化
+
+已将 `docs/` 下一层目录从英文分类统一改为中文分类：`docs/社区/`、`docs/设计/`、`docs/安全/`、`docs/调研/`、`docs/运营/`、`docs/质量/`、`docs/规划/`、`docs/规范/`、`docs/产品/`、`docs/生态/`、`docs/决策/`、`docs/协议/`、`docs/教程/`、`docs/概览/`、`docs/评审/`。全仓旧英文文档目录引用已同步替换。
+
+保留 `docs/README.md`、`docs/TASKS.md`、`docs/HANDOFF.md` 等根部核心文件名，以及 `packages/spec` 等工程代码路径，原因是这些路径被脚本、构建和开发者习惯依赖。后续新增文档应优先进入中文目录，新增目录必须先写入 `docs/社区/documentation-governance.md` 和 `docs/INDEX.md`。
+
+本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析、旧英文目录引用扫描和 Markdown 相对链接检查通过；`audit_docs.py` 显示文档数 203、任务总数 131、已完成 22、未完成 109。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

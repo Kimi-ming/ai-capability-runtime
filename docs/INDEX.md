@@ -9,15 +9,15 @@
 - `docs/INDEX.md` 是维护者索引。
 - `docs/HANDOFF.md` 只记录当前状态。
 - `docs/TASKS.md` 是开发任务源。
-- `docs/decisions/` 和 `rfcs/` 记录长期决策，不放临时想法。
-- `docs/research/` 只保留调研和参考，不作为实现契约。
+- `docs/决策/` 和 `rfcs/` 记录长期决策，不放临时想法。
+- `docs/调研/` 只保留调研和参考，不作为实现契约。
 
 ## 核心入口
 
 | 文档 | 职责 | 什么时候更新 |
 | --- | --- | --- |
 | [中文文档中心](README.md) | 面向新人和维护者的阅读入口 | 文档结构、阅读路径变化时 |
-| [中文文档规范](community/documentation-governance.md) | 语言、分层、命名和清理规则 | 文档治理规则变化时 |
+| [中文文档规范](社区/documentation-governance.md) | 语言、分层、命名和清理规则 | 文档治理规则变化时 |
 | [体系蓝图](SYSTEM.md) | 全局系统结构和子系统列表 | 新增子系统或全局不变量变化时 |
 | [产品规格](SPEC.md) | V1 范围和产品正确性 | 行为、范围或验收口径变化时 |
 | [架构总览](ARCHITECTURE.md) | 模块边界和主调用链 | Runtime/CLI/MCP/Registry 边界变化时 |
@@ -31,20 +31,20 @@
 
 | 目录 | 类型 | 职责 |
 | --- | --- | --- |
-| `docs/overview/` | 解释 | 项目介绍和总体背景。 |
-| `docs/guides/` | 教程 | 快速开始和学习路径。 |
-| `docs/product/` | 解释 | 产品定位、用户场景、能力生命周期。 |
-| `docs/spec/` | 参考 | Manifest、版本、兼容性等规范演进。 |
-| `docs/design/` | 参考 | 运行时、命令行、MCP、策略、审计、HTTP、结果等模块契约。 |
-| `docs/security/` | 参考/解释 | 威胁模型、安全边界、数据治理、供应链、凭据和最小权限。 |
-| `docs/ecosystem/` | 解释 | 注册表、互操作、信任、发现选择、商业边界等生态规则。 |
-| `docs/quality/` | 参考 | 一致性测试、质量门禁、证据、校验和 provenance。 |
-| `docs/operations/` | 操作指南 | 发布、凭据、故障恢复、计量和运行手册。 |
-| `docs/community/` | 操作指南 | 贡献者、维护者、RFC、Registry 和文档治理流程。 |
-| `docs/planning/` | 规划 | 需求、里程碑、实施计划、开放问题和追踪矩阵。 |
-| `docs/decisions/` | 决策 | 已接受 ADR。 |
-| `docs/research/` | 调研 | 外部参考和阶段性研究，不能单独作为实现依据。 |
-| `docs/reviews/` | 审查 | 阶段性技术审查。 |
+| `docs/概览/` | 解释 | 项目介绍和总体背景。 |
+| `docs/教程/` | 教程 | 快速开始和学习路径。 |
+| `docs/产品/` | 解释 | 产品定位、用户场景、能力生命周期。 |
+| `docs/规范/` | 参考 | Manifest、版本、兼容性等规范演进。 |
+| `docs/设计/` | 参考 | 运行时、命令行、MCP、策略、审计、HTTP、结果等模块契约。 |
+| `docs/安全/` | 参考/解释 | 威胁模型、安全边界、数据治理、供应链、凭据和最小权限。 |
+| `docs/生态/` | 解释 | 注册表、互操作、信任、发现选择、商业边界等生态规则。 |
+| `docs/质量/` | 参考 | 一致性测试、质量门禁、证据、校验和 provenance。 |
+| `docs/运营/` | 操作指南 | 发布、凭据、故障恢复、计量和运行手册。 |
+| `docs/社区/` | 操作指南 | 贡献者、维护者、RFC、Registry 和文档治理流程。 |
+| `docs/规划/` | 规划 | 需求、里程碑、实施计划、开放问题和追踪矩阵。 |
+| `docs/决策/` | 决策 | 已接受 ADR。 |
+| `docs/调研/` | 调研 | 外部参考和阶段性研究，不能单独作为实现依据。 |
+| `docs/评审/` | 审查 | 阶段性技术审查。 |
 | `rfcs/` | 决策前草案 | 需要社区讨论或兼容性评估的提案。 |
 | `examples/` | 教程/示例 | 示例能力和 Host 配置。 |
 | `registry/` | Registry 条目 | Git-based 能力注册表源数据。 |
@@ -62,16 +62,16 @@
 ### 架构评审路径
 
 1. [架构总览](ARCHITECTURE.md)
-2. [运行时契约](design/runtime-contracts.md)
+2. [运行时契约](设计/runtime-contracts.md)
 3. [决策索引](DECISIONS.md)
 4. [风险登记](RISKS.md)
-5. [一致性测试体系](quality/conformance-suite-v1.md)
+5. [一致性测试体系](质量/conformance-suite-v1.md)
 
 ### 实现任务路径
 
 1. [当前状态交接](HANDOFF.md)
 2. [开发任务总表](TASKS.md)
-3. 当前任务引用的 `docs/design/` 或 `docs/security/` 文档
+3. 当前任务引用的 `docs/设计/` 或 `docs/安全/` 文档
 4. [验证策略](TESTING.md)
 5. [开发工作流](WORKFLOW.md)
 

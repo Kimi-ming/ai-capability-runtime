@@ -240,6 +240,7 @@
 - 已完成：T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系。
 - 已完成：T262 P0：重新梳理中文文档入口、索引和文档规范。
 - 已完成：T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板。
+- 已完成：T264 P0：中文化 docs 子目录结构并同步全仓链接。
 
 
 ---
@@ -329,7 +330,7 @@ pnpm --filter @opencap/spec build
 产出：
 
 - `packages/spec/schema/registry-test.schema.json`
-- `docs/community/registry-guidelines.md` 更新
+- `docs/社区/registry-guidelines.md` 更新
 - 示例 tests 修正
 
 ### T005 P2：增加 manifest authoring guide
@@ -338,7 +339,7 @@ pnpm --filter @opencap/spec build
 
 产出：
 
-- `docs/guides/write-a-capability.md`
+- `docs/教程/write-a-capability.md`
 - 示例从空目录到通过 validate
 
 ---
@@ -793,7 +794,7 @@ V1 handler：
 
 新增：
 
-- `docs/guides/connect-mcp-host.md`
+- `docs/教程/connect-mcp-host.md`
 
 ---
 
@@ -817,7 +818,7 @@ V1 handler：
 
 新增：
 
-- `docs/guides/review-a-capability.md`
+- `docs/教程/review-a-capability.md`
 - 权限、风险、外部端点、README、测试、维护者检查
 
 ### T082 P1：补充 Registry README
@@ -895,7 +896,7 @@ V1 handler：
 
 新增：
 
-- `docs/security/threat-model.md`
+- `docs/安全/threat-model.md`
 - prompt injection
 - confused deputy
 - overbroad capability
@@ -995,7 +996,7 @@ V1 handler：
 
 新增：
 
-- `docs/guides/first-contribution.md`
+- `docs/教程/first-contribution.md`
 
 ### T114 P2：新增架构图
 
@@ -1080,10 +1081,10 @@ V1 handler：
 
 - `docs/INDEX.md`
 - `docs/WORKFLOW.md`
-- `docs/planning/v1-milestones.md`
-- `docs/planning/traceability-matrix.md`
+- `docs/规划/v1-milestones.md`
+- `docs/规划/traceability-matrix.md`
 - `docs/RISKS.md`
-- `docs/planning/task-template.md`
+- `docs/规划/task-template.md`
 - `docs/GLOSSARY.md`
 
 验收标准：
@@ -1106,7 +1107,7 @@ git diff --check
 
 - [x] T093 P2：威胁模型文档
 
-已完成：新增 `docs/security/threat-model.md`，覆盖资产、信任边界、攻击者模型、主要威胁、Abuse Cases、安全不变量和关联任务。
+已完成：新增 `docs/安全/threat-model.md`，覆盖资产、信任边界、攻击者模型、主要威胁、Abuse Cases、安全不变量和关联任务。
 
 验证：
 
@@ -1470,7 +1471,7 @@ pnpm --filter @opencap/spec test
 
 - `packages/mcp/src/tool-projection.ts`
 - `packages/runtime/src/`
-- `docs/design/audit-log-v1.md`
+- `docs/设计/audit-log-v1.md`
 
 验收标准：
 
@@ -1516,7 +1517,7 @@ pnpm --filter @opencap/mcp test
 涉及文件：
 
 - `rfcs/`
-- `docs/ecosystem/discovery-and-selection-boundary.md`
+- `docs/生态/discovery-and-selection-boundary.md`
 
 验收标准：
 
@@ -1538,8 +1539,8 @@ git diff --check
 
 涉及文件：
 
-- `docs/ecosystem/discovery-and-selection-boundary.md`
-- `docs/quality/execution-evidence-v1.md`
+- `docs/生态/discovery-and-selection-boundary.md`
+- `docs/质量/execution-evidence-v1.md`
 
 验收标准：
 
@@ -1561,7 +1562,7 @@ git diff --check
 
 涉及文件：
 
-- `docs/community/capability-review-checklist.md`
+- `docs/社区/capability-review-checklist.md`
 - `.github/ISSUE_TEMPLATE/capability_submission.yml`
 
 验收标准：
@@ -1583,8 +1584,8 @@ ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| 
 
 涉及文件：
 
-- `docs/security/prompt-surface-security-v1.md`
-- `docs/design/output-normalization-v1.md` 或后续等价文档
+- `docs/安全/prompt-surface-security-v1.md`
+- `docs/设计/output-normalization-v1.md` 或后续等价文档
 
 验收标准：
 
@@ -1606,8 +1607,8 @@ git diff --check
 
 涉及文件：
 
-- `docs/ecosystem/host-compatibility-matrix.md`
-- `docs/ecosystem/interoperability-profiles.md`
+- `docs/生态/host-compatibility-matrix.md`
+- `docs/生态/interoperability-profiles.md`
 
 验收标准：
 
@@ -1751,7 +1752,7 @@ pnpm --filter @opencap/runtime test
 涉及文件：
 
 - `packages/runtime/src/`
-- `docs/quality/execution-evidence-v1.md`
+- `docs/质量/execution-evidence-v1.md`
 
 验收标准：
 
@@ -1796,8 +1797,8 @@ pnpm --filter @opencap/runtime test
 
 涉及文件：
 
-- `docs/ecosystem/host-compatibility-matrix.md`
-- `docs/ecosystem/result-delivery-boundary.md`
+- `docs/生态/host-compatibility-matrix.md`
+- `docs/生态/result-delivery-boundary.md`
 
 验收标准：
 
@@ -1819,7 +1820,7 @@ git diff --check
 涉及文件：
 
 - `rfcs/`
-- `docs/quality/output-validation-v1.md`
+- `docs/质量/output-validation-v1.md`
 
 验收标准：
 
@@ -1842,7 +1843,7 @@ git diff --check
 涉及文件：
 
 - `rfcs/`
-- `docs/ecosystem/result-delivery-boundary.md`
+- `docs/生态/result-delivery-boundary.md`
 
 验收标准：
 
@@ -1911,7 +1912,7 @@ pnpm --filter @opencap/runtime test
 涉及文件：
 
 - `packages/cli/src/`
-- `docs/design/cli-contract-v1.md`
+- `docs/设计/cli-contract-v1.md`
 
 验收标准：
 
@@ -1935,7 +1936,7 @@ pnpm --filter @opencap/cli test
 
 - `packages/runtime/src/index.ts`
 - `packages/spec/src/index.ts` 或 future contracts package
-- `docs/spec/versioning-and-compatibility.md`
+- `docs/规范/versioning-and-compatibility.md`
 
 验收标准：
 
@@ -2032,7 +2033,7 @@ pnpm --filter @opencap/runtime test
 
 - `packages/runtime/src/data-egress-policy.ts`
 - `packages/runtime/src/invoke-pipeline.ts`
-- `docs/design/data-egress-policy-v1.md`
+- `docs/设计/data-egress-policy-v1.md`
 
 验收标准：
 
@@ -2055,7 +2056,7 @@ pnpm --filter @opencap/runtime test
 
 涉及文件：
 
-- `docs/design/audit-log-v1.md`
+- `docs/设计/audit-log-v1.md`
 - `packages/runtime/src/audit*`
 
 验收标准：
@@ -2078,7 +2079,7 @@ pnpm --filter @opencap/runtime test
 
 涉及文件：
 
-- `docs/design/confirmation-and-consent-v1.md`
+- `docs/设计/confirmation-and-consent-v1.md`
 - `packages/runtime/src/confirmation*`
 
 验收标准：
@@ -2103,7 +2104,7 @@ pnpm --filter @opencap/runtime test
 涉及文件：
 
 - `packages/runtime/src/`
-- `docs/quality/input-provenance-v1.md`
+- `docs/质量/input-provenance-v1.md`
 
 验收标准：
 
@@ -2148,8 +2149,8 @@ pnpm --filter @opencap/runtime test
 
 涉及文件：
 
-- `docs/quality/input-provenance-v1.md`
-- `docs/design/multi-step-execution-boundary.md`
+- `docs/质量/input-provenance-v1.md`
+- `docs/设计/multi-step-execution-boundary.md`
 
 验收标准：
 
@@ -2266,7 +2267,7 @@ pnpm --filter @opencap/runtime test
 涉及文件：
 
 - `rfcs/`
-- `docs/security/data-classification-v1.md`
+- `docs/安全/data-classification-v1.md`
 
 验收标准：
 
@@ -2289,7 +2290,7 @@ git diff --check
 涉及文件：
 
 - `rfcs/`
-- `docs/design/data-egress-policy-v1.md`
+- `docs/设计/data-egress-policy-v1.md`
 
 验收标准：
 
@@ -2339,7 +2340,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 - `packages/runtime/src/policy*`
 - `packages/runtime/src/audit*`
-- `docs/design/policy-decision-trace-v1.md`
+- `docs/设计/policy-decision-trace-v1.md`
 
 验收标准：
 
@@ -2365,7 +2366,7 @@ pnpm --filter @opencap/runtime test
 
 - `packages/cli/src/`
 - `packages/runtime/src/policy*`
-- `docs/design/cli-contract-v1.md`
+- `docs/设计/cli-contract-v1.md`
 
 验收标准：
 
@@ -2391,7 +2392,7 @@ pnpm --filter @opencap/runtime test
 
 - `packages/runtime/src/policy-ledger*`
 - `packages/cli/src/`
-- `docs/operations/policy-lifecycle-and-change-control.md`
+- `docs/运营/policy-lifecycle-and-change-control.md`
 
 验收标准：
 
@@ -2416,7 +2417,7 @@ pnpm --filter @opencap/runtime test
 
 - `packages/runtime/src/policy-validator*`
 - `packages/cli/src/`
-- `docs/design/policy-dsl-v1.md`
+- `docs/设计/policy-dsl-v1.md`
 
 验收标准：
 
@@ -2442,7 +2443,7 @@ pnpm --filter @opencap/cli test
 
 - `packages/runtime/src/policy-simulation*`
 - `packages/cli/src/`
-- `docs/quality/policy-simulation-and-diff-v1.md`
+- `docs/质量/policy-simulation-and-diff-v1.md`
 
 验收标准：
 
@@ -2491,7 +2492,7 @@ pnpm --filter @opencap/runtime test
 
 - `packages/runtime/src/policy-override*`
 - `packages/runtime/src/audit*`
-- `docs/security/policy-override-and-breakglass-v1.md`
+- `docs/安全/policy-override-and-breakglass-v1.md`
 
 验收标准：
 
@@ -2516,8 +2517,8 @@ pnpm --filter @opencap/runtime test
 涉及文件：
 
 - `rfcs/`
-- `docs/operations/policy-lifecycle-and-change-control.md`
-- `docs/security/signing-and-provenance-roadmap.md`
+- `docs/运营/policy-lifecycle-and-change-control.md`
+- `docs/安全/signing-and-provenance-roadmap.md`
 
 验收标准：
 
@@ -2563,8 +2564,8 @@ pnpm --filter @opencap/runtime test
 
 涉及文件：
 
-- `docs/operations/policy-incident-runbook.md`
-- `docs/security/policy-override-and-breakglass-v1.md`
+- `docs/运营/policy-incident-runbook.md`
+- `docs/安全/policy-override-and-breakglass-v1.md`
 
 验收标准：
 
@@ -2610,7 +2611,7 @@ pnpm --filter @opencap/runtime test
 
 涉及文件：
 
-- `docs/quality/conformance-suite-v1.md`
+- `docs/质量/conformance-suite-v1.md`
 - `packages/runtime/src/**/*.test.ts`
 
 验收标准：
@@ -2653,7 +2654,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 - [x] T262 P0：重新梳理中文文档入口、索引和文档规范
 
-已完成：新增 `docs/README.md` 作为中文文档中心，新增 `docs/community/documentation-governance.md` 作为中文文档规范，重写 `docs/INDEX.md` 为维护者索引，收敛根 `README.md` 的超长文档清单，并中文化 GitHub issue/PR 模板、变更日志、AGENTS 和一批用户可见标题。
+已完成：新增 `docs/README.md` 作为中文文档中心，新增 `docs/社区/documentation-governance.md` 作为中文文档规范，重写 `docs/INDEX.md` 为维护者索引，收敛根 `README.md` 的超长文档清单，并中文化 GitHub issue/PR 模板、变更日志、AGENTS 和一批用户可见标题。
 
 验收标准：
 
@@ -2675,7 +2676,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 - [x] T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板
 
-已完成：将散落在 `docs/` 根目录的普通文档移动到对应目录：介绍进入 `docs/overview/`，快速开始进入 `docs/guides/`，能力清单进入 `docs/spec/`，权限和安全模型进入 `docs/security/`，运行时架构进入 `docs/design/`，Registry 指南和中文文档规范进入 `docs/community/`，任务模板进入 `docs/planning/`。同步更新全仓引用、文档中心、维护者索引和交接文档。
+已完成：将散落在 `docs/` 根目录的普通文档移动到对应目录：介绍进入 `docs/概览/`，快速开始进入 `docs/教程/`，能力清单进入 `docs/规范/`，权限和安全模型进入 `docs/安全/`，运行时架构进入 `docs/设计/`，Registry 指南和中文文档规范进入 `docs/社区/`，任务模板进入 `docs/规划/`。同步更新全仓引用、文档中心、维护者索引和交接文档。
 
 验收标准：
 
@@ -2683,6 +2684,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - 被移动文档的全仓引用已更新。
 - 文档中心和维护者索引反映新的目录职责。
 - 自动化仍能找到 `docs/TASKS.md`、`docs/HANDOFF.md`、`docs/TESTING.md` 等核心文件。
+
+验证：
+
+```bash
+git diff --check
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T264 P0：中文化 docs 子目录结构并同步全仓链接
+
+- [x] T264 P0：中文化 docs 子目录结构并同步全仓链接
+
+已完成：将 `docs/community`、`docs/design`、`docs/security`、`docs/research` 等英文子目录统一迁移为 `docs/社区/`、`docs/设计/`、`docs/安全/`、`docs/调研/` 等中文目录；同步更新 README、AGENTS、GitHub 模板、文档入口、维护者索引、任务表、追踪矩阵和各设计/调研文档中的相对链接。真实工程路径仍保持 `packages/spec` 等代码目录名，避免破坏构建和工具链。
+
+验收标准：
+
+- `docs/` 下一层目录全部使用中文业务分类。
+- 全仓不再引用旧的英文文档子目录路径。
+- 文档中心、维护者索引和中文文档规范说明新的目录职责。
+- 工程代码路径没有被文档目录中文化误改。
 
 验证：
 

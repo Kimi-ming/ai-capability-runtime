@@ -114,7 +114,7 @@ main
 
 ## 什么时候写 ADR
 
-以下情况必须写 `docs/decisions/NNNN-title.md`：
+以下情况必须写 `docs/决策/NNNN-title.md`：
 
 - 改变 V1 范围
 - 引入新依赖或协议

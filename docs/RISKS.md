@@ -32,7 +32,7 @@
 | R010 | Medium | Open | tool name 映射可能冲突 | 启动时 collision detection，保留原始 id | T021, T071 |
 | R011 | Low | Open | 中文文档保留英文术语可能不统一 | 增加术语表 | T116 |
 | R012 | Low | Open | 任务清单很长，维护成本升高 | 使用 traceability matrix 和 milestone gates 管理 | T111 |
-| R013 | Medium | Open | Capability 生命周期没有落入 CLI 输出，后续可能退化成目录项目 | `docs/product/capability-lifecycle.md`；后续实现 Trust Card/List 字段 | T125 |
+| R013 | Medium | Open | Capability 生命周期没有落入 CLI 输出，后续可能退化成目录项目 | `docs/产品/capability-lifecycle.md`；后续实现 Trust Card/List 字段 | T125 |
 | R014 | High | Mitigated | 审计日志写入失败时是否阻断写操作未实现，可能导致不可追踪执行 | ADR 0010：非只读调用审计不可用时不执行 | T040, T128 |
 | R015 | Medium | Mitigated | 外部贡献者不知道如何提交 Capability，导致 Registry 难以扩展 | 贡献者路径、Capability Review Checklist、GitHub templates | T141 |
 | R016 | Medium | Mitigating | Host 行为差异导致 MCP demo 在不同 Host 上不一致 | Host compatibility matrix，后续维护测试记录 | T127, T142 |

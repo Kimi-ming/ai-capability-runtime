@@ -1,6 +1,6 @@
 # 架构决策索引
 
-本文索引 OpenCap 的关键决策。详细内容见 `docs/decisions/`。
+本文索引 OpenCap 的关键决策。详细内容见 `docs/决策/`。
 
 ## 已接受决策
 
@@ -74,7 +74,7 @@
 
 ## 决策写法
 
-新决策放在 `docs/decisions/NNNN-title.md`，包含：
+新决策放在 `docs/决策/NNNN-title.md`，包含：
 
 - 日期
 - 状态

@@ -1,6 +1,6 @@
 # 产品规格：OpenCap V1
 
-本文是 V1 实现时的产品正确性入口。更详细的历史文档见 `docs/planning/v1-requirements.md`。
+本文是 V1 实现时的产品正确性入口。更详细的历史文档见 `docs/规划/v1-requirements.md`。
 
 ## 一句话定义
 
@@ -201,18 +201,18 @@ V1 完成必须满足：
 
 实现 V1 时还应参考：
 
-- `docs/product/strategy.md`：为什么 OpenCap 只做能力层和 Runtime 治理。
-- `docs/product/use-cases.md`：角色、场景和主路径验收。
-- `docs/product/capability-lifecycle.md`：Capability 从 Draft 到 Audited 的治理状态。
-- `docs/design/domain-model.md`：核心领域对象和不变量。
-- `docs/design/runtime-contracts.md`：Runtime 模块之间的输入输出契约。
-- `docs/security/threat-model.md`：安全资产、攻击路径和 V1 控制措施。
+- `docs/产品/strategy.md`：为什么 OpenCap 只做能力层和 Runtime 治理。
+- `docs/产品/use-cases.md`：角色、场景和主路径验收。
+- `docs/产品/capability-lifecycle.md`：Capability 从 Draft 到 Audited 的治理状态。
+- `docs/设计/domain-model.md`：核心领域对象和不变量。
+- `docs/设计/runtime-contracts.md`：Runtime 模块之间的输入输出契约。
+- `docs/安全/threat-model.md`：安全资产、攻击路径和 V1 控制措施。
 
 ## 实现契约补充
 
 V1 功能实现除本文需求外，还必须符合：
 
-- `docs/design/cli-contract-v1.md`：命令行为、stdout/stderr、exit code。
-- `docs/design/error-model-v1.md`：错误分类和用户可见消息。
-- `docs/design/local-state-v1.md`：本地状态目录行为。
-- `docs/design/mcp-interface-v1.md`：MCP 工具暴露和确认缺失行为。
+- `docs/设计/cli-contract-v1.md`：命令行为、stdout/stderr、exit code。
+- `docs/设计/error-model-v1.md`：错误分类和用户可见消息。
+- `docs/设计/local-state-v1.md`：本地状态目录行为。
+- `docs/设计/mcp-interface-v1.md`：MCP 工具暴露和确认缺失行为。

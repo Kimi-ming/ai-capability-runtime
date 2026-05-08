@@ -18,77 +18,77 @@ OpenCap 负责能力治理。
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
-| 产品定位 | 明确为什么存在 | `docs/product/strategy.md` | 非 Agent、非 Marketplace 的定位 |
-| 用户场景 | 明确为谁解决什么 | `docs/product/use-cases.md` | V1 主路径用例 |
-| Capability 标准 | 统一能力描述 | `docs/spec/capability-manifest.md` | manifest schema |
-| Capability 生命周期 | 治理状态机 | `docs/product/capability-lifecycle.md` | Draft -> Audited |
-| Runtime 核心 | 安全执行能力 | `docs/design/runtime-contracts.md` | invoke pipeline |
-| HTTP 执行 | 调用外部 API | `docs/design/http-execution-v1.md` | body/auth/outbound 规则 |
-| Policy DSL | 执行前决策 | `docs/design/policy-dsl-v1.md` | default/rules YAML |
-| Policy Decision Trace | 解释每次策略决策 | `docs/design/policy-decision-trace-v1.md` | redacted trace object |
-| Policy 生命周期 | 策略版本、激活和回滚 | `docs/operations/policy-lifecycle-and-change-control.md` | policy ledger |
-| Policy Simulation | 上线前评估策略影响 | `docs/quality/policy-simulation-and-diff-v1.md` | simulation report |
-| Policy Override | 约束临时放行和 breakglass | `docs/security/policy-override-and-breakglass-v1.md` | override record |
-| Audit Log | 事后追踪 | `docs/design/audit-log-v1.md` | SQLite log schema |
-| Registry 治理 | 供应链入口 | `docs/security/supply-chain-governance.md` | review + CI + trust |
-| 发布运营 | 可持续推进 | `docs/operations/operating-model.md` | 任务、ADR、风险、发布门禁 |
-| CLI 契约 | 稳定开发者体验 | `docs/design/cli-contract-v1.md` | 命令/输出/exit code |
-| 本地状态 | 可测试可删除状态 | `docs/design/local-state-v1.md` | state dir 结构 |
-| MCP 接口 | Host 兼容表面 | `docs/design/mcp-interface-v1.md` | tools/list + tools/call |
-| 错误模型 | 一致失败语义 | `docs/design/error-model-v1.md` | OpenCapError 分类 |
-| 隐私保留 | 本地数据边界 | `docs/security/privacy-retention-v1.md` | 脱敏和保留规则 |
-| 能力分类 | Registry 可导航性 | `docs/ecosystem/capability-taxonomy.md` | 分类和粒度规则 |
-| Host 兼容 | 跨 Host 稳定性 | `docs/ecosystem/host-compatibility-matrix.md` | 兼容性记录模板 |
-| 开源边界 | OSS 与 Cloud 分工 | `docs/ecosystem/open-core-boundary.md` | open-core 约束 |
-| 社区协作 | 外部贡献路径 | `docs/community/contributor-journey.md` | contributor journey |
-| 可观测指标 | 质量和生态反馈 | `docs/operations/observability-metrics-v1.md` | 本地指标和未来 OTel 映射 |
-| 版本兼容 | 长期演进秩序 | `docs/spec/versioning-and-compatibility.md` | SemVer 和公共契约 |
-| Manifest 演进 | Schema 可迁移 | `docs/spec/manifest-evolution.md` | schema 演进规则 |
-| Registry 分发 | 可验证安装来源 | `docs/ecosystem/registry-distribution.md` | Git-based V1 registry |
-| SDK/Adapter 边界 | 防止范围膨胀 | `docs/design/sdk-and-adapter-boundary.md` | V1 非阻塞边界 |
-| 发布供应链 | 可验证发布 | `docs/operations/package-publishing-v1.md` | npm/provenance 预案 |
-| Capability 包 | 稳定 Registry 单元 | `docs/design/capability-package-v1.md` | package 目录契约 |
-| 确认与同意 | 可审计授权语义 | `docs/design/confirmation-and-consent-v1.md` | consent request/receipt |
-| 互操作 Profile | 兼容性证据化 | `docs/ecosystem/interoperability-profiles.md` | MCP/Registry profile |
-| 一致性测试 | 生态可验证 | `docs/quality/conformance-suite-v1.md` | conformance groups |
-| Agentic 风险 | 安全风险转测试 | `docs/security/agentic-risk-mapping.md` | risk-to-control map |
-| 身份授权 | 明确代表谁调用 | `docs/security/identity-and-auth-model.md` | identity/auth boundary |
-| Secret Resolver | 安全解析凭据 | `docs/design/secret-resolver-v1.md` | env provider 契约 |
-| 凭据生命周期 | 凭据创建/轮换/撤销 | `docs/operations/credential-lifecycle.md` | runbook |
-| 最小权限评审 | 防止过宽 scopes | `docs/security/least-privilege-review.md` | review checklist |
-| 远程 OAuth 边界 | 防止未来授权混乱 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | future auth profile 边界 |
-| 执行语义 | 表达副作用和结果状态 | `docs/design/execution-semantics-v1.md` | outcome/state model |
-| 重试与幂等 | 防止重复副作用 | `docs/design/retry-and-idempotency-v1.md` | retry/idempotency rules |
-| 失败恢复 | 状态未知时指导恢复 | `docs/operations/failure-recovery-runbook.md` | recovery runbook |
-| 执行证据 | 证明调用发生了什么 | `docs/quality/execution-evidence-v1.md` | evidence fields |
-| 组合边界 | 防止滑向 Agent Builder | `docs/design/composition-boundary-v1.md` | composition invariants |
-| 能力图 | 描述能力关系和风险放大 | `docs/ecosystem/capability-graph-v1.md` | graph metadata 草案 |
-| 多步执行 | 定义 step outcome 和补偿边界 | `docs/design/multi-step-execution-boundary.md` | multi-step outcome model |
-| 组合失败恢复 | 指导 partial/unknown/manual review | `docs/operations/composition-failure-runbook.md` | recovery runbook |
-| 组合调研 | Saga/workflow 边界依据 | `docs/research/composition-and-saga-scan-2026-05-07.md` | research notes |
-| Trust 模型 | 把信任变成证据摘要 | `docs/ecosystem/trust-model-v1.md` | trust level rules |
-| Capability Advisory | 处理能力漏洞和恶意风险 | `docs/security/capability-advisory-process.md` | advisory lifecycle |
-| Deprecation/Revocation | 能力弃用、下架、撤销 | `docs/ecosystem/capability-deprecation-and-revocation.md` | lifecycle terminal states |
-| Quality Score | 解释能力成熟度 | `docs/quality/capability-quality-score.md` | scoring rubric |
-| 用量计量 | 本地 usage evidence | `docs/operations/usage-metering-v1.md` | usage event model |
-| 配额预算 | 执行前额度和预算 gate | `docs/design/quota-and-budget-policy-v1.md` | quota/budget policy |
-| 限流滥用 | 防止循环调用和刷请求 | `docs/security/rate-limit-and-abuse-control-v1.md` | abuse controls |
-| 商业边界 | paid capability/commerce profile 边界 | `docs/ecosystem/paid-capability-and-commerce-boundary.md` | future commerce boundary |
-| 用量证据 | 证明用量来自 invocation | `docs/quality/usage-evidence-v1.md` | usage evidence chain |
-| Tool Projection | 生成模型可见工具元数据 | `docs/design/tool-projection-v1.md` | MCP tool projection |
-| Prompt Surface | 治理工具描述和结果注入 | `docs/security/prompt-surface-security-v1.md` | prompt-surface controls |
-| 发现选择边界 | 区分发现、选择和授权 | `docs/ecosystem/discovery-and-selection-boundary.md` | discovery boundary |
-| 元数据 Lint | 检查模型可见文案 | `docs/quality/model-visible-metadata-lint-v1.md` | metadata lint rules |
-| Result Envelope | 统一 Runtime 输出边界 | `docs/design/result-envelope-v1.md` | result envelope |
-| 输出校验 | 验证 provider response 符合 output schema | `docs/quality/output-validation-v1.md` | output validation |
-| 结果净化 | 净化 tool result prompt surface | `docs/security/tool-result-sanitization-v1.md` | result sanitizer |
-| 结果来源 | 记录结果来源和污染标记 | `docs/quality/result-provenance-v1.md` | result provenance |
-| 结果投递 | 适配 MCP/CLI/未来协议输出 | `docs/ecosystem/result-delivery-boundary.md` | delivery adapters |
-| 输入数据治理 | 管理 tool input 外发风险 | `docs/security/input-data-governance-v1.md` | input governance |
-| 数据分类 | 识别 secret/PII/source/internal URL | `docs/security/data-classification-v1.md` | classification rules |
-| Data Egress Policy | 执行前判断什么数据发给谁 | `docs/design/data-egress-policy-v1.md` | egress gate |
-| 输入来源证据 | 记录 input provenance 和 egress map | `docs/quality/input-provenance-v1.md` | input provenance |
-| 数据最小化 | 只外发 execution mapping 引用字段 | `docs/security/data-minimization-and-redaction-v1.md` | minimization/redaction |
+| 产品定位 | 明确为什么存在 | `docs/产品/strategy.md` | 非 Agent、非 Marketplace 的定位 |
+| 用户场景 | 明确为谁解决什么 | `docs/产品/use-cases.md` | V1 主路径用例 |
+| Capability 标准 | 统一能力描述 | `docs/规范/capability-manifest.md` | manifest schema |
+| Capability 生命周期 | 治理状态机 | `docs/产品/capability-lifecycle.md` | Draft -> Audited |
+| Runtime 核心 | 安全执行能力 | `docs/设计/runtime-contracts.md` | invoke pipeline |
+| HTTP 执行 | 调用外部 API | `docs/设计/http-execution-v1.md` | body/auth/outbound 规则 |
+| Policy DSL | 执行前决策 | `docs/设计/policy-dsl-v1.md` | default/rules YAML |
+| Policy Decision Trace | 解释每次策略决策 | `docs/设计/policy-decision-trace-v1.md` | redacted trace object |
+| Policy 生命周期 | 策略版本、激活和回滚 | `docs/运营/policy-lifecycle-and-change-control.md` | policy ledger |
+| Policy Simulation | 上线前评估策略影响 | `docs/质量/policy-simulation-and-diff-v1.md` | simulation report |
+| Policy Override | 约束临时放行和 breakglass | `docs/安全/policy-override-and-breakglass-v1.md` | override record |
+| Audit Log | 事后追踪 | `docs/设计/audit-log-v1.md` | SQLite log schema |
+| Registry 治理 | 供应链入口 | `docs/安全/supply-chain-governance.md` | review + CI + trust |
+| 发布运营 | 可持续推进 | `docs/运营/operating-model.md` | 任务、ADR、风险、发布门禁 |
+| CLI 契约 | 稳定开发者体验 | `docs/设计/cli-contract-v1.md` | 命令/输出/exit code |
+| 本地状态 | 可测试可删除状态 | `docs/设计/local-state-v1.md` | state dir 结构 |
+| MCP 接口 | Host 兼容表面 | `docs/设计/mcp-interface-v1.md` | tools/list + tools/call |
+| 错误模型 | 一致失败语义 | `docs/设计/error-model-v1.md` | OpenCapError 分类 |
+| 隐私保留 | 本地数据边界 | `docs/安全/privacy-retention-v1.md` | 脱敏和保留规则 |
+| 能力分类 | Registry 可导航性 | `docs/生态/capability-taxonomy.md` | 分类和粒度规则 |
+| Host 兼容 | 跨 Host 稳定性 | `docs/生态/host-compatibility-matrix.md` | 兼容性记录模板 |
+| 开源边界 | OSS 与 Cloud 分工 | `docs/生态/open-core-boundary.md` | open-core 约束 |
+| 社区协作 | 外部贡献路径 | `docs/社区/contributor-journey.md` | contributor journey |
+| 可观测指标 | 质量和生态反馈 | `docs/运营/observability-metrics-v1.md` | 本地指标和未来 OTel 映射 |
+| 版本兼容 | 长期演进秩序 | `docs/规范/versioning-and-compatibility.md` | SemVer 和公共契约 |
+| Manifest 演进 | Schema 可迁移 | `docs/规范/manifest-evolution.md` | schema 演进规则 |
+| Registry 分发 | 可验证安装来源 | `docs/生态/registry-distribution.md` | Git-based V1 registry |
+| SDK/Adapter 边界 | 防止范围膨胀 | `docs/设计/sdk-and-adapter-boundary.md` | V1 非阻塞边界 |
+| 发布供应链 | 可验证发布 | `docs/运营/package-publishing-v1.md` | npm/provenance 预案 |
+| Capability 包 | 稳定 Registry 单元 | `docs/设计/capability-package-v1.md` | package 目录契约 |
+| 确认与同意 | 可审计授权语义 | `docs/设计/confirmation-and-consent-v1.md` | consent request/receipt |
+| 互操作 Profile | 兼容性证据化 | `docs/生态/interoperability-profiles.md` | MCP/Registry profile |
+| 一致性测试 | 生态可验证 | `docs/质量/conformance-suite-v1.md` | conformance groups |
+| Agentic 风险 | 安全风险转测试 | `docs/安全/agentic-risk-mapping.md` | risk-to-control map |
+| 身份授权 | 明确代表谁调用 | `docs/安全/identity-and-auth-model.md` | identity/auth boundary |
+| Secret Resolver | 安全解析凭据 | `docs/设计/secret-resolver-v1.md` | env provider 契约 |
+| 凭据生命周期 | 凭据创建/轮换/撤销 | `docs/运营/credential-lifecycle.md` | runbook |
+| 最小权限评审 | 防止过宽 scopes | `docs/安全/least-privilege-review.md` | review checklist |
+| 远程 OAuth 边界 | 防止未来授权混乱 | `docs/生态/oauth-and-remote-runtime-boundary.md` | future auth profile 边界 |
+| 执行语义 | 表达副作用和结果状态 | `docs/设计/execution-semantics-v1.md` | outcome/state model |
+| 重试与幂等 | 防止重复副作用 | `docs/设计/retry-and-idempotency-v1.md` | retry/idempotency rules |
+| 失败恢复 | 状态未知时指导恢复 | `docs/运营/failure-recovery-runbook.md` | recovery runbook |
+| 执行证据 | 证明调用发生了什么 | `docs/质量/execution-evidence-v1.md` | evidence fields |
+| 组合边界 | 防止滑向 Agent Builder | `docs/设计/composition-boundary-v1.md` | composition invariants |
+| 能力图 | 描述能力关系和风险放大 | `docs/生态/capability-graph-v1.md` | graph metadata 草案 |
+| 多步执行 | 定义 step outcome 和补偿边界 | `docs/设计/multi-step-execution-boundary.md` | multi-step outcome model |
+| 组合失败恢复 | 指导 partial/unknown/manual review | `docs/运营/composition-failure-runbook.md` | recovery runbook |
+| 组合调研 | Saga/workflow 边界依据 | `docs/调研/composition-and-saga-scan-2026-05-07.md` | research notes |
+| Trust 模型 | 把信任变成证据摘要 | `docs/生态/trust-model-v1.md` | trust level rules |
+| Capability Advisory | 处理能力漏洞和恶意风险 | `docs/安全/capability-advisory-process.md` | advisory lifecycle |
+| Deprecation/Revocation | 能力弃用、下架、撤销 | `docs/生态/capability-deprecation-and-revocation.md` | lifecycle terminal states |
+| Quality Score | 解释能力成熟度 | `docs/质量/capability-quality-score.md` | scoring rubric |
+| 用量计量 | 本地 usage evidence | `docs/运营/usage-metering-v1.md` | usage event model |
+| 配额预算 | 执行前额度和预算 gate | `docs/设计/quota-and-budget-policy-v1.md` | quota/budget policy |
+| 限流滥用 | 防止循环调用和刷请求 | `docs/安全/rate-limit-and-abuse-control-v1.md` | abuse controls |
+| 商业边界 | paid capability/commerce profile 边界 | `docs/生态/paid-capability-and-commerce-boundary.md` | future commerce boundary |
+| 用量证据 | 证明用量来自 invocation | `docs/质量/usage-evidence-v1.md` | usage evidence chain |
+| Tool Projection | 生成模型可见工具元数据 | `docs/设计/tool-projection-v1.md` | MCP tool projection |
+| Prompt Surface | 治理工具描述和结果注入 | `docs/安全/prompt-surface-security-v1.md` | prompt-surface controls |
+| 发现选择边界 | 区分发现、选择和授权 | `docs/生态/discovery-and-selection-boundary.md` | discovery boundary |
+| 元数据 Lint | 检查模型可见文案 | `docs/质量/model-visible-metadata-lint-v1.md` | metadata lint rules |
+| Result Envelope | 统一 Runtime 输出边界 | `docs/设计/result-envelope-v1.md` | result envelope |
+| 输出校验 | 验证 provider response 符合 output schema | `docs/质量/output-validation-v1.md` | output validation |
+| 结果净化 | 净化 tool result prompt surface | `docs/安全/tool-result-sanitization-v1.md` | result sanitizer |
+| 结果来源 | 记录结果来源和污染标记 | `docs/质量/result-provenance-v1.md` | result provenance |
+| 结果投递 | 适配 MCP/CLI/未来协议输出 | `docs/生态/result-delivery-boundary.md` | delivery adapters |
+| 输入数据治理 | 管理 tool input 外发风险 | `docs/安全/input-data-governance-v1.md` | input governance |
+| 数据分类 | 识别 secret/PII/source/internal URL | `docs/安全/data-classification-v1.md` | classification rules |
+| Data Egress Policy | 执行前判断什么数据发给谁 | `docs/设计/data-egress-policy-v1.md` | egress gate |
+| 输入来源证据 | 记录 input provenance 和 egress map | `docs/质量/input-provenance-v1.md` | input provenance |
+| 数据最小化 | 只外发 execution mapping 引用字段 | `docs/安全/data-minimization-and-redaction-v1.md` | minimization/redaction |
 
 ## 系统闭环
 

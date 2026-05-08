@@ -29,16 +29,16 @@ OpenCap 是面向 AI 原生应用的开源 Capability Runtime 和治理层。
 ## 常用入口
 
 - 中文文档中心：`docs/README.md`
-- 文档维护规则：`docs/community/documentation-governance.md`
+- 文档维护规则：`docs/社区/documentation-governance.md`
 - 当前任务队列：`docs/TASKS.md`
 - 当前状态交接：`docs/HANDOFF.md`
 - 产品规格：`docs/SPEC.md`
 - 架构总览：`docs/ARCHITECTURE.md`
 - 测试策略：`docs/TESTING.md`
 - 决策索引：`docs/DECISIONS.md`
-- V1 详细需求：`docs/planning/v1-requirements.md`
-- V1 详细架构：`docs/planning/v1-architecture.md`
-- 技术方案审查：`docs/reviews/technical-plan-review-2026-05-07.md`
+- V1 详细需求：`docs/规划/v1-requirements.md`
+- V1 详细架构：`docs/规划/v1-architecture.md`
+- 技术方案审查：`docs/评审/technical-plan-review-2026-05-07.md`
 
 ## 开发循环
 

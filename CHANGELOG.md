@@ -27,6 +27,7 @@
 
 ### 变更
 
+- docs 子目录已从英文分类迁移为中文分类，并同步更新全仓文档链接。
 - `github.create_issue` manifest 已包含 JSON body 渲染和 bearer token placement。
 
 ### 已知缺口
