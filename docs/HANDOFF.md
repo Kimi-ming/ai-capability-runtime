@@ -35,19 +35,19 @@ OpenCap 处于 V1 前期实现准备阶段。
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T012 P0：实现 `opencap list`。
+Next task: T013 P1：实现 CLI 统一错误处理和 exit code。
 
 推荐第一个任务：
 
 ```text
-T012：实现 `opencap list`
+T013：实现 CLI 统一错误处理和 exit code
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011 已完成
-- install 已能把 Registry Capability 安装到 state dir
-- T012 将显示已安装 Capability
+- T001/T002/T003/T004/T005/T010/T011/T012 已完成
+- validate/install/list 都已有真实行为
+- T013 将收敛 CLI 错误处理和 exit code
 
 ## 最近验证
 
@@ -270,7 +270,7 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 
 已完成 T003：新增 `packages/spec/src/index.test.ts`，直接测试 `validateManifest` API。覆盖合法 HTTP manifest、`type: mcp`、缺少 `permissions`、非法 risk、timeout 小于 100、metadata 缺少 `trust_level`，并断言失败结果包含 JSON Pointer 风格字段路径。
 
-本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T012：实现 `opencap list`。
+本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T013：实现 CLI 统一错误处理和 exit code。
 
 
 ## Registry test case schema 已定义
@@ -279,25 +279,32 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 
 现有四个示例测试文件已补齐 `capability`、`mode` 和 `expect.status`，并保留 `expect.request` 与 `expect.permission`。Registry 指南和测试格式文档已同步说明最小字段、用途和校验命令。
 
-本轮验证：`pnpm validate` 通过，输出 4 个 valid manifest 和 4 个 valid registry test；`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec test` 和 `pnpm build` 通过。下一步按任务表进入 T012：实现 `opencap list`。
+本轮验证：`pnpm validate` 通过，输出 4 个 valid manifest 和 4 个 valid registry test；`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec test` 和 `pnpm build` 通过。下一步按任务表进入 T013：实现 CLI 统一错误处理和 exit code。
 
 
 ## Capability 编写教程已新增
 
 已完成 T005：新增 `docs/教程/write-a-capability.md`，作为 Tutorial 类型文档，面向第一次贡献 Capability 的开发者。教程从空目录开始，覆盖 `manifest.yml`、README、`tests/basic.yml`、`opencap validate <path>`、`pnpm validate` 和常见错误。
 
-`docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径已加入该教程。下一步按任务表进入 T012：实现 `opencap list`。
+`docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径已加入该教程。下一步按任务表进入 T013：实现 CLI 统一错误处理和 exit code。
 
 
 ## 本地状态路径 helper 已实现
 
 已完成 T010：`@opencap/runtime` 现在导出 `resolveStateDir`、`getLocalStatePaths` 和 `ensureLocalStateDir`。解析优先级符合本地状态设计：显式 `stateDir`、`OPENCAP_STATE_DIR`、默认 `<cwd>/opencap.local`。
 
-`ensureLocalStateDir` 只创建 V1 必需的 `installed/` 和 `tmp/`，不会创建或修改 `registry/`。`OpenCapRuntime` 构造时会保存解析后的 `statePaths`。本轮验证：`pnpm --filter @opencap/runtime test` 通过，6 个测试全部通过；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T012：实现 `opencap list`。
+`ensureLocalStateDir` 只创建 V1 必需的 `installed/` 和 `tmp/`，不会创建或修改 `registry/`。`OpenCapRuntime` 构造时会保存解析后的 `statePaths`。本轮验证：`pnpm --filter @opencap/runtime test` 通过，6 个测试全部通过；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T013：实现 CLI 统一错误处理和 exit code。
 
 
 ## Capability install 已实现
 
 已完成 T011：`@opencap/runtime` 新增 `installCapability`，CLI `opencap install <id>` 已接入真实安装逻辑。安装会在 registry 中查找唯一 Capability 目录，校验 `manifest.yml`，复制完整目录到 `opencap.local/installed/<id>/`，默认拒绝覆盖，`--force` 可替换。
 
-CLI 支持 `--state-dir`、`--registry` 和 `--force`。本轮验证：`pnpm --filter @opencap/runtime test` 通过 11 个测试；CLI smoke 安装到 `/private/tmp/opencap-cli-install-smoke` 成功，重复安装无 `--force` 返回 exit 1 并提示 `Use --force`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T012：实现 `opencap list`。
+CLI 支持 `--state-dir`、`--registry` 和 `--force`。本轮验证：`pnpm --filter @opencap/runtime test` 通过 11 个测试；CLI smoke 安装到 `/private/tmp/opencap-cli-install-smoke` 成功，重复安装无 `--force` 返回 exit 1 并提示 `Use --force`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T013：实现 CLI 统一错误处理和 exit code。
+
+
+## Capability list 已实现
+
+已完成 T012：`@opencap/runtime` 新增 `listInstalledCapabilities`，CLI `opencap list` 已接入真实本地状态读取。空安装状态会输出友好提示；已安装状态显示 `id version type risk trust status`；损坏 manifest 会以 `status: invalid` 出现，不阻断其他能力。
+
+CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @opencap/runtime test` 通过 14 个测试；CLI smoke 使用 `/private/tmp/opencap-cli-install-smoke` 能列出 `github.create_issue 0.1.0 http write experimental enabled`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T013：统一 CLI 错误处理和 exit code。

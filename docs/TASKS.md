@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T012 P0：实现 `opencap list`。
 - T020 P0：实现 Installed Capability Loader。
 - T030 P0：实现 policy 文件格式和 parser。
 - T031 P0：实现 Policy Engine。
@@ -254,6 +253,7 @@
 - 已完成：T005 P2：增加 manifest authoring guide。
 - 已完成：T010 P0：实现 OpenCap 本地状态路径 helper。
 - 已完成：T011 P0：实现 `opencap install <id>`。
+- 已完成：T012 P0：实现 `opencap list`。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T012 `opencap list`
+1. T013 CLI 统一错误处理
 2. T020 Installed Capability Loader
 3. T030 Policy parser/engine
 4. T040 Audit log
@@ -299,7 +299,7 @@ git diff --check
 7. T070 MCP bridge
 8. T080 Registry manifest CI 校验
 9. T081 Capability Review Checklist
-10. T013 CLI 统一错误处理
+10. T014 `--state-dir` 参数补齐
 
 ---
 
@@ -487,7 +487,7 @@ ls opencap.local/installed/github.create_issue
 
 ### T012 P0：实现 `opencap list`
 
-- [ ] T012 P0：实现 `opencap list`
+- [x] T012 P0：实现 `opencap list`
 
 目标：显示已安装 Capability。
 
@@ -504,16 +504,30 @@ pnpm --filter @opencap/cli dev -- list --state-dir /private/tmp/opencap-cli-inst
 pnpm --filter @opencap/runtime test
 ```
 
+完成记录：`@opencap/runtime` 已导出 `listInstalledCapabilities`；CLI `list` 支持 `--state-dir` 和 `--json`。空状态输出友好提示，已安装状态显示 id/version/type/risk/trust/status，损坏 manifest 标记为 `invalid` 且不阻断其他条目。
+
 ### T013 P1：实现 CLI 统一错误处理和 exit code
 
 - [ ] T013 P1：实现 CLI 统一错误处理和 exit code
 
-要求：
+目标：让 CLI 命令使用统一错误格式和 exit code，避免每个 command 自己散写 `try/catch`。
 
-- 用户错误 exit 1
-- unexpected error exit 2
-- 成功 exit 0
-- 错误消息简洁，不默认输出 stack trace
+验收标准：
+
+- 用户错误 exit 1。
+- unexpected/internal error exit 2。
+- 成功 exit 0。
+- 错误消息简洁，不默认输出 stack trace。
+- validate/install/list 使用同一组 CLI error helper。
+- 现有 validate/install/list smoke 行为保持不变。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli build
+pnpm --filter @opencap/cli dev -- validate /private/tmp/non-existent-opencap-path
+pnpm --filter @opencap/cli dev -- install missing.capability --state-dir /private/tmp/opencap-cli-install-smoke
+```
 
 ### T014 P1：增加 `--state-dir` 参数
 

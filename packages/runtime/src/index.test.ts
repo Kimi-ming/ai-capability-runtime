@@ -10,6 +10,7 @@ import {
   ensureLocalStateDir,
   getLocalStatePaths,
   installCapability,
+  listInstalledCapabilities,
   resolveStateDir,
 } from "./index.js";
 
@@ -184,5 +185,50 @@ describe("installCapability", () => {
     await installCapability({ cwd, id: "github.create_issue", force: true, env: {} });
 
     await expect(readFile(join(first.destinationDir, "README.md"), "utf8")).resolves.toBe("# github.create_issue\n");
+  });
+});
+
+
+describe("listInstalledCapabilities", () => {
+  it("returns an empty list when no capabilities are installed", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-list-"));
+
+    await expect(listInstalledCapabilities({ cwd, env: {} })).resolves.toEqual([]);
+  });
+
+  it("lists installed capability summaries", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-list-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    await installCapability({ cwd, id: "github.create_issue", env: {} });
+
+    await expect(listInstalledCapabilities({ cwd, env: {} })).resolves.toMatchObject([
+      {
+        id: "github.create_issue",
+        version: "0.1.0",
+        type: "http",
+        risk: "read_only",
+        trustLevel: "experimental",
+        status: "enabled",
+      },
+    ]);
+  });
+
+  it("marks invalid installed manifests without blocking valid entries", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-list-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    await installCapability({ cwd, id: "github.create_issue", env: {} });
+
+    const badDir = join(cwd, "opencap.local", "installed", "bad.capability");
+    await mkdir(badDir, { recursive: true });
+    await writeFile(join(badDir, "manifest.yml"), "id: bad.capability\n");
+
+    const result = await listInstalledCapabilities({ cwd, env: {} });
+
+    expect(result).toHaveLength(2);
+    expect(result.find((item) => item.id === "github.create_issue")?.status).toBe("enabled");
+    expect(result.find((item) => item.id === "bad.capability")).toMatchObject({
+      status: "invalid",
+      risk: "unknown",
+    });
   });
 });

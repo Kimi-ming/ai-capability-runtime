@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import { isAbsolute, resolve } from "node:path";
 import { formatManifestValidationIssue, validateManifestPath } from "@opencap/spec";
-import { InstallCapabilityError, installCapability } from "@opencap/runtime";
+import { InstallCapabilityError, installCapability, listInstalledCapabilities } from "@opencap/runtime";
 
 const program = new Command();
 
@@ -88,9 +88,34 @@ program
 
 program
   .command("list")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
   .description("List installed Capabilities.")
-  .action(() => {
-    console.log("list is not implemented yet");
+  .action(async (options: { stateDir?: string; json?: boolean }) => {
+    try {
+      const cwd = process.env.INIT_CWD ?? process.cwd();
+      const installed = await listInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
+
+      if (options.json) {
+        console.log(JSON.stringify(installed, null, 2));
+        return;
+      }
+
+      if (installed.length === 0) {
+        console.log("No installed capabilities found.");
+        return;
+      }
+
+      console.log("id version type risk trust status");
+      for (const capability of installed) {
+        console.log(
+          `${capability.id} ${capability.version ?? "-"} ${capability.type ?? "-"} ${capability.risk} ${capability.trustLevel ?? "-"} ${capability.status}`,
+        );
+      }
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : "Failed to list installed capabilities");
+      process.exitCode = 1;
+    }
   });
 
 program

@@ -43,6 +43,17 @@ export interface InstallCapabilityResult {
   manifest: CapabilityManifest;
 }
 
+export interface InstalledCapabilitySummary {
+  id: string;
+  installPath: string;
+  version?: string;
+  type?: string;
+  risk: string;
+  trustLevel?: string;
+  status: "enabled" | "invalid";
+  error?: string;
+}
+
 export type InstallCapabilityErrorCode =
   | "REGISTRY_NOT_FOUND"
   | "CAPABILITY_NOT_FOUND"
@@ -224,6 +235,58 @@ export async function installCapability(options: InstallCapabilityOptions): Prom
     destinationDir,
     manifest: validation.manifest,
   };
+}
+
+
+function summarizeRisk(manifest: CapabilityManifest): string {
+  const risks = [...new Set(manifest.permissions.map((permission) => permission.risk))];
+  return risks.join(",");
+}
+
+function metadataString(manifest: CapabilityManifest, key: string): string | undefined {
+  const value = manifest.metadata[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+export async function listInstalledCapabilities(options: ResolveStateDirOptions = {}): Promise<InstalledCapabilitySummary[]> {
+  const paths = getLocalStatePaths(options);
+
+  if (!(await pathExists(paths.installedDir))) {
+    return [];
+  }
+
+  const entries = await readdir(paths.installedDir, { withFileTypes: true });
+  const installed = entries.filter((entry) => entry.isDirectory()).sort((a, b) => a.name.localeCompare(b.name));
+  const summaries: InstalledCapabilitySummary[] = [];
+
+  for (const entry of installed) {
+    const installPath = join(paths.installedDir, entry.name);
+    const manifestPath = join(installPath, "manifest.yml");
+    const validation = await validateManifestFile(manifestPath);
+
+    if (!validation.ok) {
+      summaries.push({
+        id: entry.name,
+        installPath,
+        risk: "unknown",
+        status: "invalid",
+        error: validation.issues.map((issue) => `${issue.fieldPath} ${issue.message}`).join("; "),
+      });
+      continue;
+    }
+
+    summaries.push({
+      id: validation.manifest.id,
+      installPath,
+      version: validation.manifest.version,
+      type: validation.manifest.type,
+      risk: summarizeRisk(validation.manifest),
+      trustLevel: metadataString(validation.manifest, "trust_level"),
+      status: "enabled",
+    });
+  }
+
+  return summaries;
 }
 
 export class OpenCapRuntime {
