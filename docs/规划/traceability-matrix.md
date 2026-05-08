@@ -6,7 +6,7 @@
 
 | 需求 | 来源 | 任务 | 验证 | 状态 |
 | --- | --- | --- | --- | --- |
-| F1 Manifest 校验 | `docs/SPEC.md` | T001, T002, T003 | `pnpm validate`, spec tests | 部分完成：T001/T002 完成，T003 待补测试 |
+| F1 Manifest 校验 | `docs/SPEC.md` | T001, T002, T003 | `pnpm validate`, spec tests | 已完成 |
 | F2 Capability 安装 | `docs/SPEC.md` | T010, T011, T020 | install smoke | 未完成 |
 | F3 Capability 列表 | `docs/SPEC.md` | T012, T020 | list smoke | 未完成 |
 | F4 策略评估 | `docs/SPEC.md` | T030, T031, T032, T033 | policy unit tests | 未完成 |

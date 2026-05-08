@@ -35,19 +35,19 @@ OpenCap 处于 V1 前期实现准备阶段。
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T003 P1：补充 schema 单元测试。
+Next task: T004 P1：定义 registry test case schema。
 
 推荐第一个任务：
 
 ```text
-T003：补充 schema 单元测试
+T004：定义 registry test case schema
 ```
 
 原因：
 
-- T001/T002 已完成
-- F1 Manifest 校验还缺测试覆盖
-- 测试补齐后再进入 T010 本地状态路径 helper
+- T001/T002/T003 已完成
+- registry `tests/basic.yml` 还没有 schema 约束
+- T004 完成后再进入 T010 本地状态路径 helper
 
 ## 最近验证
 
@@ -264,3 +264,10 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 关键实现：AJV 已切换到 draft 2020-12 validator；CLI 在 `pnpm --filter @opencap/cli dev` 场景下用 `INIT_CWD` 解析用户传入的相对路径；非法 manifest 会返回非 0 exit code，并输出 manifest 文件路径和 JSON Pointer 风格字段路径。
 
 本轮验证：`pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.create_issue` 通过；`pnpm validate` 通过；临时非法 manifest 验证返回 exit 1 且输出 `/permissions/0/risk`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T003：补 validator 单元测试；完成后再进入 T010 本地状态路径 helper。
+
+
+## Manifest validator 单元测试已补齐
+
+已完成 T003：新增 `packages/spec/src/index.test.ts`，直接测试 `validateManifest` API。覆盖合法 HTTP manifest、`type: mcp`、缺少 `permissions`、非法 risk、timeout 小于 100、metadata 缺少 `trust_level`，并断言失败结果包含 JSON Pointer 风格字段路径。
+
+本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T004：定义 registry test case schema。

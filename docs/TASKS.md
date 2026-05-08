@@ -43,7 +43,6 @@
 
 ### P1：V1 完整体验
 
-- T003 P1：补充 schema 单元测试。
 - T004 P1：定义 registry test case schema。
 - T013 P1：实现 CLI 统一错误处理和 exit code。
 - T014 P1：增加 `--state-dir` 参数。
@@ -254,6 +253,7 @@
 - 已完成：T267 P0：定义 Runtime Kernel public contract 设计契约。
 - 已完成：T001 P0：让 `opencap validate` 调用真实 schema 校验。
 - 已完成：T002 P0：抽出可复用 manifest validator API。
+- 已完成：T003 P1：补充 schema 单元测试。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T003 schema 单元测试
+1. T004 registry test case schema
 2. T010 local state helper
 3. T011 install/list
 4. T020 Installed Capability Loader
@@ -299,7 +299,7 @@ git diff --check
 7. T050 HTTP executor dry-run
 8. T060 `opencap invoke`
 9. T070 MCP bridge
-10. T004 registry test case schema
+10. T005 manifest authoring guide
 
 ---
 
@@ -357,7 +357,7 @@ pnpm --filter @opencap/spec build
 
 ### T003 P1：补充 schema 单元测试
 
-- [ ] T003 P1：补充 schema 单元测试
+- [x] T003 P1：补充 schema 单元测试
 
 验收标准：
 
@@ -378,6 +378,8 @@ pnpm --filter @opencap/spec test
 pnpm --filter @opencap/spec build
 ```
 
+完成记录：已新增 `packages/spec/src/index.test.ts`，覆盖合法 HTTP manifest、非法 type、缺少 permissions、非法 risk、timeout 过小、metadata 缺 trust level，并断言 JSON Pointer 风格字段路径。
+
 ### T004 P1：定义 registry test case schema
 
 - [ ] T004 P1：定义 registry test case schema
@@ -389,6 +391,21 @@ pnpm --filter @opencap/spec build
 - `packages/spec/schema/registry-test.schema.json`
 - `docs/社区/registry-guidelines.md` 更新
 - 示例 tests 修正
+
+验收标准：
+
+- 新增 registry test case JSON Schema。
+- schema 能表达 `name`、`input`、`expect.status`、`expect.output` 或 `expect.error`。
+- 现有 `registry/**/tests/basic.yml` 按 schema 通过校验或被修正为通过。
+- Registry 指南说明 test case 的最小字段和用途。
+- 后续 CI 可以复用该 schema，不需要读取 Runtime 实现。
+
+验证：
+
+```bash
+pnpm validate
+pnpm --filter @opencap/spec build
+```
 
 ### T005 P2：增加 manifest authoring guide
 

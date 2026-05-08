@@ -10,6 +10,7 @@
 
 - `opencap validate <path>` 已接入真实 Capability Manifest schema 校验。
 - `@opencap/spec` 导出可复用 manifest loader/validator API。
+- Manifest validator 单元测试覆盖合法和非法 schema 场景。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。
 - 整体设计二次审查，补齐工程缺口、成熟度评分和 T267-T276 补强任务。
@@ -39,4 +40,4 @@
 ### 已知缺口
 
 - 命令行和运行时实现仍处于骨架阶段。
-- manifest validator API 仍缺 T003 单元测试覆盖。
+- Registry test case schema 仍未定义。

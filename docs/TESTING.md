@@ -48,7 +48,7 @@ pnpm lint
 
 ### `@opencap/spec`
 
-当前 `pnpm validate` 已能校验 registry manifests。后续 T003 必须补充单元测试覆盖：
+当前 `pnpm validate` 已能校验 registry manifests，`packages/spec/src/index.test.ts` 已覆盖 validator 基础行为。后续继续扩展时应保持覆盖：
 
 - 合法 HTTP manifest 通过
 - `type: mcp` 失败
