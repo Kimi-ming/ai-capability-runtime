@@ -1,8 +1,11 @@
 name: searches repositories
+capability: github.search_repo
+mode: dry_run
 input:
   query: opencap runtime
   kind: repositories
 expect:
+  status: dry_run
   request:
     method: GET
     url: https://api.github.com/search/repositories?q=opencap runtime

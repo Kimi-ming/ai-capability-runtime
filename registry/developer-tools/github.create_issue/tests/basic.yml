@@ -1,4 +1,6 @@
 name: creates an issue payload
+capability: github.create_issue
+mode: dry_run
 input:
   owner: opencap
   repo: opencap
@@ -8,6 +10,7 @@ input:
     - runtime
     - v0.1
 expect:
+  status: dry_run
   request:
     method: POST
     url: https://api.github.com/repos/opencap/opencap/issues

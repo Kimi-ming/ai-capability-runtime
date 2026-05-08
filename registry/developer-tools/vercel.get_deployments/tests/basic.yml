@@ -1,8 +1,11 @@
 name: lists deployments
+capability: vercel.get_deployments
+mode: dry_run
 input:
   project_id: prj_123
   limit: 5
 expect:
+  status: dry_run
   request:
     method: GET
     url: https://api.vercel.com/v6/deployments?projectId=prj_123&limit=5

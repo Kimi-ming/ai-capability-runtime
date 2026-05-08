@@ -189,6 +189,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 短期：
 
 - JSON/YAML/schema validation
+- registry test case schema validation
 - TypeScript build
 - unit tests
 

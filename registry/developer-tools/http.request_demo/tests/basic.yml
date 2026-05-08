@@ -1,7 +1,10 @@
 name: performs a read-only request
+capability: http.request_demo
+mode: dry_run
 input:
   url: https://example.com
 expect:
+  status: dry_run
   request:
     method: GET
     url: https://example.com

@@ -43,7 +43,6 @@
 
 ### P1：V1 完整体验
 
-- T004 P1：定义 registry test case schema。
 - T013 P1：实现 CLI 统一错误处理和 exit code。
 - T014 P1：增加 `--state-dir` 参数。
 - T021 P1：实现 Capability id 与 MCP tool name 映射表。
@@ -254,6 +253,7 @@
 - 已完成：T001 P0：让 `opencap validate` 调用真实 schema 校验。
 - 已完成：T002 P0：抽出可复用 manifest validator API。
 - 已完成：T003 P1：补充 schema 单元测试。
+- 已完成：T004 P1：定义 registry test case schema。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T004 registry test case schema
+1. T005 manifest authoring guide
 2. T010 local state helper
 3. T011 install/list
 4. T020 Installed Capability Loader
@@ -299,7 +299,7 @@ git diff --check
 7. T050 HTTP executor dry-run
 8. T060 `opencap invoke`
 9. T070 MCP bridge
-10. T005 manifest authoring guide
+10. T080 Registry manifest CI 校验
 
 ---
 
@@ -382,7 +382,7 @@ pnpm --filter @opencap/spec build
 
 ### T004 P1：定义 registry test case schema
 
-- [ ] T004 P1：定义 registry test case schema
+- [x] T004 P1：定义 registry test case schema
 
 目标：让 `tests/basic.yml` 有可校验格式。
 
@@ -407,14 +407,33 @@ pnpm validate
 pnpm --filter @opencap/spec build
 ```
 
+完成记录：已新增 `packages/spec/schema/registry-test.schema.json` 和 `packages/spec/src/validate-registry.ts`；`pnpm validate` 现在同时校验 manifests 与 `registry/**/tests/basic.yml`；现有 registry 测试样例已补齐 `capability`、`mode` 和 `expect.status`。
+
 ### T005 P2：增加 manifest authoring guide
 
 - [ ] T005 P2：增加 manifest authoring guide
+
+目标：让贡献者能从空目录写出一个通过 `opencap validate` / `pnpm validate` 的 HTTP Capability。
 
 产出：
 
 - `docs/教程/write-a-capability.md`
 - 示例从空目录到通过 validate
+
+验收标准：
+
+- 教程使用中文，覆盖 manifest 必填字段、权限、auth、execution、metadata 和 tests/basic.yml。
+- 教程给出可复制的最小 HTTP Capability 示例。
+- 教程说明如何运行 `pnpm validate` 和 `opencap validate <path>`。
+- 教程明确不放真实 token，测试 env 只能使用假值。
+- `docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径加入该教程。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+pnpm validate
+```
 
 ---
 

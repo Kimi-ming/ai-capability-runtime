@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opencap.dev/schema/registry-test.schema.json",
+  "title": "OpenCap Registry Test Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "capability",
+    "mode",
+    "expect"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capability": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "validate",
+        "dry_run",
+        "mock_http"
+      ]
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "valid",
+            "dry_run",
+            "success",
+            "confirmation_required",
+            "denied",
+            "blocked",
+            "failed",
+            "unknown_after_timeout"
+          ]
+        },
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "method",
+            "url"
+          ],
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ]
+            },
+            "url": {
+              "type": "string",
+              "minLength": 1
+            },
+            "headers": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "query": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "permission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "risk",
+            "decision"
+          ],
+          "properties": {
+            "risk": {
+              "type": "string",
+              "enum": [
+                "read_only",
+                "write",
+                "external_send",
+                "destructive",
+                "financial",
+                "code_execution",
+                "secret_access"
+              ]
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "allow",
+                "ask",
+                "deny",
+                "block"
+              ]
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "request"
+          ]
+        },
+        {
+          "required": [
+            "permission"
+          ]
+        },
+        {
+          "required": [
+            "output"
+          ]
+        },
+        {
+          "required": [
+            "error"
+          ]
+        }
+      ]
+    },
+    "mock_response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "mock_http"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mock_response"
+        ]
+      }
+    }
+  ]
+}

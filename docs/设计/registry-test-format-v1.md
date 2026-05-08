@@ -21,11 +21,15 @@ input:
   body: Created by OpenCap test.
 expect:
   status: dry_run
-  method: POST
-  url: https://api.github.com/repos/opencap/opencap/issues
-  body:
-    title: Test issue
-    body: Created by OpenCap test.
+  request:
+    method: POST
+    url: https://api.github.com/repos/opencap/opencap/issues
+    body:
+      title: Test issue
+      body: Created by OpenCap test.
+  permission:
+    risk: write
+    decision: ask
 ```
 
 ## 字段
@@ -37,7 +41,7 @@ expect:
 | `mode` | yes | `validate` / `dry_run` / future `mock_http` |
 | `input` | no | invocation input |
 | `env` | no | mock env，不放真实 secret |
-| `expect` | yes | 期望结果 |
+| `expect` | yes | 期望结果，必须包含 `status`，并至少包含 `request`、`permission`、`output` 或 `error` 之一 |
 
 ## mode
 
@@ -51,10 +55,11 @@ expect:
 
 必须验证：
 
-- method
-- rendered url
-- rendered body
-- policy decision 或 expected status
+- `expect.status`
+- `expect.request.method`
+- `expect.request.url`
+- 可选 rendered body
+- policy risk/decision 或后续 output/error
 
 ### future `mock_http`
 
@@ -83,3 +88,34 @@ V1 可先不实现。
 - T080：Registry manifest CI 校验。
 - T081：Capability Review Checklist。
 - T129：Registry 供应链 review 工作流。
+
+
+## V1 Schema
+
+V1 schema 位于：
+
+```text
+packages/spec/schema/registry-test.schema.json
+```
+
+当前 `pnpm validate` 会同时校验：
+
+- `registry/**/manifest.yml`
+- `registry/**/tests/basic.yml`
+
+测试文件的最小合法形态：
+
+```yaml
+name: validates a dry run
+capability: github.search_repo
+mode: dry_run
+input:
+  query: opencap runtime
+expect:
+  status: dry_run
+  request:
+    method: GET
+    url: https://api.github.com/search/repositories?q=opencap runtime
+```
+
+`expect.output` 和 `expect.error` 已在 schema 中预留，用于后续 mock HTTP 和 Result Envelope 测试。
