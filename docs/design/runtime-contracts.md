@@ -51,7 +51,7 @@
 - host
 - input metadata
 
-输出：`PolicyDecision`。
+输出：`PolicyDecision` 和 redacted `PolicyDecisionTraceV1`。
 
 边界：只决策，不交互、不执行、不读密钥。
 
@@ -128,15 +128,16 @@ V1 存储：SQLite。
 | 4. build egress map | manifest/input | field-level egress map | 写 audit，返回 planning error |
 | 5. evaluate data egress | egress map/policy | egress decision | 写 audit，不解析 secret、不执行 |
 | 6. build plan | manifest/input | invocation plan | 写 audit，返回 planning error |
-| 7. evaluate policy | plan/policy | decision | 写 audit，默认 ask 或返回 policy error |
-| 8. confirm | decision ask | confirmation result | 写 audit，不执行 |
-| 9. resolve secrets | auth/env | credential handle | 写 audit，不执行 |
-| 10. execute/dry-run | plan/credential | execution result | 写 audit，返回 execution error |
-| 11. normalize output | raw output | normalized output | 写 audit，返回 normalize error |
-| 12. validate output | normalized output/schema | validated output | 写 audit，返回 output validation error |
-| 13. sanitize result | validated output/error body | sanitized result | 写 audit，返回 sanitized summary |
-| 14. build result envelope | outcome/evidence/output | Result Envelope | 写 audit，返回 envelope error |
-| 15. audit | all context | log row | 返回主结果并警告 audit failure |
+| 7. evaluate policy | plan/policy | decision + trace | 写 audit，默认 ask 或返回 policy error |
+| 8. apply override if allowed | decision/override | effective decision + trace | 写 audit，不绕过硬安全边界 |
+| 9. confirm | decision ask | confirmation result | 写 audit，不执行 |
+| 10. resolve secrets | auth/env | credential handle | 写 audit，不执行 |
+| 11. execute/dry-run | plan/credential | execution result | 写 audit，返回 execution error |
+| 12. normalize output | raw output | normalized output | 写 audit，返回 normalize error |
+| 13. validate output | normalized output/schema | validated output | 写 audit，返回 output validation error |
+| 14. sanitize result | validated output/error body | sanitized result | 写 audit，返回 sanitized summary |
+| 15. build result envelope | outcome/evidence/output | Result Envelope | 写 audit，返回 envelope error |
+| 16. audit | all context | log row | 返回主结果并警告 audit failure |
 
 ## 错误分类
 

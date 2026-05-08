@@ -33,6 +33,10 @@ ADR：`docs/decisions/0006-sqlite-audit-log-v1.md`。
 | `risk` | text | 聚合风险 |
 | `decision` | text | allow/ask/deny |
 | `matched_rule_id` | text | policy rule id |
+| `policy_set_id` | text | policy set id，可为空 |
+| `policy_revision` | text | active policy revision，可为空 |
+| `policy_trace_json` | text | redacted decision trace JSON |
+| `override_id` | text | 本次生效的 override/breakglass id，可为空 |
 | `confirmation_status` | text | not_required/accepted/declined/unavailable |
 | `status` | text | success/error/denied/confirmation_required/dry_run |
 | `duration_ms` | integer | 耗时 |
@@ -110,4 +114,6 @@ error
 - input hash 稳定。
 - egress deny 不产生 request_started。
 - egress evidence 不含 input 原文或 secret-like value。
+- policy trace 不含 input 原文或 secret-like value。
+- override/breakglass 生效时写入 override_id 和 trace summary。
 - 非 read-only 审计不可用时 executor 不被调用。

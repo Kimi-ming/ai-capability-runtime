@@ -171,6 +171,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - Prompt-surface conformance 覆盖 tool projection、description lint、schema poisoning negative fixtures、projection hash 和 runtime-generated risk summary。
 - Result conformance 覆盖 Result Envelope、structuredContent、output schema validation、provider raw text 不直出、result sanitizer、provenance/taint labels。
 - Input/egress conformance 覆盖 input classification、secret-like/PII/internal URL 检测、data egress gate 在 secret 前运行、field-level egress map、dry-run redacted preview。
+- Policy governance conformance 覆盖 decision trace、policy change audit、broad allow simulation、override/breakglass 硬边界。
 
 ## CI 目标
 

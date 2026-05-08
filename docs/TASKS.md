@@ -201,6 +201,18 @@
 - T245 P1：internal URL/source/config egress negative tests。
 - T246 P2：manifest data class hint RFC。
 - T247 P2：organization data policy RFC。
+- T249 P1：实现 policy decision trace。
+- T250 P1：实现 policy explain CLI。
+- T251 P1：实现 policy change audit/ledger。
+- T252 P1：实现 policy validate lint。
+- T253 P1：实现 policy simulation/diff。
+- T254 P1：实现 broad allow safety checks。
+- T255 P1：实现 policy override/breakglass controls。
+- T256 P2：policy bundle manifest/signing RFC。
+- T257 P1：policy simulation fixtures。
+- T258 P2：policy incident runbook。
+- T259 P2：decision log export。
+- T260 P1：policy governance conformance tests。
 
 ### 已完成
 
@@ -225,6 +237,7 @@
 - 已完成：T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系。
 - 已完成：T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系。
 - 已完成：T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系。
+- 已完成：T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系。
 
 
 ---
@@ -2301,6 +2314,330 @@ git diff --check
 - Runtime 只外发 execution mapping 引用字段。
 - confirmation/dry-run/audit 都使用 redacted egress preview。
 - PII/source/internal URL/secret-like input 风险进入任务、测试和风险登记。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+---
+
+## Epic Q：Policy Governance
+
+### T249 P1：实现 policy decision trace
+
+- [ ] T249 P1：实现 policy decision trace
+
+目标：每次 risk policy、data egress、quota/budget、outbound、lifecycle gate 的决策都能生成脱敏 trace。
+
+涉及文件：
+
+- `packages/runtime/src/policy*`
+- `packages/runtime/src/audit*`
+- `docs/design/policy-decision-trace-v1.md`
+
+验收标准：
+
+- trace 包含 policySetId、policyRevision、gate、decision、matchedRuleId、reasonCode。
+- trace 记录 evaluated facts 的脱敏摘要。
+- default decision used 可见。
+- deny trace 中 `secretResolutionAllowed=false`。
+- trace 不包含 input 原文、secret-like value 或 token。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T250 P1：实现 policy explain CLI
+
+- [ ] T250 P1：实现 policy explain CLI
+
+目标：用户可以通过 CLI 理解某次调用为什么被允许、确认、拒绝或阻断。
+
+涉及文件：
+
+- `packages/cli/src/`
+- `packages/runtime/src/policy*`
+- `docs/design/cli-contract-v1.md`
+
+验收标准：
+
+- `opencap invoke <id> --dry-run --explain` 展示 effective decision summary。
+- 输出包含 blocking gate、matched rule、reason code、policy revision。
+- MCP 结果只暴露简短 reason code，不暴露完整内部 policy。
+- explain 输出默认不显示敏感 input 原文。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli test
+pnpm --filter @opencap/runtime test
+```
+
+### T251 P1：实现 policy change audit/ledger
+
+- [ ] T251 P1：实现 policy change audit/ledger
+
+目标：policy 激活、回滚和覆盖都留下本地可查询记录。
+
+涉及文件：
+
+- `packages/runtime/src/policy-ledger*`
+- `packages/cli/src/`
+- `docs/operations/policy-lifecycle-and-change-control.md`
+
+验收标准：
+
+- 每次 policy activation 记录 revision、digest、from/to revision、reason。
+- rollback 是重新激活旧 revision，不删除历史。
+- failed activation 不覆盖当前 active policy。
+- ledger 记录不包含 secret 或 input 原文。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T252 P1：实现 policy validate lint
+
+- [ ] T252 P1：实现 policy validate lint
+
+目标：在 policy 生效前发现语法错误、未知字段、未知 risk/decision 和危险规则。
+
+涉及文件：
+
+- `packages/runtime/src/policy-validator*`
+- `packages/cli/src/`
+- `docs/design/policy-dsl-v1.md`
+
+验收标准：
+
+- 非法 decision/risk 返回结构化错误。
+- 重复 rule id 返回 warning/error。
+- 未命名高风险 allow rule 返回 finding。
+- 输出包含文件路径、字段路径和 rule id。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/cli test
+```
+
+### T253 P1：实现 policy simulation/diff
+
+- [ ] T253 P1：实现 policy simulation/diff
+
+目标：策略变更生效前，能看到哪些场景从 ask/deny 变成 allow，哪些能力被收紧。
+
+涉及文件：
+
+- `packages/runtime/src/policy-simulation*`
+- `packages/cli/src/`
+- `docs/quality/policy-simulation-and-diff-v1.md`
+
+验收标准：
+
+- 支持 policyBefore/policyAfter + scenarios。
+- 识别 `new_allow`、`ask_to_allow`、`deny_to_ask`、`data_egress_relaxed`。
+- simulation report 不含 input 原文。
+- unchanged policy 产生 empty diff。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T254 P1：实现 broad allow safety checks
+
+- [ ] T254 P1：实现 broad allow safety checks
+
+目标：防止高风险 broad allow 静默进入 active policy。
+
+涉及文件：
+
+- `packages/runtime/src/policy-validator*`
+- `packages/runtime/src/policy-simulation*`
+
+验收标准：
+
+- `risk: write` + `decision: allow` 无 capability/resource 限定时产生 high finding。
+- `external_send`、`destructive`、`financial` allow 缺少确认边界时阻断或高危告警。
+- data class 为 `secret_like`、`pii`、`source_code` 时 broad egress allow 产生 error。
+- findings 可被 policy activation 使用。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T255 P1：实现 policy override/breakglass controls
+
+- [ ] T255 P1：实现 policy override/breakglass controls
+
+目标：支持有限的本地临时 override，同时保证它不能变成无审计后门。
+
+涉及文件：
+
+- `packages/runtime/src/policy-override*`
+- `packages/runtime/src/audit*`
+- `docs/security/policy-override-and-breakglass-v1.md`
+
+验收标准：
+
+- 支持 `allow_once`、`allow_until`、`deny_override`、`breakglass` 记录。
+- expired override 不生效。
+- breakglass 必须有 reason 和短过期时间。
+- override 写入 policy trace 和 audit。
+- override 不能覆盖 data egress deny、outbound private block、revoked/malicious block。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T256 P2：policy bundle manifest/signing RFC
+
+- [ ] T256 P2：policy bundle manifest/signing RFC
+
+目标：为未来本地 bundle、组织 bundle 和签名策略留下兼容路径，但不进入 V1 主路径。
+
+涉及文件：
+
+- `rfcs/`
+- `docs/operations/policy-lifecycle-and-change-control.md`
+- `docs/security/signing-and-provenance-roadmap.md`
+
+验收标准：
+
+- RFC 定义 bundle digest、optional signature、activation record。
+- 明确 failed activation 不覆盖当前 active policy。
+- 明确 Cloud/org bundle 不能成为 OSS Runtime 启动依赖。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T257 P1：policy simulation fixtures
+
+- [ ] T257 P1：policy simulation fixtures
+
+目标：建立一组稳定场景用于 policy simulation、broad allow 检查和 conformance。
+
+涉及文件：
+
+- `packages/runtime/test/fixtures/policies/`
+- `packages/runtime/test/fixtures/policy-scenarios/`
+
+验收标准：
+
+- 覆盖 read_only、write、external_send、destructive、financial。
+- 覆盖 pii、secret_like、source_code、internal_url。
+- 覆盖 trust/lifecycle/advisory 事实。
+- fixture 不包含真实 secret 或个人数据。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T258 P2：policy incident runbook
+
+- [ ] T258 P2：policy incident runbook
+
+目标：当用户误放开策略、能力被滥用或需要紧急阻断时，有可操作恢复流程。
+
+涉及文件：
+
+- `docs/operations/policy-incident-runbook.md`
+- `docs/security/policy-override-and-breakglass-v1.md`
+
+验收标准：
+
+- 包含 revoke override、activate deny policy、review audit、rollback policy 的步骤。
+- 明确哪些场景允许 breakglass，哪些场景必须 deny。
+- 与 capability advisory/revocation 流程相互引用。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T259 P2：decision log export
+
+- [ ] T259 P2：decision log export
+
+目标：允许用户导出脱敏 policy trace 和 decision summary，用于本地复盘或组织审查。
+
+涉及文件：
+
+- `packages/cli/src/`
+- `packages/runtime/src/audit*`
+
+验收标准：
+
+- 支持按 capability、time range、decision 筛选。
+- export 不包含 input 原文、secret-like value 或 token。
+- export 关联 invocation id、policy revision 和 trace id。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli test
+pnpm --filter @opencap/runtime test
+```
+
+### T260 P1：policy governance conformance tests
+
+- [ ] T260 P1：policy governance conformance tests
+
+目标：把 policy governance 的安全承诺转成一致性测试组。
+
+涉及文件：
+
+- `docs/quality/conformance-suite-v1.md`
+- `packages/runtime/src/**/*.test.ts`
+
+验收标准：
+
+- 覆盖 decision trace。
+- 覆盖 policy change audit。
+- 覆盖 broad allow simulation。
+- 覆盖 override/breakglass negative tests。
+- 覆盖 audit redaction。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系
+
+- [x] T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系
+
+已完成：新增 Policy Decision Trace V1、Policy Lifecycle and Change Control、Policy Simulation and Diff V1、Policy Override and Breakglass V1、Policy Governance 调研，并新增 ADR 0050-0053。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、README、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- 每个 policy/gate decision 都有 redacted trace 设计。
+- Policy 变更有 revision、digest、activation、rollback 和 change record 设计。
+- Broad allow 和 ask/deny -> allow 有 simulation/diff 检查路径。
+- Override/breakglass 不能绕过 audit、egress deny、outbound block、secret ordering 或 revoked block。
+- 相关风险、任务、conformance 和 ADR 均进入文档体系。
 
 验证：
 

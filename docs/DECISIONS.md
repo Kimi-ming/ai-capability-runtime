@@ -55,18 +55,22 @@
 | 0047 | Data Egress Gate 必须在 Secret Resolution 前运行 | 已接受 | egress deny 不解析 secret、不执行请求。 |
 | 0048 | Tool Input 分类前视为不可信数据 | 已接受 | schema validation 后仍需分类、最小化和外发审查。 |
 | 0049 | 数据最小化由 Runtime 拥有 | 已接受 | 只发送 execution mapping 引用字段，不自动外发整个 input。 |
+| 0050 | Policy Decision 必须产生 Trace | 已接受 | 每个策略或 gate 决策都要可解释、可审计、可脱敏追踪。 |
+| 0051 | Policy 变更是可审计本地对象 | 已接受 | 策略激活、回滚和覆盖必须保留 revision、digest 和 change record。 |
+| 0052 | Broad Allow 需要模拟和差异评估 | 已接受 | ask/deny 变 allow 以及高风险 broad allow 必须先产生 simulation finding。 |
+| 0053 | Breakglass 不得绕过审计和硬安全边界 | 已接受 | 紧急通道不能绕过 egress deny、outbound block、secret ordering 或 revoked block。 |
 
 ## 下一批需要决策的问题
 
-- 0050：OpenAPI adapter 的人工 review 边界。
-- 0051：Registry index signing 具体格式。
-- 0052：MCP elicitation profile 是否进入 v0.2。
-- 0053：macOS Keychain / external vault provider 是否进入 v0.2。
-- 0054：Idempotency-Key manifest field 是否进入 v0.2。
-- 0055：Composition profile 是否进入 v0.3。
-- 0056：Advisory YAML 是否映射 OSV。
-- 0057：Paid capability manifest 是否进入 v0.3。
-- 0058：Organization data policy 是否进入 v0.2。
+- 0054：OpenAPI adapter 的人工 review 边界。
+- 0055：Registry index signing 具体格式。
+- 0056：MCP elicitation profile 是否进入 v0.2。
+- 0057：macOS Keychain / external vault provider 是否进入 v0.2。
+- 0058：Idempotency-Key manifest field 是否进入 v0.2。
+- 0059：Composition profile 是否进入 v0.3。
+- 0060：Advisory YAML 是否映射 OSV。
+- 0061：Paid capability manifest 是否进入 v0.3。
+- 0062：Organization data policy 是否进入 v0.2。
 
 ## 决策写法
 

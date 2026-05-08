@@ -115,6 +115,10 @@ PolicyDecision 必须记录：
 - matched rule id
 - reason
 - evaluated permissions summary
+- policy set id、revision 和 digest
+- redacted decision trace id
+
+每次策略评估还必须生成 `PolicyDecisionTraceV1`。trace 只保存脱敏事实、匹配规则、默认决策是否生效和 reason code，不保存 input 原文或 secret-like value。
 
 ## 非目标
 
@@ -128,3 +132,7 @@ V1 不支持：
 - Rego。
 
 这些能力保留到 V1 之后。
+
+## 变更安全
+
+Policy 从 `ask`/`deny` 放宽为 `allow`，或新增覆盖 `write`、`external_send`、`destructive`、`financial`、敏感数据外发的 broad allow 时，必须先通过 policy simulation/diff 产生 finding。V1 允许先实现 warning/block 的本地检查，但不能把高风险 broad allow 当成普通文本改动。

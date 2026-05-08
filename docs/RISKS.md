@@ -75,6 +75,11 @@
 | R053 | Medium | Mitigating | 未被 execution mapping 使用的 input 字段被整体 body 外发 | data minimization；field-level egress map | T240, T242 |
 | R054 | Medium | Mitigating | 用户确认时看不到将外发的数据类别和目标 provider | confirmation summary data classes | T238, T243 |
 | R055 | High | Mitigating | internal URL/source/config 通过普通字段外发，造成内部信息泄露 | data classification + outbound policy | T235, T236, T245 |
+| R056 | High | Mitigating | 最终 allow/deny 缺少 decision trace，导致无法解释或取证 | Policy Decision Trace V1；audit 保存 redacted trace | T249, T250, T259 |
+| R057 | High | Mitigating | policy 文件静默变更放宽权限，用户无法知道影响范围 | Policy lifecycle/change ledger；activation digest | T251, T252 |
+| R058 | High | Mitigating | ask/deny 被改为 broad allow，写入、外发或金融动作静默放开 | Policy simulation/diff；broad allow safety checks | T253, T254, T260 |
+| R059 | High | Mitigating | override/breakglass 变成无审计后门 | Override record、短过期时间、硬安全边界不可绕过 | T255, T258, T260 |
+| R060 | Medium | Mitigating | future policy bundle 激活失败覆盖当前 active policy | lifecycle activation record；failed activation 不替换 active revision | T256 |
 
 ## 当前最高优先级风险
 
@@ -93,7 +98,10 @@
 13. R047：output schema mismatch 被误报 success
 14. R051：模型生成 input 静默外发敏感数据
 15. R052：ordinary input 中的 secret-like value 被发送
-16. R006：依赖安装和 workspace 构建验证
+16. R056：策略决策缺少可解释 trace
+17. R058：broad allow 静默放开高风险操作
+18. R059：override/breakglass 变成无审计后门
+19. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

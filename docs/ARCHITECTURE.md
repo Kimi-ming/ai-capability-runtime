@@ -21,6 +21,8 @@ Runtime Core
  | Capability Loader
  | Input Validator
  | Policy Engine
+ | Policy Decision Trace Builder
+ | Policy Change Ledger
  | Confirmation Handler
  | Secret Resolver
  | HTTP Executor
@@ -118,6 +120,8 @@ Runtime 加载后的能力对象，包含：
 - decision: `allow` / `ask` / `deny`
 - reason
 - matched rule
+- policy revision
+- redacted decision trace id
 
 ### InvocationLog
 
@@ -132,6 +136,8 @@ load manifest
   -> minimize input and build egress map
   -> evaluate data egress policy
   -> evaluate policy
+  -> build policy decision trace
+  -> apply allowed override if present
   -> resolve confirmation if needed
   -> resolve secrets
   -> execute or dry-run
@@ -202,3 +208,7 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 ### Data Egress 边界
 
 Input schema validation 之后，Runtime 必须先执行 input classification、data minimization 和 data egress policy。egress deny 不解析 secret、不发请求，且写入 redacted audit evidence。
+
+### Policy Governance 边界
+
+Policy 不只是 `policies.yml`。Runtime 必须记录 active policy revision、decision trace、override record 和 policy change ledger。策略放宽，尤其是 broad allow 或 ask/deny -> allow，必须经过 simulation/diff 检查。Breakglass 只能影响普通 risk policy 的 effective decision，不能绕过 audit、egress deny、outbound block、secret ordering 或 revoked/malicious block。

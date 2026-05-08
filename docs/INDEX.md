@@ -41,6 +41,7 @@ README.md
       -> docs/design/execution-semantics-v1.md
       -> docs/design/retry-and-idempotency-v1.md
       -> docs/design/quota-and-budget-policy-v1.md
+      -> docs/design/policy-decision-trace-v1.md
       -> docs/design/tool-projection-v1.md
       -> docs/design/result-envelope-v1.md
       -> docs/design/data-egress-policy-v1.md
@@ -66,6 +67,7 @@ README.md
       -> docs/security/rate-limit-and-abuse-control-v1.md
       -> docs/security/prompt-surface-security-v1.md
       -> docs/security/tool-result-sanitization-v1.md
+      -> docs/security/policy-override-and-breakglass-v1.md
       -> docs/operations/release-readiness.md
       -> docs/operations/package-publishing-v1.md
       -> docs/operations/credential-lifecycle.md
@@ -74,6 +76,7 @@ README.md
       -> docs/operations/ci-security-baseline.md
       -> docs/operations/observability-metrics-v1.md
       -> docs/operations/usage-metering-v1.md
+      -> docs/operations/policy-lifecycle-and-change-control.md
       -> docs/community/contributor-journey.md
       -> docs/community/capability-review-checklist.md
       -> docs/community/rfc-process.md
@@ -87,6 +90,7 @@ README.md
       -> docs/quality/output-validation-v1.md
       -> docs/quality/result-provenance-v1.md
       -> docs/quality/input-provenance-v1.md
+      -> docs/quality/policy-simulation-and-diff-v1.md
       -> docs/planning/v1-implementation-plan.md
       -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
@@ -179,6 +183,7 @@ README.md
 | `docs/design/execution-semantics-v1.md` | 执行语义 | outcome、side effect、request_started 或状态模型变化时 |
 | `docs/design/retry-and-idempotency-v1.md` | 重试与幂等 | retry policy、idempotency key 或重复调用规则变化时 |
 | `docs/design/quota-and-budget-policy-v1.md` | 配额与预算策略 | quota/budget gate、spend cap 或策略字段变化时 |
+| `docs/design/policy-decision-trace-v1.md` | 策略决策追踪 | policy/gate decision trace、explain 输出或 audit trace 字段变化时 |
 | `docs/design/tool-projection-v1.md` | 模型可见工具投影 | MCP tools/list metadata、projection hash 或 tool description 模板变化时 |
 | `docs/design/result-envelope-v1.md` | 工具结果信封 | Result Envelope、MCP result shape、structuredContent 或 result status 变化时 |
 | `docs/design/data-egress-policy-v1.md` | 数据外发策略 | egress gate、data policy DSL 或 external provider data policy 变化时 |
@@ -205,6 +210,7 @@ README.md
 | `docs/security/rate-limit-and-abuse-control-v1.md` | 限流与滥用控制 | local/provider rate limit、abuse throttle 或 429 语义变化时 |
 | `docs/security/prompt-surface-security-v1.md` | 模型可见提示面安全 | tool description、schema description、result text 或 prompt-surface 控制变化时 |
 | `docs/security/tool-result-sanitization-v1.md` | 工具结果净化 | provider response、error body、HTML/text 或 indirect prompt injection 控制变化时 |
+| `docs/security/policy-override-and-breakglass-v1.md` | 策略 override 与 breakglass | 临时放行、紧急通道、override audit 或硬安全边界变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
 | `docs/operations/credential-lifecycle.md` | 凭据生命周期 Runbook | token 创建、轮换、撤销或泄露响应流程变化时 |
@@ -213,6 +219,7 @@ README.md
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
 | `docs/operations/observability-metrics-v1.md` | 可观测性和指标 | audit/metrics/OTel 映射变化时 |
 | `docs/operations/usage-metering-v1.md` | 用量计量 | usage event、usage summary 或 export 变化时 |
+| `docs/operations/policy-lifecycle-and-change-control.md` | 策略生命周期与变更控制 | policy revision、activation、rollback、ledger 或 bundle 边界变化时 |
 | `docs/community/contributor-journey.md` | 贡献者路径 | 贡献流程变化时 |
 | `docs/community/capability-review-checklist.md` | Capability PR 评审 | Registry review 规则变化时 |
 | `docs/community/rfc-process.md` | RFC 流程 | 设计治理流程变化时 |
@@ -226,6 +233,7 @@ README.md
 | `docs/quality/output-validation-v1.md` | 输出校验 | output schema validation、normalization、selector 或 size limit 变化时 |
 | `docs/quality/result-provenance-v1.md` | 结果来源 | result provenance、taint label、content digest 或 transformation evidence 变化时 |
 | `docs/quality/input-provenance-v1.md` | 输入来源 | input source、field-level egress map、input hash 或 derived input evidence 变化时 |
+| `docs/quality/policy-simulation-and-diff-v1.md` | 策略模拟与差异评估 | policy simulation、broad allow finding 或 change diff 变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

@@ -126,3 +126,7 @@
 | RQ-078 | Data Egress Gate 在 secret 前阻断 | `docs/design/data-egress-policy-v1.md` | T236, T237 | egress gate ordering tests |
 | RQ-079 | 输入来源和字段外发可追踪 | `docs/quality/input-provenance-v1.md` | T239, T240, T241 | provenance/evidence tests |
 | RQ-080 | Runtime 只外发必要字段 | `docs/security/data-minimization-and-redaction-v1.md` | T242, T243, T244 | minimization/dry-run preview tests |
+| RQ-081 | Policy decision 可解释可审计 | `docs/design/policy-decision-trace-v1.md` | T249, T250, T259 | trace/explain/audit tests |
+| RQ-082 | Policy 变更可版本化可回滚 | `docs/operations/policy-lifecycle-and-change-control.md` | T251, T252, T256 | policy ledger + validate tests |
+| RQ-083 | 高风险 broad allow 上线前可发现 | `docs/quality/policy-simulation-and-diff-v1.md` | T253, T254, T260 | simulation/diff conformance |
+| RQ-084 | Override 和 breakglass 不绕过硬边界 | `docs/security/policy-override-and-breakglass-v1.md` | T255, T258, T260 | override/breakglass negative tests |

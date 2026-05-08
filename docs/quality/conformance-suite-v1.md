@@ -20,6 +20,7 @@ Conformance suite 不是普通单元测试集合。它要证明：
 | C-PKG | Capability package | 必须有 README、manifest、tests；禁止隐藏执行脚本 |
 | C-RUN | Runtime pipeline | denied/ask 不执行；allow 才进入 executor |
 | C-POL | Policy Engine | 规则顺序稳定；默认 ask；deny 优先终止 |
+| C-PG | Policy Governance | decision trace、policy ledger、simulation/diff、override 硬边界 |
 | C-CON | Consent | confirmation_required 可审计；未确认不解析 secret |
 | C-AUD | Audit | 成功、失败、拒绝、确认缺失都写日志；敏感字段脱敏 |
 | C-HTTP | HTTP executor | body 模板、auth placement、timeout、outbound policy |
@@ -33,7 +34,7 @@ Conformance suite 不是普通单元测试集合。它要证明：
 | --- | --- |
 | M1 Manifest Validation | C-MAN |
 | M2 Local Install/List | C-MAN, C-PKG |
-| M3 Policy + Audit | C-RUN, C-POL, C-CON, C-AUD |
+| M3 Policy + Audit | C-RUN, C-POL, C-PG, C-CON, C-AUD |
 | M4 HTTP Invoke | C-HTTP, C-SEC subset |
 | M5 MCP Bridge | C-MCP, C-CON |
 | M6 GitHub Demo | C-MAN 到 C-MCP 主路径 |
@@ -66,6 +67,9 @@ artifacts:
 OpenCap 的价值来自“不会做不该做的事”。因此下列测试优先级高于 happy path：
 
 - policy deny 时 executor 不被调用。
+- 每个 policy/gate decision 都产生 redacted trace。
+- broad allow 或 ask/deny -> allow 策略变更产生 simulation/diff finding。
+- override/breakglass 不覆盖 data egress deny、outbound private block 或 revoked/malicious block。
 - ask 且没有 confirmation channel 时不执行。
 - secret 不进入 logs/stdout/MCP result。
 - arbitrary URL 不能访问 localhost、private IP、metadata service。
@@ -100,3 +104,4 @@ V1 早期先用 Vitest、CLI smoke 和 YAML record 实现，不要求一次性�
 - T128：abuse cases smoke tests。
 - T137：错误模型测试。
 - T153：conformance suite skeleton。
+- T260：policy governance conformance tests。

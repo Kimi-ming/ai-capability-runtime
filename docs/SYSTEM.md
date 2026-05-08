@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 六十七个子系统
+## 七十一个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -25,6 +25,10 @@ OpenCap 负责能力治理。
 | Runtime 核心 | 安全执行能力 | `docs/design/runtime-contracts.md` | invoke pipeline |
 | HTTP 执行 | 调用外部 API | `docs/design/http-execution-v1.md` | body/auth/outbound 规则 |
 | Policy DSL | 执行前决策 | `docs/design/policy-dsl-v1.md` | default/rules YAML |
+| Policy Decision Trace | 解释每次策略决策 | `docs/design/policy-decision-trace-v1.md` | redacted trace object |
+| Policy 生命周期 | 策略版本、激活和回滚 | `docs/operations/policy-lifecycle-and-change-control.md` | policy ledger |
+| Policy Simulation | 上线前评估策略影响 | `docs/quality/policy-simulation-and-diff-v1.md` | simulation report |
+| Policy Override | 约束临时放行和 breakglass | `docs/security/policy-override-and-breakglass-v1.md` | override record |
 | Audit Log | 事后追踪 | `docs/design/audit-log-v1.md` | SQLite log schema |
 | Registry 治理 | 供应链入口 | `docs/security/supply-chain-governance.md` | review + CI + trust |
 | 发布运营 | 可持续推进 | `docs/operations/operating-model.md` | 任务、ADR、风险、发布门禁 |
@@ -101,6 +105,7 @@ Capability author
   -> data minimization
   -> data egress policy
   -> policy decision
+  -> policy decision trace
   -> confirmation if needed
   -> secret resolution
   -> HTTP execution or dry-run
@@ -124,6 +129,9 @@ Trusted Computing Base V1
 - schema validator
 - runtime invoke pipeline
 - policy engine
+- policy decision trace builder
+- policy change ledger writer
+- policy simulator
 - confirmation handler
 - consent request/receipt builder
 - secret resolver
@@ -175,6 +183,10 @@ Governance Surface
 - Tool input 在分类和最小化前不视为可外发数据。
 - Data Egress Gate 必须在 Secret Resolver 和 Executor 之前运行。
 - Runtime 只外发 execution mapping 引用字段，不自动发送整个 input。
+- 每个 policy/gate decision 必须产生 redacted decision trace。
+- Policy change 是可审计的本地对象，不能静默覆盖历史。
+- Broad allow、ask-to-allow 或 deny-to-allow 变更必须先产生 simulation/diff finding。
+- Breakglass 不得绕过 audit、data egress deny、outbound block、secret ordering 或 revoked/malicious block。
 
 ## V1 关键收敛决策
 
@@ -225,6 +237,10 @@ Governance Surface
 | Data Egress Gate 必须在 Secret Resolution 前运行 | 已接受 |
 | Tool Input 分类前视为不可信数据 | 已接受 |
 | 数据最小化由 Runtime 拥有 | 已接受 |
+| Policy Decision 必须产生 Trace | 已接受 |
+| Policy 变更是可审计对象 | 已接受 |
+| Broad Allow 需要模拟和差异评估 | 已接受 |
+| Breakglass 不得绕过审计和硬安全边界 | 已接受 |
 
 ## 设计成熟度
 
@@ -293,3 +309,7 @@ Governance Surface
 | Data Egress Policy | 清晰 | T236/T237 实现 gate 和 audit evidence |
 | 输入来源证据 | 清晰 | T239/T240/T241 记录 provenance 和 field egress map |
 | 数据最小化 | 清晰 | T242/T243/T244 落到 rendering/dry-run preview |
+| Policy Decision Trace | 清晰 | T249/T250/T259 落到 Runtime/audit/CLI explain |
+| Policy 生命周期 | 清晰 | T251/T252/T256 落到 validate/ledger/bundle RFC |
+| Policy Simulation | 清晰 | T253/T254/T260 落到 simulation report 和 conformance |
+| Policy Override | 清晰 | T255/T258/T260 落到 override record 和 incident runbook |

@@ -55,6 +55,8 @@ Registry 也是独立边界：registry 中的 manifest 不能因为通过了 sch
 | T-10 | 破坏性操作误执行 | destructive 默认 deny | stronger confirmation policy |
 | T-11 | 日志隐私过度收集 | 默认脱敏和哈希 | retention policy |
 | T-12 | tool name 冲突 | MCP 启动 fail fast | namespace policy |
+| T-13 | policy 变更静默放宽权限 | policy ledger、simulation/diff、broad allow findings | signed policy bundles |
+| T-14 | override/breakglass 变成无审计后门 | override record、短过期时间、硬安全边界不可绕过 | multi-admin approval |
 
 ## Abuse Cases
 
@@ -78,6 +80,14 @@ Registry 也是独立边界：registry 中的 manifest 不能因为通过了 sch
 
 防护：调用主流程应报告 audit failure；V1 发布前要决定审计失败时是否阻断执行。默认安全取向：写操作审计失败时不执行，读操作可配置。
 
+### AC-006：用户误把高风险写操作设成 allow
+
+防护：policy validate/simulation 产生 broad allow finding；ask/deny -> allow 需要 diff report；activation 写入 policy ledger。
+
+### AC-007：紧急通道被当成永久后门
+
+防护：breakglass 必须有 reason、短过期时间和 audit；不能覆盖 data egress deny、outbound private block、revoked/malicious capability block。
+
 ## 安全不变量
 
 - 默认策略是 `ask`。
@@ -86,6 +96,8 @@ Registry 也是独立边界：registry 中的 manifest 不能因为通过了 sch
 - 所有 HTTP 请求必须有 timeout。
 - 任意 URL 或未知域名能力必须被视为高风险。
 - Registry trust level 不覆盖本地 policy。
+- Policy 变更必须可追踪、可回滚、可模拟。
+- Breakglass 不得绕过审计、数据外发阻断、出站私网阻断、密钥解析顺序或 revoked/malicious block。
 
 ## 关联任务
 
@@ -96,3 +108,6 @@ Registry 也是独立边界：registry 中的 manifest 不能因为通过了 sch
 - T091：outbound policy。
 - T092：审计日志隐私分级。
 - T128：把 abuse cases 转成 smoke tests。
+- T249：policy decision trace。
+- T253：policy simulation/diff。
+- T255：policy override/breakglass controls。

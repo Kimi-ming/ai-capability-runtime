@@ -31,6 +31,9 @@
 必须通过：
 
 - allow/ask/deny 测试。
+- decision trace 测试。
+- policy validate 和 broad allow simulation 测试。
+- override/breakglass 负向测试。
 - redaction/hash 测试。
 - audit failure preflight 测试。
 

@@ -176,3 +176,16 @@ T001：让 opencap validate 调用真实 schema 校验
 下一步仍然是 T001。后续进入 validation、HTTP rendering、policy、confirmation、audit 和 dry-run 实现时，要把 input classification、field-level egress map、redacted egress preview、data classes 和 egress decision 作为主路径证据。
 
 本轮验证：`audit_docs.py` 显示文档数 192、任务总数 115、已完成 18、未完成 97；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+
+## Policy Decision Trace、策略生命周期、策略模拟和 Override/Breakglass 体系已补齐
+
+已新增 Policy Decision Trace V1、Policy Lifecycle and Change Control、Policy Simulation and Diff V1、Policy Override and Breakglass V1，以及 Policy Governance/Decision Audit 调研。ADR 0050-0053 已接受。
+
+本轮核心约束：每个 policy/gate decision 必须产生 redacted trace；policy change 是可审计本地对象；broad allow 和 ask/deny -> allow 需要 simulation/diff finding；breakglass 不能绕过 audit、data egress deny、outbound private block、secret resolver ordering 或 revoked/malicious block。
+
+后续进入 policy/runtime/audit 实现时，要把 policySetId、policyRevision、policy_trace_json、override_id、policy ledger、simulation report 和 broad allow findings 作为主路径对象。Conformance Suite、Threat Model、Quality Gates 和 RISKS 已经同步加入 Policy Governance 检查。
+
+下一步仍然是 T001：让 `opencap validate` 调用真实 schema 校验。不要被新任务量带偏；这些设计是后续 M3 Policy + Audit 的约束，V1 实现入口仍从 manifest validation 开始。
+
+本轮验证：`audit_docs.py` 显示文档数 201、任务总数 128、已完成 19、未完成 109；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；占位扫描只剩 GitHub issue template placeholder 和 ADR 0005 中明确的规划占位。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

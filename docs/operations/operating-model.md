@@ -36,6 +36,7 @@ Read docs
 | 协议架构 | MCP/A2A/OpenAPI 边界 | protocol-positioning/runtime-contracts |
 | Runtime 工程 | pipeline、state、executor | domain-model/runtime-contracts/http-execution |
 | 安全工程 | policy、secret、audit、SSRF | threat-model/outbound-policy/security-model |
+| Policy 治理 | decision trace、policy lifecycle、simulation、override | policy-dsl/policy-decision-trace/policy-lifecycle |
 | Registry 维护 | review、trust、tests | registry-guidelines/supply-chain-governance |
 | 发布经理 | 版本、CI、release gates | release-readiness/ROADMAP/TASKS |
 
@@ -65,6 +66,7 @@ Read docs
 - JSON/YAML parse。
 - workspace validate/test，若依赖已安装。
 - High 风险复核。
+- Policy broad allow 和 breakglass 复核。
 
 ## 开发阶段转换
 
