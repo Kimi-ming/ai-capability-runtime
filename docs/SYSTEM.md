@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 五十七个子系统
+## 六十二个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -75,6 +75,11 @@ OpenCap 负责能力治理。
 | Prompt Surface | 治理工具描述和结果注入 | `docs/security/prompt-surface-security-v1.md` | prompt-surface controls |
 | 发现选择边界 | 区分发现、选择和授权 | `docs/ecosystem/discovery-and-selection-boundary.md` | discovery boundary |
 | 元数据 Lint | 检查模型可见文案 | `docs/quality/model-visible-metadata-lint-v1.md` | metadata lint rules |
+| Result Envelope | 统一 Runtime 输出边界 | `docs/design/result-envelope-v1.md` | result envelope |
+| 输出校验 | 验证 provider response 符合 output schema | `docs/quality/output-validation-v1.md` | output validation |
+| 结果净化 | 净化 tool result prompt surface | `docs/security/tool-result-sanitization-v1.md` | result sanitizer |
+| 结果来源 | 记录结果来源和污染标记 | `docs/quality/result-provenance-v1.md` | result provenance |
+| 结果投递 | 适配 MCP/CLI/未来协议输出 | `docs/ecosystem/result-delivery-boundary.md` | delivery adapters |
 
 ## 系统闭环
 
@@ -104,6 +109,7 @@ Untrusted / Semi-trusted
 - third-party manifest descriptions
 - model-visible tool metadata candidates
 - external API responses
+- provider raw tool results
 
 Trusted Computing Base V1
 - schema validator
@@ -115,6 +121,9 @@ Trusted Computing Base V1
 - audit logger
 - tool projection builder
 - model-visible metadata linter
+- result envelope builder
+- output validator
+- result sanitizer
 
 Governance Surface
 - registry review
@@ -148,6 +157,9 @@ Governance Surface
 - MCP tool description 必须由 Runtime 生成，不能原样透传第三方自由文本。
 - 模型可见元数据不得包含指挥模型绕过系统、用户、策略、确认或审计的文本。
 - 能力发现、排序和模型选择不能作为执行授权来源。
+- Provider raw output 默认不得直接进入模型上下文。
+- 声明 output schema 的 Capability 必须先通过输出校验，才能返回 success。
+- MCP/CLI/未来 HTTP API 都只能从 Result Envelope 适配结果。
 
 ## V1 关键收敛决策
 
@@ -192,6 +204,9 @@ Governance Surface
 | MCP Tool Projection 由 Runtime 拥有 | 已接受 |
 | 模型可见元数据是安全表面 | 已接受 |
 | 发现和选择不是授权 | 已接受 |
+| Result Envelope 是 Runtime 输出边界 | 已接受 |
+| Output Schema 校验通过后才能暴露 Success | 已接受 |
+| Provider Raw Output 默认不进入模型上下文 | 已接受 |
 
 ## 设计成熟度
 
@@ -250,3 +265,8 @@ Governance Surface
 | Prompt Surface | 清晰 | T210/T211 建立 metadata lint 和 negative tests |
 | 发现选择边界 | 清晰 | T214/T215 走 discovery profile 和 selection evidence |
 | 元数据 Lint | 清晰 | T216 接入 Registry review checklist |
+| Result Envelope | 清晰 | T220/T222 落到 Runtime/MCP result adapter |
+| 输出校验 | 清晰 | T221/T054 做 schema validation 和 normalization |
+| 结果净化 | 清晰 | T223/T229 建立 sanitizer 和 negative fixtures |
+| 结果来源 | 清晰 | T224/T230 记录 provenance 和 taint labels |
+| 结果投递 | 清晰 | T226/T231 维护 Host/CLI 投递边界 |

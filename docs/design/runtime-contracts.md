@@ -129,8 +129,11 @@ V1 存储：SQLite。
 | 5. confirm | decision ask | confirmation result | 写 audit，不执行 |
 | 6. resolve secrets | auth/env | credential handle | 写 audit，不执行 |
 | 7. execute/dry-run | plan/credential | execution result | 写 audit，返回 execution error |
-| 8. normalize output | raw output | output | 写 audit，返回 normalize error |
-| 9. audit | all context | log row | 返回主结果并警告 audit failure |
+| 8. normalize output | raw output | normalized output | 写 audit，返回 normalize error |
+| 9. validate output | normalized output/schema | validated output | 写 audit，返回 output validation error |
+| 10. sanitize result | validated output/error body | sanitized result | 写 audit，返回 sanitized summary |
+| 11. build result envelope | outcome/evidence/output | Result Envelope | 写 audit，返回 envelope error |
+| 12. audit | all context | log row | 返回主结果并警告 audit failure |
 
 ## 错误分类
 
@@ -144,7 +147,7 @@ V1 存储：SQLite。
 
 ## MCP 返回契约
 
-V1 MCP tool call 应优先返回结构化结果：
+V1 MCP tool call 应由 Result Envelope 适配为结构化结果：
 
 ```json
 {

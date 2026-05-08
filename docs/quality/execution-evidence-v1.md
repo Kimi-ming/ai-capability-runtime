@@ -25,6 +25,8 @@ Execution evidence 要回答：
 | Request evidence | 请求是否发出 | request_started_at、origin |
 | Response evidence | provider 响应 | status code、request id |
 | Outcome evidence | OpenCap 如何解释结果 | success/blocked/unknown/partial |
+| Output evidence | 输出如何被验证和净化 | schema status、redaction、sanitizer warnings |
+| Result provenance | 模型看到的结果来自哪里 | content digest、taint labels、transformations |
 
 ## 最小字段
 
@@ -44,6 +46,9 @@ type ExecutionEvidenceV1 = {
   providerRequestId?: string;
   retryAttempt: number;
   outcome: string;
+  outputValidationStatus?: string;
+  resultContentDigest?: string;
+  sanitizerWarnings?: string[];
 };
 ```
 
@@ -54,6 +59,7 @@ type ExecutionEvidenceV1 = {
 - full URL query 中的敏感数据
 - full request body，除非后续明确开启并脱敏
 - provider response 中的敏感字段
+- provider raw output 原文，除非后续明确开启并脱敏
 
 ## Conformance 映射
 
@@ -64,6 +70,7 @@ type ExecutionEvidenceV1 = {
 | C-AUD | all evidence written |
 | C-HTTP | targetOrigin、httpMethod、httpStatus |
 | C-SEC | no secret values |
+| C-RES | result envelope, output validation, sanitizer, provenance |
 
 ## 测试要求
 
@@ -73,6 +80,8 @@ type ExecutionEvidenceV1 = {
 - timeout after request outcome 为 unknown。
 - retry attempt 大于 0 时记录 resend count。
 - evidence 不包含 secret-like 字段。
+- success result 有 output validation status。
+- model-visible summary 和 structuredContent 有 content digest 或 provenance summary。
 
 ## 关联任务
 

@@ -44,7 +44,7 @@
 
 外部 API 返回包含指令性文本，Host 把它放回模型上下文后影响后续工具调用。
 
-控制：结果结构化、输出 schema、结果内容脱敏、future result sanitizer。
+控制：Result Envelope、结构化输出、output schema validation、结果内容脱敏和 result sanitizer。
 
 ### Rug pull metadata update
 
@@ -92,3 +92,5 @@ MCP 工具是 model-controlled，工具定义包含 name、title、description�
 - T211：prompt-surface negative tests。
 - T216：review checklist 接入 model-visible text。
 - T217：tool result prompt-surface sanitizer 草案。
+- T223：tool result sanitizer。
+- T229：result sanitizer negative fixtures。

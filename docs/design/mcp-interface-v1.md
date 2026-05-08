@@ -59,7 +59,8 @@ description 必须由 Runtime tool projection builder 生成，包含简短风�
 MCP tools/call
   -> tool name reverse lookup capability id
   -> runtime.invoke({ channel: "mcp", host, input })
-  -> MCP result
+  -> Result Envelope
+  -> MCP result adapter
 ```
 
 MCP Bridge 不直接：
@@ -109,3 +110,15 @@ V1 默认：
 | InternalError | JSON-RPC internal error |
 
 V1 应优先让业务/执行失败作为 tool result，协议级错误只用于协议本身错误。
+
+
+## Result Envelope 映射
+
+V1 MCP Bridge 不直接返回 provider raw response。Runtime 先生成 `ResultEnvelopeV1`，MCP Bridge 再适配：
+
+- `structuredContent` 来自 Result Envelope 的 structured content。
+- `content[].text` 是 Runtime-generated summary。
+- `isError` 来自 envelope `isError`。
+- unknown/failed/blocked/confirmation_required 都返回结构化结果。
+
+如果 Host 不支持或不展示 structuredContent，OpenCap 仍只提供短摘要，不能退回到 provider raw text。

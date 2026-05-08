@@ -174,6 +174,19 @@
 - T216 P2：Capability Review Checklist 接入 model-visible text 检查。
 - T217 P2：Tool result prompt-surface sanitizer 草案。
 - T218 P2：Host tool metadata compatibility records。
+- T220 P1：实现 Result Envelope V1。
+- T221 P1：实现 output schema validation。
+- T222 P1：MCP structuredContent adapter。
+- T223 P1：Tool result sanitizer。
+- T224 P1：Result provenance/evidence。
+- T225 P1：Oversized result handling。
+- T226 P2：Host result compatibility records。
+- T227 P2：Output selector RFC。
+- T228 P2：Resource delivery profile RFC。
+- T229 P1：Result sanitizer negative fixtures。
+- T230 P2：Taint label tests。
+- T231 P1：CLI result envelope output。
+- T232 P2：Result Envelope public type exports。
 
 ### 已完成
 
@@ -196,6 +209,7 @@
 - 已完成：T197 P0：补齐信任模型、安全公告、撤销和质量评分体系。
 - 已完成：T208 P0：补齐用量计量、配额预算、限流滥用和商业边界体系。
 - 已完成：T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系。
+- 已完成：T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系。
 
 
 ---
@@ -1589,6 +1603,334 @@ git diff --check
 - discovery/selection 被明确排除为授权来源。
 - tool description 不再被旧文档描述为直接透传 manifest description。
 - 相关风险、任务、测试和追踪矩阵闭环。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+## Epic O：Result Governance 和 Output Boundary
+
+### T220 P1：实现 Result Envelope V1
+
+- [ ] T220 P1：实现 Result Envelope V1
+
+目标：Runtime 统一返回 `ResultEnvelopeV1`，MCP/CLI 只做 adapter。
+
+涉及文件：
+
+- `packages/runtime/src/`
+- `packages/mcp/src/`
+- `packages/runtime/src/result-envelope.test.ts`
+
+验收标准：
+
+- success、dry_run、blocked、confirmation_required、failed、unknown 都能表达。
+- envelope 包含 invocationId、capabilityId、status、outcome、isError、warnings、evidence。
+- failed/unknown 不只返回自由文本。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T221 P1：实现 output schema validation
+
+- [ ] T221 P1：实现 output schema validation
+
+目标：声明 output schema 的 Capability 只有在 structured output 校验通过后才能返回 success。
+
+涉及文件：
+
+- `packages/runtime/src/`
+- `packages/spec/src/`
+- `packages/runtime/src/output-validation.test.ts`
+
+验收标准：
+
+- 缺 required output 字段失败。
+- 类型不匹配失败。
+- schema validation finding 进入 evidence。
+- output schema mismatch 不标记 success。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T222 P1：MCP structuredContent adapter
+
+- [ ] T222 P1：MCP structuredContent adapter
+
+目标：MCP result 优先返回 `structuredContent`，`content[].text` 只放 Runtime-generated summary。
+
+涉及文件：
+
+- `packages/mcp/src/`
+- `packages/mcp/src/result-adapter.test.ts`
+
+验收标准：
+
+- success result 包含 structuredContent。
+- text summary 不包含 provider raw output。
+- failed/blocked/confirmation_required 都结构化。
+- isError 映射正确。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+```
+
+### T223 P1：Tool result sanitizer
+
+- [ ] T223 P1：Tool result sanitizer
+
+目标：对 provider response/error body 做 secret redaction、prompt-surface marker、size/content-type guard。
+
+涉及文件：
+
+- `packages/runtime/src/result-sanitizer.ts`
+- `packages/runtime/src/result-sanitizer.test.ts`
+
+验收标准：
+
+- token/cookie/private key 被脱敏。
+- instruction-like provider text 不直接进入 content text。
+- HTML/script/comment 被 strip 或 summarize。
+- sanitizer finding 进入 warnings/evidence。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T224 P1：Result provenance/evidence
+
+- [ ] T224 P1：Result provenance/evidence
+
+目标：记录 result provenance、content digest、transformations 和 taint labels。
+
+涉及文件：
+
+- `packages/runtime/src/`
+- `docs/quality/execution-evidence-v1.md`
+
+验收标准：
+
+- provider_untrusted/runtime_generated/secret_redacted/sanitized_text labels 可表达。
+- digest 基于 redacted structured content。
+- failed/unknown result 也有 provenance summary。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T225 P1：Oversized result handling
+
+- [ ] T225 P1：Oversized result handling
+
+目标：限制 provider JSON/text 大小，避免上下文污染、内存压力和成本失控。
+
+涉及文件：
+
+- `packages/runtime/src/`
+- `packages/runtime/src/result-limits.test.ts`
+
+验收标准：
+
+- 超大 JSON 被阻断或截断并记录 warning。
+- 超大 text 不直接进入 MCP content。
+- limits 不影响 audit redaction。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T226 P2：Host result compatibility records
+
+- [ ] T226 P2：Host result compatibility records
+
+目标：记录不同 MCP Host 对 structuredContent、content text、isError、outputSchema 的处理差异。
+
+涉及文件：
+
+- `docs/ecosystem/host-compatibility-matrix.md`
+- `docs/ecosystem/result-delivery-boundary.md`
+
+验收标准：
+
+- 记录 Host、版本、日期、字段行为和证据。
+- 明确 OpenCap 安全不依赖 Host 正确处理 structuredContent。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T227 P2：Output selector RFC
+
+- [ ] T227 P2：Output selector RFC
+
+目标：定义从 provider raw JSON 映射到 manifest output schema 的 selector 机制。
+
+涉及文件：
+
+- `rfcs/`
+- `docs/quality/output-validation-v1.md`
+
+验收标准：
+
+- selector 不能读取 secret。
+- selector 输出必须通过 output schema。
+- missing required output 失败。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T228 P2：Resource delivery profile RFC
+
+- [ ] T228 P2：Resource delivery profile RFC
+
+目标：定义未来大结果、resource links、embedded resources 的投递和读取边界。
+
+涉及文件：
+
+- `rfcs/`
+- `docs/ecosystem/result-delivery-boundary.md`
+
+验收标准：
+
+- resource handle 不是授权。
+- resource content 进入模型前仍需 sanitizer。
+- large result 默认 summary + handle。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T229 P1：Result sanitizer negative fixtures
+
+- [ ] T229 P1：Result sanitizer negative fixtures
+
+目标：把间接 prompt injection、secret leakage、HTML/script、oversized output 转成测试夹具。
+
+涉及文件：
+
+- `packages/runtime/fixtures/result-sanitizer/`
+- `packages/runtime/src/result-sanitizer.test.ts`
+
+验收标准：
+
+- provider text 要求模型忽略指令时不直出。
+- provider body 含 token 时脱敏。
+- HTML script/comment 不进入 content text。
+- oversized output 有 warning。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T230 P2：Taint label tests
+
+- [ ] T230 P2：Taint label tests
+
+目标：验证 result provenance 中 provider_untrusted、runtime_generated、secret_redacted、sanitized_text labels。
+
+涉及文件：
+
+- `packages/runtime/src/result-provenance.test.ts`
+
+验收标准：
+
+- provider 字段被标记 provider_untrusted。
+- Runtime summary 被标记 runtime_generated。
+- redacted 字段被标记 secret_redacted。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+```
+
+### T231 P1：CLI result envelope output
+
+- [ ] T231 P1：CLI result envelope output
+
+目标：CLI `invoke` 支持 Result Envelope 子集输出，并保持 secret redaction。
+
+涉及文件：
+
+- `packages/cli/src/`
+- `docs/design/cli-contract-v1.md`
+
+验收标准：
+
+- `--json` 输出 structured result envelope subset。
+- 默认人类输出只显示 summary、status、warnings。
+- `--verbose` 也只显示 redacted evidence。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli test
+```
+
+### T232 P2：Result Envelope public type exports
+
+- [ ] T232 P2：Result Envelope public type exports
+
+目标：定义 Result Envelope 是否由 `@opencap/runtime` 或独立 contract 包导出。
+
+涉及文件：
+
+- `packages/runtime/src/index.ts`
+- `packages/spec/src/index.ts` 或 future contracts package
+- `docs/spec/versioning-and-compatibility.md`
+
+验收标准：
+
+- 公共类型版本化。
+- breaking change 进入 CHANGELOG。
+- MCP/CLI adapter 不复制类型定义。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime build
+```
+
+### T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系
+
+- [x] T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系
+
+已完成：新增 Result Envelope V1、Output Validation V1、Tool Result Sanitization V1、Result Provenance V1、Result Delivery Boundary、Result Governance 调研，并新增 ADR 0044-0046。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、README、CHANGELOG、HANDOFF、MCP interface、HTTP execution 和 execution evidence 文档。
+
+验收标准：
+
+- Provider raw output 默认不进入模型上下文。
+- 声明 output schema 的结果必须通过校验后才能 success。
+- Result Envelope 成为 Runtime 到 MCP/CLI 的稳定输出边界。
+- Tool result sanitizer、provenance、taint label 和 delivery boundary 均进入任务队列。
 
 验证：
 

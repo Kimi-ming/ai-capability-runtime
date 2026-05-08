@@ -158,3 +158,12 @@ T001：让 opencap validate 调用真实 schema 校验
 下一步仍然是 T001。后续进入 MCP bridge 和 validate 实现时，要把 model-visible metadata lint、tool projection builder、projection hash 和 runtime-generated risk summary 纳入任务队列。
 
 本轮验证：`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+
+## Result Envelope、输出校验、结果净化和结果来源体系已补齐
+
+已新增 Result Envelope V1、Output Validation V1、Tool Result Sanitization V1、Result Provenance V1、Result Delivery Boundary 和 Result Governance 调研。ADR 0044-0046 已接受。OpenCap 现在明确：provider raw output 默认不进入模型上下文；声明 output schema 的 Capability 必须先通过输出校验才能返回 success；MCP/CLI/未来 API 都只能从 Runtime Result Envelope 适配结果。
+
+下一步仍然是 T001。后续进入 HTTP executor、MCP bridge 和 audit 实现时，要把 result envelope、structuredContent、output validation、sanitizer warning、content digest 和 taint labels 作为实现主线。
+
+本轮验证：`audit_docs.py` 显示文档数 183、任务总数 100、已完成 17、未完成 83；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

@@ -133,8 +133,11 @@ load manifest
   -> resolve secrets
   -> execute or dry-run
   -> normalize output
+  -> validate output schema
+  -> redact and sanitize result
+  -> build Result Envelope
   -> write audit log
-  -> return result
+  -> adapt result to CLI/MCP
 ```
 
 ## 重要边界
@@ -149,7 +152,7 @@ Policy Engine 只给决策，不做用户交互。`ask` 交给 Confirmation Hand
 
 ### Secret 边界
 
-Secret Resolver 可以读取 env，但不得把 secret 返回给 Capability output 或 audit log。
+Secret Resolver 可以读取 env，但不得把 secret 返回给 Capability output、Result Envelope、MCP result 或 audit log。
 
 ### HTTP 边界
 
@@ -186,3 +189,8 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 - `docs/design/error-model-v1.md`：统一错误分类。
 - `docs/security/privacy-retention-v1.md`：日志隐私和数据保留。
 - `docs/planning/v1-implementation-plan.md`：V1 实施顺序。
+
+
+### Result 边界
+
+外部 provider response 不直接返回给 MCP Host。Runtime 必须先完成 output validation、redaction、sanitization 和 Result Envelope 生成，再由 CLI/MCP adapter 投递。

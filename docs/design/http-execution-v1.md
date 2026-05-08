@@ -139,11 +139,15 @@ Dry-run 仍然写 audit log，状态为 `dry_run`。
 
 ## Output Normalization
 
+HTTP executor 只负责生成 raw/normalized execution result。最终返回给 Host 前，必须进入 Result Envelope pipeline。
+
 V1 输出规则：
 
 - HTTP 2xx：尝试解析 JSON；失败则返回 text。
 - HTTP 非 2xx：返回 `ExecutionError`，包含 status code 和脱敏响应摘要。
 - 输出字段应尽量映射 manifest `output` schema；V1 可以先返回 raw normalized JSON，后续增加 output selector。
+- 声明 output schema 时，structured output 必须通过校验后才能作为 success。
+- provider raw text 不默认进入 MCP `content[].text`，由 Runtime 生成摘要。
 
 ## Outbound Policy Hook
 

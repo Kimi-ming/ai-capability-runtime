@@ -65,6 +65,11 @@
 | R043 | High | Mitigating | schema description 要求模型填入 token/secret，造成凭据泄露 | model-visible metadata lint；secret exfiltration negative tests | T210, T211 |
 | R044 | Medium | Mitigating | discovery/ranking 被误当作 trust 或授权来源 | ADR 0043；discovery boundary | T214, T215 |
 | R045 | Medium | Mitigating | tool result text 带有间接 prompt injection，污染后续模型上下文 | prompt-surface security；result sanitizer 草案 | T217 |
+| R046 | High | Mitigating | Provider raw output 直接进入模型上下文，造成 result poisoning | ADR 0046；Result Envelope + sanitizer | T220, T223, T229 |
+| R047 | High | Mitigating | Output schema mismatch 仍被标记 success，导致后续模型基于错误结构行动 | ADR 0045；output validation tests | T221, T054 |
+| R048 | Medium | Mitigating | MCP Host 不保留 structuredContent，只把 text summary 给模型 | result delivery boundary；Host result compatibility records | T222, T226 |
+| R049 | High | Mitigating | Tool result 泄露 secret-like 字段到 MCP result 或 audit | result sanitizer；redaction/provenance tests | T223, T224, T230 |
+| R050 | Medium | Mitigating | 过大 provider response 污染上下文或造成成本/内存问题 | result limits；oversized result handling | T225 |
 
 ## 当前最高优先级风险
 
@@ -79,7 +84,9 @@
 9. R034：revoked capability 可寻址和本地提示
 10. R038：模型循环调用和额度耗尽
 11. R042：恶意 tool description 和 schema poisoning
-12. R006：依赖安装和 workspace 构建验证
+12. R046：provider raw output 直接进入模型上下文
+13. R047：output schema mismatch 被误报 success
+14. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

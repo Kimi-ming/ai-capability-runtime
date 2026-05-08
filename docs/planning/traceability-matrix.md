@@ -116,3 +116,8 @@
 | RQ-068 | 模型可见提示面受治理 | `docs/security/prompt-surface-security-v1.md` | T210, T211, T217 | prompt-surface negative tests |
 | RQ-069 | 发现和选择不等于授权 | `docs/ecosystem/discovery-and-selection-boundary.md` | T214, T215 | discovery profile/selection evidence review |
 | RQ-070 | 模型可见元数据可 lint | `docs/quality/model-visible-metadata-lint-v1.md` | T210, T216 | metadata lint + review checklist |
+| RQ-071 | Runtime 输出边界稳定 | `docs/design/result-envelope-v1.md` | T220, T222, T231 | result envelope tests |
+| RQ-072 | Output schema 校验后才成功 | `docs/quality/output-validation-v1.md` | T221, T054 | output validation tests |
+| RQ-073 | Tool result 不污染模型上下文 | `docs/security/tool-result-sanitization-v1.md` | T223, T229 | result sanitizer negative tests |
+| RQ-074 | 结果来源和转换可追踪 | `docs/quality/result-provenance-v1.md` | T224, T230 | provenance/taint tests |
+| RQ-075 | 结果投递不依赖 Host 安全行为 | `docs/ecosystem/result-delivery-boundary.md` | T226, T231 | Host result compatibility records |
