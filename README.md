@@ -134,7 +134,7 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 - [验证策略](docs/TESTING.md)
 - [决策索引](docs/DECISIONS.md)
 - [风险登记](docs/RISKS.md)
-- [中文文档规范](docs/documentation-governance.md)
+- [中文文档规范](docs/community/documentation-governance.md)
 
 ## 开源治理
 

@@ -239,6 +239,7 @@
 - 已完成：T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系。
 - 已完成：T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系。
 - 已完成：T262 P0：重新梳理中文文档入口、索引和文档规范。
+- 已完成：T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板。
 
 
 ---
@@ -328,7 +329,7 @@ pnpm --filter @opencap/spec build
 产出：
 
 - `packages/spec/schema/registry-test.schema.json`
-- `docs/registry-guidelines.md` 更新
+- `docs/community/registry-guidelines.md` 更新
 - 示例 tests 修正
 
 ### T005 P2：增加 manifest authoring guide
@@ -1082,7 +1083,7 @@ V1 handler：
 - `docs/planning/v1-milestones.md`
 - `docs/planning/traceability-matrix.md`
 - `docs/RISKS.md`
-- `docs/TASK_TEMPLATE.md`
+- `docs/planning/task-template.md`
 - `docs/GLOSSARY.md`
 
 验收标准：
@@ -2652,7 +2653,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 - [x] T262 P0：重新梳理中文文档入口、索引和文档规范
 
-已完成：新增 `docs/README.md` 作为中文文档中心，新增 `docs/documentation-governance.md` 作为中文文档规范，重写 `docs/INDEX.md` 为维护者索引，收敛根 `README.md` 的超长文档清单，并中文化 GitHub issue/PR 模板、变更日志、AGENTS 和一批用户可见标题。
+已完成：新增 `docs/README.md` 作为中文文档中心，新增 `docs/community/documentation-governance.md` 作为中文文档规范，重写 `docs/INDEX.md` 为维护者索引，收敛根 `README.md` 的超长文档清单，并中文化 GitHub issue/PR 模板、变更日志、AGENTS 和一批用户可见标题。
 
 验收标准：
 
@@ -2666,6 +2667,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 ```bash
 git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板
+
+- [x] T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板
+
+已完成：将散落在 `docs/` 根目录的普通文档移动到对应目录：介绍进入 `docs/overview/`，快速开始进入 `docs/guides/`，能力清单进入 `docs/spec/`，权限和安全模型进入 `docs/security/`，运行时架构进入 `docs/design/`，Registry 指南和中文文档规范进入 `docs/community/`，任务模板进入 `docs/planning/`。同步更新全仓引用、文档中心、维护者索引和交接文档。
+
+验收标准：
+
+- `docs/` 根目录只保留核心入口、状态和治理文件。
+- 被移动文档的全仓引用已更新。
+- 文档中心和维护者索引反映新的目录职责。
+- 自动化仍能找到 `docs/TASKS.md`、`docs/HANDOFF.md`、`docs/TESTING.md` 等核心文件。
+
+验证：
+
+```bash
+git diff --check
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
 node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
 ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```

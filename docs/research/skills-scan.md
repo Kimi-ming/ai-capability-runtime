@@ -32,10 +32,10 @@
 
 映射：
 
-- 教程：`docs/getting-started.md`
-- 操作指南：`docs/registry-guidelines.md`
-- 参考：`docs/capability-manifest.md`
-- 解释：`docs/introduction.md`、`docs/runtime-architecture.md`、`docs/security-model.md`
+- 教程：`docs/guides/getting-started.md`
+- 操作指南：`docs/community/registry-guidelines.md`
+- 参考：`docs/spec/capability-manifest.md`
+- 解释：`docs/overview/introduction.md`、`docs/design/runtime-architecture.md`、`docs/security/security-model.md`
 
 ### openai-docs
 

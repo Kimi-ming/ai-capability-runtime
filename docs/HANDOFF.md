@@ -193,10 +193,18 @@ T001：让 opencap validate 调用真实 schema 校验
 
 ## 中文文档入口、索引和规范已重新梳理
 
-已新增 `docs/README.md` 作为中文文档中心，新增 `docs/documentation-governance.md` 作为中文文档规范，并重写 `docs/INDEX.md` 为维护者索引。根 `README.md` 的长文档列表已收敛为关键入口，GitHub issue/PR 模板、AGENTS、CHANGELOG 和一批用户可见标题已中文化。
+已新增 `docs/README.md` 作为中文文档中心，新增 `docs/community/documentation-governance.md` 作为中文文档规范，并重写 `docs/INDEX.md` 为维护者索引。根 `README.md` 的长文档列表已收敛为关键入口，GitHub issue/PR 模板、AGENTS、CHANGELOG 和一批用户可见标题已中文化。
 
-后续维护规则：README 只放少量关键入口；新人阅读从 `docs/README.md` 开始；维护者职责和目录规则看 `docs/INDEX.md`；新增文档前先看 `docs/documentation-governance.md`，优先更新旧文档而不是继续堆新文件。
+后续维护规则：README 只放少量关键入口；新人阅读从 `docs/README.md` 开始；维护者职责和目录规则看 `docs/INDEX.md`；新增文档前先看 `docs/community/documentation-governance.md`，优先更新旧文档而不是继续堆新文件。
 
-当前不做大规模物理搬迁文件路径，因为大量任务、ADR 和 README 已经引用现有路径。若未来要迁移目录，应单独开任务，批量更新链接并增加链接检查。
+`docs/` 根目录后来已做物理归位：普通教程、参考、规范和模板文档已经移动到对应子目录。后续继续移动文件时，必须同步更新链接并运行文档闭环检查。
 
 本轮验证：`audit_docs.py` 显示文档数 203、任务总数 129、已完成 20、未完成 109；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+## docs 根目录文件已物理归位
+
+已把 `docs/` 根目录从 22 个文件压到 13 个核心入口/状态文件。移动结果：`introduction.md` -> `docs/overview/`，`getting-started.md` -> `docs/guides/`，`capability-manifest.md` -> `docs/spec/`，`permission-model.md` 和 `security-model.md` -> `docs/security/`，`runtime-architecture.md` -> `docs/design/`，`registry-guidelines.md` 和 `documentation-governance.md` -> `docs/community/`，`TASK_TEMPLATE.md` -> `docs/planning/`。全仓引用已同步更新，`.DS_Store` 本地临时文件已清理。
+
+后续规则：`docs/` 根目录只放 `README/INDEX/SYSTEM/SPEC/ARCHITECTURE/TASKS/HANDOFF/TESTING/DECISIONS/RISKS/ROADMAP/WORKFLOW/GLOSSARY` 这类核心入口、状态和治理文件。普通说明文档必须进入子目录。
+
+本轮验证：`audit_docs.py` 显示文档数 203、任务总数 130、已完成 21、未完成 109；`check_docs.py`、`git diff --check`、JSON 解析、YAML 解析和 Markdown 相对链接检查通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

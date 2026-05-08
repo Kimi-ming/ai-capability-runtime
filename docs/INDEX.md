@@ -17,7 +17,7 @@
 | 文档 | 职责 | 什么时候更新 |
 | --- | --- | --- |
 | [中文文档中心](README.md) | 面向新人和维护者的阅读入口 | 文档结构、阅读路径变化时 |
-| [中文文档规范](documentation-governance.md) | 语言、分层、命名和清理规则 | 文档治理规则变化时 |
+| [中文文档规范](community/documentation-governance.md) | 语言、分层、命名和清理规则 | 文档治理规则变化时 |
 | [体系蓝图](SYSTEM.md) | 全局系统结构和子系统列表 | 新增子系统或全局不变量变化时 |
 | [产品规格](SPEC.md) | V1 范围和产品正确性 | 行为、范围或验收口径变化时 |
 | [架构总览](ARCHITECTURE.md) | 模块边界和主调用链 | Runtime/CLI/MCP/Registry 边界变化时 |
@@ -31,6 +31,8 @@
 
 | 目录 | 类型 | 职责 |
 | --- | --- | --- |
+| `docs/overview/` | 解释 | 项目介绍和总体背景。 |
+| `docs/guides/` | 教程 | 快速开始和学习路径。 |
 | `docs/product/` | 解释 | 产品定位、用户场景、能力生命周期。 |
 | `docs/spec/` | 参考 | Manifest、版本、兼容性等规范演进。 |
 | `docs/design/` | 参考 | 运行时、命令行、MCP、策略、审计、HTTP、结果等模块契约。 |
@@ -38,7 +40,7 @@
 | `docs/ecosystem/` | 解释 | 注册表、互操作、信任、发现选择、商业边界等生态规则。 |
 | `docs/quality/` | 参考 | 一致性测试、质量门禁、证据、校验和 provenance。 |
 | `docs/operations/` | 操作指南 | 发布、凭据、故障恢复、计量和运行手册。 |
-| `docs/community/` | 操作指南 | 贡献者、维护者、RFC 和 Capability 评审流程。 |
+| `docs/community/` | 操作指南 | 贡献者、维护者、RFC、Registry 和文档治理流程。 |
 | `docs/planning/` | 规划 | 需求、里程碑、实施计划、开放问题和追踪矩阵。 |
 | `docs/decisions/` | 决策 | 已接受 ADR。 |
 | `docs/research/` | 调研 | 外部参考和阶段性研究，不能单独作为实现依据。 |
@@ -82,6 +84,6 @@
 - 修改命令、测试、构建或验证流程时，同步 `docs/TESTING.md`。
 - 每轮任务结束时，同步 `docs/HANDOFF.md`，并提交推送。
 
-## 已知整理原则
+## 文件归位原则
 
-当前不大规模移动既有文件路径，原因是许多 README、任务和 ADR 已经引用这些路径。后续如果要做物理目录迁移，应单独开任务，批量更新链接并运行链接检查。
+`docs/` 根目录只保留核心入口、状态和治理文件；教程、参考、规范、模板和说明文档必须放入对应子目录。后续如果继续移动文件，必须同步更新 `docs/README.md`、本文件、`docs/TASKS.md`、`docs/HANDOFF.md` 和所有引用链接，并运行文档闭环检查。

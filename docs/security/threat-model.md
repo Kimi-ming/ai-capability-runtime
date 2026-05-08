@@ -1,6 +1,6 @@
 # 威胁模型：OpenCap V1
 
-本文把 OpenCap V1 的主要资产、信任边界、攻击路径和控制措施系统化。它补充 `docs/security-model.md` 和 `docs/RISKS.md`。
+本文把 OpenCap V1 的主要资产、信任边界、攻击路径和控制措施系统化。它补充 `docs/security/security-model.md` 和 `docs/RISKS.md`。
 
 ## 保护资产
 

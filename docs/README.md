@@ -17,7 +17,7 @@
 
 ### 我想理解这个项目
 
-- [项目介绍](introduction.md)
+- [项目介绍](overview/introduction.md)
 - [产品战略](product/strategy.md)
 - [用户场景](product/use-cases.md)
 - [体系蓝图](SYSTEM.md)
@@ -42,7 +42,7 @@
 
 ### 我要实现 V1 主路径
 
-- [能力清单](capability-manifest.md)
+- [能力清单](spec/capability-manifest.md)
 - [命令行契约 V1](design/cli-contract-v1.md)
 - [本地状态 V1](design/local-state-v1.md)
 - [策略 DSL V1](design/policy-dsl-v1.md)
@@ -53,7 +53,7 @@
 ### 我要处理安全和治理
 
 - [威胁模型](security/threat-model.md)
-- [权限模型](permission-model.md)
+- [权限模型](security/permission-model.md)
 - [身份与授权模型](security/identity-and-auth-model.md)
 - [Secret Resolver V1](design/secret-resolver-v1.md)
 - [数据外发策略](design/data-egress-policy-v1.md)
@@ -62,7 +62,7 @@
 
 ### 我要贡献 Capability 或 Registry 条目
 
-- [Registry 指南](registry-guidelines.md)
+- [Registry 指南](community/registry-guidelines.md)
 - [能力包结构](design/capability-package-v1.md)
 - [能力评审清单](community/capability-review-checklist.md)
 - [贡献者路径](community/contributor-journey.md)
@@ -85,4 +85,4 @@
 
 项目文档默认使用中文。协议名、包名、命令、字段名、错误码、文件路径和标准名可以保留英文，例如 `MCP`、`Capability`、`manifest.yml`、`opencap validate`。
 
-新增或修改文档时请遵守 [中文文档规范](documentation-governance.md)。
+新增或修改文档时请遵守 [中文文档规范](community/documentation-governance.md)。

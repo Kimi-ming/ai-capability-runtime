@@ -20,7 +20,7 @@ OpenCap 负责能力治理。
 | --- | --- | --- | --- |
 | 产品定位 | 明确为什么存在 | `docs/product/strategy.md` | 非 Agent、非 Marketplace 的定位 |
 | 用户场景 | 明确为谁解决什么 | `docs/product/use-cases.md` | V1 主路径用例 |
-| Capability 标准 | 统一能力描述 | `docs/capability-manifest.md` | manifest schema |
+| Capability 标准 | 统一能力描述 | `docs/spec/capability-manifest.md` | manifest schema |
 | Capability 生命周期 | 治理状态机 | `docs/product/capability-lifecycle.md` | Draft -> Audited |
 | Runtime 核心 | 安全执行能力 | `docs/design/runtime-contracts.md` | invoke pipeline |
 | HTTP 执行 | 调用外部 API | `docs/design/http-execution-v1.md` | body/auth/outbound 规则 |

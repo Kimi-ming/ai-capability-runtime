@@ -21,6 +21,6 @@ rules: []
 
 ## 影响
 
-- `docs/permission-model.md` 需要同步。
+- `docs/security/permission-model.md` 需要同步。
 - Policy parser 只实现一种格式。
 - 后续如引入 OPA/Rego，通过 adapter 实现，不改变 V1 文件语义。

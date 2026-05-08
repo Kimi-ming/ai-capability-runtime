@@ -35,9 +35,9 @@ Read docs
 | 产品架构 | 定位、用户、范围 | strategy/use-cases/SPEC |
 | 协议架构 | MCP/A2A/OpenAPI 边界 | protocol-positioning/runtime-contracts |
 | Runtime 工程 | pipeline、state、executor | domain-model/runtime-contracts/http-execution |
-| 安全工程 | policy、secret、audit、SSRF | threat-model/outbound-policy/security-model |
+| 安全工程 | policy、secret、audit、SSRF | threat-model/outbound-policy/security/security-model |
 | Policy 治理 | decision trace、policy lifecycle、simulation、override | policy-dsl/policy-decision-trace/policy-lifecycle |
-| Registry 维护 | review、trust、tests | registry-guidelines/supply-chain-governance |
+| Registry 维护 | review、trust、tests | community/registry-guidelines/supply-chain-governance |
 | 发布经理 | 版本、CI、release gates | release-readiness/ROADMAP/TASKS |
 
 ## 任务状态规则
@@ -86,7 +86,7 @@ T001 P0：让 opencap validate 调用真实 schema 校验
 
 实现时需要优先参考：
 
-- `docs/capability-manifest.md`
+- `docs/spec/capability-manifest.md`
 - `docs/design/domain-model.md`
 - `docs/design/runtime-contracts.md`
 - `docs/design/http-execution-v1.md`

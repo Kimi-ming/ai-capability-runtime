@@ -24,7 +24,7 @@
 
 | 类型 | 读者问题 | 应放位置 | 示例 |
 | --- | --- | --- | --- |
-| 教程 | 我第一次怎么跑通？ | `docs/getting-started.md`、`examples/` | 快速开始、示例能力。 |
+| 教程 | 我第一次怎么跑通？ | `docs/guides/getting-started.md`、`examples/` | 快速开始、示例能力。 |
 | 操作指南 | 我要完成一个具体任务怎么办？ | `docs/operations/`、`docs/community/` | 发布、凭据、贡献流程。 |
 | 参考 | 字段、接口、契约是什么？ | `docs/design/`、`docs/spec/` | Runtime 契约、CLI 契约、Manifest。 |
 | 解释 | 为什么这样设计？ | `docs/product/`、`docs/ecosystem/`、`docs/research/` | 战略、生态边界、调研。 |
@@ -33,10 +33,14 @@
 
 - `docs/README.md`：中文文档中心，给所有读者使用。
 - `docs/INDEX.md`：维护者索引，说明每个目录职责和更新规则。
+- `docs/overview/`：项目介绍和总体背景。
+- `docs/guides/`：教程和快速开始。
 - `docs/SYSTEM.md`：系统总蓝图，只记录稳定的全局结构。
 - `docs/TASKS.md`：开发任务源，不放长篇背景。
 - `docs/HANDOFF.md`：当前状态，不替代任务表和决策文档。
 - `docs/research/`：只放调研和参考，不作为实现契约。
+- `docs/community/`：贡献流程、Registry 指南、RFC 流程和文档治理。
+- `docs/planning/`：实施计划、任务模板、里程碑和追踪矩阵。
 - `docs/decisions/`：只放已接受或明确状态的决策。
 
 ## 新增文档检查清单
@@ -63,6 +67,7 @@
 当文档变多时，优先做四件事：
 
 1. 把 README 中的长列表收敛到 `docs/README.md`。
-2. 把重复背景合并进 `docs/SYSTEM.md` 或对应设计文档。
-3. 把阶段性调研放在 `docs/research/`，不要混入主路径文档。
-4. 在 `docs/HANDOFF.md` 只保留当前接手需要的信息，避免替代历史日志。
+2. 把 `docs/` 根目录压到核心入口和状态文件，不把普通参考文档堆在根目录。
+3. 把重复背景合并进 `docs/SYSTEM.md` 或对应设计文档。
+4. 把阶段性调研放在 `docs/research/`，不要混入主路径文档。
+5. 在 `docs/HANDOFF.md` 只保留当前接手需要的信息，避免替代历史日志。
