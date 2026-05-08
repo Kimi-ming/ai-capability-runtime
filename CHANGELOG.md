@@ -14,6 +14,7 @@
 - Registry test case schema 与 `pnpm validate` 集成。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - Runtime 本地状态路径 helper，支持默认路径、env 和显式 state dir。
+- `opencap install <id>` 已接入本地 state dir 安装逻辑，支持 `--state-dir`、`--registry` 和 `--force`。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。
 - 整体设计二次审查，补齐工程缺口、成熟度评分和 T267-T276 补强任务。

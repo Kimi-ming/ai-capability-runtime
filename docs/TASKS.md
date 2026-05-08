@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T011 P0：实现 `opencap install <id>`。
 - T012 P0：实现 `opencap list`。
 - T020 P0：实现 Installed Capability Loader。
 - T030 P0：实现 policy 文件格式和 parser。
@@ -254,6 +253,7 @@
 - 已完成：T004 P1：定义 registry test case schema。
 - 已完成：T005 P2：增加 manifest authoring guide。
 - 已完成：T010 P0：实现 OpenCap 本地状态路径 helper。
+- 已完成：T011 P0：实现 `opencap install <id>`。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T011 install/list
+1. T012 `opencap list`
 2. T020 Installed Capability Loader
 3. T030 Policy parser/engine
 4. T040 Audit log
@@ -299,7 +299,7 @@ git diff --check
 7. T070 MCP bridge
 8. T080 Registry manifest CI 校验
 9. T081 Capability Review Checklist
-10. T012 `opencap list`
+10. T013 CLI 统一错误处理
 
 ---
 
@@ -464,7 +464,7 @@ pnpm --filter @opencap/runtime build
 
 ### T011 P0：实现 `opencap install <id>`
 
-- [ ] T011 P0：实现 `opencap install <id>`
+- [x] T011 P0：实现 `opencap install <id>`
 
 目标：把 registry Capability 安装到本地状态。
 
@@ -483,6 +483,8 @@ pnpm --filter @opencap/cli dev -- install github.create_issue
 ls opencap.local/installed/github.create_issue
 ```
 
+完成记录：`@opencap/runtime` 已导出 `installCapability` 和 `InstallCapabilityError`；CLI `install` 已支持 `--state-dir`、`--registry` 和 `--force`。安装会校验 manifest、复制完整 Capability 目录、默认拒绝覆盖，`--force` 可替换。
+
 ### T012 P0：实现 `opencap list`
 
 - [ ] T012 P0：实现 `opencap list`
@@ -494,6 +496,13 @@ ls opencap.local/installed/github.create_issue
 - 空安装状态有友好提示
 - 有安装时显示 id/version/type/risk/trust level
 - 损坏 manifest 有错误提示但不中断全部列表
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli dev -- list --state-dir /private/tmp/opencap-cli-install-smoke
+pnpm --filter @opencap/runtime test
+```
 
 ### T013 P1：实现 CLI 统一错误处理和 exit code
 

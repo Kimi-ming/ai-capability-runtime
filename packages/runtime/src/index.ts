@@ -1,9 +1,12 @@
-import { mkdir } from "node:fs/promises";
-import { resolve } from "node:path";
-import type { CapabilityManifest } from "@opencap/spec";
+import { cp, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+import { join, resolve } from "node:path";
+import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
+export const DEFAULT_REGISTRY_DIR_NAME = "registry";
+export const OPENCAP_REGISTRY_DIR_ENV = "OPENCAP_REGISTRY_DIR";
 
 export interface ResolveStateDirOptions {
   cwd?: string;
@@ -20,7 +23,43 @@ export interface LocalStatePaths {
   logsDatabaseFile: string;
 }
 
+export interface ResolveRegistryDirOptions {
+  cwd?: string;
+  registryDir?: string;
+  env?: Record<string, string | undefined>;
+}
+
 export interface RuntimeOptions extends ResolveStateDirOptions {}
+
+export interface InstallCapabilityOptions extends ResolveStateDirOptions, ResolveRegistryDirOptions {
+  id: string;
+  force?: boolean;
+}
+
+export interface InstallCapabilityResult {
+  id: string;
+  sourceDir: string;
+  destinationDir: string;
+  manifest: CapabilityManifest;
+}
+
+export type InstallCapabilityErrorCode =
+  | "REGISTRY_NOT_FOUND"
+  | "CAPABILITY_NOT_FOUND"
+  | "CAPABILITY_AMBIGUOUS"
+  | "CAPABILITY_INVALID"
+  | "CAPABILITY_ALREADY_INSTALLED";
+
+export class InstallCapabilityError extends Error {
+  constructor(
+    public readonly code: InstallCapabilityErrorCode,
+    message: string,
+    public readonly details: Record<string, unknown> = {},
+  ) {
+    super(message);
+    this.name = "InstallCapabilityError";
+  }
+}
 
 export interface InvocationRequest {
   capabilityId: string;
@@ -46,6 +85,14 @@ export function resolveStateDir(options: ResolveStateDirOptions = {}): string {
   return resolve(cwd, configured ?? DEFAULT_STATE_DIR_NAME);
 }
 
+export function resolveRegistryDir(options: ResolveRegistryDirOptions = {}): string {
+  const cwd = options.cwd ?? process.cwd();
+  const env = options.env ?? process.env;
+  const configured = firstNonEmpty(options.registryDir, env[OPENCAP_REGISTRY_DIR_ENV], DEFAULT_REGISTRY_DIR_NAME);
+
+  return resolve(cwd, configured ?? DEFAULT_REGISTRY_DIR_NAME);
+}
+
 export function getLocalStatePaths(options: ResolveStateDirOptions | string = {}): LocalStatePaths {
   const root = typeof options === "string" ? resolve(options) : resolveStateDir(options);
 
@@ -66,6 +113,117 @@ export async function ensureLocalStateDir(options: ResolveStateDirOptions | stri
   await mkdir(paths.tmpDir, { recursive: true });
 
   return paths;
+}
+
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await stat(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function findCapabilityDirs(registryDir: string, id: string): Promise<string[]> {
+  const entries = await readdir(registryDir, { withFileTypes: true });
+  const matches: string[] = [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const entryPath = join(registryDir, entry.name);
+
+    if (entry.name === id && (await pathExists(join(entryPath, "manifest.yml")))) {
+      matches.push(entryPath);
+      continue;
+    }
+
+    matches.push(...(await findCapabilityDirs(entryPath, id)));
+  }
+
+  return matches.sort();
+}
+
+export async function installCapability(options: InstallCapabilityOptions): Promise<InstallCapabilityResult> {
+  const cwd = options.cwd ?? process.cwd();
+  const env = options.env ?? process.env;
+  const registryDir = resolveRegistryDir({ cwd, env, registryDir: options.registryDir });
+
+  if (!(await pathExists(registryDir))) {
+    throw new InstallCapabilityError("REGISTRY_NOT_FOUND", `Registry directory not found: ${registryDir}`, {
+      registryDir,
+    });
+  }
+
+  const matches = await findCapabilityDirs(registryDir, options.id);
+
+  if (matches.length === 0) {
+    throw new InstallCapabilityError("CAPABILITY_NOT_FOUND", `Capability not found in registry: ${options.id}`, {
+      id: options.id,
+      registryDir,
+    });
+  }
+
+  if (matches.length > 1) {
+    throw new InstallCapabilityError("CAPABILITY_AMBIGUOUS", `Multiple registry entries found for capability: ${options.id}`, {
+      id: options.id,
+      matches,
+    });
+  }
+
+  const sourceDir = matches[0];
+  const manifestPath = join(sourceDir, "manifest.yml");
+  const validation = await validateManifestFile(manifestPath);
+
+  if (!validation.ok) {
+    throw new InstallCapabilityError("CAPABILITY_INVALID", `Capability manifest is invalid: ${manifestPath}`, {
+      id: options.id,
+      issues: validation.issues,
+    });
+  }
+
+  if (validation.manifest.id !== options.id) {
+    throw new InstallCapabilityError("CAPABILITY_INVALID", `Capability id mismatch: expected ${options.id}, got ${validation.manifest.id}`, {
+      id: options.id,
+      manifestId: validation.manifest.id,
+    });
+  }
+
+  const paths = await ensureLocalStateDir({ cwd, env, stateDir: options.stateDir });
+  const destinationDir = join(paths.installedDir, options.id);
+  const alreadyInstalled = await pathExists(destinationDir);
+
+  if (alreadyInstalled && !options.force) {
+    throw new InstallCapabilityError("CAPABILITY_ALREADY_INSTALLED", `Capability already installed: ${options.id}. Use --force to replace it.`, {
+      id: options.id,
+      destinationDir,
+    });
+  }
+
+  const tmpInstallDir = join(paths.tmpDir, `install-${options.id}-${randomUUID()}`);
+
+  try {
+    await cp(sourceDir, tmpInstallDir, { recursive: true, errorOnExist: true });
+
+    if (alreadyInstalled) {
+      await rm(destinationDir, { recursive: true, force: true });
+    }
+
+    await rename(tmpInstallDir, destinationDir);
+  } catch (error) {
+    await rm(tmpInstallDir, { recursive: true, force: true });
+    throw error;
+  }
+
+  return {
+    id: options.id,
+    sourceDir,
+    destinationDir,
+    manifest: validation.manifest,
+  };
 }
 
 export class OpenCapRuntime {

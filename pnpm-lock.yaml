@@ -24,6 +24,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@opencap/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@opencap/spec':
         specifier: workspace:*
         version: link:../spec
