@@ -18,6 +18,8 @@ README.md
       -> docs/ecosystem/interoperability-profiles.md
       -> docs/ecosystem/oauth-and-remote-runtime-boundary.md
       -> docs/ecosystem/capability-graph-v1.md
+      -> docs/ecosystem/trust-model-v1.md
+      -> docs/ecosystem/capability-deprecation-and-revocation.md
       -> docs/SPEC.md
       -> docs/spec/versioning-and-compatibility.md
       -> docs/spec/manifest-evolution.md
@@ -50,6 +52,7 @@ README.md
       -> docs/security/agentic-risk-mapping.md
       -> docs/security/identity-and-auth-model.md
       -> docs/security/least-privilege-review.md
+      -> docs/security/capability-advisory-process.md
       -> docs/operations/release-readiness.md
       -> docs/operations/package-publishing-v1.md
       -> docs/operations/credential-lifecycle.md
@@ -64,6 +67,7 @@ README.md
       -> docs/quality/quality-gates.md
       -> docs/quality/conformance-suite-v1.md
       -> docs/quality/execution-evidence-v1.md
+      -> docs/quality/capability-quality-score.md
       -> docs/planning/v1-implementation-plan.md
       -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
@@ -134,6 +138,8 @@ README.md
 | `docs/ecosystem/interoperability-profiles.md` | Host/协议互操作 profile | 兼容性声明、Host 记录或协议 profile 变化时 |
 | `docs/ecosystem/oauth-and-remote-runtime-boundary.md` | 远程 Runtime OAuth 边界 | HTTP/Cloud/remote runtime 授权设计变化时 |
 | `docs/ecosystem/capability-graph-v1.md` | 能力图 | provider/resource/output 关系和组合风险变化时 |
+| `docs/ecosystem/trust-model-v1.md` | Trust 模型 | trust level、Trust Card 或升级/降级规则变化时 |
+| `docs/ecosystem/capability-deprecation-and-revocation.md` | 能力弃用和撤销 | deprecated/yanked/revoked 状态或 runtime 行为变化时 |
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/spec/versioning-and-compatibility.md` | 版本和公共契约兼容性 | 公共契约或版本策略变化时 |
 | `docs/spec/manifest-evolution.md` | Manifest schema 演进 | schema 迁移或新 capability type 变化时 |
@@ -166,6 +172,7 @@ README.md
 | `docs/security/agentic-risk-mapping.md` | Agentic 风险映射 | Agentic abuse cases、控制或测试映射变化时 |
 | `docs/security/identity-and-auth-model.md` | 身份与授权模型 | Host、Runtime、provider 或凭据边界变化时 |
 | `docs/security/least-privilege-review.md` | 最小权限评审 | auth scopes、provider 权限或 Registry review 变化时 |
+| `docs/security/capability-advisory-process.md` | Capability 安全公告流程 | advisory、漏洞披露、恶意能力处理变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
 | `docs/operations/credential-lifecycle.md` | 凭据生命周期 Runbook | token 创建、轮换、撤销或泄露响应流程变化时 |
@@ -180,6 +187,7 @@ README.md
 | `docs/quality/quality-gates.md` | 质量门禁 | milestone gate 或 release gate 变化时 |
 | `docs/quality/conformance-suite-v1.md` | 一致性测试体系 | conformance profile、测试分组或 release evidence 变化时 |
 | `docs/quality/execution-evidence-v1.md` | 执行证据 | audit evidence、request/response/outcome 字段变化时 |
+| `docs/quality/capability-quality-score.md` | 能力质量评分 | score rubric、Trust Card 质量维度变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

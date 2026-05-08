@@ -40,15 +40,19 @@
 | 0032 | V1 不内置 Workflow Runtime | 已接受 | OpenCap 保持能力治理层，不做工作流引擎。 |
 | 0033 | 组合中的每一步都必须独立 Policy、Consent、Audit | 已接受 | compositionId/planHash 只作为 evidence。 |
 | 0034 | Compensation 是独立 Capability，不是隐式 Rollback | 已接受 | 补偿动作需要独立 manifest 和确认。 |
+| 0035 | Trust Level 是证据摘要，不是 Policy | 已接受 | trust 不能覆盖本地 policy 或确认。 |
+| 0036 | Revoked Capability 必须保留可寻址记录 | 已接受 | revoked 记录保留，默认隐藏但可查询。 |
+| 0037 | Quality Score 不能绕过风险 | 已接受 | 分数只解释成熟度，不改变执行策略。 |
 
 ## 下一批需要决策的问题
 
-- 0035：OpenAPI adapter 的人工 review 边界。
-- 0036：Registry index signing 具体格式。
-- 0037：MCP elicitation profile 是否进入 v0.2。
-- 0038：macOS Keychain / external vault provider 是否进入 v0.2。
-- 0039：Idempotency-Key manifest field 是否进入 v0.2。
-- 0040：Composition profile 是否进入 v0.3。
+- 0038：OpenAPI adapter 的人工 review 边界。
+- 0039：Registry index signing 具体格式。
+- 0040：MCP elicitation profile 是否进入 v0.2。
+- 0041：macOS Keychain / external vault provider 是否进入 v0.2。
+- 0042：Idempotency-Key manifest field 是否进入 v0.2。
+- 0043：Composition profile 是否进入 v0.3。
+- 0044：Advisory YAML 是否映射 OSV。
 
 ## 决策写法
 

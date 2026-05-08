@@ -17,6 +17,7 @@ The project follows Semantic Versioning after `1.0.0`. During `0.x`, public cont
 - Identity/auth model, Secret Resolver contract, credential lifecycle runbook, least-privilege review, and remote OAuth boundary docs.
 - Execution semantics, retry/idempotency rules, failure recovery runbook, and execution evidence docs.
 - Composition boundary, capability graph, multi-step execution, composition failure recovery, and saga/workflow research docs.
+- Trust model, capability advisory process, deprecation/revocation lifecycle, and capability quality score docs.
 
 ### Changed
 

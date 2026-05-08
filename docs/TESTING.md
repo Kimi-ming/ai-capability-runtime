@@ -166,6 +166,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - MCP conformance 覆盖 tools/list、tools/call、confirmation_required 和 tool name collision。
 - Execution conformance 覆盖 request_started、outcome、retryAttempt、unknown_after_timeout 和 execution evidence redaction。
 - Composition conformance 覆盖 compositionId、step-level consent、planHash 只作 evidence、compensation 独立授权。
+- Trust conformance 覆盖 trust level 不覆盖 policy、revoked capability 警告/阻断、quality score 不改变 risk。
 
 ## CI 目标
 

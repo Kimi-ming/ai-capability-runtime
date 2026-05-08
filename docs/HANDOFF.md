@@ -135,3 +135,10 @@ T001：让 opencap validate 调用真实 schema 校验
 已新增组合边界、能力图、多步执行边界、组合失败恢复和组合/Saga 调研。ADR 0032-0034 已接受。V1 明确不内置 workflow runtime；未来组合中的每一步都必须独立经过 policy、consent、secret、execution 和 audit；compensation 是独立 Capability，不是隐式 rollback。
 
 下一步仍然是 T001。后续进入 runtime 实现时，要避免把 compositionId、planHash 或 workflow-level consent 当成授权来源。
+
+
+## 信任模型、安全公告、撤销和质量评分体系已补齐
+
+已新增 Trust 模型、Capability Advisory 流程、能力弃用/下架/撤销、能力质量评分和 Trust/Advisory/Revocation 调研。ADR 0035-0037 已接受。Trust level 和 Quality Score 都只是证据摘要，不能覆盖本地 policy 或用户确认；revoked capability 必须保留可寻址记录，不能从历史中静默消失。
+
+下一步仍然是 T001。后续实现 `opencap list/install/invoke` 时，要把 lifecycle/trust/advisory 状态作为用户可见安全信号，而不是执行授权来源。

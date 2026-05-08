@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 四十四个子系统
+## 四十八个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -62,6 +62,10 @@ OpenCap 负责能力治理。
 | 多步执行 | 定义 step outcome 和补偿边界 | `docs/design/multi-step-execution-boundary.md` | multi-step outcome model |
 | 组合失败恢复 | 指导 partial/unknown/manual review | `docs/operations/composition-failure-runbook.md` | recovery runbook |
 | 组合调研 | Saga/workflow 边界依据 | `docs/research/composition-and-saga-scan-2026-05-07.md` | research notes |
+| Trust 模型 | 把信任变成证据摘要 | `docs/ecosystem/trust-model-v1.md` | trust level rules |
+| Capability Advisory | 处理能力漏洞和恶意风险 | `docs/security/capability-advisory-process.md` | advisory lifecycle |
+| Deprecation/Revocation | 能力弃用、下架、撤销 | `docs/ecosystem/capability-deprecation-and-revocation.md` | lifecycle terminal states |
+| Quality Score | 解释能力成熟度 | `docs/quality/capability-quality-score.md` | scoring rubric |
 
 ## 系统闭环
 
@@ -124,6 +128,8 @@ Governance Surface
 - 写操作审计不可用时不得执行。
 - 任意 URL 能力默认高风险，需要 outbound policy 兜底。
 - Registry trust level 不能覆盖用户本地 policy。
+- Revoked capability 必须保留可寻址记录，不能从历史中静默消失。
+- Quality Score 不能绕过 risk、policy 和 consent。
 
 ## V1 关键收敛决策
 
@@ -159,6 +165,9 @@ Governance Surface
 | V1 不内置 Workflow Runtime | 已接受 |
 | 组合中的每一步都必须独立 Policy、Consent、Audit | 已接受 |
 | Compensation 是独立 Capability，不是隐式 Rollback | 已接受 |
+| Trust Level 是证据摘要，不是 Policy | 已接受 |
+| Revoked Capability 必须保留可寻址记录 | 已接受 |
+| Quality Score 不能绕过风险 | 已接受 |
 
 ## 设计成熟度
 
@@ -204,3 +213,7 @@ Governance Surface
 | 多步执行 | 清晰 | T175/T178 增加 evidence chain |
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |
+| Trust 模型 | 清晰 | T185/T195 落到 Trust Card |
+| Capability Advisory | 清晰 | T187/T189 进入 registry/runtime 检查 |
+| Deprecation/Revocation | 清晰 | T191/T192 落到 install/list/invoke |
+| Quality Score | 清晰 | T194/T196 防止覆盖 policy |

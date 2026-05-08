@@ -142,6 +142,18 @@
 - T181 P2：Registry graph index 草案。
 - T182 P2：Compensation capability review rules。
 - T183 P2：Composition failure recovery smoke tests。
+- T185 P1：Trust level transition tests。
+- T186 P1：Revoked capability invoke warning/deny behavior。
+- T187 P1：Capability advisory YAML schema。
+- T188 P1：Revocation metadata in registry。
+- T189 P1：Installed capability advisory check。
+- T190 P2：SECURITY.md 对齐 private reporting。
+- T191 P1：Lifecycle status schema for deprecated/yanked/revoked。
+- T192 P1：Install/list/invoke lifecycle warnings。
+- T193 P2：Registry search excludes yanked/revoked by default。
+- T194 P2：Quality score rubric implementation draft。
+- T195 P2：Trust Card includes quality score。
+- T196 P1：Score cannot override policy tests。
 
 ### 已完成
 
@@ -161,6 +173,7 @@
 - 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
 - 已完成：T174 P0：补齐执行可靠性、副作用安全和失败恢复体系。
 - 已完成：T184 P0：补齐组合边界、能力图和多步执行体系。
+- 已完成：T197 P0：补齐信任模型、安全公告、撤销和质量评分体系。
 
 
 ---
@@ -1248,6 +1261,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - compositionId/planHash 只作为 evidence，不作为授权。
 - compensation 被定义为独立 Capability invocation，不是隐式 rollback。
 - 能力图作为 registry 元数据和风险放大分析基础，而不是自动执行许可。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T197 P0：补齐信任模型、安全公告、撤销和质量评分体系
+
+- [x] T197 P0：补齐信任模型、安全公告、撤销和质量评分体系
+
+已完成：新增 Trust 模型、Capability Advisory 流程、能力弃用/下架/撤销、能力质量评分、Trust/Advisory/Revocation 调研，并新增 ADR 0035-0037。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- Trust level 被定义为证据摘要，不覆盖本地 policy。
+- Revoked capability 保留可寻址记录，不能从历史中静默消失。
+- Advisory lifecycle 覆盖 reported/triaged/investigating/fixed/mitigated/revoked/published。
+- Deprecated/yanked/revoked 的 Registry 和 Runtime 行为清晰。
+- Quality Score 只解释成熟度，不能绕过 risk、policy、consent。
 
 验证：
 

@@ -53,6 +53,10 @@
 | R031 | High | Mitigating | 组合级确认绕过单步高风险确认 | ADR 0033；step-level consent tests | T177 |
 | R032 | High | Mitigating | compensation 被误认为自动 rollback，造成错误安全预期 | ADR 0034；composition failure runbook | T182, T183 |
 | R033 | Medium | Mitigating | 能力组合造成风险放大但 registry review 看不见 | capability graph；risk amplification checklist | T179, T180 |
+| R034 | High | Mitigating | 恶意或危险 Capability 被删除历史后，用户无法判断是否受影响 | ADR 0036；revocation metadata | T188, T189 |
+| R035 | High | Mitigating | Trust level 被误用为自动放行依据 | ADR 0035；score/trust cannot override policy tests | T185, T196 |
+| R036 | Medium | Mitigating | 发现能力漏洞后没有私密报告和公告流程 | capability advisory process；SECURITY.md 对齐 | T187, T190 |
+| R037 | Medium | Mitigating | Quality Score 被误解为安全认证或商业排名 | ADR 0037；quality score docs | T194, T195 |
 
 ## 当前最高优先级风险
 
@@ -64,7 +68,8 @@
 6. R024：Secret Resolver 调用顺序验证
 7. R028：timeout unknown outcome 审计语义
 8. R031：组合级确认绕过单步确认
-9. R006：依赖安装和 workspace 构建验证
+9. R034：revoked capability 可寻址和本地提示
+10. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 
