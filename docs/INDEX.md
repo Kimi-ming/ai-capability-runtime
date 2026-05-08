@@ -20,6 +20,7 @@ README.md
       -> docs/ecosystem/capability-graph-v1.md
       -> docs/ecosystem/trust-model-v1.md
       -> docs/ecosystem/capability-deprecation-and-revocation.md
+      -> docs/ecosystem/paid-capability-and-commerce-boundary.md
       -> docs/SPEC.md
       -> docs/spec/versioning-and-compatibility.md
       -> docs/spec/manifest-evolution.md
@@ -37,6 +38,7 @@ README.md
       -> docs/design/secret-resolver-v1.md
       -> docs/design/execution-semantics-v1.md
       -> docs/design/retry-and-idempotency-v1.md
+      -> docs/design/quota-and-budget-policy-v1.md
       -> docs/design/composition-boundary-v1.md
       -> docs/design/multi-step-execution-boundary.md
       -> docs/design/http-execution-v1.md
@@ -53,6 +55,7 @@ README.md
       -> docs/security/identity-and-auth-model.md
       -> docs/security/least-privilege-review.md
       -> docs/security/capability-advisory-process.md
+      -> docs/security/rate-limit-and-abuse-control-v1.md
       -> docs/operations/release-readiness.md
       -> docs/operations/package-publishing-v1.md
       -> docs/operations/credential-lifecycle.md
@@ -60,6 +63,7 @@ README.md
       -> docs/operations/composition-failure-runbook.md
       -> docs/operations/ci-security-baseline.md
       -> docs/operations/observability-metrics-v1.md
+      -> docs/operations/usage-metering-v1.md
       -> docs/community/contributor-journey.md
       -> docs/community/capability-review-checklist.md
       -> docs/community/rfc-process.md
@@ -68,6 +72,7 @@ README.md
       -> docs/quality/conformance-suite-v1.md
       -> docs/quality/execution-evidence-v1.md
       -> docs/quality/capability-quality-score.md
+      -> docs/quality/usage-evidence-v1.md
       -> docs/planning/v1-implementation-plan.md
       -> docs/planning/open-questions.md
       -> docs/operations/operating-model.md
@@ -140,6 +145,7 @@ README.md
 | `docs/ecosystem/capability-graph-v1.md` | 能力图 | provider/resource/output 关系和组合风险变化时 |
 | `docs/ecosystem/trust-model-v1.md` | Trust 模型 | trust level、Trust Card 或升级/降级规则变化时 |
 | `docs/ecosystem/capability-deprecation-and-revocation.md` | 能力弃用和撤销 | deprecated/yanked/revoked 状态或 runtime 行为变化时 |
+| `docs/ecosystem/paid-capability-and-commerce-boundary.md` | 付费能力和商业边界 | paid capability、commerce profile 或结算边界变化时 |
 | `docs/SPEC.md` | 产品正确性、V1 范围、功能需求 | 行为或范围变化时 |
 | `docs/spec/versioning-and-compatibility.md` | 版本和公共契约兼容性 | 公共契约或版本策略变化时 |
 | `docs/spec/manifest-evolution.md` | Manifest schema 演进 | schema 迁移或新 capability type 变化时 |
@@ -156,6 +162,7 @@ README.md
 | `docs/design/secret-resolver-v1.md` | 密钥解析器契约 | auth provider、secret placement 或 resolver 行为变化时 |
 | `docs/design/execution-semantics-v1.md` | 执行语义 | outcome、side effect、request_started 或状态模型变化时 |
 | `docs/design/retry-and-idempotency-v1.md` | 重试与幂等 | retry policy、idempotency key 或重复调用规则变化时 |
+| `docs/design/quota-and-budget-policy-v1.md` | 配额与预算策略 | quota/budget gate、spend cap 或策略字段变化时 |
 | `docs/design/composition-boundary-v1.md` | 组合边界 | composition profile、workflow 边界或组合不变量变化时 |
 | `docs/design/multi-step-execution-boundary.md` | 多步执行边界 | step outcome、composition outcome 或 compensation 变化时 |
 | `docs/design/runtime-contracts.md` | Runtime 模块契约 | invoke pipeline 或模块接口变化时 |
@@ -173,6 +180,7 @@ README.md
 | `docs/security/identity-and-auth-model.md` | 身份与授权模型 | Host、Runtime、provider 或凭据边界变化时 |
 | `docs/security/least-privilege-review.md` | 最小权限评审 | auth scopes、provider 权限或 Registry review 变化时 |
 | `docs/security/capability-advisory-process.md` | Capability 安全公告流程 | advisory、漏洞披露、恶意能力处理变化时 |
+| `docs/security/rate-limit-and-abuse-control-v1.md` | 限流与滥用控制 | local/provider rate limit、abuse throttle 或 429 语义变化时 |
 | `docs/operations/release-readiness.md` | 发布门禁 | alpha/beta/v1 发布条件变化时 |
 | `docs/operations/package-publishing-v1.md` | npm 包发布策略 | package 发布、trusted publishing 变化时 |
 | `docs/operations/credential-lifecycle.md` | 凭据生命周期 Runbook | token 创建、轮换、撤销或泄露响应流程变化时 |
@@ -180,6 +188,7 @@ README.md
 | `docs/operations/composition-failure-runbook.md` | 组合失败恢复 | partial/unknown composition、manual review 或补偿流程变化时 |
 | `docs/operations/ci-security-baseline.md` | CI 和开源安全基线 | GitHub Actions 或安全检查变化时 |
 | `docs/operations/observability-metrics-v1.md` | 可观测性和指标 | audit/metrics/OTel 映射变化时 |
+| `docs/operations/usage-metering-v1.md` | 用量计量 | usage event、usage summary 或 export 变化时 |
 | `docs/community/contributor-journey.md` | 贡献者路径 | 贡献流程变化时 |
 | `docs/community/capability-review-checklist.md` | Capability PR 评审 | Registry review 规则变化时 |
 | `docs/community/rfc-process.md` | RFC 流程 | 设计治理流程变化时 |
@@ -188,6 +197,7 @@ README.md
 | `docs/quality/conformance-suite-v1.md` | 一致性测试体系 | conformance profile、测试分组或 release evidence 变化时 |
 | `docs/quality/execution-evidence-v1.md` | 执行证据 | audit evidence、request/response/outcome 字段变化时 |
 | `docs/quality/capability-quality-score.md` | 能力质量评分 | score rubric、Trust Card 质量维度变化时 |
+| `docs/quality/usage-evidence-v1.md` | 用量证据 | usage event 与 audit/evidence 关联规则变化时 |
 | `docs/operations/operating-model.md` | 项目运行模型 | 团队协作或任务规则变化时 |
 | `docs/TASKS.md` | 执行任务队列 | 每次任务开始/完成/阻塞时 |
 | `docs/TESTING.md` | 验证命令和测试策略 | 新增测试、跳过验证、命令变化时 |

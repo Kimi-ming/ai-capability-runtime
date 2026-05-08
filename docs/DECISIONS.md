@@ -43,16 +43,20 @@
 | 0035 | Trust Level 是证据摘要，不是 Policy | 已接受 | trust 不能覆盖本地 policy 或确认。 |
 | 0036 | Revoked Capability 必须保留可寻址记录 | 已接受 | revoked 记录保留，默认隐藏但可查询。 |
 | 0037 | Quality Score 不能绕过风险 | 已接受 | 分数只解释成熟度，不改变执行策略。 |
+| 0038 | Usage Event 不是账单记录 | 已接受 | 本地 usage 用于观察和限额，不直接计费。 |
+| 0039 | Quota/Budget Gate 必须在 Secret Resolution 前运行 | 已接受 | 超额调用不解析 secret、不执行。 |
+| 0040 | Commerce Profile 是未来边界，不进入 V1 主路径 | 已接受 | paid capability/支付/结算走 future RFC。 |
 
 ## 下一批需要决策的问题
 
-- 0038：OpenAPI adapter 的人工 review 边界。
-- 0039：Registry index signing 具体格式。
-- 0040：MCP elicitation profile 是否进入 v0.2。
-- 0041：macOS Keychain / external vault provider 是否进入 v0.2。
-- 0042：Idempotency-Key manifest field 是否进入 v0.2。
-- 0043：Composition profile 是否进入 v0.3。
-- 0044：Advisory YAML 是否映射 OSV。
+- 0041：OpenAPI adapter 的人工 review 边界。
+- 0042：Registry index signing 具体格式。
+- 0043：MCP elicitation profile 是否进入 v0.2。
+- 0044：macOS Keychain / external vault provider 是否进入 v0.2。
+- 0045：Idempotency-Key manifest field 是否进入 v0.2。
+- 0046：Composition profile 是否进入 v0.3。
+- 0047：Advisory YAML 是否映射 OSV。
+- 0048：Paid capability manifest 是否进入 v0.3。
 
 ## 决策写法
 

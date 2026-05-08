@@ -154,6 +154,16 @@
 - T194 P2：Quality score rubric implementation draft。
 - T195 P2：Trust Card includes quality score。
 - T196 P1：Score cannot override policy tests。
+- T198 P1：Usage event schema。
+- T199 P1：Quota/budget policy gates。
+- T200 P1：Provider rate limit handling。
+- T201 P1：Local abuse throttle。
+- T202 P2：Paid capability manifest RFC。
+- T203 P2：Commerce profile RFC。
+- T204 P1：Financial consent/spend cap tests。
+- T205 P2：Usage export format。
+- T206 P2：Problem details for quota/rate errors。
+- T207 P2：Usage evidence conformance tests。
 
 ### 已完成
 
@@ -174,6 +184,7 @@
 - 已完成：T174 P0：补齐执行可靠性、副作用安全和失败恢复体系。
 - 已完成：T184 P0：补齐组合边界、能力图和多步执行体系。
 - 已完成：T197 P0：补齐信任模型、安全公告、撤销和质量评分体系。
+- 已完成：T208 P0：补齐用量计量、配额预算、限流滥用和商业边界体系。
 
 
 ---
@@ -1284,6 +1295,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - Advisory lifecycle 覆盖 reported/triaged/investigating/fixed/mitigated/revoked/published。
 - Deprecated/yanked/revoked 的 Registry 和 Runtime 行为清晰。
 - Quality Score 只解释成熟度，不能绕过 risk、policy、consent。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+### T208 P0：补齐用量计量、配额预算、限流滥用和商业边界体系
+
+- [x] T208 P0：补齐用量计量、配额预算、限流滥用和商业边界体系
+
+已完成：新增用量计量、配额与预算策略、限流与滥用控制、付费能力与商业边界、用量证据、Usage/Commerce/Abuse 调研，并新增 ADR 0038-0040。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、CHANGELOG 和 HANDOFF。
+
+验收标准：
+
+- Usage Event 被定义为本地可观测和限额证据，不是账单记录。
+- Quota/Budget Gate 在 Secret Resolver 和 Executor 前运行。
+- Rate limit 和 abuse control 能区分 local throttle 与 provider 429。
+- Financial capability 必须 explicit consent 和 spend budget，不自动 retry。
+- Paid capability/agentic commerce 被明确放入 future commerce profile，不进入 V1 主路径。
 
 验证：
 

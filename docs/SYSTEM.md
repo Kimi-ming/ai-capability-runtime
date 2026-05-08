@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 四十八个子系统
+## 五十三个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -66,6 +66,11 @@ OpenCap 负责能力治理。
 | Capability Advisory | 处理能力漏洞和恶意风险 | `docs/security/capability-advisory-process.md` | advisory lifecycle |
 | Deprecation/Revocation | 能力弃用、下架、撤销 | `docs/ecosystem/capability-deprecation-and-revocation.md` | lifecycle terminal states |
 | Quality Score | 解释能力成熟度 | `docs/quality/capability-quality-score.md` | scoring rubric |
+| 用量计量 | 本地 usage evidence | `docs/operations/usage-metering-v1.md` | usage event model |
+| 配额预算 | 执行前额度和预算 gate | `docs/design/quota-and-budget-policy-v1.md` | quota/budget policy |
+| 限流滥用 | 防止循环调用和刷请求 | `docs/security/rate-limit-and-abuse-control-v1.md` | abuse controls |
+| 商业边界 | paid capability/commerce profile 边界 | `docs/ecosystem/paid-capability-and-commerce-boundary.md` | future commerce boundary |
+| 用量证据 | 证明用量来自 invocation | `docs/quality/usage-evidence-v1.md` | usage evidence chain |
 
 ## 系统闭环
 
@@ -130,6 +135,9 @@ Governance Surface
 - Registry trust level 不能覆盖用户本地 policy。
 - Revoked capability 必须保留可寻址记录，不能从历史中静默消失。
 - Quality Score 不能绕过 risk、policy 和 consent。
+- Usage Event 不是账单记录。
+- Quota/Budget Gate 必须在 Secret Resolver 和 Executor 之前运行。
+- V1 不执行 paid capability、购买、支付或结算。
 
 ## V1 关键收敛决策
 
@@ -168,6 +176,9 @@ Governance Surface
 | Trust Level 是证据摘要，不是 Policy | 已接受 |
 | Revoked Capability 必须保留可寻址记录 | 已接受 |
 | Quality Score 不能绕过风险 | 已接受 |
+| Usage Event 不是账单记录 | 已接受 |
+| Quota/Budget Gate 必须在 Secret Resolution 前运行 | 已接受 |
+| Commerce Profile 是未来边界，不进入 V1 主路径 | 已接受 |
 
 ## 设计成熟度
 
@@ -217,3 +228,8 @@ Governance Surface
 | Capability Advisory | 清晰 | T187/T189 进入 registry/runtime 检查 |
 | Deprecation/Revocation | 清晰 | T191/T192 落到 install/list/invoke |
 | Quality Score | 清晰 | T194/T196 防止覆盖 policy |
+| 用量计量 | 清晰 | T198/T205 从 audit 派生 usage event |
+| 配额预算 | 清晰 | T199/T204 做执行前 gate |
+| 限流滥用 | 清晰 | T200/T201 处理 local/provider rate limit |
+| 商业边界 | 清晰 | T202/T203 走 future RFC |
+| 用量证据 | 清晰 | T207 做 conformance tests |

@@ -57,6 +57,10 @@
 | R035 | High | Mitigating | Trust level 被误用为自动放行依据 | ADR 0035；score/trust cannot override policy tests | T185, T196 |
 | R036 | Medium | Mitigating | 发现能力漏洞后没有私密报告和公告流程 | capability advisory process；SECURITY.md 对齐 | T187, T190 |
 | R037 | Medium | Mitigating | Quality Score 被误解为安全认证或商业排名 | ADR 0037；quality score docs | T194, T195 |
+| R038 | High | Mitigating | 模型循环调用导致 API 配额耗尽或外部刷屏 | quota/budget/rate limit gate | T199, T201 |
+| R039 | High | Mitigating | Usage event 被误当账单记录，引入错误商业和合规语义 | ADR 0038；commerce boundary | T198, T205 |
+| R040 | High | Mitigating | 超额调用仍解析 secret 或执行请求 | ADR 0039；quota gate tests | T199, T204 |
+| R041 | High | Mitigating | paid capability/agentic commerce 提前混入 V1 主路径 | ADR 0040；commerce profile RFC | T202, T203 |
 
 ## 当前最高优先级风险
 
@@ -69,7 +73,8 @@
 7. R028：timeout unknown outcome 审计语义
 8. R031：组合级确认绕过单步确认
 9. R034：revoked capability 可寻址和本地提示
-10. R006：依赖安装和 workspace 构建验证
+10. R038：模型循环调用和额度耗尽
+11. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

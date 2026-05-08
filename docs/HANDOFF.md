@@ -142,3 +142,10 @@ T001：让 opencap validate 调用真实 schema 校验
 已新增 Trust 模型、Capability Advisory 流程、能力弃用/下架/撤销、能力质量评分和 Trust/Advisory/Revocation 调研。ADR 0035-0037 已接受。Trust level 和 Quality Score 都只是证据摘要，不能覆盖本地 policy 或用户确认；revoked capability 必须保留可寻址记录，不能从历史中静默消失。
 
 下一步仍然是 T001。后续实现 `opencap list/install/invoke` 时，要把 lifecycle/trust/advisory 状态作为用户可见安全信号，而不是执行授权来源。
+
+
+## 用量计量、配额预算、限流滥用和商业边界体系已补齐
+
+已新增用量计量、配额与预算策略、限流与滥用控制、付费能力与商业边界、用量证据和 Usage/Commerce/Abuse 调研。ADR 0038-0040 已接受。Usage Event 是本地可观测和限额证据，不是账单记录；Quota/Budget Gate 必须在 Secret Resolver 和 Executor 前运行；paid capability/agentic commerce 必须走 future commerce profile，不进入 V1 主路径。
+
+下一步仍然是 T001。后续进入 policy/runtime/audit 实现时，要预留 usage event、quota decision、budget decision 和 rate limit evidence 字段。

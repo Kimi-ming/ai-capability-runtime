@@ -18,6 +18,7 @@ The project follows Semantic Versioning after `1.0.0`. During `0.x`, public cont
 - Execution semantics, retry/idempotency rules, failure recovery runbook, and execution evidence docs.
 - Composition boundary, capability graph, multi-step execution, composition failure recovery, and saga/workflow research docs.
 - Trust model, capability advisory process, deprecation/revocation lifecycle, and capability quality score docs.
+- Usage metering, quota/budget policy, rate limit/abuse control, commerce boundary, and usage evidence docs.
 
 ### Changed
 

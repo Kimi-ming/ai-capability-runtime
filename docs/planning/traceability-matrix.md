@@ -107,3 +107,8 @@
 | RQ-059 | Capability advisory 可追踪 | `docs/security/capability-advisory-process.md` | T187, T189, T190 | advisory schema/checks |
 | RQ-060 | Deprecated/yanked/revoked 生命周期清晰 | `docs/ecosystem/capability-deprecation-and-revocation.md` | T188, T191, T192, T193 | lifecycle warnings/search tests |
 | RQ-061 | Quality Score 不被误用为安全认证 | `docs/quality/capability-quality-score.md` | T194, T195, T196 | score/policy tests |
+| RQ-062 | Usage event 非账单语义清晰 | `docs/operations/usage-metering-v1.md` | T198, T205 | usage event/export tests |
+| RQ-063 | 配额预算在执行前阻断 | `docs/design/quota-and-budget-policy-v1.md` | T199, T204 | quota/budget gate tests |
+| RQ-064 | 限流和滥用控制清晰 | `docs/security/rate-limit-and-abuse-control-v1.md` | T200, T201, T206 | rate limit/problem details tests |
+| RQ-065 | 商业交易不污染 V1 主路径 | `docs/ecosystem/paid-capability-and-commerce-boundary.md` | T202, T203 | RFC/ADR review |
+| RQ-066 | 用量证据可追溯到 audit | `docs/quality/usage-evidence-v1.md` | T207 | usage evidence conformance |
