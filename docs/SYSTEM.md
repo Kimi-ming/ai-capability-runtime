@@ -18,7 +18,7 @@ OpenCap 负责能力治理。
 
 OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控制面管理策略和授权，执行面承载 Runtime Kernel，信任面沉淀审计和证据，互操作面适配 MCP、CLI 和未来 A2A/Apps SDK/OpenAPI。详细模型见 `docs/设计/整体系统设计-v1.md`。
 
-## 七十二个子系统
+## 核心子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -27,6 +27,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | Capability 标准 | 统一能力描述 | `docs/规范/capability-manifest.md` | manifest schema |
 | Capability 生命周期 | 治理状态机 | `docs/产品/capability-lifecycle.md` | Draft -> Audited |
 | 整体系统设计 | 收敛五个平面和生态闭环 | `docs/设计/整体系统设计-v1.md` | Runtime Kernel + ledgers/cards model |
+| 整体设计审查 | 找出工程化缺口和补强路线 | `docs/评审/整体设计二次审查-2026-05-08.md` | T267-T276 follow-up tasks |
 | Runtime 核心 | 安全执行能力 | `docs/设计/runtime-contracts.md` | invoke pipeline |
 | HTTP 执行 | 调用外部 API | `docs/设计/http-execution-v1.md` | body/auth/outbound 规则 |
 | Policy DSL | 执行前决策 | `docs/设计/policy-dsl-v1.md` | default/rules YAML |

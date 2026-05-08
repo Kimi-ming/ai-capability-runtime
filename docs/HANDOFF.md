@@ -226,3 +226,11 @@ T001：让 opencap validate 调用真实 schema 校验
 本轮外部标准核对：MCP 2025-11-25 继续强调协议分层、authorization、server/client features 和 metadata 安全；A2A 最新规范强调 Agent Card、任务生命周期、认证授权和多传输互操作；OpenAI Apps SDK 以 MCP server 和 ChatGPT app 分发为入口。OpenCap 因此继续坚持协议中立 Runtime Kernel，MCP 是 V1 adapter，A2A/Apps SDK/OpenAPI 是 future profile。
 
 本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析和 Markdown 相对链接检查通过；`audit_docs.py` 显示文档数 204、任务总数 132、已完成 23、未完成 109。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+## 整体设计二次审查已完成
+
+已新增 `docs/评审/整体设计二次审查-2026-05-08.md`。这次审查的结论是：OpenCap 方向成立，但下一阶段不能继续扩概念，要把五个平面压成 Runtime Kernel 类型、统一 Gate、四种 Ledger、四张 Card、Profile evidence、Registry sync、Capability identity、Provenance 预留、Authoring loop 和 Release maturity gates。
+
+已新增后续任务 T267-T276。它们是架构补强任务，不改变当前实现入口。已同步新增 R061 风险，约束体系化设计不能脱离实现主路径。下一步仍然优先 T001：让 `opencap validate` 调用真实 schema 校验。
+
+本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析和 Markdown 相对链接检查通过；`audit_docs.py` 显示文档数 205、任务总数 133、已完成 24、未完成 109。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

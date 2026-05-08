@@ -213,6 +213,16 @@
 - T258 P2：policy incident runbook。
 - T259 P2：decision log export。
 - T260 P1：policy governance conformance tests。
+- T267 P0：定义 Runtime Kernel public contract TypeScript 类型。
+- T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
+- T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
+- T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
+- T271 P1：定义 Interoperability Profile evidence record schema。
+- T272 P2：设计 Registry index/cache/sync RFC。
+- T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
+- T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
+- T275 P1：补齐 Capability authoring loop 和 lint 顺序。
+- T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
 
 ### 已完成
 
@@ -242,6 +252,7 @@
 - 已完成：T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板。
 - 已完成：T264 P0：中文化 docs 子目录结构并同步全仓链接。
 - 已完成：T265 P0：补齐整体系统设计 V1。
+- 已完成：T266 P0：完成整体设计二次审查和工程补强任务拆解。
 
 
 ---
@@ -2731,6 +2742,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - Runtime Kernel 与 MCP/A2A/Apps SDK/OpenAPI adapter 的边界清晰。
 - 设计能把现有安全、策略、审计、Registry、互操作和质量文档串起来。
 - 下一步实现入口仍保持 T001，不因新增设计改变 V1 主路径。
+
+验证：
+
+```bash
+git diff --check
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T266 P0：完成整体设计二次审查和工程补强任务拆解
+
+- [x] T266 P0：完成整体设计二次审查和工程补强任务拆解
+
+已完成：新增 `docs/评审/整体设计二次审查-2026-05-08.md`，从工程闭环角度复盘整体设计，明确 Runtime Kernel public contract、Gate 抽象、Ledger、Card、Profile evidence、Registry sync、Capability identity、Provenance、Authoring loop 和 Release maturity gates 十个补强方向。同步新增 T267-T276 后续任务，并更新文档中心、维护者索引、体系蓝图、追踪矩阵、变更日志和交接记录。
+
+验收标准：
+
+- 二次审查不新增产品范围，而是把现有整体设计压实为工程对象和验收问题。
+- 每个主要缺口都有建议产物和对应任务编号。
+- 下一步实现入口仍保持 T001，架构补强任务作为并行契约工作推进。
+- 外部标准参考只作为边界校准，不把 OpenCap 绑定到单一协议或平台。
 
 验证：
 

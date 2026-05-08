@@ -80,6 +80,7 @@
 | R058 | High | Mitigating | ask/deny 被改为 broad allow，写入、外发或金融动作静默放开 | Policy simulation/diff；broad allow safety checks | T253, T254, T260 |
 | R059 | High | Mitigating | override/breakglass 变成无审计后门 | Override record、短过期时间、硬安全边界不可绕过 | T255, T258, T260 |
 | R060 | Medium | Mitigating | future policy bundle 激活失败覆盖当前 active policy | lifecycle activation record；failed activation 不替换 active revision | T256 |
+| R061 | Medium | Mitigating | 整体设计越来越完整，但实现主路径仍未跑通，可能形成纸面架构膨胀 | 保持 T001 为下一优先级；T267-T276 只作为契约补强并绑定验证产物 | T001, T267-T276 |
 
 ## 当前最高优先级风险
 
@@ -102,6 +103,7 @@
 17. R058：broad allow 静默放开高风险操作
 18. R059：override/breakglass 变成无审计后门
 19. R006：依赖安装和 workspace 构建验证
+20. R061：整体设计完整但实现主路径滞后
 
 ## 风险处理规则
 

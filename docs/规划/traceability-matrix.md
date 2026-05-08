@@ -131,3 +131,5 @@
 | RQ-083 | 高风险 broad allow 上线前可发现 | `docs/质量/policy-simulation-and-diff-v1.md` | T253, T254, T260 | simulation/diff conformance |
 | RQ-084 | Override 和 breakglass 不绕过硬边界 | `docs/安全/policy-override-and-breakglass-v1.md` | T255, T258, T260 | override/breakglass negative tests |
 | RQ-085 | 整体设计能把标准、控制、执行、信任和互操作收敛为可执行模型 | `docs/设计/整体系统设计-v1.md` | T265 | 文档闭环检查 + 架构审查 |
+| RQ-086 | 整体设计缺口可追踪到工程补强任务 | `docs/评审/整体设计二次审查-2026-05-08.md` | T266-T276 | 文档闭环检查 + 后续契约/测试 |
+| RQ-087 | 体系化设计不脱离实现主路径 | `docs/RISKS.md`, `docs/TASKS.md` | T001, T267-T276 | T001 保持首位 + 文档闭环检查 |
