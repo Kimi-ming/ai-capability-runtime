@@ -201,6 +201,7 @@ V1 完成必须满足：
 
 实现 V1 时还应参考：
 
+- `docs/设计/整体系统设计-v1.md`：OpenCap 的五个平面、三条链路、Runtime Kernel 和最小生态闭环。
 - `docs/产品/strategy.md`：为什么 OpenCap 只做能力层和 Runtime 治理。
 - `docs/产品/use-cases.md`：角色、场景和主路径验收。
 - `docs/产品/capability-lifecycle.md`：Capability 从 Draft 到 Audited 的治理状态。

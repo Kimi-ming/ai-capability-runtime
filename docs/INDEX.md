@@ -20,6 +20,7 @@
 | [中文文档规范](社区/documentation-governance.md) | 语言、分层、命名和清理规则 | 文档治理规则变化时 |
 | [体系蓝图](SYSTEM.md) | 全局系统结构和子系统列表 | 新增子系统或全局不变量变化时 |
 | [产品规格](SPEC.md) | V1 范围和产品正确性 | 行为、范围或验收口径变化时 |
+| [整体系统设计 V1](设计/整体系统设计-v1.md) | 五个平面、三条链路、Runtime Kernel 和生态闭环 | 总体架构模型、扩展边界或生态阶段变化时 |
 | [架构总览](ARCHITECTURE.md) | 模块边界和主调用链 | Runtime/CLI/MCP/Registry 边界变化时 |
 | [开发任务总表](TASKS.md) | 任务队列和验收标准 | 每次新增、拆分、完成任务时 |
 | [当前状态交接](HANDOFF.md) | 当前阶段、验证、下一步 | 每次任务结束时 |
@@ -61,19 +62,21 @@
 
 ### 架构评审路径
 
-1. [架构总览](ARCHITECTURE.md)
-2. [运行时契约](设计/runtime-contracts.md)
-3. [决策索引](DECISIONS.md)
-4. [风险登记](RISKS.md)
-5. [一致性测试体系](质量/conformance-suite-v1.md)
+1. [整体系统设计 V1](设计/整体系统设计-v1.md)
+2. [架构总览](ARCHITECTURE.md)
+3. [运行时契约](设计/runtime-contracts.md)
+4. [决策索引](DECISIONS.md)
+5. [风险登记](RISKS.md)
+6. [一致性测试体系](质量/conformance-suite-v1.md)
 
 ### 实现任务路径
 
 1. [当前状态交接](HANDOFF.md)
 2. [开发任务总表](TASKS.md)
 3. 当前任务引用的 `docs/设计/` 或 `docs/安全/` 文档
-4. [验证策略](TESTING.md)
-5. [开发工作流](WORKFLOW.md)
+4. [整体系统设计 V1](设计/整体系统设计-v1.md) 中对应平面和链路
+5. [验证策略](TESTING.md)
+6. [开发工作流](WORKFLOW.md)
 
 ## 维护规则
 

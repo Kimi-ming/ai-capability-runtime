@@ -1,6 +1,6 @@
 # 架构总览：OpenCap V1
 
-本文是实现时的架构入口。详细设计见 `docs/规划/v1-architecture.md`。
+本文是实现时的架构入口。整体系统模型见 `docs/设计/整体系统设计-v1.md`，详细实施架构见 `docs/规划/v1-architecture.md`。
 
 ## 架构原则
 
@@ -10,6 +10,10 @@
 4. Audit Logger 是核心路径，不是插件。
 5. V1 只支持 HTTP Capability。
 6. 本地状态明确、可删除、可重建。
+
+## 总体模型
+
+OpenCap V1 采用五个平面组织架构：标准面、控制面、执行面、信任面和互操作面。Runtime Core 是执行面内核，CLI/MCP/未来 API 都只是互操作入口；Registry、Policy、Audit、Trust 和 Compatibility 共同构成控制和证据体系。
 
 ## 模块图
 
@@ -181,6 +185,7 @@ HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
 
 架构实现时优先对齐以下文档：
 
+- `docs/设计/整体系统设计-v1.md`：五个平面、三条主链路、Runtime Kernel、账本和卡片模型。
 - `docs/设计/domain-model.md`：对象、关系和不变量。
 - `docs/设计/runtime-contracts.md`：Runtime 调用管线和模块契约。
 - `docs/协议/protocol-positioning.md`：MCP、A2A、OpenAPI 和 Apps SDK 的边界。

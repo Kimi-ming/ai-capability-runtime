@@ -216,3 +216,13 @@ T001：让 opencap validate 调用真实 schema 校验
 保留 `docs/README.md`、`docs/TASKS.md`、`docs/HANDOFF.md` 等根部核心文件名，以及 `packages/spec` 等工程代码路径，原因是这些路径被脚本、构建和开发者习惯依赖。后续新增文档应优先进入中文目录，新增目录必须先写入 `docs/社区/documentation-governance.md` 和 `docs/INDEX.md`。
 
 本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析、旧英文目录引用扫描和 Markdown 相对链接检查通过；`audit_docs.py` 显示文档数 203、任务总数 131、已完成 22、未完成 109。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+## 整体系统设计 V1 已补齐
+
+已新增 `docs/设计/整体系统设计-v1.md`，把 OpenCap 的总体设计收敛为五个平面：标准面、控制面、执行面、信任面和互操作面。文档同时明确三条主链路、Runtime Kernel、四种账本、四张卡片、执行前门禁顺序和分阶段生态闭环。
+
+这次设计没有改变 V1 实现入口。下一步仍然是 T001：让 `opencap validate` 调用真实 schema 校验。新设计的作用是防止后续实现时把 MCP adapter、Registry、Policy、Audit、A2A、Apps SDK 或 OpenAPI adapter 混进同一个边界里。
+
+本轮外部标准核对：MCP 2025-11-25 继续强调协议分层、authorization、server/client features 和 metadata 安全；A2A 最新规范强调 Agent Card、任务生命周期、认证授权和多传输互操作；OpenAI Apps SDK 以 MCP server 和 ChatGPT app 分发为入口。OpenCap 因此继续坚持协议中立 Runtime Kernel，MCP 是 V1 adapter，A2A/Apps SDK/OpenAPI 是 future profile。
+
+本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析和 Markdown 相对链接检查通过；`audit_docs.py` 显示文档数 204、任务总数 132、已完成 23、未完成 109。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

@@ -14,7 +14,11 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 七十一个子系统
+## 整体设计模型
+
+OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控制面管理策略和授权，执行面承载 Runtime Kernel，信任面沉淀审计和证据，互操作面适配 MCP、CLI 和未来 A2A/Apps SDK/OpenAPI。详细模型见 `docs/设计/整体系统设计-v1.md`。
+
+## 七十二个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -22,6 +26,7 @@ OpenCap 负责能力治理。
 | 用户场景 | 明确为谁解决什么 | `docs/产品/use-cases.md` | V1 主路径用例 |
 | Capability 标准 | 统一能力描述 | `docs/规范/capability-manifest.md` | manifest schema |
 | Capability 生命周期 | 治理状态机 | `docs/产品/capability-lifecycle.md` | Draft -> Audited |
+| 整体系统设计 | 收敛五个平面和生态闭环 | `docs/设计/整体系统设计-v1.md` | Runtime Kernel + ledgers/cards model |
 | Runtime 核心 | 安全执行能力 | `docs/设计/runtime-contracts.md` | invoke pipeline |
 | HTTP 执行 | 调用外部 API | `docs/设计/http-execution-v1.md` | body/auth/outbound 规则 |
 | Policy DSL | 执行前决策 | `docs/设计/policy-dsl-v1.md` | default/rules YAML |
@@ -89,6 +94,16 @@ OpenCap 负责能力治理。
 | Data Egress Policy | 执行前判断什么数据发给谁 | `docs/设计/data-egress-policy-v1.md` | egress gate |
 | 输入来源证据 | 记录 input provenance 和 egress map | `docs/质量/input-provenance-v1.md` | input provenance |
 | 数据最小化 | 只外发 execution mapping 引用字段 | `docs/安全/data-minimization-and-redaction-v1.md` | minimization/redaction |
+
+## 五个平面
+
+| 平面 | 核心职责 | 典型文档 |
+| --- | --- | --- |
+| 标准面 | Capability 描述、打包、测试和演进 | `docs/规范/capability-manifest.md`, `docs/设计/capability-package-v1.md` |
+| 控制面 | 安装、策略、确认、配额、生命周期和变更 | `docs/设计/policy-dsl-v1.md`, `docs/运营/policy-lifecycle-and-change-control.md` |
+| 执行面 | Runtime pipeline、executor、result envelope | `docs/设计/runtime-contracts.md`, `docs/设计/result-envelope-v1.md` |
+| 信任面 | 审计、来源、撤销、安全公告和质量证据 | `docs/设计/audit-log-v1.md`, `docs/生态/trust-model-v1.md` |
+| 互操作面 | MCP、CLI、未来 A2A/Apps SDK/OpenAPI adapter | `docs/生态/interoperability-profiles.md`, `docs/协议/protocol-positioning.md` |
 
 ## 系统闭环
 

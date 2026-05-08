@@ -241,6 +241,7 @@
 - 已完成：T262 P0：重新梳理中文文档入口、索引和文档规范。
 - 已完成：T263 P0：整理 docs 根目录文件并归位参考、教程、规范和模板。
 - 已完成：T264 P0：中文化 docs 子目录结构并同步全仓链接。
+- 已完成：T265 P0：补齐整体系统设计 V1。
 
 
 ---
@@ -2707,6 +2708,29 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - 全仓不再引用旧的英文文档子目录路径。
 - 文档中心、维护者索引和中文文档规范说明新的目录职责。
 - 工程代码路径没有被文档目录中文化误改。
+
+验证：
+
+```bash
+git diff --check
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T265 P0：补齐整体系统设计 V1
+
+- [x] T265 P0：补齐整体系统设计 V1
+
+已完成：新增 `docs/设计/整体系统设计-v1.md`，把 OpenCap 的总体架构收敛为标准面、控制面、执行面、信任面和互操作面五个平面，并明确能力供应链、调用执行链、证据反馈链、Runtime Kernel、四种账本、四张卡片、执行前门禁顺序和分阶段生态闭环。同步更新文档中心、维护者索引、体系蓝图、架构总览、产品规格、追踪矩阵、变更日志和交接记录。
+
+验收标准：
+
+- 整体设计能解释 OpenCap 为什么不是 Agent、Marketplace 或单纯 MCP 聚合器。
+- Runtime Kernel 与 MCP/A2A/Apps SDK/OpenAPI adapter 的边界清晰。
+- 设计能把现有安全、策略、审计、Registry、互操作和质量文档串起来。
+- 下一步实现入口仍保持 T001，不因新增设计改变 V1 主路径。
 
 验证：
 
