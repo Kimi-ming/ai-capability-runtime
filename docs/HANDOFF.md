@@ -35,19 +35,19 @@ OpenCap 处于 V1 前期实现准备阶段。
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T010 P0：实现 OpenCap 本地状态路径 helper。
+Next task: T011 P0：实现 `opencap install <id>`。
 
 推荐第一个任务：
 
 ```text
-T010：实现 OpenCap 本地状态路径 helper
+T011：实现 `opencap install <id>`
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005 已完成
-- install/list/invoke 还缺统一 state dir 解析
-- T010 是本地 Runtime 闭环的下一个基础任务
+- T001/T002/T003/T004/T005/T010 已完成
+- 本地状态路径 helper 已可复用
+- T011 将开始把 Registry Capability 安装到 state dir
 
 ## 最近验证
 
@@ -270,7 +270,7 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 
 已完成 T003：新增 `packages/spec/src/index.test.ts`，直接测试 `validateManifest` API。覆盖合法 HTTP manifest、`type: mcp`、缺少 `permissions`、非法 risk、timeout 小于 100、metadata 缺少 `trust_level`，并断言失败结果包含 JSON Pointer 风格字段路径。
 
-本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T010：实现 OpenCap 本地状态路径 helper。
+本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T011：实现 `opencap install <id>`。
 
 
 ## Registry test case schema 已定义
@@ -279,11 +279,18 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 
 现有四个示例测试文件已补齐 `capability`、`mode` 和 `expect.status`，并保留 `expect.request` 与 `expect.permission`。Registry 指南和测试格式文档已同步说明最小字段、用途和校验命令。
 
-本轮验证：`pnpm validate` 通过，输出 4 个 valid manifest 和 4 个 valid registry test；`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec test` 和 `pnpm build` 通过。下一步按任务表进入 T010：实现 OpenCap 本地状态路径 helper。
+本轮验证：`pnpm validate` 通过，输出 4 个 valid manifest 和 4 个 valid registry test；`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec test` 和 `pnpm build` 通过。下一步按任务表进入 T011：实现 `opencap install <id>`。
 
 
 ## Capability 编写教程已新增
 
 已完成 T005：新增 `docs/教程/write-a-capability.md`，作为 Tutorial 类型文档，面向第一次贡献 Capability 的开发者。教程从空目录开始，覆盖 `manifest.yml`、README、`tests/basic.yml`、`opencap validate <path>`、`pnpm validate` 和常见错误。
 
-`docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径已加入该教程。下一步按任务表进入 T010：实现 OpenCap 本地状态路径 helper。
+`docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径已加入该教程。下一步按任务表进入 T011：实现 `opencap install <id>`。
+
+
+## 本地状态路径 helper 已实现
+
+已完成 T010：`@opencap/runtime` 现在导出 `resolveStateDir`、`getLocalStatePaths` 和 `ensureLocalStateDir`。解析优先级符合本地状态设计：显式 `stateDir`、`OPENCAP_STATE_DIR`、默认 `<cwd>/opencap.local`。
+
+`ensureLocalStateDir` 只创建 V1 必需的 `installed/` 和 `tmp/`，不会创建或修改 `registry/`。`OpenCapRuntime` 构造时会保存解析后的 `statePaths`。本轮验证：`pnpm --filter @opencap/runtime test` 通过，6 个测试全部通过；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T011：实现 `opencap install <id>`。

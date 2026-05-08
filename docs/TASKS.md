@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T010 P0：实现 OpenCap 本地状态路径 helper。
 - T011 P0：实现 `opencap install <id>`。
 - T012 P0：实现 `opencap list`。
 - T020 P0：实现 Installed Capability Loader。
@@ -254,6 +253,7 @@
 - 已完成：T003 P1：补充 schema 单元测试。
 - 已完成：T004 P1：定义 registry test case schema。
 - 已完成：T005 P2：增加 manifest authoring guide。
+- 已完成：T010 P0：实现 OpenCap 本地状态路径 helper。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T010 local state helper
-2. T011 install/list
-3. T020 Installed Capability Loader
-4. T030 Policy parser/engine
-5. T040 Audit log
-6. T050 HTTP executor dry-run
-7. T060 `opencap invoke`
-8. T070 MCP bridge
-9. T080 Registry manifest CI 校验
-10. T081 Capability Review Checklist
+1. T011 install/list
+2. T020 Installed Capability Loader
+3. T030 Policy parser/engine
+4. T040 Audit log
+5. T050 HTTP executor dry-run
+6. T060 `opencap invoke`
+7. T070 MCP bridge
+8. T080 Registry manifest CI 校验
+9. T081 Capability Review Checklist
+10. T012 `opencap list`
 
 ---
 
@@ -443,7 +443,7 @@ pnpm validate
 
 ### T010 P0：实现 OpenCap 本地状态路径 helper
 
-- [ ] T010 P0：实现 OpenCap 本地状态路径 helper
+- [x] T010 P0：实现 OpenCap 本地状态路径 helper
 
 目标：统一管理 `opencap.local/` 路径。
 
@@ -459,6 +459,8 @@ pnpm validate
 pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/runtime build
 ```
+
+完成记录：`@opencap/runtime` 已导出 `resolveStateDir`、`getLocalStatePaths`、`ensureLocalStateDir`、`DEFAULT_STATE_DIR_NAME` 和 `OPENCAP_STATE_DIR_ENV`；默认路径、env、显式 stateDir 优先级、目录结构和最小目录创建均有单元测试覆盖。
 
 ### T011 P0：实现 `opencap install <id>`
 
