@@ -146,3 +146,12 @@ Runtime 实现后，MCP Host 可以这样加载 OpenCap：
 ## License
 
 MIT
+
+## 本地环境
+
+```bash
+conda activate ai-capability-runtime
+pnpm install
+```
+
+环境定义见 [environment.yml](environment.yml)，详细说明见 [开发环境](docs/教程/开发环境.md)。

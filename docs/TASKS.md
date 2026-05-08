@@ -253,6 +253,7 @@
 - 已完成：T264 P0：中文化 docs 子目录结构并同步全仓链接。
 - 已完成：T265 P0：补齐整体系统设计 V1。
 - 已完成：T266 P0：完成整体设计二次审查和工程补强任务拆解。
+- 已完成：T277 P0：创建项目 conda 开发环境。
 
 
 ---
@@ -299,6 +300,8 @@
 pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.create_issue
 pnpm validate
 ```
+
+当前观察：项目 conda 环境已能运行 pnpm；`pnpm validate` 当前失败在 AJV draft 2020-12 meta schema 未加载，错误为 `no schema with key or ref "https://json-schema.org/draft/2020-12/schema"`。T001 实现时应优先修正 validator 初始化。
 
 ### T002 P0：抽出可复用 manifest validator API
 
@@ -2774,4 +2777,28 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .
 node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
 ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T277 P0：创建项目 conda 开发环境
+
+- [x] T277 P0：创建项目 conda 开发环境
+
+已完成：创建 `ai-capability-runtime` conda 环境，路径为 `/opt/anaconda3/envs/ai-capability-runtime`，包含 Python 3.11、Node.js 22 和 pnpm 9.15。新增 `environment.yml` 和 `docs/教程/开发环境.md`，安装 pnpm workspace 依赖并生成 `pnpm-lock.yaml`，同步 README、文档中心、验证策略和交接记录。
+
+验收标准：
+
+- `conda env list` 能看到 `ai-capability-runtime`。
+- 环境内 Python、Node.js、pnpm 版本可查询。
+- 仓库包含可复现的 `environment.yml`。
+- 仓库包含 `pnpm-lock.yaml`。
+- 文档说明如何激活环境和安装依赖。
+
+验证：
+
+```bash
+/opt/anaconda3/envs/ai-capability-runtime/bin/python --version
+/opt/anaconda3/envs/ai-capability-runtime/bin/node --version
+/opt/anaconda3/envs/ai-capability-runtime/bin/pnpm --version
+pnpm build
+pnpm test
 ```

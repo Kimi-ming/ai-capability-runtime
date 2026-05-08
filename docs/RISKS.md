@@ -25,7 +25,7 @@
 | R003 | High | Mitigating | `http.request_demo` 接受任意 URL，可能变成 SSRF/内网探测工具 | ADR 0011；新增 outbound policy 文档，待实现阻断 | T055, T091 |
 | R004 | High | Mitigating | 审计日志可能记录敏感输入或 token | 新增 Audit Log V1 设计，待实现 redaction/hash 测试 | T041, T092 |
 | R005 | Medium | Mitigated | schema 曾半支持 mcp/local，与 V1 实现范围不一致 | ADR 0005；schema 已收敛 HTTP-only | T003 |
-| R006 | Medium | Open | 依赖未安装，pnpm workspace 可能首次 build/test 暴露问题 | M1 前安装依赖并提交 lockfile | T100 |
+| R006 | Medium | Mitigated | 依赖未安装，pnpm workspace 可能首次 build/test 暴露问题 | 已创建 conda 环境、安装依赖并提交 lockfile；`pnpm build` 和 `pnpm test` 通过，`pnpm validate` 的 AJV 问题归入 T001 | T100, T001 |
 | R007 | Medium | Mitigated | SQLite 作为 audit log 是否合适尚未正式决策 | ADR 0006 已接受；V1 使用 SQLite | T040, T042 |
 | R008 | Medium | Open | MCP SDK/Host 对 elicitation 支持不确定 | 技术 spike，确认 SDK 和目标 Host 行为 | T070, T073 |
 | R009 | Medium | Open | CLI install 覆盖本地目录可能误删用户状态 | 默认拒绝覆盖，`--force` 明确确认 | T011 |
@@ -102,7 +102,7 @@
 16. R056：策略决策缺少可解释 trace
 17. R058：broad allow 静默放开高风险操作
 18. R059：override/breakglass 变成无审计后门
-19. R006：依赖安装和 workspace 构建验证
+19. R006：依赖安装和 workspace 构建验证（已缓解，剩余 validate 问题归入 T001）
 20. R061：整体设计完整但实现主路径滞后
 
 ## 风险处理规则

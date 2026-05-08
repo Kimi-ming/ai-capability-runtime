@@ -234,3 +234,18 @@ T001：让 opencap validate 调用真实 schema 校验
 已新增后续任务 T267-T276。它们是架构补强任务，不改变当前实现入口。已同步新增 R061 风险，约束体系化设计不能脱离实现主路径。下一步仍然优先 T001：让 `opencap validate` 调用真实 schema 校验。
 
 本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析和 Markdown 相对链接检查通过；`audit_docs.py` 显示文档数 205、任务总数 133、已完成 24、未完成 109。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+## 项目 conda 环境已创建
+
+已创建 `ai-capability-runtime` conda 环境，路径为 `/opt/anaconda3/envs/ai-capability-runtime`。环境包含 Python 3.11、Node.js 22 和 pnpm 9.15。环境定义已写入 `environment.yml`，使用说明见 `docs/教程/开发环境.md`。
+
+建议后续开发先运行：
+
+```bash
+conda activate ai-capability-runtime
+pnpm install
+```
+
+这台机器上 `conda run -n ai-capability-runtime node --version` 可能会因为 PATH 优先级拿到 Homebrew Node；激活环境后应确认 `which node` 指向 `/opt/anaconda3/envs/ai-capability-runtime/bin/node`。
+
+依赖已在该环境中安装，`pnpm-lock.yaml` 已生成。使用环境 PATH 运行时：`pnpm build` 通过，`pnpm test` 通过；`pnpm validate` 失败在 T001 范围内，错误为 AJV 没有加载 `https://json-schema.org/draft/2020-12/schema`。这说明环境问题已解除，下一步应修 validator。

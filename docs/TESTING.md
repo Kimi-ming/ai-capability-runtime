@@ -1,5 +1,13 @@
 # 验证策略
 
+运行验证前建议激活项目环境：
+
+```bash
+conda activate ai-capability-runtime
+```
+
+环境定义见 `environment.yml` 和 `docs/教程/开发环境.md`。
+
 本文定义 OpenCap 开发过程中的验证方式。任务完成前必须运行对应验证，不能运行时要在 `docs/HANDOFF.md` 说明原因。
 
 ## 当前可运行校验

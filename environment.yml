@@ -1,0 +1,7 @@
+name: ai-capability-runtime
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - nodejs=22
+  - pnpm=9.15
