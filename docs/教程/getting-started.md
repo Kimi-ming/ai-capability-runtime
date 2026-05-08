@@ -1,6 +1,6 @@
 # 快速入门
 
-本文说明 OpenCap V1 预期的开发者流程。当前部分命令仍是骨架，后续实现会按这里的闭环推进。
+本文说明 OpenCap V1 的开发者流程。当前 `validate` 已可运行，install/list/invoke/logs/serve 仍会按这里的闭环继续实现。
 
 ## 前置条件
 
@@ -21,7 +21,7 @@ pnpm install
 pnpm validate
 ```
 
-该命令会用 OpenCap schema 校验示例 Capability manifests。
+该命令会用 OpenCap schema 校验示例 Capability manifests；非法 manifest 会返回非 0 exit code，并输出文件路径和字段路径。
 
 ## 查看一个 Capability
 

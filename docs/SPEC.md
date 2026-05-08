@@ -74,7 +74,8 @@ opencap validate registry/developer-tools/github.create_issue
 
 - 找到 manifest
 - 校验 JSON Schema
-- 输出可读错误
+- 支持单 Capability 目录和 registry 目录
+- 输出包含文件路径和字段路径的可读错误
 - 非法时返回非 0 exit code
 
 ### F2：Capability 安装

@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
-    "validate": "node src/validate-manifests.mjs ../../registry"
+    "validate": "pnpm build && node dist/validate-manifests.js ../../registry"
   },
   "dependencies": {
     "ajv": "^8.17.1",

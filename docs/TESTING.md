@@ -30,13 +30,16 @@ node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/pac
 ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```
 
-## 依赖安装后应支持的校验
+## Workspace 校验
+
+依赖安装后，当前应支持：
 
 ```bash
 pnpm install
 pnpm validate
 pnpm test
 pnpm build
+pnpm lint
 ```
 
 如果因为网络或依赖未安装不能运行，需要在交接文档中记录。
@@ -45,7 +48,7 @@ pnpm build
 
 ### `@opencap/spec`
 
-必须覆盖：
+当前 `pnpm validate` 已能校验 registry manifests。后续 T003 必须补充单元测试覆盖：
 
 - 合法 HTTP manifest 通过
 - `type: mcp` 失败

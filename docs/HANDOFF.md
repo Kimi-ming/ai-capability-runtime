@@ -25,8 +25,8 @@ OpenCap 处于 V1 前期实现准备阶段。
 
 主要包仍是骨架：
 
-- `@opencap/spec` 有 schema、类型和 manifest validation 脚本雏形
-- `@opencap/cli` 有命令骨架，但命令尚未真实执行
+- `@opencap/spec` 有 schema、类型和可复用 manifest validator API
+- `@opencap/cli` 的 `validate` 命令已接入真实 schema 校验，其余命令仍是骨架
 - `@opencap/runtime` 有 Runtime class 骨架
 - `@opencap/mcp` 有 tool name 和 tool description helper
 - `@opencap/sdk` 暂缓实现
@@ -35,19 +35,19 @@ OpenCap 处于 V1 前期实现准备阶段。
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T001 P0：让 `opencap validate` 调用真实 schema 校验。
+Next task: T003 P1：补充 schema 单元测试。
 
 推荐第一个任务：
 
 ```text
-T001：让 opencap validate 调用真实 schema 校验
+T003：补充 schema 单元测试
 ```
 
 原因：
 
-- 风险低
-- 依赖少
-- 是所有后续 install/registry/CI 的基础
+- T001/T002 已完成
+- F1 Manifest 校验还缺测试覆盖
+- 测试补齐后再进入 T010 本地状态路径 helper
 
 ## 最近验证
 
@@ -60,22 +60,21 @@ T001：让 opencap validate 调用真实 schema 校验
 - `pnpm build`
 - `pnpm test`
 
-当前已知：`pnpm validate` 失败在 T001 范围内，错误为 AJV 没有加载 `https://json-schema.org/draft/2020-12/schema`。
+当前已知：`pnpm validate` 已通过；validator 单元测试仍在 T003 范围内待补。
 
 ## 已知风险
 
-- `opencap validate` CLI 目前只是输出 scaffold 文本。
-- `packages/spec/src/validate-manifests.mjs` 可以校验 registry，但还没有接到 CLI。
-- 没有 `pnpm-lock.yaml`，首次安装依赖后应提交。
+- validator API 还缺 T003 单元测试覆盖。
+- install/list/invoke/logs/serve 仍是骨架命令。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 `@opencap/spec` 的可复用 validator API。
-2. 让 `opencap validate <path>` 调用 validator。
-3. 添加 validate 单元测试和 CLI smoke test。
-4. 运行 `pnpm install && pnpm validate && pnpm test`。
+1. 实现 T010：OpenCap 本地状态路径 helper。
+2. 实现 T011/T012：install/list 的最小本地状态闭环。
+3. 补 T003：manifest validator 单元测试。
+4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
 
 ## 本轮体系化补充
@@ -256,3 +255,12 @@ pnpm install
 T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：修正 `opencap validate` 的真实 schema 校验，尤其是 AJV draft 2020-12 meta schema 初始化问题。后续 T124/T145 再把本次契约落入 `packages/runtime` 的 TypeScript public exports。
 
 本轮验证：`check_docs.py`、`audit_docs.py`、`git diff --check`、JSON 解析、YAML 解析、Markdown 相对链接检查和项目 conda 环境下的 `pnpm build` 通过。
+
+
+## Manifest validate 主路径已实现
+
+已完成 T001/T002：`@opencap/spec` 现在导出可复用 manifest validator API，支持 YAML/JSON manifest、单 Capability 目录、registry 目录和单 manifest 文件；`opencap validate <path>` 已接入真实 JSON Schema 校验，不再输出 scaffold 文本。
+
+关键实现：AJV 已切换到 draft 2020-12 validator；CLI 在 `pnpm --filter @opencap/cli dev` 场景下用 `INIT_CWD` 解析用户传入的相对路径；非法 manifest 会返回非 0 exit code，并输出 manifest 文件路径和 JSON Pointer 风格字段路径。
+
+本轮验证：`pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.create_issue` 通过；`pnpm validate` 通过；临时非法 manifest 验证返回 exit 1 且输出 `/permissions/0/risk`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T003：补 validator 单元测试；完成后再进入 T010 本地状态路径 helper。

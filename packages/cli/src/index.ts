@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { isAbsolute, resolve } from "node:path";
+import { formatManifestValidationIssue, validateManifestPath } from "@opencap/spec";
 
 const program = new Command();
 
@@ -20,8 +22,35 @@ program
   .command("validate")
   .argument("[path]", "Capability or registry path", ".")
   .description("Validate Capability manifests.")
-  .action((path: string) => {
-    console.log(`validate is scaffolded for ${path}`);
+  .action(async (path: string) => {
+    try {
+      const targetPath = isAbsolute(path) ? path : resolve(process.env.INIT_CWD ?? process.cwd(), path);
+      const result = await validateManifestPath(targetPath);
+
+      if (result.manifests.length === 0) {
+        console.error(`No manifests found under ${path}`);
+        process.exitCode = 1;
+        return;
+      }
+
+      for (const valid of result.valid) {
+        console.log(`Valid manifest: ${valid.filePath}`);
+      }
+
+      for (const invalid of result.invalid) {
+        console.error(`Invalid manifest: ${invalid.filePath}`);
+        for (const issue of invalid.issues) {
+          console.error(`  ${formatManifestValidationIssue(issue)}`);
+        }
+      }
+
+      if (result.invalid.length > 0) {
+        process.exitCode = 1;
+      }
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : "Failed to validate manifests");
+      process.exitCode = 1;
+    }
   });
 
 program
@@ -54,4 +83,4 @@ program
     console.log("logs is not implemented yet");
   });
 
-program.parse();
+await program.parseAsync();

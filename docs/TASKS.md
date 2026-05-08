@@ -21,8 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T001 P0：让 `opencap validate` 调用真实 schema 校验。
-- T002 P0：抽出可复用 manifest validator API。
 - T010 P0：实现 OpenCap 本地状态路径 helper。
 - T011 P0：实现 `opencap install <id>`。
 - T012 P0：实现 `opencap list`。
@@ -254,6 +252,8 @@
 - 已完成：T266 P0：完成整体设计二次审查和工程补强任务拆解。
 - 已完成：T277 P0：创建项目 conda 开发环境。
 - 已完成：T267 P0：定义 Runtime Kernel public contract 设计契约。
+- 已完成：T001 P0：让 `opencap validate` 调用真实 schema 校验。
+- 已完成：T002 P0：抽出可复用 manifest validator API。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T001 `opencap validate` 接真实校验
-2. T002 spec validator API
-3. T010 local state helper
-4. T011 install/list
-5. T020 Installed Capability Loader
-6. T030 Policy parser/engine
-7. T040 Audit log
-8. T050 HTTP executor dry-run
-9. T060 `opencap invoke`
-10. T070 MCP bridge
+1. T003 schema 单元测试
+2. T010 local state helper
+3. T011 install/list
+4. T020 Installed Capability Loader
+5. T030 Policy parser/engine
+6. T040 Audit log
+7. T050 HTTP executor dry-run
+8. T060 `opencap invoke`
+9. T070 MCP bridge
+10. T004 registry test case schema
 
 ---
 
@@ -307,7 +307,7 @@ git diff --check
 
 ### T001 P0：让 `opencap validate` 调用真实 schema 校验
 
-- [ ] T001 P0：让 `opencap validate` 调用真实 schema 校验
+- [x] T001 P0：让 `opencap validate` 调用真实 schema 校验
 
 目标：CLI 不再输出 scaffold 文本，而是能校验指定 Capability 或 registry 路径。
 
@@ -331,13 +331,15 @@ pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.creat
 pnpm validate
 ```
 
-当前观察：项目 conda 环境已能运行 pnpm；`pnpm validate` 当前失败在 AJV draft 2020-12 meta schema 未加载，错误为 `no schema with key or ref "https://json-schema.org/draft/2020-12/schema"`。T001 实现时应优先修正 validator 初始化。
+完成记录：`opencap validate` 已调用 `@opencap/spec` validator；支持单 Capability 目录、registry 目录和 `manifest.yml` / `manifest.yaml` / `manifest.json` 文件；非法 manifest 返回非 0 exit code，并输出文件路径和 JSON Pointer 风格字段路径。AJV 已切换到 draft 2020-12 validator。
 
 ### T002 P0：抽出可复用 manifest validator API
 
-- [ ] T002 P0：抽出可复用 manifest validator API
+- [x] T002 P0：抽出可复用 manifest validator API
 
 目标：Runtime、CLI、CI 都能复用同一套校验逻辑。
+
+完成记录：`@opencap/spec` 已导出 `loadManifest`、`validateManifest`、`validateManifestFile`、`validateManifestPath`、`findManifestFiles` 和结构化 validation result 类型；CLI 只负责路径解析和输出格式化。
 
 验收标准：
 
@@ -357,14 +359,24 @@ pnpm --filter @opencap/spec build
 
 - [ ] T003 P1：补充 schema 单元测试
 
-覆盖：
+验收标准：
 
-- 合法 HTTP manifest
-- `type: mcp` 失败
-- 缺少 `permissions` 失败
-- 非法 risk 失败
-- timeout 小于 100 失败
-- metadata 缺 trust level 失败
+- `packages/spec` 有 validator 单元测试文件。
+- 测试直接调用 `validateManifest` 或 `validateManifestFile`，无需通过 CLI 输出断言。
+- 合法 HTTP manifest 通过。
+- `type: mcp` 失败。
+- 缺少 `permissions` 失败。
+- 非法 risk 失败。
+- timeout 小于 100 失败。
+- metadata 缺 trust level 失败。
+- 失败结果至少断言一个 JSON Pointer 风格字段路径。
+
+验证：
+
+```bash
+pnpm --filter @opencap/spec test
+pnpm --filter @opencap/spec build
+```
 
 ### T004 P1：定义 registry test case schema
 
