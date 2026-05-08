@@ -70,7 +70,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T005 P2：增加 manifest authoring guide。
 - T015 P2：增加 `opencap doctor`。
 - T034 P2：支持 `--yes` 非交互确认。
 - T043 P2：增加日志筛选。
@@ -254,6 +253,7 @@
 - 已完成：T002 P0：抽出可复用 manifest validator API。
 - 已完成：T003 P1：补充 schema 单元测试。
 - 已完成：T004 P1：定义 registry test case schema。
+- 已完成：T005 P2：增加 manifest authoring guide。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T005 manifest authoring guide
-2. T010 local state helper
-3. T011 install/list
-4. T020 Installed Capability Loader
-5. T030 Policy parser/engine
-6. T040 Audit log
-7. T050 HTTP executor dry-run
-8. T060 `opencap invoke`
-9. T070 MCP bridge
-10. T080 Registry manifest CI 校验
+1. T010 local state helper
+2. T011 install/list
+3. T020 Installed Capability Loader
+4. T030 Policy parser/engine
+5. T040 Audit log
+6. T050 HTTP executor dry-run
+7. T060 `opencap invoke`
+8. T070 MCP bridge
+9. T080 Registry manifest CI 校验
+10. T081 Capability Review Checklist
 
 ---
 
@@ -411,7 +411,7 @@ pnpm --filter @opencap/spec build
 
 ### T005 P2：增加 manifest authoring guide
 
-- [ ] T005 P2：增加 manifest authoring guide
+- [x] T005 P2：增加 manifest authoring guide
 
 目标：让贡献者能从空目录写出一个通过 `opencap validate` / `pnpm validate` 的 HTTP Capability。
 
@@ -435,6 +435,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 pnpm validate
 ```
 
+完成记录：已新增 `docs/教程/write-a-capability.md`，覆盖最小 HTTP Capability、README、`tests/basic.yml`、单能力校验、registry 校验和常见错误；`docs/README.md` 已加入教程入口。
+
 ---
 
 ## Epic B：CLI 基础能力
@@ -450,6 +452,13 @@ pnpm validate
 - 默认路径是 repo/current working directory 下的 `opencap.local`
 - 支持未来通过 env 或 flag 覆盖
 - 创建必要目录时不影响 registry 源文件
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+```
 
 ### T011 P0：实现 `opencap install <id>`
 
