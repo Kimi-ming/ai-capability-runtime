@@ -1,6 +1,6 @@
 # HANDOFF：当前状态交接
 
-更新时间：2026-05-07
+更新时间：2026-05-08
 
 ## 当前阶段
 
@@ -149,3 +149,12 @@ T001：让 opencap validate 调用真实 schema 校验
 已新增用量计量、配额与预算策略、限流与滥用控制、付费能力与商业边界、用量证据和 Usage/Commerce/Abuse 调研。ADR 0038-0040 已接受。Usage Event 是本地可观测和限额证据，不是账单记录；Quota/Budget Gate 必须在 Secret Resolver 和 Executor 前运行；paid capability/agentic commerce 必须走 future commerce profile，不进入 V1 主路径。
 
 下一步仍然是 T001。后续进入 policy/runtime/audit 实现时，要预留 usage event、quota decision、budget decision 和 rate limit evidence 字段。
+
+
+## Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系已补齐
+
+已新增 Tool Projection V1、Prompt Surface Security、Discovery and Selection Boundary、Model-visible Metadata Lint 和工具描述/prompt-surface 调研。ADR 0041-0043 已接受。MCP tools/list 的模型可见描述必须由 Runtime 生成，第三方 manifest description 只能作为 lint 后的 safe summary 候选；发现、排序和模型选择只产生 evidence，不能授权执行。
+
+下一步仍然是 T001。后续进入 MCP bridge 和 validate 实现时，要把 model-visible metadata lint、tool projection builder、projection hash 和 runtime-generated risk summary 纳入任务队列。
+
+本轮验证：`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

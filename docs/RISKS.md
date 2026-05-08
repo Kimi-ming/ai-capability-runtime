@@ -61,6 +61,10 @@
 | R039 | High | Mitigating | Usage event 被误当账单记录，引入错误商业和合规语义 | ADR 0038；commerce boundary | T198, T205 |
 | R040 | High | Mitigating | 超额调用仍解析 secret 或执行请求 | ADR 0039；quota gate tests | T199, T204 |
 | R041 | High | Mitigating | paid capability/agentic commerce 提前混入 V1 主路径 | ADR 0040；commerce profile RFC | T202, T203 |
+| R042 | High | Mitigating | 恶意 tool description 诱导模型绕过用户意图或安全策略 | ADR 0041/0042；tool projection 和 metadata lint | T209, T210, T211 |
+| R043 | High | Mitigating | schema description 要求模型填入 token/secret，造成凭据泄露 | model-visible metadata lint；secret exfiltration negative tests | T210, T211 |
+| R044 | Medium | Mitigating | discovery/ranking 被误当作 trust 或授权来源 | ADR 0043；discovery boundary | T214, T215 |
+| R045 | Medium | Mitigating | tool result text 带有间接 prompt injection，污染后续模型上下文 | prompt-surface security；result sanitizer 草案 | T217 |
 
 ## 当前最高优先级风险
 
@@ -74,7 +78,8 @@
 8. R031：组合级确认绕过单步确认
 9. R034：revoked capability 可寻址和本地提示
 10. R038：模型循环调用和额度耗尽
-11. R006：依赖安装和 workspace 构建验证
+11. R042：恶意 tool description 和 schema poisoning
+12. R006：依赖安装和 workspace 构建验证
 
 ## 风险处理规则
 

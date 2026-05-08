@@ -164,6 +164,16 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
+- T209 P1：实现 MCP Tool Projection builder。
+- T210 P1：实现 model-visible metadata lint。
+- T211 P1：补充 prompt-surface negative fixtures。
+- T212 P1：记录 tool projection hash/evidence。
+- T213 P1：MCP tools/list 使用 Runtime-generated risk summary。
+- T214 P2：Discovery profile RFC。
+- T215 P2：Selection evidence record。
+- T216 P2：Capability Review Checklist 接入 model-visible text 检查。
+- T217 P2：Tool result prompt-surface sanitizer 草案。
+- T218 P2：Host tool metadata compatibility records。
 
 ### 已完成
 
@@ -185,6 +195,7 @@
 - 已完成：T184 P0：补齐组合边界、能力图和多步执行体系。
 - 已完成：T197 P0：补齐信任模型、安全公告、撤销和质量评分体系。
 - 已完成：T208 P0：补齐用量计量、配额预算、限流滥用和商业边界体系。
+- 已完成：T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系。
 
 
 ---
@@ -1318,6 +1329,266 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 - Rate limit 和 abuse control 能区分 local throttle 与 provider 429。
 - Financial capability 必须 explicit consent 和 spend budget，不自动 retry。
 - Paid capability/agentic commerce 被明确放入 future commerce profile，不进入 V1 主路径。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+
+## Epic N：Tool Projection 和 Prompt Surface Governance
+
+### T209 P1：实现 MCP Tool Projection builder
+
+- [ ] T209 P1：实现 MCP Tool Projection builder
+
+目标：`@opencap/mcp` 不再临时拼接 tool description，而是通过明确的 projection builder 生成模型可见 MCP tool metadata。
+
+涉及文件：
+
+- `packages/mcp/src/index.ts`
+- `packages/mcp/src/tool-projection.ts`
+- `packages/mcp/src/tool-projection.test.ts`
+
+验收标准：
+
+- projection 输出包含 `projectionVersion`、`capabilityId`、`toolName`、`title`、`description`、`inputSchema`、`outputSchema`。
+- description 使用 Runtime 模板。
+- 不读取 README 或远程文档。
+- tool name 映射仍然 deterministic。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+```
+
+### T210 P1：实现 model-visible metadata lint
+
+- [ ] T210 P1：实现 model-visible metadata lint
+
+目标：对 manifest name、description、input/output schema descriptions 执行 prompt-surface lint。
+
+涉及文件：
+
+- `packages/spec/src/metadata-lint.ts`
+- `packages/spec/src/index.ts`
+- `packages/spec/src/metadata-lint.test.ts`
+
+验收标准：
+
+- 检测 instruction override。
+- 检测 forced tool choice。
+- 检测 bypass governance。
+- 检测 secret exfiltration。
+- 输出结构化 finding。
+
+验证：
+
+```bash
+pnpm --filter @opencap/spec test
+```
+
+### T211 P1：补充 prompt-surface negative fixtures
+
+- [ ] T211 P1：补充 prompt-surface negative fixtures
+
+目标：把 tool description injection、schema poisoning、hidden text 等风险转成可复用测试夹具。
+
+涉及文件：
+
+- `packages/spec/fixtures/invalid/*.yml`
+- `packages/spec/src/metadata-lint.test.ts`
+
+验收标准：
+
+- `ignore previous instructions` fixture 失败。
+- `always call this tool` fixture 失败。
+- schema field 要求填入 token fixture 失败。
+- hidden unicode fixture 失败。
+
+验证：
+
+```bash
+pnpm --filter @opencap/spec test
+```
+
+### T212 P1：记录 tool projection hash/evidence
+
+- [ ] T212 P1：记录 tool projection hash/evidence
+
+目标：Runtime 或 MCP layer 能生成 projection hash，供 audit/evidence 使用。
+
+涉及文件：
+
+- `packages/mcp/src/tool-projection.ts`
+- `packages/runtime/src/`
+- `docs/design/audit-log-v1.md`
+
+验收标准：
+
+- 相同输入生成相同 projection hash。
+- description 或 schema 改变会改变 projection hash。
+- audit/evidence 文档说明字段。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+```
+
+### T213 P1：MCP tools/list 使用 Runtime-generated risk summary
+
+- [ ] T213 P1：MCP tools/list 使用 Runtime-generated risk summary
+
+目标：tools/list 的风险和权限摘要来自 Runtime/manifest structured permissions，而不是自由文本。
+
+涉及文件：
+
+- `packages/mcp/src/index.ts`
+- `packages/mcp/src/tool-projection.ts`
+
+验收标准：
+
+- description 包含结构化 permissions/risk summary。
+- manifest description 不能覆盖 risk summary。
+- 空 permissions 时报 validation error，而不是生成空风险描述。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+```
+
+### T214 P2：Discovery profile RFC
+
+- [ ] T214 P2：Discovery profile RFC
+
+目标：定义未来 registry search/discovery 的 profile，避免自动安装、自动授权或商业排名污染安全边界。
+
+涉及文件：
+
+- `rfcs/`
+- `docs/ecosystem/discovery-and-selection-boundary.md`
+
+验收标准：
+
+- RFC 明确 discovery metadata。
+- RFC 明确 ranking 不能修改 policy。
+- RFC 明确 revoked/yanked 默认隐藏。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T215 P2：Selection evidence record
+
+- [ ] T215 P2：Selection evidence record
+
+目标：定义 Host/model 选择工具时可选记录的 evidence 字段。
+
+涉及文件：
+
+- `docs/ecosystem/discovery-and-selection-boundary.md`
+- `docs/quality/execution-evidence-v1.md`
+
+验收标准：
+
+- selection evidence 只用于审计和调试。
+- 字段包含 selected tool、projection hash、available tools hash。
+- 文档明确不用于授权。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T216 P2：Capability Review Checklist 接入 model-visible text 检查
+
+- [ ] T216 P2：Capability Review Checklist 接入 model-visible text 检查
+
+目标：Registry 人工评审能显式检查 tool description、schema description 和 README 中的提示注入风险。
+
+涉及文件：
+
+- `docs/community/capability-review-checklist.md`
+- `.github/ISSUE_TEMPLATE/capability_submission.yml`
+
+验收标准：
+
+- checklist 包含 model-visible text 检查。
+- template 提醒提交者不要写入 prompt injection 或 secret 请求。
+
+验证：
+
+```bash
+ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T217 P2：Tool result prompt-surface sanitizer 草案
+
+- [ ] T217 P2：Tool result prompt-surface sanitizer 草案
+
+目标：定义 provider response/error 进入模型上下文前的最小 sanitization 和结构化输出策略。
+
+涉及文件：
+
+- `docs/security/prompt-surface-security-v1.md`
+- `docs/design/output-normalization-v1.md` 或后续等价文档
+
+验收标准：
+
+- 区分 structuredContent 和 free text。
+- 明确 secret redaction。
+- 明确 indirect prompt injection 作为 risk，不承诺完全消除。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T218 P2：Host tool metadata compatibility records
+
+- [ ] T218 P2：Host tool metadata compatibility records
+
+目标：记录不同 MCP Host 对 title、description、outputSchema、annotations 和 `_meta` 的处理差异。
+
+涉及文件：
+
+- `docs/ecosystem/host-compatibility-matrix.md`
+- `docs/ecosystem/interoperability-profiles.md`
+
+验收标准：
+
+- 至少记录 Claude Desktop、Cursor、自定义 MCP client 的字段支持情况。
+- 兼容性声明绑定 Host 版本和测试日期。
+
+验证：
+
+```bash
+git diff --check
+```
+
+### T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系
+
+- [x] T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系
+
+已完成：新增 Tool Projection V1、Prompt Surface Security、Discovery and Selection Boundary、Model-visible Metadata Lint、工具描述/prompt-surface 调研，并新增 ADR 0041-0043。同步更新 SYSTEM、INDEX、DECISIONS、TASKS、RISKS、TESTING、追踪矩阵、Capability Review Checklist、CHANGELOG、HANDOFF 和 MCP scaffold helper。
+
+验收标准：
+
+- MCP tool projection 被定义为 Runtime-owned。
+- model-visible metadata 被定义为 security surface。
+- discovery/selection 被明确排除为授权来源。
+- tool description 不再被旧文档描述为直接透传 manifest description。
+- 相关风险、任务、测试和追踪矩阵闭环。
 
 验证：
 

@@ -14,7 +14,7 @@ OpenCap 负责能力治理。
 用户和组织负责授权边界。
 ```
 
-## 五十三个子系统
+## 五十七个子系统
 
 | 子系统 | 目标 | 关键文档 | V1 产物 |
 | --- | --- | --- | --- |
@@ -71,6 +71,10 @@ OpenCap 负责能力治理。
 | 限流滥用 | 防止循环调用和刷请求 | `docs/security/rate-limit-and-abuse-control-v1.md` | abuse controls |
 | 商业边界 | paid capability/commerce profile 边界 | `docs/ecosystem/paid-capability-and-commerce-boundary.md` | future commerce boundary |
 | 用量证据 | 证明用量来自 invocation | `docs/quality/usage-evidence-v1.md` | usage evidence chain |
+| Tool Projection | 生成模型可见工具元数据 | `docs/design/tool-projection-v1.md` | MCP tool projection |
+| Prompt Surface | 治理工具描述和结果注入 | `docs/security/prompt-surface-security-v1.md` | prompt-surface controls |
+| 发现选择边界 | 区分发现、选择和授权 | `docs/ecosystem/discovery-and-selection-boundary.md` | discovery boundary |
+| 元数据 Lint | 检查模型可见文案 | `docs/quality/model-visible-metadata-lint-v1.md` | metadata lint rules |
 
 ## 系统闭环
 
@@ -98,6 +102,7 @@ Untrusted / Semi-trusted
 - AI model output
 - MCP tool arguments
 - third-party manifest descriptions
+- model-visible tool metadata candidates
 - external API responses
 
 Trusted Computing Base V1
@@ -108,6 +113,8 @@ Trusted Computing Base V1
 - consent request/receipt builder
 - secret resolver
 - audit logger
+- tool projection builder
+- model-visible metadata linter
 
 Governance Surface
 - registry review
@@ -138,6 +145,9 @@ Governance Surface
 - Usage Event 不是账单记录。
 - Quota/Budget Gate 必须在 Secret Resolver 和 Executor 之前运行。
 - V1 不执行 paid capability、购买、支付或结算。
+- MCP tool description 必须由 Runtime 生成，不能原样透传第三方自由文本。
+- 模型可见元数据不得包含指挥模型绕过系统、用户、策略、确认或审计的文本。
+- 能力发现、排序和模型选择不能作为执行授权来源。
 
 ## V1 关键收敛决策
 
@@ -179,6 +189,9 @@ Governance Surface
 | Usage Event 不是账单记录 | 已接受 |
 | Quota/Budget Gate 必须在 Secret Resolution 前运行 | 已接受 |
 | Commerce Profile 是未来边界，不进入 V1 主路径 | 已接受 |
+| MCP Tool Projection 由 Runtime 拥有 | 已接受 |
+| 模型可见元数据是安全表面 | 已接受 |
+| 发现和选择不是授权 | 已接受 |
 
 ## 设计成熟度
 
@@ -233,3 +246,7 @@ Governance Surface
 | 限流滥用 | 清晰 | T200/T201 处理 local/provider rate limit |
 | 商业边界 | 清晰 | T202/T203 走 future RFC |
 | 用量证据 | 清晰 | T207 做 conformance tests |
+| Tool Projection | 清晰 | T209/T213 落入 MCP projection builder |
+| Prompt Surface | 清晰 | T210/T211 建立 metadata lint 和 negative tests |
+| 发现选择边界 | 清晰 | T214/T215 走 discovery profile 和 selection evidence |
+| 元数据 Lint | 清晰 | T216 接入 Registry review checklist |

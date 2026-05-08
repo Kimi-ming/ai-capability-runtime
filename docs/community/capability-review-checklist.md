@@ -39,6 +39,9 @@
 
 ## 安全
 
+- [ ] model-visible name、description、schema descriptions 不含 prompt injection、强制调用、绕过确认或泄露 secret 的文本。
+- [ ] 工具描述只描述能力，不指挥模型、用户或 Host。
+- [ ] 描述、permissions、risk 和真实 execution 行为一致。
 - [ ] 不访问 localhost/private network/metadata service。
 - [ ] 不隐藏第二个外部请求。
 - [ ] 不把用户输入拼进 host，除非有明确风险说明。

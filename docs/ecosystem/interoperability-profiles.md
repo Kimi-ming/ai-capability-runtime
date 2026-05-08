@@ -32,7 +32,7 @@ Profile 用来回答三件事：
 - 支持 `tools/list`。
 - 支持 `tools/call` 路由到 Runtime invoke pipeline。
 - tool name 从 Capability id 稳定映射，不允许冲突静默覆盖。
-- tool description 必须包含风险和权限摘要。
+- tool description 必须来自 Runtime tool projection，并包含风险和权限摘要。
 - tool input schema 必须来自 manifest input schema。
 - tool call 参数必须被视为不可信输入，进入 Runtime 前重新校验。
 - 错误必须映射到 `docs/design/error-model-v1.md`。

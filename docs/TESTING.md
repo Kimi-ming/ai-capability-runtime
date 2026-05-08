@@ -142,7 +142,7 @@ opencap serve --mcp
 期望：
 
 - Host 能看到 `github_create_issue`
-- description 包含 risk 信息
+- description 来自 Runtime tool projection，包含 risk 信息
 - input schema 来自 manifest
 
 ### Smoke 3：写操作确认
@@ -168,6 +168,7 @@ V1 后续要把普通测试提升为 profile-driven conformance。测试分组�
 - Composition conformance 覆盖 compositionId、step-level consent、planHash 只作 evidence、compensation 独立授权。
 - Trust conformance 覆盖 trust level 不覆盖 policy、revoked capability 警告/阻断、quality score 不改变 risk。
 - Usage conformance 覆盖 quota/budget gate 在 secret 前运行、usage event 不含 input/output/secret、financial spend cap 阻断。
+- Prompt-surface conformance 覆盖 tool projection、description lint、schema poisoning negative fixtures、projection hash 和 runtime-generated risk summary。
 
 ## CI 目标
 

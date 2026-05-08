@@ -112,3 +112,7 @@
 | RQ-064 | 限流和滥用控制清晰 | `docs/security/rate-limit-and-abuse-control-v1.md` | T200, T201, T206 | rate limit/problem details tests |
 | RQ-065 | 商业交易不污染 V1 主路径 | `docs/ecosystem/paid-capability-and-commerce-boundary.md` | T202, T203 | RFC/ADR review |
 | RQ-066 | 用量证据可追溯到 audit | `docs/quality/usage-evidence-v1.md` | T207 | usage evidence conformance |
+| RQ-067 | MCP tool projection 由 Runtime 控制 | `docs/design/tool-projection-v1.md` | T209, T212, T213 | projection builder/hash tests |
+| RQ-068 | 模型可见提示面受治理 | `docs/security/prompt-surface-security-v1.md` | T210, T211, T217 | prompt-surface negative tests |
+| RQ-069 | 发现和选择不等于授权 | `docs/ecosystem/discovery-and-selection-boundary.md` | T214, T215 | discovery profile/selection evidence review |
+| RQ-070 | 模型可见元数据可 lint | `docs/quality/model-visible-metadata-lint-v1.md` | T210, T216 | metadata lint + review checklist |

@@ -47,11 +47,11 @@ MCP tool 字段：
 | --- | --- |
 | `name` | 映射后的 tool name |
 | `title` | manifest `name` |
-| `description` | manifest description + risk summary |
+| `description` | Runtime-generated tool projection description |
 | `inputSchema` | manifest `input` |
 | `outputSchema` | manifest `output`，如 SDK 支持 |
 
-description 应包含简短风险提示，但安全判断不能依赖 description。
+description 必须由 Runtime tool projection builder 生成，包含简短风险提示；安全判断不能依赖 description。第三方 manifest description 只能作为通过 lint 后的 safe summary 候选。
 
 ## Tool Call 路由
 
