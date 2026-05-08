@@ -1,4 +1,4 @@
-# Rate Limit and Abuse Control V1：限流与滥用控制
+# 限流与滥用控制 V1
 
 本文定义 OpenCap V1 如何防止 Capability 被模型、Host 或用户误用成刷请求、刷消息、刷成本或 DoS 触发器。
 

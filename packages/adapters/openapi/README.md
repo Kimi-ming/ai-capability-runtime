@@ -1,4 +1,4 @@
-# OpenAPI Adapter
+# OpenAPI 适配器
 
 OpenAPI Adapter 是未来能力，用于把 OpenAPI operation 转换成 OpenCap Capability。
 

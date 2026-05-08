@@ -1,4 +1,4 @@
-# Policy Decision Trace V1：策略决策追踪
+# 策略决策追踪 V1
 
 本文定义 OpenCap Runtime 如何解释一次 allow/ask/deny/redact/block 决策的来源。
 
@@ -60,9 +60,9 @@ input classification
   -> lifecycle/advisory trace
 ```
 
-最终 invocation 可以有多个 trace，但只能有一个 effective decision summary。
+最终 invocation 可以有多个 trace，但只能有一个有效决策摘要。
 
-## Effective Decision Summary
+## 有效决策摘要
 
 ```ts
 type EffectiveDecisionSummaryV1 = {

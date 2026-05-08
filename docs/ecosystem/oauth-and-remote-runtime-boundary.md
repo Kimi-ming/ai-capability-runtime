@@ -1,4 +1,4 @@
-# OAuth 与远程 Runtime 边界
+# OAuth 与远程运行时边界
 
 本文定义 OpenCap 未来从本地 Runtime 走向远程 Runtime、Cloud 或多 Host 接入时，OAuth 和授权边界必须如何重新设计。
 

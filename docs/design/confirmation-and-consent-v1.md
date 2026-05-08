@@ -1,4 +1,4 @@
-# Confirmation and Consent V1：确认与同意模型
+# 确认与同意 V1：确认与同意模型
 
 本文定义 OpenCap 如何在执行真实世界操作前取得用户同意，并把同意结果写入审计日志。它补充 Policy DSL、MCP 接口和 Audit Log 设计。
 

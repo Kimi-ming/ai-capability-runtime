@@ -1,4 +1,4 @@
-# RFC 流程
+# 提案流程
 
 本文定义 OpenCap 如何处理较大的设计变化。
 
@@ -30,27 +30,27 @@ rfcs/NNNN-title.md
 ## RFC 模板
 
 ```md
-# RFC NNNN: Title
+# RFC NNNN：标题
 
-## Summary
+## 摘要
 
-## Motivation
+## 动机
 
-## Goals
+## 目标
 
-## Non-goals
+## 非目标
 
-## Design
+## 设计
 
-## Security
+## 安全
 
-## Compatibility
+## 兼容性
 
-## Alternatives
+## 替代方案
 
-## Rollout
+## 发布计划
 
-## Open Questions
+## 开放问题
 ```
 
 ## RFC 到 ADR

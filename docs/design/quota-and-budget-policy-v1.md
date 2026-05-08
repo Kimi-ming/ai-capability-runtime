@@ -1,4 +1,4 @@
-# Quota and Budget Policy V1：配额与预算策略
+# 配额与预算策略 V1
 
 本文定义 OpenCap 如何在执行前应用本地配额、预算和频率限制。它补充 Policy Engine，但不取代风险策略。
 

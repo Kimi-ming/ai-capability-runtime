@@ -1,25 +1,25 @@
-## Summary
+## 摘要
 
-## Type
+## 类型
 
-- [ ] Runtime / CLI / MCP change
-- [ ] Capability registry entry
-- [ ] Documentation
-- [ ] Security fix
-- [ ] CI / release
+- [ ] Runtime / CLI / MCP 变更
+- [ ] Capability Registry 条目
+- [ ] 文档
+- [ ] 安全修复
+- [ ] CI / 发布
 
-## Validation
+## 验证
 
 - [ ] `git diff --check`
-- [ ] JSON/YAML parse checks
-- [ ] Relevant unit tests
-- [ ] Docs updated when behavior changed
+- [ ] JSON/YAML 解析检查
+- [ ] 相关单元测试
+- [ ] 行为变化时已同步文档
 
-## Risk
+## 风险
 
-- [ ] No new permissions or network behavior
-- [ ] New/changed permissions are documented
-- [ ] Secrets are not logged or exposed
-- [ ] Audit behavior is preserved
+- [ ] 没有新增权限或网络行为
+- [ ] 新增或变更的权限已记录
+- [ ] 密钥不会进入日志或输出
+- [ ] 审计行为保持完整
 
-## Notes
+## 备注

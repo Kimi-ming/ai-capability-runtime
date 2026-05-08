@@ -1,4 +1,4 @@
-# Capability Review Checklist
+# 能力评审清单
 
 本文是 Registry Capability PR 的人工评审清单。
 

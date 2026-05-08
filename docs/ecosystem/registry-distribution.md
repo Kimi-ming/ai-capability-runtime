@@ -1,4 +1,4 @@
-# Registry 分发模型
+# 注册表分发模型
 
 本文定义 OpenCap Registry 从 V1 Git-based 模式到未来索引和镜像的演进路径。
 

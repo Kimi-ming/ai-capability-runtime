@@ -1,4 +1,4 @@
-# RFC 0001：Capability Manifest V1
+# RFC 0001：能力清单 V1
 
 ## 状态
 

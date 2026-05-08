@@ -1,4 +1,4 @@
-# Maintainer Guide
+# 维护者指南
 
 本文定义 OpenCap 维护者如何处理 PR、Capability review、发布和安全事件。
 

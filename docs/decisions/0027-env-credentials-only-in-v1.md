@@ -1,4 +1,4 @@
-# ADR 0027：V1 只实现 env-based downstream credentials
+# 架构决策 0027：V1 只实现环境变量下游凭据
 
 日期：2026-05-07
 

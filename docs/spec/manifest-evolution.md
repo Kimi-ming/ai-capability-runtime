@@ -1,4 +1,4 @@
-# Manifest 演进策略
+# 能力清单演进策略
 
 本文定义 Capability Manifest 如何从 V1 演进到后续版本，避免 schema 变化破坏生态。
 

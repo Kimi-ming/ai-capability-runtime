@@ -1,4 +1,4 @@
-# TASK_TEMPLATE：任务书写模板
+# 任务书写模板
 
 在 `docs/TASKS.md` 中新增任务时，使用以下模板。
 

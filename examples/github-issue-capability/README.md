@@ -1,4 +1,4 @@
-# GitHub Issue Capability
+# GitHub Issue 能力示例
 
 该示例对应 Registry 条目：
 

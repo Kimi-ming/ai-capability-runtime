@@ -1,4 +1,4 @@
-# Registry Test Format V1
+# 注册表测试格式 V1
 
 本文定义 `registry/**/tests/*.yml` 的 V1 格式。目标是让 Registry 条目不仅能通过 schema，还能被 mock 验证。
 

@@ -1,4 +1,4 @@
-# Prompt Surface Security V1：模型可见提示面安全
+# 模型可见提示面安全 V1
 
 本文定义 OpenCap 如何治理模型可见的工具描述、schema 文案、工具结果和发现元数据。
 

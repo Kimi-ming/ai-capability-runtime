@@ -1,4 +1,4 @@
-# Output Validation V1：输出校验与归一化
+# 输出校验与归一化 V1
 
 本文定义 OpenCap 如何把 provider response 归一化为 Capability output，并用 manifest `output` schema 验证。
 

@@ -1,4 +1,4 @@
-# SDK 和 Adapter 边界
+# SDK 和适配器边界
 
 本文定义 V1 中 SDK、adapters 与 Runtime 核心的关系。
 

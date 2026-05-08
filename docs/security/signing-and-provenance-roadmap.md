@@ -1,4 +1,4 @@
-# 签名和 Provenance 路线图
+# 签名和来源证明路线图
 
 本文定义 OpenCap 发布和 Registry 供应链的签名路线。
 

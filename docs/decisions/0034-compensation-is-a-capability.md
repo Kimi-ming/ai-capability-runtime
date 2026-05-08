@@ -1,4 +1,4 @@
-# ADR 0034：Compensation 是独立 Capability，不是隐式 Rollback
+# 架构决策 0034：补偿动作是独立能力，不是隐式回滚
 
 日期：2026-05-07
 

@@ -1,4 +1,4 @@
-# ADR 0041：MCP Tool Projection 由 Runtime 拥有
+# 架构决策 0041：MCP 工具投影 由 运行时 拥有
 
 日期：2026-05-08
 

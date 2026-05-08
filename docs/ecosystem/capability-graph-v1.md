@@ -1,4 +1,4 @@
-# Capability Graph V1：能力图
+# 能力图 V1
 
 本文定义 OpenCap 如何描述 Capability 之间的关系。能力图不是 workflow，它是发现、评审、组合和风险分析的元数据基础。
 

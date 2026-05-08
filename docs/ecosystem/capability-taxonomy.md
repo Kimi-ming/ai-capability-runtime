@@ -1,4 +1,4 @@
-# Capability 分类体系
+# 能力分类体系
 
 本文定义 OpenCap Registry 中 Capability 的分类、粒度和命名规则。生态项目必须避免两种极端：能力太粗变成 Agent，能力太细变成 API 噪声。
 

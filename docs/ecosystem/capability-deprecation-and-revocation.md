@@ -1,4 +1,4 @@
-# Capability Deprecation and Revocation：弃用、下架与撤销
+# 能力弃用、下架与撤销
 
 本文定义 Capability 生命周期后段：什么时候 deprecated、yanked、revoked，以及这些状态对 Registry、Runtime 和用户意味着什么。
 

@@ -1,4 +1,4 @@
-# HANDOFF：当前状态交接
+# 当前状态交接
 
 更新时间：2026-05-08
 
@@ -189,3 +189,14 @@ T001：让 opencap validate 调用真实 schema 校验
 下一步仍然是 T001：让 `opencap validate` 调用真实 schema 校验。不要被新任务量带偏；这些设计是后续 M3 Policy + Audit 的约束，V1 实现入口仍从 manifest validation 开始。
 
 本轮验证：`audit_docs.py` 显示文档数 201、任务总数 128、已完成 19、未完成 109；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；占位扫描只剩 GitHub issue template placeholder 和 ADR 0005 中明确的规划占位。`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。
+
+
+## 中文文档入口、索引和规范已重新梳理
+
+已新增 `docs/README.md` 作为中文文档中心，新增 `docs/documentation-governance.md` 作为中文文档规范，并重写 `docs/INDEX.md` 为维护者索引。根 `README.md` 的长文档列表已收敛为关键入口，GitHub issue/PR 模板、AGENTS、CHANGELOG 和一批用户可见标题已中文化。
+
+后续维护规则：README 只放少量关键入口；新人阅读从 `docs/README.md` 开始；维护者职责和目录规则看 `docs/INDEX.md`；新增文档前先看 `docs/documentation-governance.md`，优先更新旧文档而不是继续堆新文件。
+
+当前不做大规模物理搬迁文件路径，因为大量任务、ADR 和 README 已经引用现有路径。若未来要迁移目录，应单独开任务，批量更新链接并增加链接检查。
+
+本轮验证：`audit_docs.py` 显示文档数 203、任务总数 129、已完成 20、未完成 109；`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过；`npm run build` 已尝试，但当前环境缺少 `pnpm`，失败为 `sh: pnpm: command not found`。

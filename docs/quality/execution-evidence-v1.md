@@ -1,4 +1,4 @@
-# Execution Evidence V1：执行证据
+# 执行证据 V1
 
 本文定义 OpenCap 如何用审计日志和测试证据证明一次真实世界调用发生了什么。
 

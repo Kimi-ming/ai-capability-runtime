@@ -1,4 +1,4 @@
-# ADR 0032：V1 不内置 Workflow Runtime
+# 架构决策 0032：V1 不内置 Workflow 运行时
 
 日期：2026-05-07
 

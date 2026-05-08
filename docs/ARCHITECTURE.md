@@ -1,4 +1,4 @@
-# ARCHITECTURE：OpenCap V1 架构总览
+# 架构总览：OpenCap V1
 
 本文是实现时的架构入口。详细设计见 `docs/planning/v1-architecture.md`。
 

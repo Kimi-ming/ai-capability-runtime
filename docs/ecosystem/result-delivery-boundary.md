@@ -1,4 +1,4 @@
-# Result Delivery Boundary：结果投递边界
+# 结果投递边界
 
 本文定义 OpenCap 在不同 Host 和协议能力下如何投递工具结果，避免把 Host 兼容差异误当作安全边界。
 

@@ -1,4 +1,4 @@
-# SPEC：OpenCap V1 产品规格
+# 产品规格：OpenCap V1
 
 本文是 V1 实现时的产品正确性入口。更详细的历史文档见 `docs/planning/v1-requirements.md`。
 

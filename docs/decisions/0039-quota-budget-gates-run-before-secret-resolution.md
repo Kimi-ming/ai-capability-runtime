@@ -1,4 +1,4 @@
-# ADR 0039：Quota/Budget Gate 必须在 Secret Resolution 前运行
+# 架构决策 0039：配额和预算门禁 必须在 密钥解析 前运行
 
 日期：2026-05-08
 

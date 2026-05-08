@@ -1,4 +1,4 @@
-# ADR 0029：远程 Runtime OAuth 必须走新 Profile
+# 架构决策 0029：远程 运行时 OAuth 必须走新 配置
 
 日期：2026-05-07
 

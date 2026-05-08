@@ -1,4 +1,4 @@
-# Policy Override and Breakglass V1：策略 Override 与紧急通道
+# 策略临时覆盖与紧急通道 V1
 
 本文定义 OpenCap 如何处理临时策略放行和紧急场景，避免 override 变成绕过安全边界的后门。
 

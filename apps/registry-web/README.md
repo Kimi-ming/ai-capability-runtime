@@ -1,4 +1,4 @@
-# Registry Web
+# 注册表展示层
 
 Registry Web 是 Git-based OpenCap Registry 的未来展示层。
 

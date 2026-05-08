@@ -1,4 +1,4 @@
-# Input Provenance V1：输入来源与外发证据
+# 输入来源与外发证据 V1
 
 本文定义 OpenCap 如何记录一次 tool input 的来源、分类、最小化和外发目标。
 

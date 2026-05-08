@@ -1,4 +1,4 @@
-# Capability Advisory Process：能力安全公告流程
+# 能力安全公告流程
 
 本文定义 OpenCap 如何处理 Capability 相关安全问题，包括恶意能力、过宽权限、凭据泄露、误导性 README、provider API 风险和供应链污染。
 

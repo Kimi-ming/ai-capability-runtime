@@ -1,4 +1,4 @@
-# ADR 0045：Output Schema 校验通过后才能暴露 Success
+# 架构决策 0045：输出 Schema 校验通过后才能暴露 Success
 
 日期：2026-05-08
 

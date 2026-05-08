@@ -1,4 +1,4 @@
-# Least Privilege Review：最小权限评审
+# 最小权限评审
 
 本文定义 Capability 进入 Registry 前，如何评审 auth scopes、permissions 和 execution 是否满足最小权限原则。
 

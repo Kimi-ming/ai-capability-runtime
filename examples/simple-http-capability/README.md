@@ -1,4 +1,4 @@
-# Simple HTTP Capability
+# 简单 HTTP 能力示例
 
 这个示例展示最小可用的 OpenCap Capability 形态。
 

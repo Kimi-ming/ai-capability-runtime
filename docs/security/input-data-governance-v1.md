@@ -1,4 +1,4 @@
-# Input Data Governance V1：输入数据治理
+# 输入数据治理 V1
 
 本文定义 OpenCap 如何治理模型、Host 或用户传入 Capability 的 tool arguments，防止敏感数据被错误外发给下游 provider。
 

@@ -1,4 +1,4 @@
-# DECISIONS：架构决策索引
+# 架构决策索引
 
 本文索引 OpenCap 的关键决策。详细内容见 `docs/decisions/`。
 

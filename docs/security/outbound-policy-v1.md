@@ -1,4 +1,4 @@
-# Outbound Policy V1
+# 出站网络策略 V1
 
 本文定义 HTTP Capability 的出站网络安全规则。OpenCap 调用真实世界能力时，不能把模型生成或用户提供的 URL 无约束地交给 Runtime。
 

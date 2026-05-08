@@ -1,4 +1,4 @@
-# ADR 0021：Registry 分发模型
+# 架构决策 0021：注册表 分发模型
 
 日期：2026-05-07
 
@@ -17,4 +17,3 @@ V1 使用 Git-based Registry，本地 install 默认从 checkout 的 `registry/`
 - `opencap install` V1 不做远程下载。
 - 安装行为可追溯到 Git commit。
 - 未来 registry index 只是发现加速，不替代 manifest 原文。
-

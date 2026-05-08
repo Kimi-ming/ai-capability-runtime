@@ -1,4 +1,4 @@
-# Capability Package V1：能力包结构
+# 能力包 V1：能力包结构
 
 本文定义 OpenCap Registry 中一个 Capability package 的最小目录契约。V1 的 package 是 Git 目录，不是 npm 包，也不是可执行插件。
 

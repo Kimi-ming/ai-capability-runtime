@@ -1,4 +1,4 @@
-# ADR 0022：SDK 和 Adapter 边界
+# 架构决策 0022：SDK 和 适配器 边界
 
 日期：2026-05-07
 
@@ -17,4 +17,3 @@ V1 主路径不依赖 SDK 或 adapters。Manifest 是事实契约。SDK 和 Open
 - SDK 不阻塞 V1。
 - OpenAPI adapter 需要 RFC。
 - Local command adapter 必须先有 sandbox 设计。
-

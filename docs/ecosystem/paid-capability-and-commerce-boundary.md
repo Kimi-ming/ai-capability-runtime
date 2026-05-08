@@ -1,4 +1,4 @@
-# Paid Capability and Commerce Boundary：付费能力与商业交易边界
+# 付费能力与商业交易边界
 
 本文定义 OpenCap OSS 与未来 paid capability、agentic commerce、结算和交易协议之间的边界。
 

@@ -1,4 +1,4 @@
-# Usage Metering V1：用量计量
+# 用量计量 V1
 
 本文定义 OpenCap V1 如何记录本地用量。V1 的 usage metering 是本地可观测和安全控制基础，不是账单系统。
 

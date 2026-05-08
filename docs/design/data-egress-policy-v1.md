@@ -1,4 +1,4 @@
-# Data Egress Policy V1：数据外发策略
+# 数据外发策略 V1
 
 本文定义 OpenCap 如何在执行前判断 tool input 是否可以发送到目标 provider/origin。
 

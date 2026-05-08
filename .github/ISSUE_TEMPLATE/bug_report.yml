@@ -1,26 +1,26 @@
-name: Bug report
-description: Report a reproducible OpenCap bug
+name: 缺陷报告
+description: 报告可复现的 OpenCap 缺陷
 title: "bug: "
 labels: ["bug"]
 body:
   - type: textarea
     id: summary
     attributes:
-      label: Summary
-      description: What happened?
+      label: 摘要
+      description: 发生了什么？
     validations:
       required: true
   - type: textarea
     id: reproduce
     attributes:
-      label: Reproduction
-      description: Steps, commands, inputs, and expected behavior.
+      label: 复现步骤
+      description: 请提供步骤、命令、输入和期望行为。
     validations:
       required: true
   - type: textarea
     id: environment
     attributes:
-      label: Environment
-      description: OS, Node, package manager, OpenCap commit/version.
+      label: 环境
+      description: 操作系统、Node 版本、包管理器、OpenCap commit/version。
     validations:
       required: false

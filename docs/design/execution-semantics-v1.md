@@ -1,4 +1,4 @@
-# Execution Semantics V1：执行语义
+# 执行语义 V1
 
 本文定义 OpenCap Runtime 如何理解一次 Capability 调用的执行语义。它回答：这个调用是不是只读、是否有副作用、失败后能否重试、超时后状态是否未知，以及审计日志应如何表达这些事实。
 

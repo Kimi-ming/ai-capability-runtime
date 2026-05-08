@@ -1,4 +1,4 @@
-# TASKS：OpenCap 开发任务总表
+# 开发任务总表：OpenCap
 
 本文是 OpenCap 的开发任务源。后续每次开发都应从这里选择任务、完成验证，并更新状态。
 
@@ -238,6 +238,7 @@
 - 已完成：T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系。
 - 已完成：T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系。
 - 已完成：T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系。
+- 已完成：T262 P0：重新梳理中文文档入口、索引和文档规范。
 
 
 ---
@@ -2638,6 +2639,28 @@ pnpm --filter @opencap/runtime test
 - Broad allow 和 ask/deny -> allow 有 simulation/diff 检查路径。
 - Override/breakglass 不能绕过 audit、egress deny、outbound block、secret ordering 或 revoked block。
 - 相关风险、任务、conformance 和 ADR 均进入文档体系。
+
+验证：
+
+```bash
+git diff --check
+node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/package.json','packages/spec/schema/manifest.schema.json','packages/cli/package.json','packages/runtime/package.json','packages/mcp/package.json','packages/sdk-js/package.json','apps/console/package.json','apps/registry-web/package.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+```
+
+### T262 P0：重新梳理中文文档入口、索引和文档规范
+
+- [x] T262 P0：重新梳理中文文档入口、索引和文档规范
+
+已完成：新增 `docs/README.md` 作为中文文档中心，新增 `docs/documentation-governance.md` 作为中文文档规范，重写 `docs/INDEX.md` 为维护者索引，收敛根 `README.md` 的超长文档清单，并中文化 GitHub issue/PR 模板、变更日志、AGENTS 和一批用户可见标题。
+
+验收标准：
+
+- 新人可以从 `docs/README.md` 进入文档，不需要在文件树里盲找。
+- `docs/INDEX.md` 只承担维护者索引职责，不再堆全部文档流水账。
+- README 只保留关键入口，不再复制完整文档目录。
+- 文档默认中文，技术专有名词保留规则写入规范。
+- GitHub 模板和显眼文档标题中文化。
 
 验证：
 

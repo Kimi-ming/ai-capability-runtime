@@ -1,4 +1,4 @@
-# ADR 0052：Broad Allow 需要 Simulation/Diff
+# 架构决策 0052：宽泛放行 需要 模拟和差异评估
 
 日期：2026-05-08
 

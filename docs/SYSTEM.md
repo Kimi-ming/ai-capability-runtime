@@ -1,4 +1,4 @@
-# SYSTEM：OpenCap 体系蓝图
+# 体系蓝图：OpenCap
 
 本文把 OpenCap V1 的产品、协议、Runtime、安全、Registry、发布和开源治理串成一个完整系统。阅读顺序从本文开始，再进入具体文档。
 

@@ -1,4 +1,4 @@
-# Policy DSL V1
+# 策略 DSL V1
 
 本文定义 OpenCap V1 的本地策略文件格式。目标是足够简单、可读、可测试，同时给未来 OPA/Rego 留出接口。
 

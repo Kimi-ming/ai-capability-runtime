@@ -1,4 +1,4 @@
-# Registry 指南
+# 注册表指南
 
 OpenCap Registry 使用 Git-based 模式。开发者通过 Pull Request 提交 Capability，CI 负责校验 manifest 和测试样例。
 

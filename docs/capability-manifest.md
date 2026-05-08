@@ -1,4 +1,4 @@
-# Capability Manifest
+# 能力清单
 
 Capability Manifest 是 OpenCap 的核心标准。它描述一个 AI Host 可以通过 OpenCap Runtime 调用的行动或数据能力。
 

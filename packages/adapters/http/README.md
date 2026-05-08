@@ -1,4 +1,4 @@
-# HTTP Adapter
+# HTTP 适配器
 
 HTTP adapter 是 OpenCap 的第一个执行目标。
 

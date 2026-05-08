@@ -1,4 +1,4 @@
-# ADR 0020：包发布和 Provenance 策略
+# 架构决策 0020：包发布和 Provenance 策略
 
 日期：2026-05-07
 
@@ -17,4 +17,3 @@ OpenCap 优先使用 npm trusted publishing 和 provenance。V1 前保持 packag
 - 发布 workflow 应使用 OIDC trusted publishing。
 - 不优先使用长期 npm token。
 - T123 需要按此策略制定发布预案。
-

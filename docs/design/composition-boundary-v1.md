@@ -1,4 +1,4 @@
-# Composition Boundary V1：组合边界
+# 组合边界 V1
 
 本文定义 OpenCap 如何看待多个 Capability 的组合。核心原则：OpenCap V1 不做 Agent，不做 workflow builder，也不自动规划多步任务；但 OpenCap 必须为未来组合提供安全边界和证据模型。
 

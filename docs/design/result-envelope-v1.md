@@ -1,4 +1,4 @@
-# Result Envelope V1：工具结果信封
+# 结果信封 V1
 
 本文定义 OpenCap Runtime 如何把一次 Capability 调用的结果封装成稳定、可审计、可传给 MCP Host 的 Result Envelope。
 

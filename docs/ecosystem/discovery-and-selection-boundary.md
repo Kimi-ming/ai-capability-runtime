@@ -1,4 +1,4 @@
-# Discovery and Selection Boundary：能力发现与选择边界
+# 能力发现与选择边界
 
 本文定义 OpenCap 的能力发现、安装、Host 暴露、模型选择和 Runtime 授权之间的边界。
 

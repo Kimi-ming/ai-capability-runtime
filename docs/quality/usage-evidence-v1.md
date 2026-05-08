@@ -1,18 +1,18 @@
-# Usage Evidence V1：用量证据
+# 用量证据 V1
 
 本文定义 OpenCap 如何证明某个用量统计来自真实 invocation，而不是随意累加的计数器。
 
-## Evidence Chain
+## 证据链
 
 ```text
 Invocation Audit Log
   -> Execution Evidence
   -> Usage Event
-  -> Usage Summary
+  -> 用量摘要
   -> Future Export / Cloud Sync
 ```
 
-Usage Summary 必须能回溯到 invocation id 或聚合窗口。
+用量摘要必须能回溯到 invocation id 或聚合窗口。
 
 ## 最小字段
 

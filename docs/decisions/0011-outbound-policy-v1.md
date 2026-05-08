@@ -1,4 +1,4 @@
-# ADR 0011：V1 引入最小 Outbound Policy
+# 架构决策 0011：V1 引入最小 出站网络 策略
 
 日期：2026-05-07
 
@@ -22,4 +22,3 @@ V1 HTTP executor 在发请求前必须执行最小 outbound policy：
 - `http.request_demo` 只能作为高风险 demo，不应默认真实执行任意 URL。
 - T055/T091 进入 V1 安全主路径。
 - 审计日志需要记录 outbound decision 和 blocked reason。
-

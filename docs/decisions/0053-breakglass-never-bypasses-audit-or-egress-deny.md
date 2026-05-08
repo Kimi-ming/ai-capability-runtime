@@ -1,4 +1,4 @@
-# ADR 0053：Breakglass 不得绕过 Audit 或 Egress Deny
+# 架构决策 0053：紧急通道 不得绕过 审计 或 外发拒绝
 
 日期：2026-05-08
 

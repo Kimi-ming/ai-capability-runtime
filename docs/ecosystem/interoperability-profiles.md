@@ -1,4 +1,4 @@
-# 互操作 Profiles：OpenCap 兼容性声明规则
+# 互操作配置：OpenCap 兼容性声明规则
 
 本文定义 OpenCap 如何声明和验证与 AI Host、MCP、未来 A2A/Apps SDK 生态的互操作性。核心原则：兼容性不能靠 README 口头承诺，必须由 profile、测试记录和证据组成。
 

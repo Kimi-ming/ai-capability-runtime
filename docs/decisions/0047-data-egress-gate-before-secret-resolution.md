@@ -1,4 +1,4 @@
-# ADR 0047：Data Egress Gate 必须在 Secret Resolution 前运行
+# 架构决策 0047：Data 外发 Gate 必须在 密钥解析 前运行
 
 日期：2026-05-08
 

@@ -1,4 +1,4 @@
-# ADR 0012：Registry Test Format V1
+# 架构决策 0012：注册表测试格式 V1
 
 日期：2026-05-07
 
@@ -27,4 +27,3 @@ V1 先支持 `validate` 和 `dry_run`，保留 future `mock_http`。
 - 需要新增 registry test schema。
 - CI 可以先跑 manifest + dry-run planning。
 - Capability review 可以要求至少一个 basic dry-run test。
-

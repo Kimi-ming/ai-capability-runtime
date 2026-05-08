@@ -1,4 +1,4 @@
-# ADR 0017：开源核心与未来 Cloud 边界
+# 架构决策 0017：开源核心与未来 Cloud 边界
 
 日期：2026-05-07
 
@@ -19,4 +19,3 @@ Capability Manifest、CLI、Local Runtime、MCP Bridge、Policy Engine、Local A
 - V1 不引入 Cloud 依赖。
 - README 和战略文档保持 local-first。
 - 商业化设计不得破坏 OSS 可独立运行。
-

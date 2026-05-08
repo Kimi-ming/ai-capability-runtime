@@ -1,4 +1,4 @@
-# Runtime 架构
+# 运行时架构
 
 OpenCap Runtime 是执行已安装 Capability 的本地或自托管服务。
 

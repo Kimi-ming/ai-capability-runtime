@@ -1,4 +1,4 @@
-# AGENTS.md
+# AI 代理协作说明
 
 本文件给所有参与 OpenCap 的 AI 代理和开发者使用。目标是让每次开发都能从文档开始、以验证结束，并把状态写回仓库。
 
@@ -24,9 +24,12 @@ OpenCap 是面向 AI 原生应用的开源 Capability Runtime 和治理层。
 4. 不绕过权限模型和审计模型。
 5. 不把 `.env`、token、`opencap.local/`、数据库日志提交进仓库。
 6. 每次任务结束后更新任务状态、handoff，并提交推送。
+7. 面向读者的文档默认使用中文；协议名、命令、字段名和包名可以保留英文。
 
 ## 常用入口
 
+- 中文文档中心：`docs/README.md`
+- 文档维护规则：`docs/documentation-governance.md`
 - 当前任务队列：`docs/TASKS.md`
 - 当前状态交接：`docs/HANDOFF.md`
 - 产品规格：`docs/SPEC.md`

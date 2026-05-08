@@ -1,4 +1,4 @@
-# ADR 0009：Policy DSL V1 使用顶层 default/rules
+# 架构决策 0009：策略 DSL V1 使用顶层 default/rules
 
 日期：2026-05-07
 
@@ -24,4 +24,3 @@ rules: []
 - `docs/permission-model.md` 需要同步。
 - Policy parser 只实现一种格式。
 - 后续如引入 OPA/Rego，通过 adapter 实现，不改变 V1 文件语义。
-

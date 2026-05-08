@@ -1,4 +1,4 @@
-# Policy Simulation and Diff V1：策略模拟与差异评估
+# 策略模拟与差异评估 V1
 
 本文定义 OpenCap 如何在策略变更生效前评估它会放开或收紧哪些调用。
 

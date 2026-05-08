@@ -1,4 +1,4 @@
-# Conformance Suite V1：一致性测试体系
+# 一致性测试体系 V1
 
 本文定义 OpenCap V1 如何证明一个实现、一个 Capability package 或一个 Host profile 符合 OpenCap 的最小契约。
 

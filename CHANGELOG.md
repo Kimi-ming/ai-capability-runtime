@@ -1,34 +1,35 @@
-# Changelog
+# 变更日志
 
-All notable changes to OpenCap will be documented in this file.
+本文记录 OpenCap 的重要变更。
 
-The project follows Semantic Versioning after `1.0.0`. During `0.x`, public contracts may evolve, but breaking changes must still be documented.
+项目在 `1.0.0` 之后遵循语义化版本。`0.x` 阶段公共契约仍可能演进，但破坏性变更也必须记录。
 
-## Unreleased
+## 未发布
 
-### Added
+### 新增
 
-- OpenCap V1 project architecture and Chinese documentation system.
-- Capability Manifest V1 draft and HTTP-only scope.
-- Local Runtime, Policy, Audit, MCP, Registry, security, and governance design docs.
-- GitHub issue and pull request templates.
-- Initial registry examples for developer-tool capabilities.
-- Interoperability profiles, consent model, capability package contract, conformance suite, and agentic risk mapping docs.
-- Identity/auth model, Secret Resolver contract, credential lifecycle runbook, least-privilege review, and remote OAuth boundary docs.
-- Execution semantics, retry/idempotency rules, failure recovery runbook, and execution evidence docs.
-- Composition boundary, capability graph, multi-step execution, composition failure recovery, and saga/workflow research docs.
-- Trust model, capability advisory process, deprecation/revocation lifecycle, and capability quality score docs.
-- Usage metering, quota/budget policy, rate limit/abuse control, commerce boundary, and usage evidence docs.
-- Tool projection, prompt-surface security, discovery/selection boundary, and model-visible metadata lint docs.
-- Result envelope, output validation, tool result sanitization, result provenance, and result delivery boundary docs.
-- Input data governance, data classification, data egress policy, input provenance, and data minimization docs.
-- Policy decision trace, policy lifecycle/change control, policy simulation/diff, and override/breakglass docs.
+- OpenCap V1 项目架构和中文文档体系。
+- 能力清单 V1 草案和 HTTP-only 范围。
+- 本地运行时、策略、审计、MCP、注册表、安全和治理设计文档。
+- GitHub issue 和 pull request 模板已中文化。
+- 初始开发者工具注册表示例能力。
+- 互操作 profile、确认同意模型、能力包契约、一致性测试和 Agentic 风险映射文档。
+- 身份授权模型、Secret Resolver 契约、凭据生命周期手册、最小权限评审和远程 OAuth 边界文档。
+- 执行语义、重试幂等规则、失败恢复手册和执行证据文档。
+- 组合边界、能力图、多步执行、组合失败恢复和 Saga/workflow 调研文档。
+- 信任模型、能力安全公告流程、弃用/撤销生命周期和能力质量评分文档。
+- 用量计量、配额预算策略、限流滥用控制、商业边界和用量证据文档。
+- 工具投影、模型可见提示面安全、发现选择边界和模型可见元数据检查文档。
+- 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
+- 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
+- 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。
+- 中文文档中心、中文文档规范、维护者索引和中文 GitHub 模板。
 
-### Changed
+### 变更
 
-- `github.create_issue` manifest now includes JSON body rendering and bearer token placement.
+- `github.create_issue` manifest 已包含 JSON body 渲染和 bearer token placement。
 
-### Known Gaps
+### 已知缺口
 
-- CLI/runtime implementation is still scaffold-level.
-- `pnpm` is not available in the current local shell, so full workspace validation has not been run in this environment.
+- 命令行和运行时实现仍处于骨架阶段。
+- 当前本地 shell 缺少 `pnpm`，因此本环境尚未运行完整 workspace 验证。

@@ -1,4 +1,4 @@
-# ADR 0019：版本和兼容性策略
+# 架构决策 0019：版本和兼容性策略
 
 日期：2026-05-07
 
@@ -19,4 +19,3 @@ OpenCap 采用 SemVer 思路。`0.x` 阶段允许快速演进，但破坏性变�
 - V1 前也要记录 breaking changes。
 - Manifest 和 Capability version 都使用 SemVer。
 - 发布前必须更新 CHANGELOG。
-

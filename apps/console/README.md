@@ -1,4 +1,4 @@
-# OpenCap Console
+# 本地控制台
 
 Console 是计划中的 OpenCap 本地 UI。
 

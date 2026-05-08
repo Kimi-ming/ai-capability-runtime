@@ -1,4 +1,4 @@
-# Policy Lifecycle and Change Control：策略生命周期与变更控制
+# 策略生命周期与变更控制
 
 本文定义 OpenCap 如何把本地 policy 当作可审计、可版本化、可回滚的治理对象。
 

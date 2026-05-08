@@ -1,4 +1,4 @@
-# Result Provenance V1：结果来源与污染标记
+# 结果来源与污染标记 V1
 
 本文定义 OpenCap 如何记录工具结果来自哪里、经过哪些转换，以及哪些字段是 untrusted provider data。
 

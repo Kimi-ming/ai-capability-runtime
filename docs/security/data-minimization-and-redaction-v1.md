@@ -1,4 +1,4 @@
-# Data Minimization and Redaction V1：数据最小化与脱敏
+# 数据最小化与脱敏 V1
 
 本文定义 OpenCap 在发送 tool input 前如何尽量减少外发数据，并在确认、日志和结果中使用脱敏摘要。
 

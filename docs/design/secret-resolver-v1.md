@@ -1,4 +1,4 @@
-# Secret Resolver V1：密钥解析器契约
+# 密钥解析器 V1
 
 本文定义 V1 Secret Resolver 的输入、输出、生命周期和测试要求。Secret Resolver 是 OpenCap Runtime 的可信边界之一。
 

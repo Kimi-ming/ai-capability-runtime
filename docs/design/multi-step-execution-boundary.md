@@ -1,4 +1,4 @@
-# Multi-step Execution Boundary：多步执行边界
+# 多步执行边界
 
 本文定义未来多步执行、Saga、补偿和组合失败恢复如何与 OpenCap Runtime 交互。
 

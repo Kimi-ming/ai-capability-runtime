@@ -1,4 +1,4 @@
-# 调研：Tool Description、Prompt Surface 与 Tool Poisoning 2026-05-08
+# 调研：工具描述、提示面与工具投毒 2026-05-08
 
 本文记录本轮模型可见工具元数据、prompt surface 和能力发现边界参考的外部来源。
 

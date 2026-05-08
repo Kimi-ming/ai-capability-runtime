@@ -1,4 +1,4 @@
-# Capability Quality Score：能力质量评分
+# 能力质量评分
 
 本文定义一个非安全认证的质量评分模型，用于帮助用户和维护者理解 Capability 的成熟度。Quality Score 只展示事实，不替代 policy 和 consent。
 

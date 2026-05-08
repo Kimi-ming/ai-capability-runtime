@@ -1,4 +1,4 @@
-# Tool Projection V1：模型可见工具投影
+# 工具投影 V1：模型可见工具投影
 
 本文定义 OpenCap Runtime 如何把 Capability Manifest 转成 MCP Host 和模型可见的 tool metadata。
 

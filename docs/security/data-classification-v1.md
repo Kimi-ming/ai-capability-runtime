@@ -1,4 +1,4 @@
-# Data Classification V1：数据分类
+# 数据分类 V1
 
 本文定义 OpenCap V1 的本地数据分类规则，用于输入治理、确认摘要、审计和未来组织级 data policy。
 

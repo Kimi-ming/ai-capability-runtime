@@ -1,4 +1,4 @@
-# MCP Proxy Adapter
+# MCP Proxy 适配器
 
 MCP Proxy Adapter 是未来能力，用于把已有 MCP tool 包装成 OpenCap Capability。
 

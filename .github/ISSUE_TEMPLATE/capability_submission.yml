@@ -1,5 +1,5 @@
-name: Capability submission
-description: Propose or submit a new OpenCap Capability
+name: Capability 提交
+description: 提议或提交新的 OpenCap Capability
 title: "capability: "
 labels: ["capability", "registry"]
 body:
@@ -13,21 +13,21 @@ body:
   - type: textarea
     id: behavior
     attributes:
-      label: Behavior
-      description: What external action or data access does this Capability perform?
+      label: 行为
+      description: 这个 Capability 会执行什么外部动作，或访问什么外部数据？
     validations:
       required: true
   - type: textarea
     id: permissions
     attributes:
-      label: Permissions and risk
-      description: List resources, actions, risk level, and required credentials.
+      label: 权限和风险
+      description: 请列出 resource、action、risk level 和所需凭据。
     validations:
       required: true
   - type: textarea
     id: tests
     attributes:
-      label: Tests
-      description: Describe dry-run or mock tests included.
+      label: 测试
+      description: 请说明包含的 dry-run 或 mock test。
     validations:
       required: false

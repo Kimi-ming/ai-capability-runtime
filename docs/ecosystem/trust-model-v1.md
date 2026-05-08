@@ -1,4 +1,4 @@
-# Trust Model V1：信任模型
+# 信任模型 V1
 
 本文定义 OpenCap Registry 中 Capability 的信任等级、升级条件、降级条件和用户可见语义。Trust 不是“安全保证”，而是可验证事实的汇总。
 

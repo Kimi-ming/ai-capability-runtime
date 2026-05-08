@@ -1,4 +1,4 @@
-# Failure Recovery Runbook：失败恢复手册
+# 失败恢复手册
 
 本文定义 OpenCap 在真实执行失败、超时或状态未知时如何指导用户和维护者恢复。
 

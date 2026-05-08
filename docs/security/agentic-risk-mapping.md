@@ -1,4 +1,4 @@
-# Agentic Risk Mapping：Agentic AI 风险到 OpenCap 控制
+# Agentic AI 风险映射：从风险到 OpenCap 控制
 
 OpenCap 不做 Agent，但它让 Agent 和 AI Host 可以调用真实世界能力。因此它必须把 Agentic AI 风险当作一等风险处理。
 

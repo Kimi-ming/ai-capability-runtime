@@ -1,4 +1,4 @@
-# ADR 0018：RFC 与社区治理流程
+# 架构决策 0018：RFC 与社区治理流程
 
 日期：2026-05-07
 
@@ -26,4 +26,3 @@ OpenCap 是生态型基础设施，未来会出现 schema、policy、runtime、p
 - 新增 `docs/community/rfc-process.md`。
 - 设计争议从 PR 评论升级到 RFC。
 - ADR 保持最终决策索引。
-

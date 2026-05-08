@@ -1,4 +1,4 @@
-# ADR 0008：HTTP body 与 API key placement
+# 架构决策 0008：HTTP 请求体与 API key 放置方式
 
 日期：2026-05-07
 
@@ -47,4 +47,3 @@ V1 不支持 query token。
 - HTTP executor 需要实现 JSON body 渲染。
 - GitHub demo manifest 要更新。
 - secret 不得进入 resolved URL、日志或 MCP result。
-

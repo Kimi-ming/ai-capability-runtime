@@ -1,4 +1,4 @@
-# Retry and Idempotency V1：重试与幂等
+# 重试与幂等 V1
 
 本文定义 OpenCap V1 对自动重试、幂等键和重复调用的处理原则。
 

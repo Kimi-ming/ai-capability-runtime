@@ -1,4 +1,4 @@
-# Model-visible Metadata Lint V1：模型可见元数据检查
+# 模型可见元数据检查 V1
 
 本文定义 OpenCap 对工具描述、schema 描述和未来发现元数据的 lint 规则。
 

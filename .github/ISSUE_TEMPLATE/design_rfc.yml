@@ -1,26 +1,26 @@
-name: Design / RFC proposal
-description: Propose a design change that may need an RFC or ADR
+name: 设计 / RFC 提案
+description: 提议可能需要 RFC 或 ADR 的设计变更
 title: "design: "
 labels: ["design"]
 body:
   - type: textarea
     id: motivation
     attributes:
-      label: Motivation
-      description: What problem does this solve?
+      label: 动机
+      description: 这个提案要解决什么问题？
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposal
-      description: Sketch the design, compatibility, and rollout.
+      label: 提案
+      description: 请概述设计、兼容性和 rollout 方式。
     validations:
       required: true
   - type: textarea
     id: risks
     attributes:
-      label: Risks
-      description: Security, compatibility, or migration risks.
+      label: 风险
+      description: 安全、兼容性或迁移风险。
     validations:
       required: false

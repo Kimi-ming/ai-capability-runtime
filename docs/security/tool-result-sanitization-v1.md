@@ -1,4 +1,4 @@
-# Tool Result Sanitization V1：工具结果净化
+# 工具结果净化 V1
 
 本文定义 OpenCap 如何处理 provider response、error body 和外部文本中的敏感信息与间接 prompt injection。
 
