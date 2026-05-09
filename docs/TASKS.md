@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T060 P0：实现 `opencap invoke <id> --dry-run`。
 - T070 P0：选择 MCP TypeScript SDK 并接入。
 - T071 P0：实现 MCP `tools/list`。
 - T072 P0：实现 MCP `tools/call` 路由。
@@ -254,6 +253,7 @@
 - 已完成：T053 P1：定义 HTTP request body manifest 字段。
 - 已完成：T054 P1：实现 output normalization。
 - 已完成：T055 P1：处理 arbitrary URL Capability 风险。
+- 已完成：T060 P0：实现 `opencap invoke <id> --dry-run`。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1184,7 +1184,7 @@ pnpm lint
 
 ### T060 P0：实现 `opencap invoke <id> --dry-run`
 
-- [ ] T060 P0：实现 `opencap invoke <id> --dry-run`
+- [x] T060 P0：实现 `opencap invoke <id> --dry-run`
 
 验收标准：
 
@@ -1201,6 +1201,15 @@ pnpm --filter @opencap/runtime test
 pnpm lint
 ```
 
+完成记录：
+
+- CLI `invoke` 已支持 `--dry-run`。
+- 支持 `--input <file>` 和 `--input-json <json>`。
+- 从 installed capabilities 读取 manifest，并在未安装时返回用户错误。
+- dry-run 会评估 policy，生成 HTTP dry-run plan，并写入 SQLite `dry_run` 审计事件。
+- smoke 已覆盖 inline JSON、文件输入和 `opencap logs --status dry_run`。
+
+
 ### T061 P1：实现真实 `opencap invoke`
 
 - [ ] T061 P1：实现真实 `opencap invoke`
@@ -1211,6 +1220,14 @@ pnpm lint
 - read_only 操作按 policy 自动 allow
 - secret 缺失时给明确错误
 - 结果支持 pretty 和 json 输出
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli build
+pnpm --filter @opencap/runtime test
+pnpm lint
+```
 
 ### T062 P1：添加示例 input 文件
 

@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T060 P0：实现 `opencap invoke <id> --dry-run`。
+Next task: T061 P1：实现真实 `opencap invoke`。
 
 推荐第一个任务：
 
 ```text
-T060：实现 `opencap invoke <id> --dry-run`
+T061：实现真实 `opencap invoke`
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan，并执行真实 HTTP 请求
-- T060 将把 dry-run plan 接入 CLI `opencap invoke`
+- T061 将把真实 HTTP executor 接入 CLI `opencap invoke`
 
 ## 最近验证
 
@@ -66,12 +66,12 @@ T060：实现 `opencap invoke <id> --dry-run`
 ## 已知风险
 
 - `invoke`、`serve` 仍是骨架命令。
-- `opencap invoke` 尚未接入 dry-run 或真实执行。
+- `opencap invoke` 已接入 dry-run，但尚未接入真实执行。
 - MCP server 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T060：实现 `opencap invoke <id> --dry-run`。
+1. 实现 T061：实现真实 `opencap invoke`。
 2. 实现 T054：output normalization。
 3. 再回到 T060/T061：`opencap invoke` 接入。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
@@ -130,6 +130,19 @@ T055 已完成。`http.request_demo` 已显式声明 `metadata.network_access: a
 - `pnpm --filter @opencap/runtime test`
 
 下一步推荐：T060 P0：实现 `opencap invoke <id> --dry-run`。
+
+## CLI invoke dry-run 已实现
+
+T060 已完成。`opencap invoke <id> --dry-run` 现在会从 installed capabilities 读取 manifest，支持 `--input <file>` 和 `--input-json <json>`，评估 policy，生成 HTTP dry-run plan，并写入 SQLite `dry_run` 审计事件。已用临时 state dir smoke 覆盖安装、inline JSON、文件输入和 `opencap logs --status dry_run` 查询。
+
+本轮针对性验证：
+
+- `pnpm --filter @opencap/cli build`
+- `opencap invoke github.create_issue --dry-run --input-json ...` smoke
+- `opencap invoke github.create_issue --dry-run --input ...` smoke
+- `opencap logs --status dry_run --json` smoke
+
+下一步推荐：T061 P1：实现真实 `opencap invoke`。
 
 ## 本轮体系化补充
 
@@ -461,4 +474,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T060：实现 `opencap invoke <id> --dry-run`。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T061：实现真实 `opencap invoke`。

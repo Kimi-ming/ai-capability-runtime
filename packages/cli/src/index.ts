@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { access, readFile, stat } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { Command } from "commander";
@@ -10,10 +11,17 @@ import {
   InstallCapabilityError,
   SqliteAuditLogger,
   type AuditInvocationStatus,
+  buildHttpDryRunPlan,
+  evaluatePolicy,
   getLocalStatePaths,
+  hashInput,
   installCapability,
   listInstalledCapabilities,
+  loadInstalledCapabilities,
+  loadPolicySet,
+  redactInput,
   resolveRegistryDir,
+  stableJsonStringify,
 } from "@opencap/runtime";
 
 const program = new Command();
@@ -151,6 +159,31 @@ async function policyStatus(policyPath: string): Promise<string> {
   }
 }
 
+
+function resolveCliPath(path: string): string {
+  return isAbsolute(path) ? path : resolve(process.env.INIT_CWD ?? process.cwd(), path);
+}
+
+async function parseInvokeInput(options: { input?: string; inputJson?: string }): Promise<unknown> {
+  if (options.input !== undefined && options.inputJson !== undefined) {
+    throw new Error("Use either --input or --input-json, not both.");
+  }
+
+  if (options.inputJson !== undefined) {
+    return JSON.parse(options.inputJson);
+  }
+
+  if (options.input !== undefined) {
+    return JSON.parse(await readFile(resolveCliPath(options.input), "utf8"));
+  }
+
+  return {};
+}
+
+function trustLevelFromMetadata(metadata: Record<string, unknown>): string | undefined {
+  return typeof metadata.trust_level === "string" ? metadata.trust_level : undefined;
+}
+
 async function runCliAction(action: () => Promise<void>, fallbackMessage: string): Promise<void> {
   try {
     await action();
@@ -279,11 +312,54 @@ program
   .argument("<id>", "Capability id")
   .option("--state-dir <path>", "Local OpenCap state directory")
   .option("--input <file>", "JSON input file")
+  .option("--input-json <json>", "Inline JSON input")
   .option("--dry-run", "Build an invocation plan without external execution")
   .description("Invoke an installed Capability.")
-  .action((id: string, _options: { stateDir?: string; input?: string; dryRun?: boolean }) => {
-    console.log(`invoke is not implemented yet for ${id}`);
-  });
+  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean }) => runCliAction(async () => {
+    if (!options.dryRun) {
+      throw new Error("Real invoke is not implemented yet. Use --dry-run.");
+    }
+
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const input = await parseInvokeInput(options);
+    const loaded = await loadInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
+    const capability = loaded.capabilities.find((installed) => installed.id === id);
+
+    if (capability === undefined) {
+      throw new Error(`Installed capability not found: ${id}`);
+    }
+
+    const policySet = await loadPolicySet({ cwd, env: process.env, stateDir: options.stateDir });
+    const policy = evaluatePolicy(policySet, {
+      capabilityId: capability.id,
+      permissions: capability.manifest.permissions,
+      channel: "cli",
+      trustLevel: trustLevelFromMetadata(capability.manifest.metadata),
+    });
+    const plan = await buildHttpDryRunPlan(capability.manifest, input);
+    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+
+    try {
+      await logger.record({
+        id: randomUUID(),
+        timestamp: new Date().toISOString(),
+        channel: "cli",
+        capabilityId: capability.id,
+        status: "dry_run",
+        policyDecision: policy.decision,
+        confirmationStatus: policy.decision === "deny" ? "denied" : "approved",
+        reason: `Dry run plan generated. ${policy.reason}`,
+        matchedRuleId: policy.matchedRuleId,
+        inputHash: hashInput(input),
+        inputRedactedJson: stableJsonStringify(redactInput(input)),
+        resolvedUrl: plan.url,
+      });
+    } finally {
+      logger.close();
+    }
+
+    console.log(JSON.stringify({ capabilityId: capability.id, mode: "dry_run", policy, plan }, null, 2));
+  }, `Failed to invoke ${id}`));
 
 program
   .command("serve")
