@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { classifyInput } from "./input-classifier.js";
 
@@ -57,4 +60,48 @@ describe("input classification engine", () => {
 
     expect(result.findings).toEqual([expect.objectContaining({ path: "/body", dataClass: "free_text_unknown", action: "ask" })]);
   });
+});
+
+
+interface InputClassificationFixture {
+  name: string;
+  input: unknown;
+  expectedDataClasses: string[];
+  expectedFindings: Array<{
+    path: string;
+    dataClass: string;
+    action?: string;
+  }>;
+  redactedPreviewContains?: string[];
+  redactedPreviewNotContains?: string[];
+}
+
+const fixtureDir = join(dirname(fileURLToPath(import.meta.url)), "../fixtures/input-classification");
+
+function loadInputClassificationFixtures(): InputClassificationFixture[] {
+  return readdirSync(fixtureDir)
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .map((file) => JSON.parse(readFileSync(join(fixtureDir, file), "utf8")) as InputClassificationFixture);
+}
+
+describe("input classification fixtures", () => {
+  for (const fixture of loadInputClassificationFixtures()) {
+    it(`classifies fixture: ${fixture.name}`, () => {
+      const result = classifyInput(fixture.input);
+
+      expect(result.dataClasses).toEqual(expect.arrayContaining(fixture.expectedDataClasses));
+      expect(result.findings).toEqual(expect.arrayContaining(
+        fixture.expectedFindings.map((finding) => expect.objectContaining(finding)),
+      ));
+
+      const preview = JSON.stringify(result.redactedPreview);
+      for (const expected of fixture.redactedPreviewContains ?? []) {
+        expect(preview).toContain(expected);
+      }
+      for (const forbidden of fixture.redactedPreviewNotContains ?? []) {
+        expect(preview).not.toContain(forbidden);
+      }
+    });
+  }
 });

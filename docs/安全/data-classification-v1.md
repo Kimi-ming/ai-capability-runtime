@@ -100,6 +100,8 @@ type DataClassificationFindingV1 = {
 
 这不是合规 DLP；它是 Runtime pre-secret gate 的安全信号。
 
+可复用测试夹具位于 `packages/runtime/fixtures/input-classification/`，覆盖 secret-like、PII、internal URL、source/config 和 large free text unknown。
+
 ## Redaction Preview
 
 确认和 audit 只能展示 redacted preview：

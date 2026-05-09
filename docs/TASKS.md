@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T235 P1：补充 sensitive input classification fixtures。
 - T236 P1：实现 Data Egress Policy Gate。
 - T237 P1：记录 egress decision audit fields。
 - T238 P1：confirmation summary 展示 data classes 和 egress target。
@@ -3014,7 +3013,7 @@ pnpm --filter @opencap/runtime test
 
 ### T235 P1：补充 sensitive input classification fixtures
 
-- [ ] T235 P1：补充 sensitive input classification fixtures
+- [x] T235 P1：补充 sensitive input classification fixtures
 
 目标：建立可复用输入分类测试夹具。
 
@@ -3036,6 +3035,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/fixtures/input-classification/`，包含 secret-like、pii、internal URL、source/config 和 large free text unknown 五个 JSON fixtures。`input-classifier.test.ts` 现在自动加载 fixtures，断言 expected data classes、field findings 和 redacted preview 不含敏感原文。
 
 ### T236 P1：实现 Data Egress Policy Gate
 

@@ -1,0 +1,35 @@
+{
+  "name": "source and env config text",
+  "input": {
+    "envFile": "DATABASE_URL=postgres://localhost/app\nAPI_KEY=super-secret",
+    "stack": "Error: boom\n    at run (/repo/app.ts:10:5)"
+  },
+  "expectedDataClasses": [
+    "source_code",
+    "secret_like"
+  ],
+  "expectedFindings": [
+    {
+      "path": "/envFile",
+      "dataClass": "source_code",
+      "action": "ask"
+    },
+    {
+      "path": "/envFile",
+      "dataClass": "secret_like",
+      "action": "deny"
+    },
+    {
+      "path": "/stack",
+      "dataClass": "source_code",
+      "action": "ask"
+    }
+  ],
+  "redactedPreviewContains": [
+    "[redacted:secret_like,source_code]"
+  ],
+  "redactedPreviewNotContains": [
+    "super-secret",
+    "DATABASE_URL"
+  ]
+}

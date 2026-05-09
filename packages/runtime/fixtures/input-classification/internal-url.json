@@ -1,0 +1,29 @@
+{
+  "name": "internal URL targets",
+  "input": {
+    "metadataUrl": "http://169.254.169.254/latest/meta-data/",
+    "localUrl": "http://localhost:8787/admin"
+  },
+  "expectedDataClasses": [
+    "internal_url"
+  ],
+  "expectedFindings": [
+    {
+      "path": "/metadataUrl",
+      "dataClass": "internal_url",
+      "action": "deny"
+    },
+    {
+      "path": "/localUrl",
+      "dataClass": "internal_url",
+      "action": "deny"
+    }
+  ],
+  "redactedPreviewContains": [
+    "[redacted:internal_url]"
+  ],
+  "redactedPreviewNotContains": [
+    "169.254.169.254",
+    "localhost:8787"
+  ]
+}

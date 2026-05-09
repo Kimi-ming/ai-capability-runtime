@@ -1,0 +1,29 @@
+{
+  "name": "personal contact information",
+  "input": {
+    "email": "dev@example.com",
+    "phone": "+1 415 555 0199"
+  },
+  "expectedDataClasses": [
+    "pii"
+  ],
+  "expectedFindings": [
+    {
+      "path": "/email",
+      "dataClass": "pii",
+      "action": "ask"
+    },
+    {
+      "path": "/phone",
+      "dataClass": "pii",
+      "action": "ask"
+    }
+  ],
+  "redactedPreviewContains": [
+    "d***@example.com"
+  ],
+  "redactedPreviewNotContains": [
+    "dev@example.com",
+    "415 555 0199"
+  ]
+}

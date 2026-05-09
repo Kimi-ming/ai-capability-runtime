@@ -1,0 +1,16 @@
+{
+  "name": "large free text unknown",
+  "input": {
+    "body": "ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text ordinary text "
+  },
+  "expectedDataClasses": [
+    "free_text_unknown"
+  ],
+  "expectedFindings": [
+    {
+      "path": "/body",
+      "dataClass": "free_text_unknown",
+      "action": "ask"
+    }
+  ]
+}
