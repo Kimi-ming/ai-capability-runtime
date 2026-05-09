@@ -15,6 +15,7 @@ import {
   confirmationSummaryFromDataEgress,
   createConfirmationAuditEvent,
   createDataEgressAuditEvent,
+  createInputProvenanceEvidence,
   defaultPolicySet,
   evaluatePolicy,
   DEFAULT_STATE_DIR_NAME,
@@ -1088,6 +1089,47 @@ describe("data egress audit", () => {
   });
 });
 
+
+describe("input provenance audit evidence", () => {
+  it("expresses all input sources without storing raw input", () => {
+    for (const inputSource of ["user_supplied", "model_generated", "tool_derived", "runtime_generated"] as const) {
+      const evidence = createInputProvenanceEvidence({
+        input: { prompt: "hello", token: "ghp_secret_value" },
+        inputSource,
+        derivedFromInvocationId: inputSource === "tool_derived" ? "inv-source" : undefined,
+        dataClasses: ["secret_like"],
+        egressTargetOrigin: "https://api.github.com",
+        egressDecision: "deny",
+        policyRuleId: "deny-secret-like",
+        transformations: ["redaction"],
+      });
+
+      expect(evidence.inputHash).toMatch(/^sha256:[a-f0-9]{64}$/);
+      expect(evidence.inputSource).toBe(inputSource);
+      expect(JSON.stringify(evidence)).not.toContain("ghp_secret_value");
+    }
+  });
+
+  it("records tool-derived source invocation and transformations", () => {
+    const evidence = createInputProvenanceEvidence({
+      input: { issue_url: "https://github.com/opencap/opencap/issues/1" },
+      inputSource: "tool_derived",
+      derivedFromInvocationId: "inv-upstream",
+      dataClasses: [],
+      egressTargetOrigin: "https://api.github.com",
+      egressDecision: "allow",
+      transformations: ["field_mapping", "minimization"],
+    });
+
+    expect(evidence).toMatchObject({
+      inputSource: "tool_derived",
+      derivedFromInvocationId: "inv-upstream",
+      transformations: ["field_mapping", "minimization"],
+      minimizationApplied: true,
+    });
+  });
+});
+
 describe("SQLite audit logger", () => {
   it("creates the SQLite database and writes audit events", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-"));
@@ -1152,6 +1194,51 @@ describe("SQLite audit logger", () => {
       );
 
       await expect(logger.recent(1)).resolves.toMatchObject([{ reason: "second" }]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("persists input provenance evidence", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-input-provenance-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+
+    try {
+      await logger.record({
+        id: "evt-input-provenance",
+        timestamp: "2026-05-09T00:00:00.000Z",
+        channel: "cli",
+        capabilityId: "github.create_issue",
+        status: "denied",
+        policyDecision: "deny",
+        confirmationStatus: "denied",
+        reason: "Data egress denied.",
+        inputProvenance: createInputProvenanceEvidence({
+          input: { token: "ghp_secret_value" },
+          inputSource: "tool_derived",
+          derivedFromInvocationId: "inv-upstream",
+          dataClasses: ["secret_like"],
+          egressTargetOrigin: "https://api.github.com",
+          egressDecision: "deny",
+          policyRuleId: "deny-secret-like",
+          transformations: ["redaction"],
+        }),
+      });
+
+      const recent = await logger.recent(10);
+      expect(recent).toMatchObject([
+        {
+          capabilityId: "github.create_issue",
+          inputProvenance: {
+            inputSource: "tool_derived",
+            derivedFromInvocationId: "inv-upstream",
+            dataClasses: ["secret_like"],
+            egressDecision: "deny",
+            transformations: ["redaction"],
+          },
+        },
+      ]);
+      expect(JSON.stringify(recent)).not.toContain("ghp_secret_value");
     } finally {
       logger.close();
     }

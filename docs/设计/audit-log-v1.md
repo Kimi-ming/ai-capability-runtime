@@ -48,6 +48,7 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `input_hash` | text | 原始输入稳定 hash |
 | `input_redacted_json` | text | 脱敏输入 |
 | `input_data_classes_json` | text | 输入数据分类摘要 |
+| `input_provenance_json` | text | 输入来源、hash、派生来源和 transformations 的脱敏 evidence |
 | `egress_decision` | text | allow/ask/deny/redact |
 | `egress_data_classes_json` | text | 本次外发涉及的数据类别数组 |
 | `egress_target_origin` | text | 外发目标 origin |
@@ -95,6 +96,7 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `resolved_url` | `redacted_user_data` | origin/path 可记录，query 必须脱敏或省略 |
 | `input_hash` | `redacted_user_data` | SHA-256 hash |
 | `input_redacted_json` | `redacted_user_data` | redacted JSON |
+| `input_provenance_json` | `redacted_user_data` | 不含 input 原文，只含 hash、source、derived id 和 transformations |
 | `output_redacted_json` | `redacted_user_data` | redacted JSON |
 | `error` | `redacted_user_data` | 错误 code 和脱敏 message |
 | `egress_decision` | `operational_metadata` | 原值 |

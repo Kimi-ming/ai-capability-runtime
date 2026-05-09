@@ -390,6 +390,32 @@ export interface ResultEnvelopeV1 {
   evidence: ResultEvidenceSummaryV1;
 }
 
+export type InputProvenanceSource = "user_supplied" | "model_generated" | "tool_derived" | "runtime_generated";
+
+export interface InputProvenanceEvidence {
+  inputHash: string;
+  inputSource: InputProvenanceSource;
+  derivedFromInvocationId?: string;
+  dataClasses: DataEgressContext["dataClasses"];
+  redactionApplied: boolean;
+  minimizationApplied: boolean;
+  egressTargetOrigin?: string;
+  egressDecision?: DataEgressDecision;
+  policyRuleId?: string;
+  transformations: string[];
+}
+
+export interface CreateInputProvenanceEvidenceInput {
+  input: unknown;
+  inputSource: InputProvenanceSource;
+  derivedFromInvocationId?: string;
+  dataClasses?: DataEgressContext["dataClasses"];
+  egressTargetOrigin?: string;
+  egressDecision?: DataEgressDecision;
+  policyRuleId?: string;
+  transformations?: string[];
+}
+
 export interface CreateResultEnvelopeInput {
   invocationId?: string;
   capabilityId: string;
@@ -1410,6 +1436,26 @@ export function hashInput(value: unknown): string {
   return `sha256:${createHash("sha256").update(stableJsonStringify(value)).digest("hex")}`;
 }
 
+function hasTransformation(transformations: string[], fragment: string): boolean {
+  return transformations.some((transformation) => transformation.toLowerCase().includes(fragment));
+}
+
+export function createInputProvenanceEvidence(input: CreateInputProvenanceEvidenceInput): InputProvenanceEvidence {
+  const transformations = [...new Set(input.transformations ?? [])].sort();
+  return {
+    inputHash: hashInput(input.input),
+    inputSource: input.inputSource,
+    derivedFromInvocationId: input.derivedFromInvocationId,
+    dataClasses: [...(input.dataClasses ?? [])],
+    redactionApplied: hasTransformation(transformations, "redact"),
+    minimizationApplied: hasTransformation(transformations, "minim"),
+    egressTargetOrigin: input.egressTargetOrigin,
+    egressDecision: input.egressDecision,
+    policyRuleId: input.policyRuleId,
+    transformations,
+  };
+}
+
 export function confirmationSummaryFromDataEgress(decision: DataEgressDecisionResult): ConfirmationEgressSummary {
   return {
     targetOrigin: decision.evidence.targetOrigin,
@@ -1582,6 +1628,7 @@ export interface AuditEvent {
   egressTargetOrigin?: string;
   egressMatchedRuleId?: string;
   egressRedactedPreviewJson?: string;
+  inputProvenance?: InputProvenanceEvidence;
 }
 
 export interface AuditLogger {
@@ -1736,6 +1783,7 @@ interface AuditEventRow {
   egress_target_origin: string | null;
   egress_matched_rule_id: string | null;
   egress_redacted_preview_json: string | null;
+  input_provenance_json: string | null;
 }
 
 const require = createRequire(import.meta.url);
@@ -1766,7 +1814,8 @@ CREATE TABLE IF NOT EXISTS invocations (
   egress_data_classes_json TEXT,
   egress_target_origin TEXT,
   egress_matched_rule_id TEXT,
-  egress_redacted_preview_json TEXT
+  egress_redacted_preview_json TEXT,
+  input_provenance_json TEXT
 ) STRICT;
 `;
 
@@ -1786,6 +1835,7 @@ function ensureAuditSchema(database: DatabaseSync): void {
     ["egress_target_origin", "TEXT"],
     ["egress_matched_rule_id", "TEXT"],
     ["egress_redacted_preview_json", "TEXT"],
+    ["input_provenance_json", "TEXT"],
   ];
 
   for (const [columnName, columnType] of additionalColumns) {
@@ -1803,6 +1853,34 @@ function parseEgressDataClasses(value: string | null): DataEgressContext["dataCl
   try {
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? parsed.filter((item): item is DataEgressContext["dataClasses"][number] => typeof item === "string") : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function parseInputProvenance(value: string | null): InputProvenanceEvidence | undefined {
+  if (value === null) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<InputProvenanceEvidence>;
+    if (typeof parsed.inputHash !== "string" || typeof parsed.inputSource !== "string") {
+      return undefined;
+    }
+
+    return {
+      inputHash: parsed.inputHash,
+      inputSource: parsed.inputSource as InputProvenanceSource,
+      derivedFromInvocationId: typeof parsed.derivedFromInvocationId === "string" ? parsed.derivedFromInvocationId : undefined,
+      dataClasses: Array.isArray(parsed.dataClasses) ? parsed.dataClasses.filter((item): item is DataEgressContext["dataClasses"][number] => typeof item === "string") : [],
+      redactionApplied: parsed.redactionApplied === true,
+      minimizationApplied: parsed.minimizationApplied === true,
+      egressTargetOrigin: typeof parsed.egressTargetOrigin === "string" ? parsed.egressTargetOrigin : undefined,
+      egressDecision: typeof parsed.egressDecision === "string" ? parsed.egressDecision as DataEgressDecision : undefined,
+      policyRuleId: typeof parsed.policyRuleId === "string" ? parsed.policyRuleId : undefined,
+      transformations: Array.isArray(parsed.transformations) ? parsed.transformations.filter((item): item is string => typeof item === "string") : [],
+    };
   } catch {
     return undefined;
   }
@@ -1828,6 +1906,7 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     egressTargetOrigin: row.egress_target_origin ?? undefined,
     egressMatchedRuleId: row.egress_matched_rule_id ?? undefined,
     egressRedactedPreviewJson: row.egress_redacted_preview_json ?? undefined,
+    inputProvenance: parseInputProvenance(row.input_provenance_json),
   };
 }
 
@@ -1849,8 +1928,8 @@ export class SqliteAuditLogger implements AuditLogger {
         `INSERT INTO invocations (
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
           input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
-          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -1871,6 +1950,7 @@ export class SqliteAuditLogger implements AuditLogger {
         event.egressTargetOrigin ?? null,
         event.egressMatchedRuleId ?? null,
         event.egressRedactedPreviewJson ?? null,
+        event.inputProvenance === undefined ? null : stableJsonStringify(event.inputProvenance),
       );
   }
 
@@ -1899,7 +1979,7 @@ export class SqliteAuditLogger implements AuditLogger {
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
                 input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
-                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json
+                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json
          FROM invocations
          ${whereSql}
          ORDER BY timestamp DESC, id DESC

@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T239 P1：input provenance audit evidence。
 - T240 P1：field-level egress map。
 - T241 P2：derived input evidence chain。
 - T242 P1：按 execution mapping 做 input minimization。
@@ -3115,7 +3114,7 @@ pnpm --filter @opencap/runtime test
 
 ### T239 P1：input provenance audit evidence
 
-- [ ] T239 P1：input provenance audit evidence
+- [x] T239 P1：input provenance audit evidence
 
 目标：记录 input source、input hash、derivedFromInvocationId、egress decision 和 transformations。
 
@@ -3135,6 +3134,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `InputProvenanceEvidence`、`InputProvenanceSource` 和 `createInputProvenanceEvidence`，可表达 `user_supplied`、`model_generated`、`tool_derived`、`runtime_generated`。`AuditEvent.inputProvenance` 会被 SQLite logger 持久化到 `input_provenance_json` 并在查询时恢复结构化对象；测试覆盖 tool-derived source invocation、transformations、egress decision 和不记录 input 原文。
 
 ### T240 P1：field-level egress map
 

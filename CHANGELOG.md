@@ -108,6 +108,7 @@
 - Runtime Data Egress Policy Gate，默认阻断 `secret_like` 和 `internal_url` 外发，要求 `pii/source_code` 到 `external_send` 进入确认，并在 deny 时禁止 secret resolution 和执行。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。
+- Runtime input provenance audit evidence，记录 input source、input hash、derived invocation、egress decision 和 transformations，SQLite 不保存 input 原文。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。
 - 中文文档中心、中文文档规范、维护者索引和中文 GitHub 模板。
 

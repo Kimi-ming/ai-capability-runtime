@@ -59,6 +59,23 @@ type InputProvenanceV1 = {
 - 完整自由文本。
 - 未脱敏的 URL query。
 
+## Runtime 实现状态
+
+当前 `@opencap/runtime` 导出：
+
+```ts
+createInputProvenanceEvidence(input)
+```
+
+当前实现可以表达：
+
+- `user_supplied`。
+- `model_generated`。
+- `tool_derived`。
+- `runtime_generated`。
+
+`createInputProvenanceEvidence` 会从 raw input 计算 `inputHash`，但返回的 evidence 不保存 raw input。`tool_derived` 可以记录 `derivedFromInvocationId`；`transformations` 会派生 `redactionApplied` 和 `minimizationApplied`。`AuditEvent.inputProvenance` 会被 SQLite logger 持久化为 `input_provenance_json`，查询时恢复为结构化对象。
+
 ## 与 Audit 的关系
 
 Audit log 已有 input hash 和 redacted input。Input provenance 是 audit 的扩展 evidence，不是新的授权来源。
