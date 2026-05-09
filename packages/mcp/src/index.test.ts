@@ -129,7 +129,7 @@ describe("MCP tool name mapping", () => {
           title: "Create GitHub Issue",
           inputSchema: { type: "object" },
           description: expect.stringContaining("Risk: write"),
-          metadata: { capabilityId: "github.create_issue" },
+          metadata: expect.objectContaining({ capabilityId: "github.create_issue" }),
         }),
       ],
     });

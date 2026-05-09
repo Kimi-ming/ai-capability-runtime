@@ -52,7 +52,7 @@ pnpm lint
 
 - `packages/spec/src/index.test.ts`：Manifest validator 和 registry test schema 基础行为，当前覆盖 11 个测试。
 - `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。
-- `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。
+- `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 10 个测试。
 - `packages/cli/src/smoke.test.ts`：CLI 端到端 smoke，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs，当前覆盖 1 个测试。
 
 当前缺口：

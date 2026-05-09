@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强和 MCP Tool Projection builder
 
 ## 当前代码状态
 
@@ -25,31 +25,33 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke`、`serve` 仍是骨架。
 - `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
-- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强。
+- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现。
 - `@opencap/sdk` 暂缓实现。
 
 ## 当前任务入口
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T209 P1：实现 MCP Tool Projection builder。
+Next task: T210 P1：实现 model-visible metadata lint。
 
 推荐第一个任务：
 
 ```text
-T209：实现 MCP Tool Projection builder
+T210：实现 model-visible metadata lint
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T102/T103/T104/T112/T113/T114/T120/T121/T122 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T102/T103/T104/T112/T113/T114/T120/T121/T122/T209 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- T209 将实现 MCP Tool Projection builder，统一生成模型可见 tool metadata
+- T210 将实现 model-visible metadata lint，检测 prompt-surface 注入风险
 
 ## 最近验证
 
-项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。T122 本轮已运行：
+项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。T209 本轮已运行：
 
+- `pnpm --filter @opencap/mcp test`
+- `pnpm --filter @opencap/mcp build`
 - `check_docs.py`
 - `git diff --check`
 
@@ -107,11 +109,11 @@ T093 已完成。`docs/安全/threat-model.md` 已新增威胁状态标记和重
 
 ## pnpm workspace 全量验证已通过
 
-T100 已完成。当前 conda 环境下 `pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 均通过；T104 后测试统计为 spec 11 个、cli 1 个、runtime 63 个、mcp 9 个。`pnpm validate` 当前覆盖 5 个 registry manifest 和 5 个 registry test。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+T100 已完成。当前 conda 环境下 `pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 均通过；T209 后测试统计为 spec 11 个、cli 1 个、runtime 63 个、mcp 10 个。`pnpm validate` 当前覆盖 5 个 registry manifest 和 5 个 registry test。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
 
 ## 下一步建议
 
-1. 实现 T209：实现 MCP Tool Projection builder。
+1. 实现 T210：实现 model-visible metadata lint。
 2. 新增或更新中文版本策略文档，说明 package、manifest schema、registry compatibility 和 alpha/beta/1.0 兼容口径。
 3. 明确 `0.x` breaking change 记录方式，以及 manifest schema 与 registry entry 的兼容关系。
 4. 完成后跑 `check_docs.py` 和 `git diff --check`。

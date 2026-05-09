@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T209 P1：实现 MCP Tool Projection builder。
 - T210 P1：实现 model-visible metadata lint。
 - T211 P1：补充 prompt-surface negative fixtures。
 - T212 P1：记录 tool projection hash/evidence。
@@ -2378,7 +2377,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 ### T209 P1：实现 MCP Tool Projection builder
 
-- [ ] T209 P1：实现 MCP Tool Projection builder
+- [x] T209 P1：实现 MCP Tool Projection builder
 
 目标：`@opencap/mcp` 不再临时拼接 tool description，而是通过明确的 projection builder 生成模型可见 MCP tool metadata。
 
@@ -2400,6 +2399,8 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 ```bash
 pnpm --filter @opencap/mcp test
 ```
+
+完成记录：新增 `packages/mcp/src/tool-projection.ts` 和 `packages/mcp/src/tool-projection.test.ts`，由 `buildMcpToolProjection` 统一生成模型可见 tool metadata；projection 包含 `projectionVersion`、`capabilityId`、`toolName`、`title`、`description`、`inputSchema` 和 `outputSchema`。`describeCapabilityAsTool` 已改为复用 projection builder，并在 metadata 中携带 `projectionVersion`。
 
 ### T210 P1：实现 model-visible metadata lint
 
