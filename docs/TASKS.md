@@ -40,7 +40,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T083 P2：添加 GitHub Issue/PR templates。
 - T084 P2：新增更多示例 Capability。
 - T093 P2：威胁模型文档。
 - T104 P2：端到端 smoke test。
@@ -1508,7 +1507,7 @@ git diff --check
 
 ### T083 P2：添加 GitHub Issue/PR templates
 
-- [ ] T083 P2：添加 GitHub Issue/PR templates
+- [x] T083 P2：添加 GitHub Issue/PR templates
 
 新增：
 
@@ -1532,6 +1531,13 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已新增 `.github/ISSUE_TEMPLATE/feature_request.yml`。
+- 已确认 bug report、capability submission、technical design proposal 和 PR template 存在。
+- Capability 提交模板明确只填写 env var 名称，不填写真实 token 或密钥。
+- 安全政策 contact link 已修正为 GitHub security policy URL。
+
 ### T084 P2：新增更多示例 Capability
 
 - [ ] T084 P2：新增更多示例 Capability
@@ -1542,6 +1548,21 @@ git diff --check
 - `notion.create_page`，write 风险
 - `sentry.list_issues`，read_only 风险
 - `postgres.query_readonly`，read_only 但敏感数据风险
+
+验收标准：
+
+- 新增至少一个 registry 示例 Capability，优先覆盖当前示例未覆盖的风险类型。
+- 新 Capability 包含 `manifest.yml`、`README.md` 和 `tests/basic.yml`。
+- 示例不包含真实 secret、私有 URL 或生产用户数据。
+- `pnpm validate` 通过。
+
+验证：
+
+```bash
+pnpm validate
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ---
 

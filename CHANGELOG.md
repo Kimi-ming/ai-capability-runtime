@@ -55,6 +55,7 @@
 - 能力清单 V1 草案和 HTTP-only 范围。
 - 本地运行时、策略、审计、MCP、注册表、安全和治理设计文档。
 - GitHub issue 和 pull request 模板已中文化。
+- GitHub feature request issue template，并修正 Capability 提交模板的 secret 提示和安全政策链接。
 - 初始开发者工具注册表示例能力。
 - 互操作 profile、确认同意模型、能力包契约、一致性测试和 Agentic 风险映射文档。
 - 身份授权模型、Secret Resolver 契约、凭据生命周期手册、最小权限评审和远程 OAuth 边界文档。

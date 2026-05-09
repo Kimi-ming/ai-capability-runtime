@@ -21,7 +21,7 @@ body:
     id: permissions
     attributes:
       label: 权限和风险
-      description: 请列出 resource、action、risk level 和所需凭据。
+      description: 请列出 resource、action、risk level 和所需 env var 名称。不要填写真实 token 或密钥。
     validations:
       required: true
   - type: textarea
