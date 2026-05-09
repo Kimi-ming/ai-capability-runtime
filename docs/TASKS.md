@@ -40,7 +40,6 @@
 
 ### P1：V1 完整体验
 
-- T014 P1：增加 `--state-dir` 参数。
 - T021 P1：实现 Capability id 与 MCP tool name 映射表。
 - T022 P1：实现本地状态初始化。
 - T033 P1：记录 ask/deny 的审计日志。
@@ -254,6 +253,7 @@
 - 已完成：T011 P0：实现 `opencap install <id>`。
 - 已完成：T012 P0：实现 `opencap list`。
 - 已完成：T013 P1：实现 CLI 统一错误处理和 exit code。
+- 已完成：T014 P1：增加 `--state-dir` 参数。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T014 `--state-dir` 参数补齐
+1. T015 `opencap doctor`
 2. T020 Installed Capability Loader
 3. T030 Policy parser/engine
 4. T040 Audit log
@@ -299,7 +299,7 @@ git diff --check
 7. T070 MCP bridge
 8. T080 Registry manifest CI 校验
 9. T081 Capability Review Checklist
-10. T015 `opencap doctor`
+10. T021 Capability id 与 MCP tool name 映射表
 
 ---
 
@@ -533,7 +533,7 @@ pnpm --filter @opencap/cli dev -- install missing.capability --state-dir /privat
 
 ### T014 P1：增加 `--state-dir` 参数
 
-- [ ] T014 P1：增加 `--state-dir` 参数
+- [x] T014 P1：增加 `--state-dir` 参数
 
 目标：测试和用户可以指定状态目录。
 
@@ -559,9 +559,13 @@ pnpm --filter @opencap/cli dev -- list --state-dir /private/tmp/opencap-cli-stat
 pnpm --filter @opencap/cli build
 ```
 
+完成记录：`install`、`list` 已保持真实 `--state-dir` 行为；`invoke`、`logs`、`serve` 已接受 `--state-dir` 并保持骨架输出。
+
 ### T015 P2：增加 `opencap doctor`
 
 - [ ] T015 P2：增加 `opencap doctor`
+
+目标：提供一个只读诊断命令，帮助开发者确认本地环境、registry 和 state dir 的基础健康状态。
 
 检查：
 
@@ -570,6 +574,21 @@ pnpm --filter @opencap/cli build
 - state dir 是否可写
 - installed manifest 是否有效
 - policy 文件是否有效
+
+验收标准：
+
+- `opencap doctor` 命令可运行。
+- 输出至少包含 Node 版本、pnpm 可用性、registry 路径、state dir 路径、installed 目录状态。
+- doctor 不修改 registry 或 state dir 内容，除非用户后续显式要求 repair。
+- 缺少 registry 或 state dir 不应导致 stack trace。
+- `--state-dir` 和 `--registry` 可用于指定检查路径。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli dev -- doctor --state-dir /private/tmp/opencap-cli-state-dir-smoke
+pnpm --filter @opencap/cli build
+```
 
 ---
 

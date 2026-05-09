@@ -136,18 +136,32 @@ program
     }
   }, "Failed to list installed capabilities"));
 
+
+program
+  .command("invoke")
+  .argument("<id>", "Capability id")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--input <file>", "JSON input file")
+  .option("--dry-run", "Build an invocation plan without external execution")
+  .description("Invoke an installed Capability.")
+  .action((id: string, _options: { stateDir?: string; input?: string; dryRun?: boolean }) => {
+    console.log(`invoke is not implemented yet for ${id}`);
+  });
+
 program
   .command("serve")
+  .option("--state-dir <path>", "Local OpenCap state directory")
   .option("--mcp", "Expose installed Capabilities as MCP tools")
   .description("Start the OpenCap runtime.")
-  .action((options: { mcp?: boolean }) => {
+  .action((options: { stateDir?: string; mcp?: boolean }) => {
     console.log(options.mcp ? "MCP runtime is not implemented yet" : "runtime is not implemented yet");
   });
 
 program
   .command("logs")
+  .option("--state-dir <path>", "Local OpenCap state directory")
   .description("Show invocation logs.")
-  .action(() => {
+  .action((_options: { stateDir?: string }) => {
     console.log("logs is not implemented yet");
   });
 
