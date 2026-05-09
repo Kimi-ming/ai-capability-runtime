@@ -51,7 +51,7 @@ pnpm lint
 当前测试入口：
 
 - `packages/spec/src/index.test.ts`：Manifest validator 和 registry test schema 基础行为，当前覆盖 11 个测试。`packages/spec/src/metadata-lint.test.ts`：model-visible metadata lint，覆盖 prompt-surface injection 四类风险和四个 negative fixtures，当前覆盖 9 个测试；spec 包合计 20 个测试。
-- `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。`packages/runtime/src/result-envelope.test.ts`：Result Envelope V1 success/dry_run/blocked/confirmation_required/failed/unknown 映射，当前覆盖 5 个测试。`packages/runtime/src/output-validation.test.ts`：output schema validation required/type/finding/envelope failure，当前覆盖 4 个测试。`packages/runtime/src/result-sanitizer.test.ts`：tool result sanitizer secret redaction、prompt marker、HTML strip 和 envelope warning/evidence，当前覆盖 4 个测试。`packages/runtime/src/result-provenance.test.ts`：result content digest、transformations、taint labels 和 failed/unknown provenance，当前覆盖 2 个测试；Runtime 包合计 78 个测试。
+- `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。`packages/runtime/src/result-envelope.test.ts`：Result Envelope V1 success/dry_run/blocked/confirmation_required/failed/unknown 映射，当前覆盖 5 个测试。`packages/runtime/src/output-validation.test.ts`：output schema validation required/type/finding/envelope failure，当前覆盖 4 个测试。`packages/runtime/src/result-sanitizer.test.ts`：tool result sanitizer secret redaction、prompt marker、HTML strip 和 envelope warning/evidence，当前覆盖 4 个测试。`packages/runtime/src/result-provenance.test.ts`：result content digest、transformations、taint labels 和 failed/unknown provenance，当前覆盖 2 个测试。`packages/runtime/src/result-limits.test.ts`：oversized structured/text result、MCP summary 边界和 size limit/redaction 顺序，当前覆盖 3 个测试；Runtime 包合计 81 个测试。
 - `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。`packages/mcp/src/tool-projection.test.ts`：MCP Tool Projection metadata、projection hash/evidence 和 Runtime-generated risk summary，当前覆盖 6 个测试。`packages/mcp/src/result-adapter.test.ts`：Result Envelope 到 MCP structuredContent/content/isError 适配，当前覆盖 3 个测试；MCP 包合计 18 个测试。
 - `packages/cli/src/smoke.test.ts`：CLI 端到端 smoke，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs，当前覆盖 1 个测试。
 
@@ -129,6 +129,7 @@ pnpm validate
 - output schema validation 对缺 required 字段、类型不匹配返回 finding，并且 schema mismatch 不标记 success
 - tool result sanitizer 对 secret-like 字段/值脱敏，替换 instruction-like provider text，strip HTML/script/comment，并把 finding 写入 warnings/evidence
 - result provenance/evidence 记录基于 redacted structured content 的 digest、transformations 和 taint labels，failed/unknown 也有 provenance summary
+- oversized structured result 会以 `[TRUNCATED_RESULT]` 替换并记录 `CONTENT_TRUNCATED`，oversized text 会截断且不进入 MCP `content[].text` 原文，size limit 不绕过 secret redaction evidence
 
 ### Secret Resolver
 

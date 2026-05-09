@@ -10,7 +10,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { dirname, join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
-import { sanitizeToolResult, type ResultSanitizerFinding } from "./result-sanitizer.js";
+import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -400,6 +400,7 @@ export interface ResultEnvelopeBuildOptions {
   invocationId?: string;
   evidence?: ResultEvidenceSummaryV1;
   outputSchema?: unknown;
+  sanitizer?: ToolResultSanitizerOptions;
 }
 
 function resultStatusIsError(status: ResultEnvelopeStatus): boolean {
@@ -741,7 +742,7 @@ function baseHttpResultEvidence(result: HttpExecutionResult, options: ResultEnve
 }
 
 export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResult, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
-  const sanitizerResult = sanitizeToolResult(result.ok ? result.output : result.error?.response);
+  const sanitizerResult = sanitizeToolResult(result.ok ? result.output : result.error?.response, options.sanitizer);
   const outputValidation = options.outputSchema === undefined
     ? { ok: true, status: "not_applicable" as const, findings: [] }
     : validateOutputAgainstSchema(sanitizerResult.value, options.outputSchema);

@@ -26,7 +26,7 @@ Execution evidence 要回答：
 | Request evidence | 请求是否发出 | request_started_at、origin |
 | Response evidence | provider 响应 | status code、request id |
 | Outcome evidence | OpenCap 如何解释结果 | success/blocked/unknown/partial |
-| Output evidence | 输出如何被验证和净化 | schema status、redaction、sanitizer warnings |
+| Output evidence | 输出如何被验证、净化和限流 | schema status、redaction、sanitizer warnings、size limit |
 | Result provenance | 模型看到的结果来自哪里 | content digest、taint labels、transformations |
 
 ## 最小字段
@@ -68,6 +68,12 @@ type ExecutionEvidenceV1 = {
     taint: Record<string, string[]>;
   };
   sanitizerWarnings?: string[];
+  resultSizeLimit?: {
+    maxTextLength?: number;
+    maxStructuredBytes?: number;
+    truncated: boolean;
+    truncatedPaths: string[];
+  };
 };
 ```
 
@@ -91,6 +97,7 @@ Selection evidence 只用于审计和调试。它不能：
 - full request body，除非后续明确开启并脱敏
 - provider response 中的敏感字段
 - provider raw output 原文，除非后续明确开启并脱敏
+- 超过 size limit 的完整 provider output 原文
 
 ## Conformance 映射
 
@@ -114,6 +121,8 @@ Selection evidence 只用于审计和调试。它不能：
 - success result 有 output validation status。
 - model-visible summary 和 structuredContent 有 content digest 或 provenance summary。
 - result provenance 使用 provider_untrusted/runtime_generated/secret_redacted/sanitized_text taint labels。
+- oversized structured/text result 记录 `CONTENT_TRUNCATED`，并能从 evidence 看出发生截断或替换。
+- size limit 不影响 secret redaction finding 和 result provenance digest。
 - selection evidence 包含 selected tool、selected projection hash 和 available tools hash，并明确不参与授权。
 
 ## 关联任务

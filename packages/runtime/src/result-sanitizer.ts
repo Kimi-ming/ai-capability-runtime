@@ -18,11 +18,14 @@ export interface SanitizedToolResult {
 
 export interface ToolResultSanitizerOptions {
   maxTextLength?: number;
+  maxStructuredBytes?: number;
 }
 
 const DEFAULT_MAX_TEXT_LENGTH = 4000;
+const DEFAULT_MAX_STRUCTURED_BYTES = 65536;
 const REDACTED_VALUE = "[REDACTED]";
 const SANITIZED_TEXT = "[SANITIZED_TEXT]";
+const TRUNCATED_RESULT = "[TRUNCATED_RESULT]";
 const SENSITIVE_FIELD_FRAGMENTS = ["token", "secret", "password", "api_key", "authorization", "cookie", "credential", "private_key"] as const;
 const PROMPT_SURFACE_PATTERNS = [
   /ignore\s+(all\s+)?(previous|prior|above)\s+instructions?/i,
@@ -121,9 +124,22 @@ function sanitizeNode(value: unknown, path: string, findings: ResultSanitizerFin
 
 export function sanitizeToolResult(value: unknown, options: ToolResultSanitizerOptions = {}): SanitizedToolResult {
   const findings: ResultSanitizerFinding[] = [];
-  const resolvedOptions = { maxTextLength: options.maxTextLength ?? DEFAULT_MAX_TEXT_LENGTH };
+  const resolvedOptions = {
+    maxTextLength: options.maxTextLength ?? DEFAULT_MAX_TEXT_LENGTH,
+    maxStructuredBytes: options.maxStructuredBytes ?? DEFAULT_MAX_STRUCTURED_BYTES,
+  };
+  const sanitized = sanitizeNode(value, "/", findings, resolvedOptions);
+
+  if (typeof sanitized !== "string") {
+    const size = JSON.stringify(sanitized)?.length ?? 0;
+    if (size > resolvedOptions.maxStructuredBytes) {
+      findings.push(finding("CONTENT_TRUNCATED", "/", "Provider structured result exceeded sanitizer size limit and was replaced."));
+      return { value: TRUNCATED_RESULT, findings };
+    }
+  }
+
   return {
-    value: sanitizeNode(value, "/", findings, resolvedOptions),
+    value: sanitized,
     findings,
   };
 }

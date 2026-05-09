@@ -87,6 +87,15 @@ Provider response 和 provider error 都是不可信输入。进入模型上下�
 - 字段级 sanitizer warning 进入 `warnings` 或 evidence summary。
 - sanitizer finding 使用 `SECRET_REDACTED`、`PROMPT_SURFACE_MARKER`、`HTML_STRIPPED`、`CONTENT_TRUNCATED` 等 code。
 
+### Result Size Limits
+
+Runtime 必须在 provider result 进入 MCP adapter 前执行大小限制。V1 默认限制：
+
+- `maxTextLength`：单个 provider text 默认最多 4000 字符。超限后截断，并记录 `CONTENT_TRUNCATED`。
+- `maxStructuredBytes`：已净化 structured result 默认最多 65536 字节。超限后以 `[TRUNCATED_RESULT]` 替换整个结构化结果，并记录根路径 `/` 的 `CONTENT_TRUNCATED`。
+- size limit 在 secret redaction 和 prompt-surface sanitization 之后检查，因此超限不能绕过 secret redaction evidence。
+- MCP `content[].text` 仍只能使用 Runtime-generated summary，不能因为 provider text 被截断就把 provider 原文摘要当成可信指令。
+
 ### Free Text
 
 `content[].text` 只是兼容 fallback，必须由 Runtime 生成摘要。规则：

@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T225 P1：Oversized result handling。
 - T226 P2：Host result compatibility records。
 - T227 P2：Output selector RFC。
 - T228 P2：Resource delivery profile RFC。
@@ -2773,7 +2772,7 @@ pnpm --filter @opencap/runtime test
 
 ### T225 P1：Oversized result handling
 
-- [ ] T225 P1：Oversized result handling
+- [x] T225 P1：Oversized result handling
 
 目标：限制 provider JSON/text 大小，避免上下文污染、内存压力和成本失控。
 
@@ -2794,6 +2793,8 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/runtime test
 ```
 
+完成记录：Runtime sanitizer 现在支持 `maxStructuredBytes`，对超过限制的结构化 provider result 以 `[TRUNCATED_RESULT]` 替换并记录 `CONTENT_TRUNCATED`；文本 provider output 会在进入 Result Envelope/MCP adapter 前按 `maxTextLength` 截断，MCP `content[].text` 仍只使用 Runtime-generated summary。新增 `packages/runtime/src/result-limits.test.ts` 覆盖大 JSON、大文本，以及 secret redaction 与 size limit 同时发生的场景。
+
 ### T226 P2：Host result compatibility records
 
 - [ ] T226 P2：Host result compatibility records
@@ -2808,7 +2809,7 @@ pnpm --filter @opencap/runtime test
 验收标准：
 
 - 记录 Host、版本、日期、字段行为和证据。
-- 明确 OpenCap 安全不依赖 Host 正确处理 structuredContent。
+- 明确 OpenCap 安全不以 Host 正确处理 structuredContent 作为前提。
 
 验证：
 
