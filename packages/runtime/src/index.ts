@@ -1,8 +1,11 @@
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { mkdirSync } from "node:fs";
+import { createRequire } from "node:module";
 import { stdin as processStdin, stdout as processStdout } from "node:process";
 import { createInterface } from "node:readline/promises";
-import { join, resolve } from "node:path";
+import type { DatabaseSync } from "node:sqlite";
+import { dirname, join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
 
@@ -595,6 +598,108 @@ export async function confirmWithAudit(
   await logger.record(auditEvent);
 
   return { confirmation, auditEvent };
+}
+
+export interface SqliteAuditLoggerOptions extends ResolveStateDirOptions {
+  databaseFile?: string;
+}
+
+interface AuditEventRow {
+  id: string;
+  timestamp: string;
+  channel: ConfirmationChannel;
+  capability_id: string;
+  status: AuditInvocationStatus;
+  policy_decision: PolicyDecision;
+  confirmation_status: ConfirmationStatus;
+  reason: string;
+  matched_rule_id: string | null;
+}
+
+const require = createRequire(import.meta.url);
+
+type DatabaseSyncConstructor = typeof import("node:sqlite").DatabaseSync;
+
+function openDatabaseSync(databaseFile: string): DatabaseSync {
+  const { DatabaseSync } = require("node:sqlite") as { DatabaseSync: DatabaseSyncConstructor };
+  return new DatabaseSync(databaseFile);
+}
+
+const CREATE_INVOCATIONS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS invocations (
+  id TEXT PRIMARY KEY,
+  timestamp TEXT NOT NULL,
+  channel TEXT NOT NULL,
+  capability_id TEXT NOT NULL,
+  status TEXT NOT NULL,
+  policy_decision TEXT NOT NULL,
+  confirmation_status TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  matched_rule_id TEXT
+) STRICT;
+`;
+
+function auditEventFromRow(row: AuditEventRow): AuditEvent {
+  return {
+    id: row.id,
+    timestamp: row.timestamp,
+    channel: row.channel,
+    capabilityId: row.capability_id,
+    status: row.status,
+    policyDecision: row.policy_decision,
+    confirmationStatus: row.confirmation_status,
+    reason: row.reason,
+    matchedRuleId: row.matched_rule_id ?? undefined,
+  };
+}
+
+export class SqliteAuditLogger implements AuditLogger {
+  private readonly database: DatabaseSync;
+  readonly databaseFile: string;
+
+  constructor(options: SqliteAuditLoggerOptions | string = {}) {
+    this.databaseFile = typeof options === "string" ? resolve(options) : resolve(options.databaseFile ?? getLocalStatePaths(options).logsDatabaseFile);
+    mkdirSync(dirname(this.databaseFile), { recursive: true });
+    this.database = openDatabaseSync(this.databaseFile);
+    this.database.exec(CREATE_INVOCATIONS_TABLE_SQL);
+  }
+
+  async record(event: AuditEvent): Promise<void> {
+    this.database
+      .prepare(
+        `INSERT INTO invocations (
+          id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        event.id,
+        event.timestamp,
+        event.channel,
+        event.capabilityId,
+        event.status,
+        event.policyDecision,
+        event.confirmationStatus,
+        event.reason,
+        event.matchedRuleId ?? null,
+      );
+  }
+
+  async recent(limit = 20): Promise<AuditEvent[]> {
+    const rows = this.database
+      .prepare(
+        `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id
+         FROM invocations
+         ORDER BY timestamp DESC, id DESC
+         LIMIT ?`,
+      )
+      .all(limit) as unknown as AuditEventRow[];
+
+    return rows.map(auditEventFromRow);
+  }
+
+  close(): void {
+    this.database.close();
+  }
 }
 
 function firstNonEmpty(...values: Array<string | undefined>): string | undefined {

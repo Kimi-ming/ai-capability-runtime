@@ -12,7 +12,7 @@
 
 ## 当前最小实现
 
-当前 Runtime 已有 `AuditLogger` 接口和 `InMemoryAuditLogger`，用于在 SQLite 落地前记录 confirmation 相关审计事件。T040 会把同一接口接到 SQLite 存储。
+当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录。当前 Node 对该模块仍会打印 ExperimentalWarning。
 
 ## 存储
 

@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T040 P0：确定并实现日志存储。
 - T041 P0：实现 redaction 和 input hash。
 - T050 P0：实现 URL 模板渲染。
 - T051 P0：实现 dry-run executor。
@@ -254,6 +253,7 @@
 - 已完成：T032 P0：实现 Confirmation Handler 接口。
 - 已完成：T033 P1：记录 ask/deny 的审计日志。
 - 已完成：T034 P2：支持 `--yes` 非交互确认。
+- 已完成：T040 P0：确定并实现日志存储。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T040 Audit log 存储
-2. T041 redaction 和 input hash
-3. T042 `opencap logs`
-4. T050 HTTP executor dry-run
-5. T060 `opencap invoke`
-6. T070 MCP bridge
-7. T080 Registry manifest CI 校验
-8. T081 Capability Review Checklist
-9. T023 Runtime loader CLI integration
-10. T050 HTTP executor dry-run
+1. T041 redaction 和 input hash
+2. T042 `opencap logs`
+3. T050 HTTP executor dry-run
+4. T060 `opencap invoke`
+5. T070 MCP bridge
+6. T080 Registry manifest CI 校验
+7. T081 Capability Review Checklist
+8. T023 Runtime loader CLI integration
+9. T050 HTTP executor dry-run
+10. T061 真实 `opencap invoke`
 
 ---
 
@@ -865,7 +865,7 @@ pnpm lint
 
 ### T040 P0：确定并实现日志存储
 
-- [ ] T040 P0：确定并实现日志存储
+- [x] T040 P0：确定并实现日志存储
 
 推荐：SQLite。
 
@@ -884,6 +884,14 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `SqliteAuditLogger`。
+- 使用 Node 内置 `node:sqlite`，当前会出现 Node ExperimentalWarning。
+- logger 会自动创建 `invocations` 表。
+- 支持写入 `AuditEvent` 和查询最近 N 条。
+- 支持测试时使用临时 state dir 或显式 database file。
+
 ### T041 P0：实现 redaction 和 input hash
 
 - [ ] T041 P0：实现 redaction 和 input hash
@@ -901,6 +909,14 @@ pnpm lint
 - 嵌套对象也脱敏
 - 保留字段存在但值为 `[REDACTED]`
 - input hash 稳定
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T042 P1：实现 `opencap logs`
 

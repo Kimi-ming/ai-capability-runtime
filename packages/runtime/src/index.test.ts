@@ -15,6 +15,7 @@ import {
   InstallCapabilityError,
   McpNoElicitationConfirmationHandler,
   PolicyParseError,
+  SqliteAuditLogger,
   OpenCapRuntime,
   ensureLocalStateDir,
   getLocalStatePaths,
@@ -515,6 +516,75 @@ describe("confirmation audit", () => {
       confirmationStatus: "approved",
       reason: "Policy allowed without confirmation.",
     });
+  });
+});
+
+describe("SQLite audit logger", () => {
+  it("creates the SQLite database and writes audit events", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+    const policy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+    const event = createConfirmationAuditEvent(
+      { capabilityId: "github.create_issue", channel: "mcp", policy },
+      {
+        status: "confirmation_required",
+        channel: "mcp",
+        policyDecision: "ask",
+        prompted: false,
+        reason: "confirmation needed",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    try {
+      await logger.record(event);
+
+      expect(await exists(logger.databaseFile)).toBe(true);
+      await expect(logger.recent(10)).resolves.toMatchObject([
+        {
+          id: event.id,
+          capabilityId: "github.create_issue",
+          status: "blocked",
+          policyDecision: "ask",
+          confirmationStatus: "confirmation_required",
+        },
+      ]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("queries the most recent N audit events", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+    const policy = evaluatePolicy(parsePolicyYml("default: allow\nrules: []\n"), {
+      capabilityId: "github.search_repo",
+      permissions: [{ resource: "github.repo", action: "search", risk: "read_only" }],
+    });
+
+    try {
+      await logger.record(
+        createConfirmationAuditEvent(
+          { capabilityId: "github.search_repo", channel: "cli", policy },
+          { status: "approved", channel: "cli", policyDecision: "allow", prompted: false, reason: "first" },
+          new Date("2026-05-09T00:00:00.000Z"),
+        ),
+      );
+      await logger.record(
+        createConfirmationAuditEvent(
+          { capabilityId: "github.search_repo", channel: "cli", policy },
+          { status: "approved", channel: "cli", policyDecision: "allow", prompted: false, reason: "second" },
+          new Date("2026-05-09T00:00:01.000Z"),
+        ),
+      );
+
+      await expect(logger.recent(1)).resolves.toMatchObject([{ reason: "second" }]);
+    } finally {
+      logger.close();
+    }
   });
 });
 
