@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T240 P1：field-level egress map。
 - T241 P2：derived input evidence chain。
 - T242 P1：按 execution mapping 做 input minimization。
 - T243 P1：redacted egress preview。
@@ -3139,7 +3138,7 @@ pnpm --filter @opencap/runtime test
 
 ### T240 P1：field-level egress map
 
-- [ ] T240 P1：field-level egress map
+- [x] T240 P1：field-level egress map
 
 目标：记录 input 字段分别进入 URL/query/header/body 的映射。
 
@@ -3159,6 +3158,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/egress-map.ts` 和 `egress-map.test.ts`，导出 `buildFieldLevelEgressMap`。HTTP manifest 的 URL 模板字段会映射到 `url`/`query`，`execution.body.fields` 会映射到 `body`；未被引用的 input 字段不会出现在 map 中，每个字段携带 data classes 和 redacted 状态，且不记录字段值。
 
 ### T241 P2：derived input evidence chain
 

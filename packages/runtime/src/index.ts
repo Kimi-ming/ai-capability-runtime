@@ -1,7 +1,9 @@
 export { classifyInput } from "./input-classifier.js";
 export type { InputClassificationAction, InputClassificationConfidence, InputClassificationFinding, InputClassificationOptions, InputClassificationResult, InputDataClass } from "./input-classifier.js";
 export { defaultDataEgressPolicy, evaluateDataEgressPolicy } from "./data-egress-policy.js";
+export { buildFieldLevelEgressMap } from "./egress-map.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
+export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";

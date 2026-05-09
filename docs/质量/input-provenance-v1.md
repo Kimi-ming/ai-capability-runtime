@@ -37,20 +37,30 @@ type InputProvenanceV1 = {
 {
   "fields": [
     {
-      "path": "body",
+      "path": "/body",
       "destination": "body",
-      "data_classes": ["free_text_unknown"],
+      "dataClasses": ["free_text_unknown"],
       "redacted": false
     },
     {
-      "path": "labels",
+      "path": "/labels",
       "destination": "body",
-      "data_classes": [],
+      "dataClasses": [],
       "redacted": false
     }
   ]
 }
 ```
+
+当前 `@opencap/runtime` 导出 `buildFieldLevelEgressMap(manifest, input, classification)`。V1 会从 HTTP manifest 的 `execution.url` 模板和 `execution.body.fields` 中提取被渲染的 input 字段：
+
+- URL path/template 字段标记为 `url`。
+- URL query 模板字段标记为 `query`。
+- JSON body mapping 字段标记为 `body`。
+- 未被 URL/body 引用的 input 字段不会进入 map。
+- 每个字段会携带来自 input classification 的 `dataClasses` 和 `redacted` 状态。
+
+Egress map 不记录字段值，只记录 JSON Pointer path、destination、data classes 和 redaction 状态。
 
 ## 不记录
 
