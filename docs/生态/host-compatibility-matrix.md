@@ -24,6 +24,25 @@
 | tool annotations | no | 不作为安全边界 |
 | stderr 日志 | yes | 不影响协议 |
 
+## Tool Metadata 字段兼容性记录
+
+记录口径：`supported` 表示已有测试证据；`pending-smoke` 表示本机识别到 Host 版本但尚未完成手动 smoke；`not-implemented` 表示 OpenCap V1 当前不输出该字段或不把它作为安全边界。
+
+测试日期：2026-05-09。
+OpenCap commit：待发布记录应填写具体 commit；当前文档记录基于 `main` 分支 T218。
+
+| Host | Host version | Test date | Profile | `title` | `description` | `outputSchema` | `annotations` | `_meta` | 证据/备注 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Claude Desktop | 1.3561.0 | 2026-05-09 | `opencap.mcp.tools.v1` | pending-smoke | pending-smoke | pending-smoke | pending-smoke | pending-smoke | 本机 app version 已识别；需要按 `docs/教程/connect-mcp-host.md` 跑手动 smoke 后更新。 |
+| Cursor | 3.3.16 | 2026-05-09 | `opencap.mcp.tools.v1` | pending-smoke | pending-smoke | pending-smoke | pending-smoke | pending-smoke | 本机 app version 已识别；适合用 developer-tools demo 做手动 smoke。 |
+| 自定义 MCP client | OpenCap helper tests 0.1.0-dev | 2026-05-09 | `opencap.mcp.tools.v1` | supported | supported | supported | not-implemented | not-implemented | `packages/mcp/src/index.test.ts` 和 `tool-projection.test.ts` 覆盖 projection payload；V1 当前不依赖 annotations 或 `_meta` 做安全判断。 |
+
+字段说明：
+
+- `title`、`description`、`outputSchema` 是模型可见或 Host 可见字段，兼容性记录只能说明 Host 是否接收/展示，不能改变 Runtime policy。
+- `annotations` 和 `_meta` 未来可用于 Host hints，但 V1 不把它们作为授权、确认、trust 或 policy 输入。
+- 如果 Host 忽略 `outputSchema`，OpenCap 仍必须在 Runtime 内执行 output validation/redaction，并返回结构化结果。
+
 ## 测试记录模板
 
 ```text

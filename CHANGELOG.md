@@ -87,6 +87,7 @@
 - Selection evidence record 文档，定义 selected tool、projection hash、available tools hash 等字段，并明确不参与授权。
 - Capability Review Checklist 和 Capability 提交模板接入 model-visible text 检查，覆盖 prompt injection、secret 请求和隐藏指令。
 - Tool result prompt-surface sanitizer 草案，区分 structuredContent/free text，明确 secret redaction 和 indirect prompt injection 风险边界。
+- Host tool metadata compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 title、description、outputSchema、annotations 和 `_meta` 的字段兼容性。
 - 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。

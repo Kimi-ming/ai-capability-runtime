@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T218 P2：Host tool metadata compatibility records。
 - T220 P1：实现 Result Envelope V1。
 - T221 P1：实现 output schema validation。
 - T222 P1：MCP structuredContent adapter。
@@ -2600,7 +2599,7 @@ git diff --check
 
 ### T218 P2：Host tool metadata compatibility records
 
-- [ ] T218 P2：Host tool metadata compatibility records
+- [x] T218 P2：Host tool metadata compatibility records
 
 目标：记录不同 MCP Host 对 title、description、outputSchema、annotations 和 `_meta` 的处理差异。
 
@@ -2619,6 +2618,8 @@ git diff --check
 ```bash
 git diff --check
 ```
+
+完成记录：`docs/生态/host-compatibility-matrix.md` 已新增 tool metadata 字段兼容性记录，覆盖 Claude Desktop、Cursor 和自定义 MCP client，并绑定 Host version/test date；Claude Desktop 1.3561.0 和 Cursor 3.3.16 当前标记为 `pending-smoke`，自定义 MCP client 绑定 OpenCap helper tests。`docs/生态/interoperability-profiles.md` 已扩展 `opencap.host.record.v1` 字段，要求记录 title、description、outputSchema、annotations 和 `_meta` 支持情况。
 
 ### T219 P0：补齐 Tool Projection、Prompt Surface、发现选择边界和模型可见元数据治理体系
 

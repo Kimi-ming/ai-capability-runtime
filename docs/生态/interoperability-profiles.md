@@ -69,18 +69,31 @@ Profile 用来回答三件事：
 
 ```yaml
 host: claude-desktop
-host_version: unknown
+host_version: 1.3561.0
 opencap_version: 0.1.0-dev
+opencap_commit: <git-sha>
 profile: opencap.mcp.tools.v1
 capability: github.create_issue
-date: 2026-05-07
-result: pass
+test_date: 2026-05-09
+result: pass | fail | pending-smoke
+tool_metadata:
+  title: supported | ignored | pending-smoke
+  description: supported | ignored | pending-smoke
+  output_schema: supported | ignored | pending-smoke
+  annotations: supported | ignored | not-implemented | pending-smoke
+  meta: supported | ignored | not-implemented | pending-smoke
 checks:
   tools_list: pass
   tools_call_dry_run: pass
   confirmation_required: pass
 notes: MCP Host does not provide native confirmation in this test.
 ```
+
+记录要求：
+
+- 每条 compatibility record 必须绑定 Host 名称、Host version、OpenCap commit 和 test date。
+- 字段支持情况必须逐项记录，不能用“兼容 MCP”一笔带过。
+- `annotations` 和 `_meta` 只能作为 Host hint 或未来兼容性信息，不能降低 Runtime policy、confirmation 或 audit 要求。
 
 ## Future Profile
 
