@@ -14,3 +14,12 @@
 ```bash
 pnpm validate
 ```
+
+安装 registry 中的 demo 能力后，可以用示例输入做 dry-run：
+
+```bash
+opencap install http.request_demo
+opencap invoke http.request_demo --dry-run --input examples/simple-http-capability/input.json
+```
+
+`http.request_demo` 是任意 URL 示例，真实执行前必须理解 outbound policy 风险。

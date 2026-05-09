@@ -30,7 +30,6 @@
 
 ### P1：V1 完整体验
 
-- T062 P1：添加示例 input 文件。
 - T073 P1：定义 MCP `confirmation_required` 结果格式。
 - T080 P1：Registry manifest CI 校验。
 - T081 P1：Capability Review Checklist。
@@ -254,6 +253,7 @@
 - 已完成：T055 P1：处理 arbitrary URL Capability 风险。
 - 已完成：T060 P0：实现 `opencap invoke <id> --dry-run`。
 - 已完成：T061 P1：实现真实 `opencap invoke`。
+- 已完成：T062 P1：添加示例 input 文件。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1242,7 +1242,7 @@ pnpm lint
 
 ### T062 P1：添加示例 input 文件
 
-- [ ] T062 P1：添加示例 input 文件
+- [x] T062 P1：添加示例 input 文件
 
 验收标准：
 
@@ -1267,6 +1267,21 @@ pnpm lint
 
 - [ ] T070 P0：选择 MCP TypeScript SDK 并接入
 
+验收标准：
+
+- 选择并记录 MCP TypeScript SDK 依赖。
+- `@opencap/mcp` 可以构建最小 server 模块。
+- 不改变 Runtime Kernel 边界，MCP 只作为 adapter。
+- 为 T071 `tools/list` 和 T072 `tools/call` 留出清晰入口。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp build
+pnpm lint
+pnpm validate
+```
+
 任务：
 
 - 确认 package 名和版本
@@ -1284,6 +1299,14 @@ pnpm lint
 - inputSchema 来自 manifest
 - description 包含风险摘要
 - tool name 冲突时启动失败
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+pnpm --filter @opencap/mcp build
+pnpm lint
+```
 
 ### T072 P0：实现 tools/call 路由
 
