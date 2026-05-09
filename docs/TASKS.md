@@ -30,7 +30,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T122 P2：版本策略。
 - T123 P2：npm package 发布预案。
 - T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
 - T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
@@ -1991,7 +1990,7 @@ git diff --check
 
 ### T122 P2：版本策略
 
-- [ ] T122 P2：版本策略
+- [x] T122 P2：版本策略
 
 决策：
 
@@ -2013,6 +2012,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：`docs/规范/versioning-and-compatibility.md` 已补强 package version、manifest schema version、registry compatibility、alpha/beta/1.0 兼容口径和 `0.x` breaking change 记录规则；文档明确 Capability 自身 `version`、manifest schema 和 package version 不能互相替代。`docs/README.md` 与 `docs/INDEX.md` 已增加入口。
+
 ### T123 P2：npm package 发布预案
 
 - [ ] T123 P2：npm package 发布预案
@@ -2023,6 +2024,20 @@ git diff --check
 - `@opencap/spec`
 - `@opencap/runtime`
 - `@opencap/mcp`
+
+验收标准：
+
+- 新增或更新中文 npm package 发布预案，覆盖 package 范围、发布顺序、trusted publishing/provenance、发布前验证和不发布条件。
+- 明确当前 alpha 阶段哪些 package 可发布、哪些仍为占位或暂缓。
+- 不要求真实发布 npm package，只形成可执行预案。
+- 从 `docs/README.md` 或 `docs/INDEX.md` 可发现。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ---
 

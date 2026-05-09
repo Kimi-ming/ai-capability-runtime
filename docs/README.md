@@ -51,6 +51,7 @@
 ### 我要实现 V1 主路径
 
 - [能力清单](规范/capability-manifest.md)
+- [版本和兼容性策略](规范/versioning-and-compatibility.md)
 - [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md)
 - [命令行契约 V1](设计/cli-contract-v1.md)
 - [本地状态 V1](设计/local-state-v1.md)
