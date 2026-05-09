@@ -99,15 +99,36 @@ V1 只支持 `type: http` 的 Capability。`mcp` 和 `local` 类型留到后续 
 
 ## 快速开始
 
-当前仓库已经包含 V1 项目骨架和文档。第一阶段实现目标是 CLI 和 Runtime 闭环。
+当前仓库已经可以跑通 CLI 到 Runtime 的最小本地闭环：validate、install、list、invoke dry-run 和 logs。示例命令使用临时 state dir，不会污染仓库根目录或用户真实项目下的 `opencap.local/`。
 
 ```bash
 pnpm install
 pnpm validate
+
+SMOKE_STATE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/opencap-readme-state.XXXXXX")"
+
 pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.create_issue
+pnpm --filter @opencap/cli dev -- install github.create_issue --state-dir "$SMOKE_STATE_DIR"
+pnpm --filter @opencap/cli dev -- list --state-dir "$SMOKE_STATE_DIR"
+pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
+pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run
+
+rm -rf "$SMOKE_STATE_DIR"
 ```
 
-Runtime 实现后，MCP Host 可以这样加载 OpenCap：
+常用验证命令：
+
+```bash
+pnpm test
+pnpm build
+pnpm lint
+```
+
+### MCP 当前状态
+
+V1 的目标是让 MCP Host 通过 `opencap serve --mcp` 发现并调用已安装 Capability。当前代码已经有 MCP tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper，但 CLI 的 `serve --mcp` 仍是骨架入口，还不能作为完整 MCP server 使用。
+
+未来完整 Runtime 实现后，MCP Host 配置形态会是：
 
 ```json
 {

@@ -26,7 +26,6 @@
 
 ### P1：V1 完整体验
 
-- T112 P1：README 跟随实现更新。
 - T113 P1：新增贡献者上手教程。
 - T116 P1：维护术语表和文档索引。
 - T120 P1：定义 alpha release checklist。
@@ -1871,7 +1870,7 @@ git diff --check
 
 ### T112 P1：README 跟随实现更新
 
-- [ ] T112 P1：README 跟随实现更新
+- [x] T112 P1：README 跟随实现更新
 
 当 CLI 可用后，更新快速开始为真实命令。
 
@@ -1890,6 +1889,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：README 快速开始已更新为当前真实可运行的 CLI 闭环，覆盖 validate、install、list、invoke dry-run 和 logs，并使用临时 `--state-dir` 避免污染真实 `opencap.local/`。README 同时明确 `serve --mcp` 当前仍是骨架入口，MCP helper 已存在但完整 MCP server 尚未实现。
+
 ### T113 P1：新增贡献者上手教程
 
 - [ ] T113 P1：新增贡献者上手教程
@@ -1897,6 +1898,20 @@ git diff --check
 新增：
 
 - `docs/教程/first-contribution.md`
+
+验收标准：
+
+- 新增中文贡献者上手教程，覆盖环境准备、选择任务、实现、验证、文档同步和提交推送。
+- 教程链接到 `docs/TASKS.md`、`docs/TESTING.md`、`docs/HANDOFF.md` 和贡献指南。
+- `docs/README.md` 与 `docs/INDEX.md` 增加教程入口。
+- 内容与当前 continuous-doc-dev 工作流一致，不引入过时命令。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T114 P2：新增架构图
 
