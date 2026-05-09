@@ -10,6 +10,10 @@
 - 支持 `opencap logs` 做本地查询。
 - 为未来 OpenTelemetry/export 留字段空间。
 
+## 当前最小实现
+
+当前 Runtime 已有 `AuditLogger` 接口和 `InMemoryAuditLogger`，用于在 SQLite 落地前记录 confirmation 相关审计事件。T040 会把同一接口接到 SQLite 存储。
+
 ## 存储
 
 V1 使用 SQLite：

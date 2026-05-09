@@ -5,10 +5,13 @@ import { describe, expect, it } from "vitest";
 import {
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
+  confirmWithAudit,
+  createConfirmationAuditEvent,
   defaultPolicySet,
   evaluatePolicy,
   DEFAULT_STATE_DIR_NAME,
   OPENCAP_STATE_DIR_ENV,
+  InMemoryAuditLogger,
   InstallCapabilityError,
   McpNoElicitationConfirmationHandler,
   PolicyParseError,
@@ -395,6 +398,81 @@ describe("confirmation handlers", () => {
       status: "approved",
       policyDecision: "allow",
       prompted: false,
+    });
+  });
+});
+
+describe("confirmation audit", () => {
+  it("records confirmation_required as a blocked audit event", async () => {
+    const logger = new InMemoryAuditLogger();
+    const policy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+
+    const result = await confirmWithAudit(new McpNoElicitationConfirmationHandler(), {
+      capabilityId: "github.create_issue",
+      channel: "mcp",
+      policy,
+    }, logger);
+
+    expect(result.confirmation.status).toBe("confirmation_required");
+    expect(result.auditEvent).toMatchObject({
+      capabilityId: "github.create_issue",
+      status: "blocked",
+      policyDecision: "ask",
+      confirmationStatus: "confirmation_required",
+    });
+    expect(logger.events).toHaveLength(1);
+  });
+
+  it("records policy deny as a denied audit event without prompting", async () => {
+    const logger = new InMemoryAuditLogger();
+    const policy = evaluatePolicy(parsePolicyYml("default: deny\nrules: []\n"), {
+      capabilityId: "github.delete_issue",
+      permissions: [{ resource: "github.issue", action: "delete", risk: "destructive" }],
+    });
+
+    const result = await confirmWithAudit(new CliConfirmationHandler(async () => {
+      throw new Error("prompt should not be called");
+    }), {
+      capabilityId: "github.delete_issue",
+      channel: "cli",
+      policy,
+    }, logger);
+
+    expect(result.confirmation.status).toBe("denied");
+    expect(result.auditEvent).toMatchObject({
+      capabilityId: "github.delete_issue",
+      status: "denied",
+      policyDecision: "deny",
+      confirmationStatus: "denied",
+    });
+    expect(logger.events).toEqual([result.auditEvent]);
+  });
+
+  it("creates executed audit events for approved confirmations", () => {
+    const policy = evaluatePolicy(parsePolicyYml("default: allow\nrules: []\n"), {
+      capabilityId: "github.search_repo",
+      permissions: [{ resource: "github.repo", action: "search", risk: "read_only" }],
+    });
+    const event = createConfirmationAuditEvent(
+      { capabilityId: "github.search_repo", channel: "cli", policy },
+      {
+        status: "approved",
+        channel: "cli",
+        policyDecision: "allow",
+        prompted: false,
+        reason: "Policy allowed without confirmation.",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    expect(event).toMatchObject({
+      timestamp: "2026-05-09T00:00:00.000Z",
+      status: "executed",
+      confirmationStatus: "approved",
+      reason: "Policy allowed without confirmation.",
     });
   });
 });

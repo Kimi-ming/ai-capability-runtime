@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine 和 Confirmation Handler 接口
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler 和内存审计事件
 
 ## 当前代码状态
 
@@ -24,7 +24,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine 和 Confirmation Handler。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler 和内存 AuditLogger。
 - `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
 - `@opencap/sdk` 暂缓实现。
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T033 P1：记录 ask/deny 的审计日志。
+Next task: T034 P2：支持 `--yes` 非交互确认。
 
 推荐第一个任务：
 
 ```text
-T033：记录 ask/deny 的审计日志
+T034：支持 `--yes` 非交互确认
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny 并处理最小确认结果
-- T033 将开始把 ask/deny/confirmation_required 等阻断路径写入审计证据
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认并生成内存审计事件
+- 按当前任务文件顺序，T034 将先补 CLI `--yes` 非交互确认边界，然后再进入 T040 SQLite 审计存储
 
 ## 最近验证
 
@@ -66,13 +66,13 @@ T033：记录 ask/deny 的审计日志
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- Audit Logger 尚未实现，ask/deny/confirmation_required 还没有审计证据。
+- SQLite Audit Logger 尚未实现，当前只有内存审计事件。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T033：记录 ask/deny 的审计日志。
+1. 实现 T034：`--yes` 非交互确认边界。
 2. 实现 T040：SQLite audit log 的最小写入能力。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
@@ -367,3 +367,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T032：`@opencap/runtime` 新增 `ConfirmationHandler`、`CliConfirmationHandler` 和 `McpNoElicitationConfirmationHandler`。CLI handler 支持注入 prompt；MCP no-elicitation handler 对 ask 返回 `confirmation_required`；allow/deny 不进入确认 prompt。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 32 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 和 `git diff --check` 通过。下一步按任务表进入 T033：记录 ask/deny 的审计日志。
+
+## ask/deny 审计事件已实现
+
+已完成 T033：`@opencap/runtime` 新增 `AuditLogger` 接口、`InMemoryAuditLogger`、`createConfirmationAuditEvent` 和 `confirmWithAudit`。`confirmation_required` 会记录为 blocked，policy deny 记录为 denied，approved 记录为 executed。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 35 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。下一步按任务表进入 T034：支持 `--yes` 非交互确认。

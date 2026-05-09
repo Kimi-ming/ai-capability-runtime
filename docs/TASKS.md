@@ -36,7 +36,6 @@
 
 ### P1：V1 完整体验
 
-- T033 P1：记录 ask/deny 的审计日志。
 - T042 P1：实现 `opencap logs`。
 - T053 P1：定义 HTTP request body manifest 字段。
 - T054 P1：实现 output normalization。
@@ -254,6 +253,7 @@
 - 已完成：T030 P0：实现 policy 文件格式和 parser。
 - 已完成：T031 P0：实现 Policy Engine。
 - 已完成：T032 P0：实现 Confirmation Handler 接口。
+- 已完成：T033 P1：记录 ask/deny 的审计日志。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,15 +290,15 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T033 记录 ask/deny 的审计日志
-2. T040 Audit log
-3. T050 HTTP executor dry-run
-4. T060 `opencap invoke`
-5. T070 MCP bridge
-6. T080 Registry manifest CI 校验
-7. T081 Capability Review Checklist
-8. T023 Runtime loader CLI integration
-9. T042 `opencap logs`
+1. T040 Audit log 存储
+2. T041 redaction 和 input hash
+3. T042 `opencap logs`
+4. T050 HTTP executor dry-run
+5. T060 `opencap invoke`
+6. T070 MCP bridge
+7. T080 Registry manifest CI 校验
+8. T081 Capability Review Checklist
+9. T023 Runtime loader CLI integration
 10. T050 HTTP executor dry-run
 
 ---
@@ -796,7 +796,7 @@ pnpm lint
 
 ### T033 P1：记录 ask/deny 的审计日志
 
-- [ ] T033 P1：记录 ask/deny 的审计日志
+- [x] T033 P1：记录 ask/deny 的审计日志
 
 要求：
 
@@ -819,6 +819,13 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `AuditLogger`、`InMemoryAuditLogger`、`createConfirmationAuditEvent` 和 `confirmWithAudit`。
+- `confirmation_required` 会记录为 blocked。
+- policy deny 会记录为 denied。
+- approved confirmation 会记录为 executed，为后续真实 invoke 审计保留状态语言。
+
 ### T034 P2：支持 `--yes` 非交互确认
 
 - [ ] T034 P2：支持 `--yes` 非交互确认
@@ -829,6 +836,21 @@ pnpm lint
 
 - 不得影响 MCP 模式
 - financial/destructive 默认不允许 `--yes` 绕过，除非策略明确允许
+
+验收标准：
+
+- CLI ask 在 `--yes` 模式下可返回 approved。
+- MCP ask 不受 `--yes` 影响，仍返回 `confirmation_required`。
+- financial/destructive ask 不会被 `--yes` 自动批准。
+- policy deny 不会被 `--yes` 覆盖。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ---
 
@@ -846,6 +868,14 @@ pnpm lint
 - 写入 invocation log
 - 查询最近 N 条
 - 支持测试时使用临时 state dir
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T041 P0：实现 redaction 和 input hash
 

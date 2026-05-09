@@ -498,6 +498,74 @@ export class McpNoElicitationConfirmationHandler implements ConfirmationHandler 
   }
 }
 
+export type AuditInvocationStatus = "blocked" | "denied" | "executed";
+
+export interface AuditEvent {
+  id: string;
+  timestamp: string;
+  channel: ConfirmationChannel;
+  capabilityId: string;
+  status: AuditInvocationStatus;
+  policyDecision: PolicyDecision;
+  confirmationStatus: ConfirmationStatus;
+  reason: string;
+  matchedRuleId?: string;
+}
+
+export interface AuditLogger {
+  record(event: AuditEvent): Promise<void>;
+}
+
+export class InMemoryAuditLogger implements AuditLogger {
+  readonly events: AuditEvent[] = [];
+
+  async record(event: AuditEvent): Promise<void> {
+    this.events.push(event);
+  }
+}
+
+function auditStatusFromConfirmation(status: ConfirmationStatus): AuditInvocationStatus {
+  if (status === "denied") {
+    return "denied";
+  }
+
+  if (status === "approved") {
+    return "executed";
+  }
+
+  return "blocked";
+}
+
+export function createConfirmationAuditEvent(
+  request: ConfirmationRequest,
+  confirmation: ConfirmationResult,
+  timestamp = new Date(),
+): AuditEvent {
+  return {
+    id: randomUUID(),
+    timestamp: timestamp.toISOString(),
+    channel: request.channel,
+    capabilityId: request.capabilityId,
+    status: auditStatusFromConfirmation(confirmation.status),
+    policyDecision: request.policy.decision,
+    confirmationStatus: confirmation.status,
+    reason: confirmation.reason,
+    matchedRuleId: request.policy.matchedRuleId,
+  };
+}
+
+export async function confirmWithAudit(
+  handler: ConfirmationHandler,
+  request: ConfirmationRequest,
+  logger: AuditLogger,
+): Promise<{ confirmation: ConfirmationResult; auditEvent: AuditEvent }> {
+  const confirmation = await handler.confirm(request);
+  const auditEvent = createConfirmationAuditEvent(request, confirmation);
+  await logger.record(auditEvent);
+
+  return { confirmation, auditEvent };
+}
+
 function firstNonEmpty(...values: Array<string | undefined>): string | undefined {
   return values.find((value) => typeof value === "string" && value.trim().length > 0)?.trim();
 }
