@@ -27,6 +27,7 @@
 | [开发任务总表](TASKS.md) | 任务队列和验收标准 | 每次新增、拆分、完成任务时 |
 | [当前状态交接](HANDOFF.md) | 当前阶段、验证、下一步 | 每次任务结束时 |
 | [验证策略](TESTING.md) | 可运行验证和测试计划 | 命令、测试范围、缺口变化时 |
+| [Alpha Release Checklist](releases/alpha-checklist.md) | Alpha 发布前门禁 | 发布范围、阻断项或发布流程变化时 |
 | [决策索引](DECISIONS.md) | 已接受 ADR 总览 | 新增或调整 ADR 时 |
 | [风险登记](RISKS.md) | High/Medium/Low 风险 | 发现、缓解或关闭风险时 |
 
@@ -84,6 +85,7 @@
 6. [验证策略](TESTING.md)
 7. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
 8. [开发工作流](WORKFLOW.md)
+9. [Alpha Release Checklist](releases/alpha-checklist.md)
 
 ### Capability 贡献评审路径
 

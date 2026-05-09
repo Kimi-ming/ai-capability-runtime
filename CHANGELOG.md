@@ -21,6 +21,7 @@
 - README 快速开始更新为当前真实可运行的 CLI 闭环，并明确 `serve --mcp` 仍是骨架入口。
 - 第一次贡献教程，串联环境准备、任务选择、验证、文档同步和提交推送。
 - 架构总览新增 V1 Runtime 主路径 Mermaid 图，明确 CLI、Runtime、Policy、Audit、HTTP Executor、Local State 和外部 API 的关系。
+- Alpha release checklist，区分发布阻断项和可后续跟进项，并明确未实现能力边界。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
 - Capability PR 评审指南，覆盖维护者合并前的阻断项、follow-up 项和安全检查。

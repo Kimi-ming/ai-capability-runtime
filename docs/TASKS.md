@@ -27,7 +27,6 @@
 ### P1：V1 完整体验
 
 - T116 P1：维护术语表和文档索引。
-- T120 P1：定义 alpha release checklist。
 - T121 P1：CHANGELOG。
 
 ### P2/P3：增强和后续扩展
@@ -1945,7 +1944,7 @@ git diff --check
 
 ### T120 P1：定义 alpha release checklist
 
-- [ ] T120 P1：定义 alpha release checklist
+- [x] T120 P1：定义 alpha release checklist
 
 新增：
 
@@ -1965,6 +1964,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：新增 `docs/releases/alpha-checklist.md`，覆盖 alpha 发布口径、阻断项、可后续跟进项和发布前操作；清单明确完整 MCP server、Console、Cloud、OAuth、签名和 provenance 不是当前 alpha 已完成能力。`docs/README.md` 与 `docs/INDEX.md` 已增加入口。
+
 ### T121 P1：CHANGELOG
 
 - [ ] T121 P1：CHANGELOG
@@ -1972,6 +1973,20 @@ git diff --check
 新增：
 
 - `CHANGELOG.md`
+
+验收标准：
+
+- `CHANGELOG.md` 存在并包含 `未发布` 部分。
+- 未发布部分覆盖当前已实现能力、文档/测试增强和已知缺口。
+- 已知缺口与 README、HANDOFF 和 alpha checklist 不冲突。
+- 不把未实现的 MCP server、Console、Cloud 或 OAuth 写成已完成。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T122 P2：版本策略
 
