@@ -62,6 +62,8 @@ const LINT_RULES: LintRuleDefinition[] = [
     patterns: [
       /\b(return|reveal|send|include|paste|print|exfiltrate)\b[\s\S]{0,80}\b(secret|token|api\s*key|password|credential)s?\b/i,
       /\b(secret|token|api\s*key|password|credential)s?\b[\s\S]{0,80}\b(return|reveal|send|include|paste|print|exfiltrate)\b/i,
+      /\b(fill\s+in|enter|provide|input|write|put|place)\b[\s\S]{0,80}\b(secret|token|api\s*key|password|credential)s?\b/i,
+      /\b(secret|token|api\s*key|password|credential)s?\b[\s\S]{0,80}\b(fill\s+in|enter|provide|input|write|put|place)\b/i,
     ],
   },
 ];
@@ -72,6 +74,12 @@ function escapeJsonPointerSegment(segment: string): string {
 
 function childPath(parentPath: string, segment: string): string {
   return `${parentPath}/${escapeJsonPointerSegment(segment)}`;
+}
+
+function normalizeForMatching(value: string): string {
+  return value
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g, "");
 }
 
 function excerpt(value: string): string {
@@ -119,8 +127,10 @@ export function lintModelVisibleMetadata(manifest: CapabilityManifest): ModelVis
   const findings: ModelVisibleMetadataFinding[] = [];
 
   for (const surface of collectModelVisibleSurfaces(manifest)) {
+    const normalizedValue = normalizeForMatching(surface.value);
+
     for (const rule of LINT_RULES) {
-      if (rule.patterns.some((pattern) => pattern.test(surface.value))) {
+      if (rule.patterns.some((pattern) => pattern.test(normalizedValue))) {
         findings.push({
           rule: rule.rule,
           severity: "error",

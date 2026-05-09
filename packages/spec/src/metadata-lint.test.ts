@@ -1,5 +1,6 @@
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { lintModelVisibleMetadata, type CapabilityManifest } from "./index.js";
+import { lintModelVisibleMetadata, loadManifest, validateManifest, type CapabilityManifest, type ModelVisibleMetadataLintRule } from "./index.js";
 
 function baseManifest(overrides: Partial<CapabilityManifest> = {}): CapabilityManifest {
   return {
@@ -128,4 +129,27 @@ describe("lintModelVisibleMetadata", () => {
       }),
     ]);
   });
+  it.each([
+    ["tool-description-injection.yml", "instruction_override"],
+    ["schema-poisoning-forced-tool.yml", "forced_tool_choice"],
+    ["schema-token-collection.yml", "secret_exfiltration"],
+    ["hidden-unicode-injection.yml", "instruction_override"],
+  ] satisfies Array<[string, ModelVisibleMetadataLintRule]>)(
+    "flags prompt-surface negative fixture %s",
+    async (fixtureName, expectedRule) => {
+      const fixturePath = fileURLToPath(new URL(`../fixtures/invalid/${fixtureName}`, import.meta.url));
+      const manifest = await loadManifest(fixturePath);
+      const validation = await validateManifest(manifest, fixturePath);
+
+      expect(validation.ok).toBe(true);
+      if (!validation.ok) {
+        return;
+      }
+
+      const findings = lintModelVisibleMetadata(validation.manifest);
+
+      expect(findings).toEqual([expect.objectContaining({ rule: expectedRule, severity: "error" })]);
+    },
+  );
+
 });

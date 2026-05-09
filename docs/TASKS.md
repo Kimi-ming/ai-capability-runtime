@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T211 P1：补充 prompt-surface negative fixtures。
 - T212 P1：记录 tool projection hash/evidence。
 - T213 P1：MCP tools/list 使用 Runtime-generated risk summary。
 - T214 P2：Discovery profile RFC。
@@ -2431,7 +2430,7 @@ pnpm --filter @opencap/spec test
 
 ### T211 P1：补充 prompt-surface negative fixtures
 
-- [ ] T211 P1：补充 prompt-surface negative fixtures
+- [x] T211 P1：补充 prompt-surface negative fixtures
 
 目标：把 tool description injection、schema poisoning、hidden text 等风险转成可复用测试夹具。
 
@@ -2452,6 +2451,8 @@ pnpm --filter @opencap/spec test
 ```bash
 pnpm --filter @opencap/spec test
 ```
+
+完成记录：新增 `packages/spec/fixtures/invalid/` 下四个 prompt-surface negative fixtures，覆盖 tool description injection、schema forced tool choice、schema token collection 和 hidden unicode injection；`metadata-lint.test.ts` 会加载 fixture、先确认 manifest schema 合法，再断言 lint 返回对应结构化 finding。`metadata-lint.ts` 已补充 secret collection 语义，并在匹配前移除零宽和方向控制字符以阻断隐藏注入绕过。
 
 ### T212 P1：记录 tool projection hash/evidence
 
