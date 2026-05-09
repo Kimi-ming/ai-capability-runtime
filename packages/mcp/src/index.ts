@@ -1,4 +1,11 @@
 import type { CapabilityManifest } from "@opencap/spec";
+import {
+  McpNoElicitationConfirmationHandler,
+  confirmWithAudit,
+  evaluatePolicy,
+  type AuditLogger,
+  type PolicySet,
+} from "@opencap/runtime";
 
 export interface CapabilityLike {
   id: string;
@@ -83,4 +90,72 @@ export function buildMcpToolsList(manifests: CapabilityManifest[]): McpToolsList
   return {
     tools: manifests.map((manifest) => describeCapabilityAsTool(manifest)),
   };
+}
+
+export interface McpToolCallRequest {
+  name: string;
+  arguments?: unknown;
+}
+
+export interface McpToolCallResult {
+  isError: boolean;
+  content: Array<{ type: "text"; text: string }>;
+  structuredContent?: unknown;
+}
+
+export interface McpToolCallRouterOptions {
+  policySet: PolicySet;
+  auditLogger: AuditLogger;
+  execute: (manifest: CapabilityManifest, input: unknown) => Promise<unknown>;
+}
+
+function textResult(text: string, structuredContent: unknown, isError: boolean): McpToolCallResult {
+  return {
+    isError,
+    content: [{ type: "text", text }],
+    structuredContent,
+  };
+}
+
+function findManifestByToolName(manifests: CapabilityManifest[], toolName: string): CapabilityManifest | undefined {
+  return manifests.find((manifest) => capabilityIdToMcpToolName(manifest.id) === toolName);
+}
+
+export async function routeMcpToolCall(
+  manifests: CapabilityManifest[],
+  request: McpToolCallRequest,
+  options: McpToolCallRouterOptions,
+): Promise<McpToolCallResult> {
+  buildMcpToolNameMap(manifests);
+  const manifest = findManifestByToolName(manifests, request.name);
+
+  if (manifest === undefined) {
+    return textResult(`Unknown MCP tool: ${request.name}`, { error: { code: "TOOL_NOT_FOUND", toolName: request.name } }, true);
+  }
+
+  const policy = evaluatePolicy(options.policySet, {
+    capabilityId: manifest.id,
+    permissions: manifest.permissions,
+    channel: "mcp",
+  });
+  const { confirmation } = await confirmWithAudit(
+    new McpNoElicitationConfirmationHandler(),
+    { capabilityId: manifest.id, channel: "mcp", policy, input: request.arguments },
+    options.auditLogger,
+  );
+
+  if (confirmation.status === "denied") {
+    return textResult(confirmation.reason, { error: { code: "POLICY_DENIED", message: confirmation.reason } }, true);
+  }
+
+  if (confirmation.status === "confirmation_required") {
+    return textResult(confirmation.reason, { error: { code: "CONFIRMATION_REQUIRED", message: confirmation.reason } }, true);
+  }
+
+  if (confirmation.status !== "approved") {
+    return textResult(confirmation.reason, { error: { code: "CONFIRMATION_REJECTED", message: confirmation.reason } }, true);
+  }
+
+  const output = await options.execute(manifest, request.arguments ?? {});
+  return textResult("Tool call completed.", output, false);
 }

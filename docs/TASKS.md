@@ -22,7 +22,6 @@
 ### P0：V1 必须先完成
 
 - T070 P0：选择 MCP TypeScript SDK 并接入。
-- T072 P0：实现 MCP `tools/call` 路由。
 - T090 P0：实现禁止 token passthrough 的约束。
 - T100 P0：修正并跑通 pnpm workspace。
 - T101 P0：CI 基础通过。
@@ -254,6 +253,7 @@
 - 已完成：T061 P1：实现真实 `opencap invoke`。
 - 已完成：T062 P1：添加示例 input 文件。
 - 已完成：T071 P0：实现 tools/list。
+- 已完成：T072 P0：实现 tools/call 路由。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1319,7 +1319,7 @@ pnpm lint
 
 ### T072 P0：实现 tools/call 路由
 
-- [ ] T072 P0：实现 tools/call 路由
+- [x] T072 P0：实现 tools/call 路由
 
 验收标准：
 
@@ -1337,16 +1337,34 @@ pnpm --filter @opencap/mcp build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/mcp` 已导出 `routeMcpToolCall`。
+- tool name 会反查 Capability manifest。
+- allow 会调用注入的 executor 并返回 structuredContent。
+- deny 会返回 `POLICY_DENIED` 结构化错误。
+- ask 在无 elicitation MCP 路径返回 `CONFIRMATION_REQUIRED`。
+- allow/deny/ask 都会通过 Runtime confirmation audit 记录。
+
+
 ### T073 P1：MCP confirmation_required 结果格式
 
 - [ ] T073 P1：MCP confirmation_required 结果格式
 
-需要定义：
+验收标准：
 
-- result content
-- structured metadata
-- host 如何让用户重试
-- 是否生成 confirmation token
+- `confirmation_required` 的 `content` 文案稳定。
+- `structuredContent.error.code` 使用 `CONFIRMATION_REQUIRED`。
+- metadata 包含 capability id、policy decision 和重试提示。
+- 明确 V1 不生成 confirmation token，用户需要在 CLI/Console 改 policy 或未来 elicitation profile 中重试。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+pnpm --filter @opencap/mcp build
+pnpm lint
+```
 
 ### T074 P2：MCP Host 手动测试文档
 

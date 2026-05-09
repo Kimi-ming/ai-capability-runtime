@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { InMemoryAuditLogger, parsePolicyYml } from "@opencap/runtime";
 import {
   McpToolNameCollisionError,
   buildMcpToolNameMap,
   buildMcpToolsList,
   capabilityIdToMcpToolName,
   describeCapabilityAsTool,
+  routeMcpToolCall,
 } from "./index.js";
 
 function manifest() {
@@ -29,6 +31,55 @@ function manifest() {
     metadata: { trust_level: "experimental" },
   };
 }
+
+
+describe("MCP tools/call routing", () => {
+  it("routes allowed tool calls to the executor", async () => {
+    const logger = new InMemoryAuditLogger();
+    const result = await routeMcpToolCall([manifest()], { name: "github_create_issue", arguments: { title: "Bug" } }, {
+      policySet: parsePolicyYml("default: allow\nrules: []\n"),
+      auditLogger: logger,
+      execute: async (_manifest, input) => ({ ok: true, input }),
+    });
+
+    expect(result).toMatchObject({
+      isError: false,
+      structuredContent: { ok: true, input: { title: "Bug" } },
+    });
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0]).toMatchObject({ status: "executed", confirmationStatus: "approved" });
+  });
+
+  it("returns structured errors for denied tool calls", async () => {
+    const logger = new InMemoryAuditLogger();
+    const result = await routeMcpToolCall([manifest()], { name: "github_create_issue", arguments: { title: "Bug" } }, {
+      policySet: parsePolicyYml("default: deny\nrules: []\n"),
+      auditLogger: logger,
+      execute: async () => { throw new Error("should not execute"); },
+    });
+
+    expect(result).toMatchObject({
+      isError: true,
+      structuredContent: { error: { code: "POLICY_DENIED" } },
+    });
+    expect(logger.events[0]).toMatchObject({ status: "denied", confirmationStatus: "denied" });
+  });
+
+  it("returns confirmation_required for ask decisions without MCP elicitation", async () => {
+    const logger = new InMemoryAuditLogger();
+    const result = await routeMcpToolCall([manifest()], { name: "github_create_issue", arguments: { title: "Bug" } }, {
+      policySet: parsePolicyYml("default: ask\nrules: []\n"),
+      auditLogger: logger,
+      execute: async () => { throw new Error("should not execute"); },
+    });
+
+    expect(result).toMatchObject({
+      isError: true,
+      structuredContent: { error: { code: "CONFIRMATION_REQUIRED" } },
+    });
+    expect(logger.events[0]).toMatchObject({ status: "blocked", confirmationStatus: "confirmation_required" });
+  });
+});
 
 describe("MCP tool name mapping", () => {
   it("maps capability ids to MCP-safe tool names", () => {
