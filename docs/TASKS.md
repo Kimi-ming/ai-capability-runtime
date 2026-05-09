@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T220 P1：实现 Result Envelope V1。
 - T221 P1：实现 output schema validation。
 - T222 P1：MCP structuredContent adapter。
 - T223 P1：Tool result sanitizer。
@@ -2648,7 +2647,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 ### T220 P1：实现 Result Envelope V1
 
-- [ ] T220 P1：实现 Result Envelope V1
+- [x] T220 P1：实现 Result Envelope V1
 
 目标：Runtime 统一返回 `ResultEnvelopeV1`，MCP/CLI 只做 adapter。
 
@@ -2669,6 +2668,8 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：Runtime 新增 Result Envelope V1 类型和 builder，包含 `RESULT_ENVELOPE_VERSION`、`createResultEnvelope`、`resultEnvelopeFromDryRunPlan`、`resultEnvelopeFromHttpExecutionResult`、`blockedResultEnvelope` 和 `confirmationRequiredResultEnvelope`；可表达 success、dry_run、blocked、confirmation_required、failed 和 unknown。HTTP failed/timeout 会返回结构化 `error`，不会只依赖自由文本；runtime 测试新增 `packages/runtime/src/result-envelope.test.ts` 覆盖 5 个 Result Envelope 场景。
 
 ### T221 P1：实现 output schema validation
 

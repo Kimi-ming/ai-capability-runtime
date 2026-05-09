@@ -332,6 +332,257 @@ export interface HttpExecutionResult {
   };
 }
 
+export const RESULT_ENVELOPE_VERSION = "opencap.result_envelope.v1";
+
+export type ResultEnvelopeStatus = "success" | "dry_run" | "blocked" | "confirmation_required" | "failed" | "unknown";
+export type ResultWarningSeverity = "info" | "warning" | "error";
+
+export interface ResultWarningV1 {
+  code: string;
+  message: string;
+  severity: ResultWarningSeverity;
+}
+
+export interface ResultEvidenceSummaryV1 {
+  inputHash?: string;
+  risk?: string;
+  policyDecision?: string;
+  confirmationStatus?: string;
+  requestStarted?: boolean;
+  targetOrigin?: string;
+  httpMethod?: string;
+  httpStatus?: number;
+  errorCode?: string;
+  resolvedUrl?: string;
+}
+
+export interface ResultEnvelopeV1 {
+  envelopeVersion: typeof RESULT_ENVELOPE_VERSION;
+  invocationId: string;
+  capabilityId: string;
+  status: ResultEnvelopeStatus;
+  outcome: string;
+  isError: boolean;
+  structuredContent?: unknown;
+  textSummary?: string;
+  warnings: ResultWarningV1[];
+  evidence: ResultEvidenceSummaryV1;
+}
+
+export interface CreateResultEnvelopeInput {
+  invocationId?: string;
+  capabilityId: string;
+  status: ResultEnvelopeStatus;
+  outcome?: string;
+  structuredContent?: unknown;
+  textSummary?: string;
+  warnings?: ResultWarningV1[];
+  evidence?: ResultEvidenceSummaryV1;
+}
+
+export interface ResultEnvelopeBuildOptions {
+  invocationId?: string;
+  evidence?: ResultEvidenceSummaryV1;
+}
+
+function resultStatusIsError(status: ResultEnvelopeStatus): boolean {
+  return status !== "success" && status !== "dry_run";
+}
+
+function errorCodeFromStructuredContent(structuredContent: unknown): string | undefined {
+  if (!isRecord(structuredContent)) {
+    return undefined;
+  }
+
+  const error = structuredContent.error;
+  if (!isRecord(error) || typeof error.code !== "string") {
+    return undefined;
+  }
+
+  return error.code;
+}
+
+function defaultTextSummary(input: CreateResultEnvelopeInput): string {
+  const outcome = input.outcome ?? input.status;
+
+  if (input.status === "success") {
+    return `${input.capabilityId} succeeded.`;
+  }
+
+  if (input.status === "dry_run") {
+    return `${input.capabilityId} dry run generated.`;
+  }
+
+  if (input.status === "blocked") {
+    return `${input.capabilityId} blocked.`;
+  }
+
+  if (input.status === "confirmation_required") {
+    return `${input.capabilityId} requires confirmation.`;
+  }
+
+  if (input.status === "unknown" && outcome === "unknown_after_timeout") {
+    return `${input.capabilityId} outcome is unknown after timeout.`;
+  }
+
+  const errorCode = errorCodeFromStructuredContent(input.structuredContent);
+  return errorCode === undefined ? `${input.capabilityId} ${input.status}.` : `${input.capabilityId} ${input.status} with ${errorCode}.`;
+}
+
+export function createResultEnvelope(input: CreateResultEnvelopeInput): ResultEnvelopeV1 {
+  return {
+    envelopeVersion: RESULT_ENVELOPE_VERSION,
+    invocationId: input.invocationId ?? randomUUID(),
+    capabilityId: input.capabilityId,
+    status: input.status,
+    outcome: input.outcome ?? input.status,
+    isError: resultStatusIsError(input.status),
+    structuredContent: input.structuredContent,
+    textSummary: input.textSummary ?? defaultTextSummary(input),
+    warnings: input.warnings ?? [],
+    evidence: input.evidence ?? {},
+  };
+}
+
+function targetOrigin(url: string): string | undefined {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function warningFromCode(code: string): ResultWarningV1 {
+  return {
+    code: code.toUpperCase(),
+    message: `Runtime warning: ${code}.`,
+    severity: "warning",
+  };
+}
+
+export function resultEnvelopeFromDryRunPlan(plan: HttpDryRunPlan, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
+  return createResultEnvelope({
+    invocationId: options.invocationId,
+    capabilityId: plan.capabilityId,
+    status: "dry_run",
+    outcome: "dry_run",
+    structuredContent: {
+      request: {
+        method: plan.method,
+        url: plan.url,
+        body: plan.body,
+      },
+      authMode: plan.authMode,
+      risk: plan.risk,
+    },
+    warnings: (plan.warnings ?? []).map(warningFromCode),
+    evidence: {
+      risk: plan.risk,
+      requestStarted: false,
+      targetOrigin: targetOrigin(plan.url),
+      httpMethod: plan.method,
+      resolvedUrl: plan.url,
+      ...options.evidence,
+    },
+  });
+}
+
+interface ResultEnvelopeErrorOptions extends ResultEnvelopeBuildOptions {
+  capabilityId: string;
+  reason: string;
+}
+
+export function blockedResultEnvelope(options: ResultEnvelopeErrorOptions): ResultEnvelopeV1 {
+  return createResultEnvelope({
+    invocationId: options.invocationId,
+    capabilityId: options.capabilityId,
+    status: "blocked",
+    outcome: "blocked",
+    structuredContent: { error: { code: "BLOCKED", message: options.reason } },
+    evidence: { requestStarted: false, ...options.evidence },
+  });
+}
+
+export function confirmationRequiredResultEnvelope(options: ResultEnvelopeErrorOptions): ResultEnvelopeV1 {
+  return createResultEnvelope({
+    invocationId: options.invocationId,
+    capabilityId: options.capabilityId,
+    status: "confirmation_required",
+    outcome: "confirmation_required",
+    structuredContent: { error: { code: "CONFIRMATION_REQUIRED", message: options.reason } },
+    evidence: { requestStarted: false, ...options.evidence },
+  });
+}
+
+function envelopeStatusFromHttpResult(result: HttpExecutionResult): ResultEnvelopeStatus {
+  if (result.ok) {
+    return "success";
+  }
+
+  if (result.status === "timeout") {
+    return "unknown";
+  }
+
+  if (result.status === "secret_missing") {
+    return "blocked";
+  }
+
+  return "failed";
+}
+
+function outcomeFromHttpResult(result: HttpExecutionResult): string {
+  if (result.status === "timeout") {
+    return "unknown_after_timeout";
+  }
+
+  if (result.status === "secret_missing") {
+    return "blocked_before_request";
+  }
+
+  return result.status;
+}
+
+function requestStartedFromHttpResult(result: HttpExecutionResult): boolean {
+  return result.status !== "secret_missing";
+}
+
+function structuredContentFromHttpResult(result: HttpExecutionResult): unknown {
+  if (result.ok) {
+    return redactInput(result.output);
+  }
+
+  const error = result.error ?? { code: "HTTP_EXECUTION_ERROR", message: "HTTP execution failed." };
+  return {
+    error: {
+      code: error.code,
+      message: error.message,
+      statusCode: error.statusCode,
+      response: redactInput(error.response),
+    },
+  };
+}
+
+export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResult, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
+  const errorCode = result.error?.code;
+
+  return createResultEnvelope({
+    invocationId: options.invocationId,
+    capabilityId: result.capabilityId,
+    status: envelopeStatusFromHttpResult(result),
+    outcome: outcomeFromHttpResult(result),
+    structuredContent: structuredContentFromHttpResult(result),
+    evidence: {
+      requestStarted: requestStartedFromHttpResult(result),
+      targetOrigin: targetOrigin(result.url),
+      httpMethod: result.method,
+      httpStatus: result.statusCode,
+      errorCode,
+      resolvedUrl: result.url,
+      ...options.evidence,
+    },
+  });
+}
+
 export interface HttpExecutionOptions extends HttpDryRunOptions {
   env?: Record<string, string | undefined>;
   fetch?: typeof fetch;
