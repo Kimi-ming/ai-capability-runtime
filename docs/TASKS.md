@@ -37,7 +37,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T093 P2：威胁模型文档。
 - T104 P2：端到端 smoke test。
 - T114 P2：新增架构图。
 - T122 P2：版本策略。
@@ -1672,7 +1671,7 @@ git diff --check
 
 ### T093 P2：威胁模型文档
 
-- [ ] T093 P2：威胁模型文档
+- [x] T093 P2：威胁模型文档
 
 新增：
 
@@ -1697,6 +1696,13 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已补强 `docs/安全/threat-model.md`。
+- 文档新增威胁状态标记：已缓解、部分缓解、待实现。
+- 文档新增重点威胁矩阵，覆盖 SSRF、secret leakage、malicious capability、prompt injection via tool description、confused deputy、overbroad capability、silent policy relaxation 和 audit privacy overcollection。
+- 文档把现有控制和待补控制映射到 permission policy、confirmation、audit redaction、outbound policy、registry review、metadata lint、policy simulation/diff 等路径。
+
 ---
 
 ## Epic K：测试和 CI
@@ -1712,6 +1718,17 @@ git diff --check
 - 生成并提交 `pnpm-lock.yaml`
 - `pnpm build` 通过或明确拆分可执行包
 - `pnpm test` 通过
+
+验证：
+
+```bash
+pnpm build
+pnpm test
+pnpm lint
+pnpm validate
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T101 P0：CI 基础通过
 

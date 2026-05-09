@@ -58,6 +58,28 @@ Registry 也是独立边界：registry 中的 manifest 不能因为通过了 sch
 | T-13 | policy 变更静默放宽权限 | policy ledger、simulation/diff、broad allow findings | signed policy bundles |
 | T-14 | override/breakglass 变成无审计后门 | override record、短过期时间、硬安全边界不可绕过 | multi-admin approval |
 
+
+## 威胁状态标记
+
+| 状态 | 含义 |
+| --- | --- |
+| 已缓解 | 当前实现或文档流程已经提供可验证控制。 |
+| 部分缓解 | 已有一部分控制，但仍依赖后续实现或人工流程。 |
+| 待实现 | 已识别威胁，但核心自动化控制还没有落地。 |
+
+## 重点威胁矩阵
+
+| 威胁 | 状态 | 攻击路径 | 现有控制 | 待补控制 |
+| --- | --- | --- | --- | --- |
+| SSRF / unsafe arbitrary URL | 部分缓解 | 恶意或模型生成的 URL 访问 localhost、private network、metadata service | `http.request_demo` 标记 `arbitrary_url` 和 `unsafe_by_default`；dry-run warning；outbound policy 设计 | Runtime outbound gate、private IP/metadata block tests、redirect re-check |
+| Secret leakage | 部分缓解 | token 通过 input、query、日志、错误响应或 provider output 泄露 | token passthrough 测试；redaction；audit 隐私分级；query token 禁止设计 | Secret Resolver、URL redaction helper、provider output redaction tests |
+| Malicious capability | 部分缓解 | manifest 描述正常但隐藏外发、权限低估或使用代理端点 | registry CI；Capability PR 评审指南；trust level；review checklist | maintainer verification、provenance/signing、metadata lint |
+| Prompt injection via tool description | 待实现 | Capability name/description/schema description 诱导模型忽略确认或泄露 secret | 文档要求 model-visible 文本不得指挥模型绕过确认 | model-visible metadata lint、registry CI lint rule |
+| Confused deputy | 部分缓解 | Host 或模型用用户权限执行用户没有明确授权的外部动作 | policy 默认 ask；confirmation handler；MCP 无确认返回 `confirmation_required` | Host identity/session model、consent receipt、scoped delegated authorization |
+| Overbroad capability | 部分缓解 | 单个 Capability 暴露过宽 API，例如任意 URL、任意 SQL 或任意 Slack channel | permissions/risk 必填；review checklist；unsafe-by-default 标记 | capability scope linter、outbound/data-egress policy、registry quality score |
+| Silent policy relaxation | 待实现 | broad allow 或 ask/deny -> allow 让写入/外发静默执行 | policy parser 和 decision trace 设计 | policy simulation/diff、activation ledger、high-risk broad allow block |
+| Audit privacy overcollection | 部分缓解 | 记录 input/output 原文导致二次泄露 | input hash、redacted input、审计隐私分级 | centralized audit privacy map、output/error redaction tests |
+
 ## Abuse Cases
 
 ### AC-001：模型被诱导创建错误 Issue

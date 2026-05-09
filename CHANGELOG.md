@@ -8,6 +8,7 @@
 
 ### 新增
 
+- 威胁模型补充状态化矩阵，覆盖 SSRF、secret leakage、malicious capability、tool description prompt injection、confused deputy 和 overbroad capability。
 - `opencap validate <path>` 已接入真实 Capability Manifest schema 校验。
 - `@opencap/spec` 导出可复用 manifest loader/validator API。
 - Manifest validator 单元测试覆盖合法和非法 schema 场景。
