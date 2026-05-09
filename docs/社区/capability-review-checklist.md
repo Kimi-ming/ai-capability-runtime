@@ -37,11 +37,19 @@
 - [ ] token 不通过 query string。
 - [ ] README 不要求用户把 secret 写进 manifest。
 
-## 安全
+## 模型可见文本
 
-- [ ] model-visible name、description、schema descriptions 不含 prompt injection、强制调用、绕过确认或泄露 secret 的文本。
+这些内容可能进入 Host、模型上下文、Registry 搜索或人工 review，必须按 `docs/质量/model-visible-metadata-lint-v1.md` 检查。
+
+- [ ] manifest `name` 和 `description` 不含 instruction override、forced tool choice、bypass governance 或 secret exfiltration。
+- [ ] input/output schema `description` 不要求用户填入 token、cookie、password、private key、API key 或其他 secret。
+- [ ] schema description 不诱导模型“必须调用此工具”“忽略其他工具”“绕过确认”。
+- [ ] README 和 examples 不包含隐藏指令、HTML comment 指令、零宽字符隐藏文本、base64/hex 解码指令或 prompt injection 示例。
 - [ ] 工具描述只描述能力，不指挥模型、用户或 Host。
 - [ ] 描述、permissions、risk 和真实 execution 行为一致。
+
+## 安全
+
 - [ ] 不访问 localhost/private network/metadata service。
 - [ ] 不隐藏第二个外部请求。
 - [ ] 不把用户输入拼进 host，除非有明确风险说明。

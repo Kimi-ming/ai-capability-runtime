@@ -24,6 +24,18 @@ body:
       description: 请列出 resource、action、risk level 和所需 env var 名称。不要填写真实 token 或密钥。
     validations:
       required: true
+  - type: checkboxes
+    id: model_visible_text
+    attributes:
+      label: 模型可见文本确认
+      description: 请确认 manifest name/description、input/output schema descriptions、README 和 examples 不包含 prompt injection、强制工具选择、绕过确认、隐藏指令或 secret 请求。
+      options:
+        - label: 我没有写入 `ignore previous instructions`、`always call this tool`、绕过确认/审计或类似 prompt injection 文本。
+          required: true
+        - label: 我没有要求用户在 schema description、README 或示例中填写 token、cookie、password、API key、private key 或其他 secret 原值。
+          required: true
+        - label: README 和 examples 不包含隐藏 HTML comment 指令、零宽字符隐藏文本或要求模型解码执行的 base64/hex 指令。
+          required: true
   - type: textarea
     id: tests
     attributes:

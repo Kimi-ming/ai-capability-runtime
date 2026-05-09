@@ -85,6 +85,7 @@
 - 工具投影、模型可见提示面安全、发现选择边界和模型可见元数据检查文档。
 - Discovery Profile V1 RFC，定义 discovery metadata、默认隐藏 yanked/revoked、ranking 不得修改 policy 或触发自动安装/授权。
 - Selection evidence record 文档，定义 selected tool、projection hash、available tools hash 等字段，并明确不参与授权。
+- Capability Review Checklist 和 Capability 提交模板接入 model-visible text 检查，覆盖 prompt injection、secret 请求和隐藏指令。
 - 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。

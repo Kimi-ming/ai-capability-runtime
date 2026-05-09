@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T216 P2：Capability Review Checklist 接入 model-visible text 检查。
 - T217 P2：Tool result prompt-surface sanitizer 草案。
 - T218 P2：Host tool metadata compatibility records。
 - T220 P1：实现 Result Envelope V1。
@@ -2553,7 +2552,7 @@ git diff --check
 
 ### T216 P2：Capability Review Checklist 接入 model-visible text 检查
 
-- [ ] T216 P2：Capability Review Checklist 接入 model-visible text 检查
+- [x] T216 P2：Capability Review Checklist 接入 model-visible text 检查
 
 目标：Registry 人工评审能显式检查 tool description、schema description 和 README 中的提示注入风险。
 
@@ -2572,6 +2571,8 @@ git diff --check
 ```bash
 ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```
+
+完成记录：`docs/社区/capability-review-checklist.md` 新增“模型可见文本”评审段，覆盖 manifest name/description、input/output schema descriptions、README、examples、隐藏指令、零宽字符和 secret 请求；`.github/ISSUE_TEMPLATE/capability_submission.yml` 新增强制勾选项，要求提交者确认没有 prompt injection、强制工具选择、绕过确认/审计、secret 请求或隐藏文本。
 
 ### T217 P2：Tool result prompt-surface sanitizer 草案
 
