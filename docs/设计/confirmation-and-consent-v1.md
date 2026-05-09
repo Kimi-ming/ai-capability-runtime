@@ -47,6 +47,34 @@ type ConsentRequest = {
 
 `operationSummary` 可以来自 manifest，但最终文本必须由 Runtime 组装。输入摘要需要按 `docs/安全/privacy-retention-v1.md` 脱敏。
 
+## Egress Confirmation Summary
+
+当一次调用涉及 Data Egress Gate，确认摘要必须包含 Runtime 生成的外发摘要：
+
+```ts
+type ConfirmationEgressSummary = {
+  targetOrigin: string;
+  dataClasses: string[];
+  fields: Array<{
+    path: string;
+    destination: "url" | "query" | "header" | "body";
+    dataClasses: string[];
+  }>;
+  redactedPreview: unknown;
+};
+```
+
+当前 Runtime 导出 `confirmationSummaryFromDataEgress(decision)`，把 Data Egress decision evidence 转成 confirmation request 可用的 `egress` 字段。
+
+CLI prompt 会展示：
+
+- `Target origin`：例如 `https://slack.com`。
+- `Data classes`：例如 `pii`、`source_code`。
+- `Fields sent`：例如 `/text -> body [pii]`。
+- `Preview`：只展示 redacted preview。
+
+MCP STDIO 无确认通道时仍返回 `confirmation_required`，但 reason 会包含同一份 egress summary，便于 Host 或上层客户端展示，不会执行请求。
+
 ## Consent Receipt
 
 V1 审计对象：
@@ -107,6 +135,9 @@ MCP 2025-11-25 提供 elicitation 能力后，OpenCap 可以把 Consent Request 
 - ask 且无确认通道时返回 `confirmation_required`。
 - `confirmation_required` 不解析 secret，不执行 HTTP。
 - declined/expired/unavailable 都进入 audit log。
+- confirmation request 包含 target origin。
+- confirmation request 包含 data classes。
+- confirmation request 包含 fields sent。
 - consent summary 中不包含 secret。
 - approved_once 只对当前 invocation 生效。
 - approved_always 只通过 policy 文件更新表达。

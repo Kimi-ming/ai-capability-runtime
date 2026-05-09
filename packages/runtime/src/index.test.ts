@@ -12,6 +12,7 @@ import {
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
   confirmWithAudit,
+  confirmationSummaryFromDataEgress,
   createConfirmationAuditEvent,
   createDataEgressAuditEvent,
   defaultPolicySet,
@@ -836,16 +837,61 @@ describe("confirmation handlers", () => {
     });
   });
 
+  it("includes egress target, data classes, fields, and redacted preview in CLI prompt", async () => {
+    let promptMessage = "";
+    const handler = new CliConfirmationHandler(async (message) => {
+      promptMessage = message;
+      return "no";
+    });
+    const dataEgressDecision = evaluateDataEgressPolicy({
+      capabilityId: "slack.send_message",
+      provider: "slack",
+      targetOrigin: "https://slack.com",
+      resource: "slack.message",
+      action: "send",
+      risk: "external_send",
+      inputHash: "sha256:input",
+      dataClasses: ["pii"],
+      redactedPreview: { text: "d***@example.com" },
+      renderedFields: [{ path: "/text", destination: "body", dataClasses: ["pii"] }],
+    });
+
+    await handler.confirm({
+      capabilityId: "slack.send_message",
+      channel: "cli",
+      policy: askPolicy,
+      operationSummary: "send Slack message",
+      egress: confirmationSummaryFromDataEgress(dataEgressDecision),
+    });
+
+    expect(promptMessage).toContain("Target origin: https://slack.com");
+    expect(promptMessage).toContain("Data classes: pii");
+    expect(promptMessage).toContain("Fields sent: /text -> body [pii]");
+    expect(promptMessage).toContain('Preview: {"text":"d***@example.com"}');
+    expect(promptMessage).not.toContain("dev@example.com");
+  });
+
   it("returns confirmation_required for MCP ask decisions without prompting", async () => {
     const handler = new McpNoElicitationConfirmationHandler();
 
     await expect(
-      handler.confirm({ capabilityId: "github.create_issue", channel: "mcp", policy: askPolicy }),
+      handler.confirm({
+        capabilityId: "github.create_issue",
+        channel: "mcp",
+        policy: askPolicy,
+        egress: {
+          targetOrigin: "https://api.github.com",
+          dataClasses: ["source_code"],
+          fields: [{ path: "/body", destination: "body", dataClasses: ["source_code"] }],
+          redactedPreview: { body: "[redacted:source_code]" },
+        },
+      }),
     ).resolves.toMatchObject({
       status: "confirmation_required",
       channel: "mcp",
       policyDecision: "ask",
       prompted: false,
+      reason: expect.stringContaining("https://api.github.com"),
     });
   });
 

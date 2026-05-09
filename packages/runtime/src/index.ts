@@ -1317,12 +1317,26 @@ export function evaluatePolicy(policySet: PolicySet, input: PolicyEvaluationInpu
 export type ConfirmationChannel = "cli" | "mcp";
 export type ConfirmationStatus = "approved" | "rejected" | "confirmation_required" | "denied";
 
+export interface ConfirmationEgressField {
+  path: string;
+  destination: DataEgressContext["renderedFields"][number]["destination"];
+  dataClasses: DataEgressContext["dataClasses"];
+}
+
+export interface ConfirmationEgressSummary {
+  targetOrigin: string;
+  dataClasses: DataEgressContext["dataClasses"];
+  fields: ConfirmationEgressField[];
+  redactedPreview: unknown;
+}
+
 export interface ConfirmationRequest {
   capabilityId: string;
   policy: PolicyEvaluationResult;
   channel: ConfirmationChannel;
   operationSummary?: string;
   input?: unknown;
+  egress?: ConfirmationEgressSummary;
 }
 
 export interface ConfirmationResult {
@@ -1396,6 +1410,19 @@ export function hashInput(value: unknown): string {
   return `sha256:${createHash("sha256").update(stableJsonStringify(value)).digest("hex")}`;
 }
 
+export function confirmationSummaryFromDataEgress(decision: DataEgressDecisionResult): ConfirmationEgressSummary {
+  return {
+    targetOrigin: decision.evidence.targetOrigin,
+    dataClasses: [...decision.evidence.dataClasses],
+    fields: decision.evidence.renderedFields.map((field) => ({
+      path: field.path,
+      destination: field.destination,
+      dataClasses: [...field.dataClasses],
+    })),
+    redactedPreview: decision.evidence.redactedPreview,
+  };
+}
+
 export type CliPrompt = (message: string) => Promise<string>;
 
 export interface CliConfirmationHandlerOptions {
@@ -1428,9 +1455,43 @@ async function defaultCliPrompt(message: string): Promise<string> {
   }
 }
 
+function egressFieldsSummary(fields: ConfirmationEgressField[]): string {
+  if (fields.length === 0) {
+    return "none";
+  }
+
+  return fields
+    .map((field) => {
+      const dataClasses = field.dataClasses.length === 0 ? "none" : field.dataClasses.join(", ");
+      return `${field.path} -> ${field.destination} [${dataClasses}]`;
+    })
+    .join(", ");
+}
+
+function confirmationEgressText(egress: ConfirmationEgressSummary | undefined): string {
+  if (egress === undefined) {
+    return "";
+  }
+
+  const dataClasses = egress.dataClasses.length === 0 ? "none" : egress.dataClasses.join(", ");
+  return [
+    `Target origin: ${egress.targetOrigin}`,
+    `Data classes: ${dataClasses}`,
+    `Fields sent: ${egressFieldsSummary(egress.fields)}`,
+    `Preview: ${stableJsonStringify(egress.redactedPreview)}`,
+  ].join("\n");
+}
+
+function confirmationReasonWithEgress(baseReason: string, request: ConfirmationRequest): string {
+  const egressText = confirmationEgressText(request.egress);
+  return egressText.length === 0 ? baseReason : `${baseReason}\n${egressText}`;
+}
+
 function approvalQuestion(request: ConfirmationRequest): string {
   const summary = request.operationSummary ?? request.capabilityId;
-  return `OpenCap wants to run ${summary}. Allow once? [y/N] `;
+  const egressText = confirmationEgressText(request.egress);
+  const details = egressText.length === 0 ? "" : `\n${egressText}`;
+  return `OpenCap wants to run ${summary}.${details}\nAllow once? [y/N] `;
 }
 
 function hasManualOnlyRisk(policy: PolicyEvaluationResult): boolean {
@@ -1494,7 +1555,7 @@ export class McpNoElicitationConfirmationHandler implements ConfirmationHandler 
     return confirmationResult(
       request,
       "confirmation_required",
-      "This capability requires human confirmation, but this MCP channel cannot prompt.",
+      confirmationReasonWithEgress("This capability requires human confirmation, but this MCP channel cannot prompt.", request),
       false,
     );
   }

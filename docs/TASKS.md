@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T238 P1：confirmation summary 展示 data classes 和 egress target。
 - T239 P1：input provenance audit evidence。
 - T240 P1：field-level egress map。
 - T241 P2：derived input evidence chain。
@@ -3090,7 +3089,7 @@ pnpm --filter @opencap/runtime test
 
 ### T238 P1：confirmation summary 展示 data classes 和 egress target
 
-- [ ] T238 P1：confirmation summary 展示 data classes 和 egress target
+- [x] T238 P1：confirmation summary 展示 data classes 和 egress target
 
 目标：用户确认写操作或外发操作时，能看到将发送给谁、发送哪些数据类别。
 
@@ -3111,6 +3110,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 Runtime `ConfirmationEgressSummary`、`ConfirmationRequest.egress` 和 `confirmationSummaryFromDataEgress`。CLI confirmation prompt 现在展示 target origin、data classes、fields sent 和 redacted preview；MCP no-elicitation 的 `confirmation_required` reason 也携带同一份外发摘要。测试覆盖 prompt 不含原始敏感值。
 
 ### T239 P1：input provenance audit evidence
 
