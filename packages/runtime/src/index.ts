@@ -113,6 +113,50 @@ export interface InvocationResult {
   error?: string;
 }
 
+export type UrlTemplateRenderErrorCode = "URL_TEMPLATE_INPUT_INVALID" | "URL_TEMPLATE_FIELD_MISSING" | "URL_TEMPLATE_FIELD_UNSUPPORTED";
+
+export class UrlTemplateRenderError extends Error {
+  constructor(
+    public readonly code: UrlTemplateRenderErrorCode,
+    message: string,
+    public readonly details: Record<string, unknown> = {},
+  ) {
+    super(message);
+    this.name = "UrlTemplateRenderError";
+  }
+}
+
+function templateInputRecord(input: unknown): Record<string, unknown> {
+  if (!isRecord(input)) {
+    throw new UrlTemplateRenderError("URL_TEMPLATE_INPUT_INVALID", "URL template input must be an object.");
+  }
+
+  return input;
+}
+
+function templateValueToString(fieldName: string, value: unknown): string {
+  if (value === undefined || value === null) {
+    throw new UrlTemplateRenderError("URL_TEMPLATE_FIELD_MISSING", `Missing URL template field: ${fieldName}`, { fieldName });
+  }
+
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  throw new UrlTemplateRenderError("URL_TEMPLATE_FIELD_UNSUPPORTED", `URL template field ${fieldName} must be a string, number, or boolean.`, {
+    fieldName,
+  });
+}
+
+export function renderUrlTemplate(template: string, input: unknown): string {
+  const record = templateInputRecord(input);
+
+  return template.replace(/{{\s*([A-Za-z0-9_-]+)\s*}}/g, (_match, fieldName: string) => {
+    const rawValue = templateValueToString(fieldName, record[fieldName]);
+    return encodeURIComponent(rawValue);
+  });
+}
+
 export const POLICY_DECISIONS = ["allow", "ask", "deny"] as const;
 export const POLICY_RISKS = [
   "read_only",

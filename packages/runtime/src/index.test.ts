@@ -16,6 +16,8 @@ import {
   InstallCapabilityError,
   McpNoElicitationConfirmationHandler,
   PolicyParseError,
+  UrlTemplateRenderError,
+  renderUrlTemplate,
   SqliteAuditLogger,
   OpenCapRuntime,
   ensureLocalStateDir,
@@ -87,6 +89,33 @@ async function exists(path: string): Promise<boolean> {
     return false;
   }
 }
+
+describe("URL template rendering", () => {
+  it("renders fields with URL encoding", () => {
+    expect(
+      renderUrlTemplate("https://api.github.com/repos/{{owner}}/{{repo}}/issues?q={{query}}", {
+        owner: "open cap",
+        repo: "runtime/core",
+        query: "bug #1",
+      }),
+    ).toBe("https://api.github.com/repos/open%20cap/runtime%2Fcore/issues?q=bug%20%231");
+  });
+
+  it("throws a structured error for missing fields", () => {
+    expect(() => renderUrlTemplate("https://example.com/{{missing}}", {})).toThrow(UrlTemplateRenderError);
+    expect(() => renderUrlTemplate("https://example.com/{{missing}}", {})).toThrow(/missing/);
+  });
+
+  it("throws a structured error for unsupported field values", () => {
+    expect(() => renderUrlTemplate("https://example.com/{{payload}}", { payload: { nested: true } })).toThrow(
+      UrlTemplateRenderError,
+    );
+  });
+
+  it("requires object input", () => {
+    expect(() => renderUrlTemplate("https://example.com/{{field}}", null)).toThrow(UrlTemplateRenderError);
+  });
+});
 
 describe("state dir helpers", () => {
   it("uses <cwd>/opencap.local by default", () => {

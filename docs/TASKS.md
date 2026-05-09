@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T050 P0：实现 URL 模板渲染。
 - T051 P0：实现 dry-run executor。
 - T052 P0：实现 HTTP executor。
 - T060 P0：实现 `opencap invoke <id> --dry-run`。
@@ -254,6 +253,7 @@
 - 已完成：T041 P0：实现 redaction 和 input hash。
 - 已完成：T042 P1：实现 `opencap logs`。
 - 已完成：T043 P2：增加日志筛选。
+- 已完成：T050 P0：实现 URL 模板渲染。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T050 HTTP executor dry-run
+1. T051 dry-run executor
 2. T060 `opencap invoke`
 3. T070 MCP bridge
 4. T080 Registry manifest CI 校验
@@ -992,7 +992,7 @@ pnpm lint
 
 ### T050 P0：实现 URL 模板渲染
 
-- [ ] T050 P0：实现 URL 模板渲染
+- [x] T050 P0：实现 URL 模板渲染
 
 要求：
 
@@ -1016,6 +1016,13 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `renderUrlTemplate` 和 `UrlTemplateRenderError`。
+- URL 模板支持 `{{field}}`，变量来自输入对象。
+- 缺字段、非对象输入和对象型字段会返回结构化错误。
+- 变量统一使用 `encodeURIComponent`。
+
 ### T051 P0：实现 dry-run executor
 
 - [ ] T051 P0：实现 dry-run executor
@@ -1028,6 +1035,14 @@ pnpm lint
 - 不读取 secret 原值
 - 不发网络请求
 - 写 audit log
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T052 P0：实现 HTTP executor
 
