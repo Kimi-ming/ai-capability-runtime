@@ -8,6 +8,7 @@ import YAML from "yaml";
 import { formatManifestValidationIssue, validateManifestPath } from "@opencap/spec";
 import {
   InstallCapabilityError,
+  SqliteAuditLogger,
   getLocalStatePaths,
   installCapability,
   listInstalledCapabilities,
@@ -75,6 +76,38 @@ function pnpmVersion(): string {
     return "missing";
   }
   return result.stdout.trim() || "unknown";
+}
+
+function parseLimit(value: string | undefined, fallback: number): number {
+  if (value === undefined) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid --limit value: ${value}`);
+  }
+
+  return parsed;
+}
+
+function formatLogLine(event: {
+  timestamp: string;
+  capabilityId: string;
+  policyDecision: string;
+  status: string;
+  confirmationStatus: string;
+  reason: string;
+}): string {
+  return [
+    event.timestamp,
+    event.capabilityId,
+    event.policyDecision,
+    event.status,
+    event.confirmationStatus,
+    "-",
+    event.reason,
+  ].join(" ");
 }
 
 async function policyStatus(policyPath: string): Promise<string> {
@@ -236,10 +269,35 @@ program
 program
   .command("logs")
   .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .option("--limit <number>", "Number of recent log entries to show", "20")
   .description("Show invocation logs.")
-  .action((_options: { stateDir?: string }) => {
-    console.log("logs is not implemented yet");
-  });
+  .action((options: { stateDir?: string; json?: boolean; limit?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const limit = parseLimit(options.limit, 20);
+    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+
+    try {
+      const events = await logger.recent(limit);
+
+      if (options.json) {
+        console.log(JSON.stringify(events, null, 2));
+        return;
+      }
+
+      if (events.length === 0) {
+        console.log("No invocation logs found.");
+        return;
+      }
+
+      console.log("timestamp capability_id decision status confirmation duration_ms reason");
+      for (const event of events) {
+        console.log(formatLogLine(event));
+      }
+    } finally {
+      logger.close();
+    }
+  }, "Failed to read invocation logs"));
 
 const argv = process.argv[2] === "--" ? [process.argv[0], process.argv[1], ...process.argv.slice(3)] : process.argv;
 

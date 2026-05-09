@@ -28,6 +28,7 @@
 - CLI `--yes` 确认边界，普通 CLI ask 可自动批准，destructive/financial 和 deny 不可绕过。
 - SQLite Audit Logger，使用 Node 内置 `node:sqlite` 创建 `invocations` 表、写入审计事件并查询最近记录。
 - Runtime redaction 和 input hash，支持递归脱敏、稳定 JSON、SHA-256 hash，并持久化到 SQLite 审计记录。
+- `opencap logs` 接入 SQLite 审计日志查询，支持默认最近 20 条、`--limit` 和 `--json`。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。

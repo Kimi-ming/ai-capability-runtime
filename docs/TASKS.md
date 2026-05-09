@@ -34,7 +34,6 @@
 
 ### P1：V1 完整体验
 
-- T042 P1：实现 `opencap logs`。
 - T053 P1：定义 HTTP request body manifest 字段。
 - T054 P1：实现 output normalization。
 - T055 P1：处理 arbitrary URL Capability 风险。
@@ -254,6 +253,7 @@
 - 已完成：T034 P2：支持 `--yes` 非交互确认。
 - 已完成：T040 P0：确定并实现日志存储。
 - 已完成：T041 P0：实现 redaction 和 input hash。
+- 已完成：T042 P1：实现 `opencap logs`。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T042 `opencap logs`
+1. T043 日志筛选
 2. T050 HTTP executor dry-run
 3. T060 `opencap invoke`
 4. T070 MCP bridge
@@ -299,7 +299,7 @@ git diff --check
 7. T023 Runtime loader CLI integration
 8. T050 HTTP executor dry-run
 9. T061 真实 `opencap invoke`
-10. T041 redaction 后续接入
+10. T062 示例 input 文件
 
 ---
 
@@ -928,7 +928,7 @@ pnpm lint
 
 ### T042 P1：实现 `opencap logs`
 
-- [ ] T042 P1：实现 `opencap logs`
+- [x] T042 P1：实现 `opencap logs`
 
 验收标准：
 
@@ -945,6 +945,14 @@ pnpm --filter @opencap/cli build
 pnpm lint
 ```
 
+完成记录：
+
+- `opencap logs` 已接入 `SqliteAuditLogger.recent()`。
+- 默认显示最近 20 条，`--limit` 可调整数量。
+- `--json` 输出结构化审计事件。
+- 普通输出显示 timestamp、capability id、decision、status、confirmation、duration 和 reason。
+- 当前 `duration_ms` 尚未进入 `AuditEvent`，普通输出以 `-` 占位。
+
 ### T043 P2：增加日志筛选
 
 - [ ] T043 P2：增加日志筛选
@@ -955,6 +963,21 @@ pnpm lint
 - `--status`
 - `--since`
 - `--limit`
+
+验收标准：
+
+- `opencap logs --capability <id>` 只显示指定 capability。
+- `opencap logs --status <status>` 只显示指定状态。
+- `--limit` 和筛选条件可以同时使用。
+- `--since` 可接受 ISO 时间字符串。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/cli build
+pnpm lint
+```
 
 ---
 

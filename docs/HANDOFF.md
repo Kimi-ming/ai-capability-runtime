@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction 和 input hash
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash 和 `opencap logs`
 
 ## 当前代码状态
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T042 P1：实现 `opencap logs`。
+Next task: T043 P2：增加日志筛选。
 
 推荐第一个任务：
 
 ```text
-T042：实现 `opencap logs`
+T043：增加日志筛选
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes` 边界、生成审计事件、脱敏输入并持久化到 SQLite
-- T042 将把 SQLite 最近记录查询接到 CLI `opencap logs`
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042 已完成
+- Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite 并通过 `opencap logs` 查询
+- T043 将给日志查询增加 capability/status/since 筛选
 
 ## 最近验证
 
@@ -66,13 +66,13 @@ T042：实现 `opencap logs`
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- `opencap logs` 仍是骨架命令，还不能读取 SQLite 审计日志。
+- `opencap logs` 还缺 capability/status/since 筛选。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T042：`opencap logs` 查询命令。
+1. 实现 T043：日志筛选。
 2. 实现 T050：HTTP executor dry-run。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
@@ -391,3 +391,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T041：`@opencap/runtime` 新增 `redactInput`、`stableJsonStringify` 和 `hashInput`。confirmation audit request 带 input 时，会生成稳定 `inputHash` 和 `inputRedactedJson`，SQLite logger 会持久化这两个字段。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 43 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T042：实现 `opencap logs`。
+
+## opencap logs 已实现
+
+已完成 T042：CLI `opencap logs` 接入 `SqliteAuditLogger.recent()`。默认显示最近 20 条，支持 `--json` 与 `--limit`；普通输出包含 timestamp、capability id、decision、status、confirmation、duration 占位和 reason。
+
+本轮验证：`pnpm --filter @opencap/cli build`、`pnpm --filter @opencap/runtime test`、空日志 `opencap logs --json` smoke、有日志 `opencap logs --limit 1` smoke、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T043：增加日志筛选。
