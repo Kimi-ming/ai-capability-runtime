@@ -12,7 +12,7 @@
 
 ## 当前最小实现
 
-当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录。审计事件可保存 `input_hash` 与 `input_redacted_json`。当前 Node 对该模块仍会打印 ExperimentalWarning。
+当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录。审计事件可保存 `input_hash`、`input_redacted_json`、`request_started` 和 Data Egress evidence。当前 Node 对该模块仍会打印 ExperimentalWarning。
 
 ## 存储
 
@@ -43,12 +43,16 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `override_id` | text | 本次生效的 override/breakglass id，可为空 |
 | `confirmation_status` | text | not_required/accepted/declined/unavailable |
 | `status` | text | success/error/denied/confirmation_required/dry_run |
+| `request_started` | integer | 是否已经发起 provider request，egress deny 必须为 `0` |
 | `duration_ms` | integer | 耗时 |
 | `input_hash` | text | 原始输入稳定 hash |
 | `input_redacted_json` | text | 脱敏输入 |
 | `input_data_classes_json` | text | 输入数据分类摘要 |
 | `egress_decision` | text | allow/ask/deny/redact |
+| `egress_data_classes_json` | text | 本次外发涉及的数据类别数组 |
 | `egress_target_origin` | text | 外发目标 origin |
+| `egress_matched_rule_id` | text | 命中的 data egress policy rule id |
+| `egress_redacted_preview_json` | text | 外发预览的脱敏 JSON |
 | `output_redacted_json` | text | 脱敏输出 |
 | `resolved_url` | text | 脱敏 URL |
 | `tool_projection_version` | text | MCP tool projection 版本，例如 `opencap.mcp.tool-projection.v1` |
@@ -86,13 +90,18 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `status` | `public_metadata` | 原值 |
 | `policy_decision` | `public_metadata` | 原值 |
 | `confirmation_status` | `public_metadata` | 原值 |
+| `request_started` | `operational_metadata` | 原值；egress deny 为 `false` |
 | `matched_rule_id` | `operational_metadata` | 原值 |
 | `resolved_url` | `redacted_user_data` | origin/path 可记录，query 必须脱敏或省略 |
 | `input_hash` | `redacted_user_data` | SHA-256 hash |
 | `input_redacted_json` | `redacted_user_data` | redacted JSON |
 | `output_redacted_json` | `redacted_user_data` | redacted JSON |
 | `error` | `redacted_user_data` | 错误 code 和脱敏 message |
+| `egress_decision` | `operational_metadata` | 原值 |
+| `egress_data_classes_json` | `operational_metadata` | 数据类别名称数组，不含字段原文 |
 | `egress_target_origin` | `operational_metadata` | origin 原值 |
+| `egress_matched_rule_id` | `operational_metadata` | 原值 |
+| `egress_redacted_preview_json` | `redacted_user_data` | redacted preview JSON，不含 secret 原文 |
 | `policy_trace_json` | `redacted_user_data` | 不含 input 原文 |
 | `override_id` | `operational_metadata` | 原值 |
 | provider request id | `operational_metadata` | 原值，除非 provider 文档声明包含 secret |
@@ -139,6 +148,26 @@ Debug 模式不能增加：
 4. debug 模式只能通过本地配置或 CLI flag 开启。
 5. SQLite 写入前执行最后一道 audit redaction guard。
 6. 测试覆盖 secret-like key、header、query、provider output 和 error message。
+
+## Data Egress Audit 实现状态
+
+当前 Runtime 导出：
+
+```ts
+createDataEgressAuditEvent(context, decision, channel, timestamp?)
+recordDataEgressDecision(logger, context, decision, channel, timestamp?)
+```
+
+Data Egress audit event 会记录：
+
+- `egressDecision`。
+- `egressDataClasses`。
+- `egressTargetOrigin`。
+- `egressMatchedRuleId`。
+- `egressRedactedPreviewJson`。
+- `requestStarted=false`。
+
+当 Data Egress Gate 返回 `deny` 时，事件状态为 `denied`，`policyDecision=deny`，`confirmationStatus=denied`，并且不会记录 input 原文或 secret-like value。SQLite logger 会把这些字段持久化到 `invocations` 表，并在打开既有数据库时补齐缺失列。
 
 ## 脱敏规则
 

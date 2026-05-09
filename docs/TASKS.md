@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T237 P1：记录 egress decision audit fields。
 - T238 P1：confirmation summary 展示 data classes 和 egress target。
 - T239 P1：input provenance audit evidence。
 - T240 P1：field-level egress map。
@@ -3066,7 +3065,7 @@ pnpm --filter @opencap/runtime test
 
 ### T237 P1：记录 egress decision audit fields
 
-- [ ] T237 P1：记录 egress decision audit fields
+- [x] T237 P1：记录 egress decision audit fields
 
 目标：audit log 记录 data classes、egress target、egress decision、policy rule id 和 redacted preview。
 
@@ -3086,6 +3085,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：扩展 `AuditEvent`、`InMemoryAuditLogger` 和 `SqliteAuditLogger`，新增 `createDataEgressAuditEvent` 与 `recordDataEgressDecision`。审计事件现在记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`；SQLite `invocations` 表会持久化这些字段并支持既有数据库列迁移。新增测试覆盖 egress deny audit、logger 写入和 SQLite 查询不含 secret 原文。
 
 ### T238 P1：confirmation summary 展示 data classes 和 egress target
 

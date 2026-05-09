@@ -8,10 +8,12 @@ import {
   capabilityRiskWarnings,
   detectArbitraryUrlCapability,
   executeHttpCapability,
+  evaluateDataEgressPolicy,
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
   confirmWithAudit,
   createConfirmationAuditEvent,
+  createDataEgressAuditEvent,
   defaultPolicySet,
   evaluatePolicy,
   DEFAULT_STATE_DIR_NAME,
@@ -33,6 +35,7 @@ import {
   loadInstalledCapabilities,
   loadPolicySet,
   parsePolicyYml,
+  recordDataEgressDecision,
   redactInput,
   resolveStateDir,
   stableJsonStringify,
@@ -991,6 +994,54 @@ describe("confirmation audit", () => {
   });
 });
 
+
+describe("data egress audit", () => {
+  const context = {
+    capabilityId: "github.create_issue",
+    provider: "github",
+    targetOrigin: "https://api.github.com",
+    resource: "github.issue",
+    action: "create",
+    risk: "write",
+    inputHash: "sha256:input",
+    dataClasses: ["secret_like" as const],
+    redactedPreview: { token: "[redacted:secret_like]" },
+    renderedFields: [{ path: "/token", destination: "body" as const, dataClasses: ["secret_like" as const] }],
+  };
+
+  it("creates egress deny audit events without request start or raw secret", () => {
+    const decision = evaluateDataEgressPolicy(context);
+    const event = createDataEgressAuditEvent(context, decision, "mcp", new Date("2026-05-09T00:00:00.000Z"));
+
+    expect(event).toMatchObject({
+      timestamp: "2026-05-09T00:00:00.000Z",
+      capabilityId: "github.create_issue",
+      status: "denied",
+      policyDecision: "deny",
+      confirmationStatus: "denied",
+      matchedRuleId: "deny-secret-like",
+      requestStarted: false,
+      egressDecision: "deny",
+      egressDataClasses: ["secret_like"],
+      egressTargetOrigin: "https://api.github.com",
+      egressMatchedRuleId: "deny-secret-like",
+      egressRedactedPreviewJson: '{"token":"[redacted:secret_like]"}',
+    });
+    expect(JSON.stringify(event)).not.toContain("ghp_secret");
+  });
+
+  it("records egress decision fields through audit logger", async () => {
+    const logger = new InMemoryAuditLogger();
+    const decision = evaluateDataEgressPolicy(context);
+
+    const event = await recordDataEgressDecision(logger, context, decision, "mcp", new Date("2026-05-09T00:00:00.000Z"));
+
+    expect(logger.events).toEqual([event]);
+    expect(event.requestStarted).toBe(false);
+    expect(event.egressDecision).toBe("deny");
+  });
+});
+
 describe("SQLite audit logger", () => {
   it("creates the SQLite database and writes audit events", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-"));
@@ -1055,6 +1106,51 @@ describe("SQLite audit logger", () => {
       );
 
       await expect(logger.recent(1)).resolves.toMatchObject([{ reason: "second" }]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("persists egress decision evidence", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-egress-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+    const context = {
+      capabilityId: "github.create_issue",
+      provider: "github",
+      targetOrigin: "https://api.github.com",
+      resource: "github.issue",
+      action: "create",
+      risk: "write",
+      inputHash: "sha256:input",
+      dataClasses: ["secret_like" as const],
+      redactedPreview: { token: "[redacted:secret_like]" },
+      renderedFields: [{ path: "/token", destination: "body" as const, dataClasses: ["secret_like" as const] }],
+    };
+
+    try {
+      const event = createDataEgressAuditEvent(
+        context,
+        evaluateDataEgressPolicy(context),
+        "mcp",
+        new Date("2026-05-09T00:00:00.000Z"),
+      );
+      await logger.record(event);
+
+      const recent = await logger.recent(10);
+      expect(recent).toMatchObject([
+        {
+          capabilityId: "github.create_issue",
+          status: "denied",
+          policyDecision: "deny",
+          requestStarted: false,
+          egressDecision: "deny",
+          egressDataClasses: ["secret_like"],
+          egressTargetOrigin: "https://api.github.com",
+          egressMatchedRuleId: "deny-secret-like",
+          egressRedactedPreviewJson: '{"token":"[redacted:secret_like]"}',
+        },
+      ]);
+      expect(JSON.stringify(recent)).not.toContain("ghp_secret");
     } finally {
       logger.close();
     }

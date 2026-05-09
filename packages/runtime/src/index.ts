@@ -15,6 +15,7 @@ import { dirname, join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
 import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
+import type { DataEgressContext, DataEgressDecision, DataEgressDecisionResult } from "./data-egress-policy.js";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -1514,6 +1515,12 @@ export interface AuditEvent {
   inputHash?: string;
   inputRedactedJson?: string;
   resolvedUrl?: string;
+  requestStarted?: boolean;
+  egressDecision?: DataEgressDecision;
+  egressDataClasses?: DataEgressContext["dataClasses"];
+  egressTargetOrigin?: string;
+  egressMatchedRuleId?: string;
+  egressRedactedPreviewJson?: string;
 }
 
 export interface AuditLogger {
@@ -1572,6 +1579,73 @@ export async function confirmWithAudit(
   return { confirmation, auditEvent };
 }
 
+function policyDecisionFromDataEgress(decision: DataEgressDecision): PolicyDecision {
+  return decision === "redact" ? "ask" : decision;
+}
+
+function auditStatusFromDataEgress(decision: DataEgressDecision): AuditInvocationStatus {
+  if (decision === "deny") {
+    return "denied";
+  }
+
+  if (decision === "ask" || decision === "redact") {
+    return "blocked";
+  }
+
+  return "executed";
+}
+
+function confirmationStatusFromDataEgress(decision: DataEgressDecision): ConfirmationStatus {
+  if (decision === "deny") {
+    return "denied";
+  }
+
+  if (decision === "ask" || decision === "redact") {
+    return "confirmation_required";
+  }
+
+  return "approved";
+}
+
+export function createDataEgressAuditEvent(
+  context: DataEgressContext,
+  decision: DataEgressDecisionResult,
+  channel: ConfirmationChannel,
+  timestamp = new Date(),
+): AuditEvent {
+  return {
+    id: randomUUID(),
+    timestamp: timestamp.toISOString(),
+    channel,
+    capabilityId: context.capabilityId,
+    status: auditStatusFromDataEgress(decision.decision),
+    policyDecision: policyDecisionFromDataEgress(decision.decision),
+    confirmationStatus: confirmationStatusFromDataEgress(decision.decision),
+    reason: decision.summary,
+    matchedRuleId: decision.matchedRuleId,
+    inputHash: context.inputHash,
+    inputRedactedJson: stableJsonStringify(decision.evidence.redactedPreview),
+    requestStarted: false,
+    egressDecision: decision.decision,
+    egressDataClasses: [...decision.evidence.dataClasses],
+    egressTargetOrigin: decision.evidence.targetOrigin,
+    egressMatchedRuleId: decision.matchedRuleId,
+    egressRedactedPreviewJson: stableJsonStringify(decision.evidence.redactedPreview),
+  };
+}
+
+export async function recordDataEgressDecision(
+  logger: AuditLogger,
+  context: DataEgressContext,
+  decision: DataEgressDecisionResult,
+  channel: ConfirmationChannel,
+  timestamp = new Date(),
+): Promise<AuditEvent> {
+  const auditEvent = createDataEgressAuditEvent(context, decision, channel, timestamp);
+  await logger.record(auditEvent);
+  return auditEvent;
+}
+
 export interface SqliteAuditLoggerOptions extends ResolveStateDirOptions {
   databaseFile?: string;
 }
@@ -1595,6 +1669,12 @@ interface AuditEventRow {
   input_hash: string | null;
   input_redacted_json: string | null;
   resolved_url: string | null;
+  request_started: 0 | 1 | null;
+  egress_decision: DataEgressDecision | null;
+  egress_data_classes_json: string | null;
+  egress_target_origin: string | null;
+  egress_matched_rule_id: string | null;
+  egress_redacted_preview_json: string | null;
 }
 
 const require = createRequire(import.meta.url);
@@ -1619,7 +1699,13 @@ CREATE TABLE IF NOT EXISTS invocations (
   matched_rule_id TEXT,
   input_hash TEXT,
   input_redacted_json TEXT,
-  resolved_url TEXT
+  resolved_url TEXT,
+  request_started INTEGER,
+  egress_decision TEXT,
+  egress_data_classes_json TEXT,
+  egress_target_origin TEXT,
+  egress_matched_rule_id TEXT,
+  egress_redacted_preview_json TEXT
 ) STRICT;
 `;
 
@@ -1630,6 +1716,34 @@ function ensureAuditSchema(database: DatabaseSync): void {
 
   if (!columnNames.has("resolved_url")) {
     database.exec("ALTER TABLE invocations ADD COLUMN resolved_url TEXT");
+  }
+
+  const additionalColumns: Array<[string, string]> = [
+    ["request_started", "INTEGER"],
+    ["egress_decision", "TEXT"],
+    ["egress_data_classes_json", "TEXT"],
+    ["egress_target_origin", "TEXT"],
+    ["egress_matched_rule_id", "TEXT"],
+    ["egress_redacted_preview_json", "TEXT"],
+  ];
+
+  for (const [columnName, columnType] of additionalColumns) {
+    if (!columnNames.has(columnName)) {
+      database.exec(`ALTER TABLE invocations ADD COLUMN ${columnName} ${columnType}`);
+    }
+  }
+}
+
+function parseEgressDataClasses(value: string | null): DataEgressContext["dataClasses"] | undefined {
+  if (value === null) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((item): item is DataEgressContext["dataClasses"][number] => typeof item === "string") : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -1647,6 +1761,12 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     inputHash: row.input_hash ?? undefined,
     inputRedactedJson: row.input_redacted_json ?? undefined,
     resolvedUrl: row.resolved_url ?? undefined,
+    requestStarted: row.request_started === null ? undefined : row.request_started === 1,
+    egressDecision: row.egress_decision ?? undefined,
+    egressDataClasses: parseEgressDataClasses(row.egress_data_classes_json),
+    egressTargetOrigin: row.egress_target_origin ?? undefined,
+    egressMatchedRuleId: row.egress_matched_rule_id ?? undefined,
+    egressRedactedPreviewJson: row.egress_redacted_preview_json ?? undefined,
   };
 }
 
@@ -1659,6 +1779,7 @@ export class SqliteAuditLogger implements AuditLogger {
     mkdirSync(dirname(this.databaseFile), { recursive: true });
     this.database = openDatabaseSync(this.databaseFile);
     this.database.exec(CREATE_INVOCATIONS_TABLE_SQL);
+    ensureAuditSchema(this.database);
   }
 
   async record(event: AuditEvent): Promise<void> {
@@ -1666,8 +1787,9 @@ export class SqliteAuditLogger implements AuditLogger {
       .prepare(
         `INSERT INTO invocations (
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
-          input_hash, input_redacted_json, resolved_url
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
+          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -1682,6 +1804,12 @@ export class SqliteAuditLogger implements AuditLogger {
         event.inputHash ?? null,
         event.inputRedactedJson ?? null,
         event.resolvedUrl ?? null,
+        event.requestStarted === undefined ? null : event.requestStarted ? 1 : 0,
+        event.egressDecision ?? null,
+        event.egressDataClasses === undefined ? null : stableJsonStringify(event.egressDataClasses),
+        event.egressTargetOrigin ?? null,
+        event.egressMatchedRuleId ?? null,
+        event.egressRedactedPreviewJson ?? null,
       );
   }
 
@@ -1709,7 +1837,8 @@ export class SqliteAuditLogger implements AuditLogger {
     const rows = this.database
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
-                input_hash, input_redacted_json, resolved_url
+                input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
+                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json
          FROM invocations
          ${whereSql}
          ORDER BY timestamp DESC, id DESC
