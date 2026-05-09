@@ -1,3 +1,5 @@
+export { sanitizeToolResult } from "./result-sanitizer.js";
+export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -8,6 +10,7 @@ import type { DatabaseSync } from "node:sqlite";
 import { dirname, join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
+import { sanitizeToolResult, type ResultSanitizerFinding } from "./result-sanitizer.js";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -356,6 +359,7 @@ export interface ResultEvidenceSummaryV1 {
   resolvedUrl?: string;
   outputValidationStatus?: OutputValidationStatus;
   outputValidationFindings?: OutputValidationFinding[];
+  sanitizerFindings?: ResultSanitizerFinding[];
 }
 
 export interface ResultEnvelopeV1 {
@@ -550,6 +554,14 @@ function warningFromCode(code: string): ResultWarningV1 {
   };
 }
 
+function warningFromSanitizerFinding(finding: ResultSanitizerFinding): ResultWarningV1 {
+  return {
+    code: finding.code,
+    message: finding.message,
+    severity: finding.severity,
+  };
+}
+
 export function resultEnvelopeFromDryRunPlan(plan: HttpDryRunPlan, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
   return createResultEnvelope({
     invocationId: options.invocationId,
@@ -636,9 +648,9 @@ function requestStartedFromHttpResult(result: HttpExecutionResult): boolean {
   return result.status !== "secret_missing";
 }
 
-function structuredContentFromHttpResult(result: HttpExecutionResult): unknown {
+function structuredContentFromHttpResult(result: HttpExecutionResult, sanitizedValue: unknown): unknown {
   if (result.ok) {
-    return redactInput(result.output);
+    return sanitizedValue;
   }
 
   const error = result.error ?? { code: "HTTP_EXECUTION_ERROR", message: "HTTP execution failed." };
@@ -647,7 +659,7 @@ function structuredContentFromHttpResult(result: HttpExecutionResult): unknown {
       code: error.code,
       message: error.message,
       statusCode: error.statusCode,
-      response: redactInput(error.response),
+      response: sanitizedValue,
     },
   };
 }
@@ -665,9 +677,11 @@ function baseHttpResultEvidence(result: HttpExecutionResult, options: ResultEnve
 }
 
 export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResult, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
+  const sanitizerResult = sanitizeToolResult(result.ok ? result.output : result.error?.response);
   const outputValidation = options.outputSchema === undefined
     ? { ok: true, status: "not_applicable" as const, findings: [] }
-    : validateOutputAgainstSchema(result.output, options.outputSchema);
+    : validateOutputAgainstSchema(sanitizerResult.value, options.outputSchema);
+  const sanitizerWarnings = sanitizerResult.findings.map(warningFromSanitizerFinding);
 
   if (result.ok && !outputValidation.ok) {
     const findings = outputValidation.findings;
@@ -683,10 +697,12 @@ export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResul
           findings,
         },
       },
+      warnings: sanitizerWarnings,
       evidence: {
         ...baseHttpResultEvidence(result, options),
         outputValidationStatus: "invalid",
         outputValidationFindings: findings,
+        sanitizerFindings: sanitizerResult.findings,
       },
     });
   }
@@ -696,11 +712,13 @@ export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResul
     capabilityId: result.capabilityId,
     status: envelopeStatusFromHttpResult(result),
     outcome: outcomeFromHttpResult(result),
-    structuredContent: structuredContentFromHttpResult(result),
+    structuredContent: structuredContentFromHttpResult(result, sanitizerResult.value),
+    warnings: sanitizerWarnings,
     evidence: {
       ...baseHttpResultEvidence(result, options),
       outputValidationStatus: outputValidation.status,
       outputValidationFindings: outputValidation.findings,
+      sanitizerFindings: sanitizerResult.findings,
     },
   });
 }

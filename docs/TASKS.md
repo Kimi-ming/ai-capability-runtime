@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T223 P1：Tool result sanitizer。
 - T224 P1：Result provenance/evidence。
 - T225 P1：Oversized result handling。
 - T226 P2：Host result compatibility records。
@@ -2724,7 +2723,7 @@ pnpm --filter @opencap/mcp test
 
 ### T223 P1：Tool result sanitizer
 
-- [ ] T223 P1：Tool result sanitizer
+- [x] T223 P1：Tool result sanitizer
 
 目标：对 provider response/error body 做 secret redaction、prompt-surface marker、size/content-type guard。
 
@@ -2745,6 +2744,8 @@ pnpm --filter @opencap/mcp test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/result-sanitizer.ts` 和 `result-sanitizer.test.ts`，提供 `sanitizeToolResult`，覆盖 secret-like key/value 脱敏、instruction-like provider text 替换为 `[SANITIZED_TEXT]`、HTML/script/comment strip、内容截断 finding。`resultEnvelopeFromHttpExecutionResult` 现在先执行 sanitizer，再做 output validation，并把 sanitizer findings 写入 Result Envelope warnings 和 evidence。
 
 ### T224 P1：Result provenance/evidence
 

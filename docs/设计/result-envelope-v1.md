@@ -85,6 +85,7 @@ Provider response 和 provider error 都是不可信输入。进入模型上下�
 - secret-like key 或 value 必须替换为 `[REDACTED]` 或省略。
 - 不把 provider raw error、HTML、Markdown 或长文本直接塞进结构化字段。
 - 字段级 sanitizer warning 进入 `warnings` 或 evidence summary。
+- sanitizer finding 使用 `SECRET_REDACTED`、`PROMPT_SURFACE_MARKER`、`HTML_STRIPPED`、`CONTENT_TRUNCATED` 等 code。
 
 ### Free Text
 

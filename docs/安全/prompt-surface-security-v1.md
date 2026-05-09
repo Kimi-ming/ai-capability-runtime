@@ -89,6 +89,9 @@ MCP 工具是 model-controlled，工具定义包含 name、title、description�
 - projection builder 不读取 README。
 - tools/list 输出使用 runtime-generated risk summary。
 - projection hash 在 manifest description 修改后变化。
+- provider result 中的 secret-like 字段/值被脱敏。
+- instruction-like provider text 不直接进入模型可见 text。
+- HTML/script/comment 被 strip 或转换为 sanitizer warning。
 
 ## 关联任务
 
