@@ -17,6 +17,7 @@
 - pnpm workspace 全量验证通过：build/test/lint/validate 均可在项目 conda 环境运行。
 - 单元测试基础设施现状文档化，明确 spec、runtime、mcp helper 已覆盖的测试入口和 CLI 测试缺口。
 - Runtime 临时测试项目 helper，覆盖 install/list/logs 写入显式临时 state dir 且不污染默认 `opencap.local/`。
+- CLI 端到端 smoke test，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
 - Capability PR 评审指南，覆盖维护者合并前的阻断项、follow-up 项和安全检查。

@@ -34,7 +34,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T104 P2：端到端 smoke test。
 - T114 P2：新增架构图。
 - T122 P2：版本策略。
 - T123 P2：npm package 发布预案。
@@ -1818,7 +1817,7 @@ git diff --check
 
 ### T104 P2：端到端 smoke test
 
-- [ ] T104 P2：端到端 smoke test
+- [x] T104 P2：端到端 smoke test
 
 目标：用 fixture 跑通 validate/install/list/invoke dry-run/logs。
 
@@ -1836,6 +1835,8 @@ pnpm test
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
+
+完成记录：`packages/cli/src/smoke.test.ts` 已新增可重复运行的 CLI 端到端 smoke test，并通过 `@opencap/cli` 的 `test` 脚本纳入根目录 `pnpm test`。测试使用系统临时目录作为 `--state-dir`，依次跑通 validate、install、list、invoke dry-run 和 logs；失败时会输出阶段名、参数、stdout、stderr 和 exit code。
 
 ---
 
@@ -1873,6 +1874,21 @@ git diff --check
 - [ ] T112 P1：README 跟随实现更新
 
 当 CLI 可用后，更新快速开始为真实命令。
+
+验收标准：
+
+- README 快速开始使用当前真实可运行命令，不再停留在概念说明。
+- 覆盖 validate、install、list、invoke dry-run、logs 的最小本地闭环。
+- 明确 `serve --mcp` 当前仍是骨架或实验状态，避免误导用户。
+- README 与 `docs/TESTING.md` 的临时 state dir 策略不冲突。
+
+验证：
+
+```bash
+pnpm test
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T113 P1：新增贡献者上手教程
 

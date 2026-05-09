@@ -46,19 +46,20 @@ pnpm lint
 
 ## 当前单元测试基础设施
 
-根目录 `pnpm test` 当前执行 `pnpm -r test`，会运行 workspace 中已声明 `test` 脚本的包。现阶段测试基础设施已经覆盖 `@opencap/spec`、`@opencap/runtime` 和 `@opencap/mcp`，CLI 行为主要通过 Runtime 单元测试、文档化 smoke 命令和历史任务验证间接覆盖，尚未建立独立 CLI command snapshot tests。
+根目录 `pnpm test` 当前执行 `pnpm -r test`，会运行 workspace 中已声明 `test` 脚本的包。现阶段测试基础设施已经覆盖 `@opencap/spec`、`@opencap/runtime`、`@opencap/mcp` 和 CLI smoke test。CLI 已有端到端 smoke 覆盖，但尚未建立完整 command snapshot tests。
 
 当前测试入口：
 
 - `packages/spec/src/index.test.ts`：Manifest validator 和 registry test schema 基础行为，当前覆盖 11 个测试。
 - `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。
 - `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。
+- `packages/cli/src/smoke.test.ts`：CLI 端到端 smoke，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs，当前覆盖 1 个测试。
 
 当前缺口：
 
-- `@opencap/cli` 尚未配置独立 `test` 脚本，CLI 行为需要在 T134/T137 中补齐 command snapshot、stdout/stderr 和 exit code 测试。
+- `@opencap/cli` 已有 smoke test，但仍需要在 T134/T137 中补齐 command snapshot、stdout/stderr 和 exit code 细粒度测试。
 - `apps/console` 和 `apps/registry-web` 仍是占位应用，当前没有前端单元测试要求。
-- Secret Resolver、outbound policy、audit failure preflight 和端到端 smoke test 仍是后续任务，需要按下面的模块计划继续补齐。
+- Secret Resolver、outbound policy、audit failure preflight 和更完整的 conformance smoke 仍是后续任务，需要按下面的模块计划继续补齐。
 
 ## 临时目录测试策略
 
@@ -99,7 +100,7 @@ pnpm validate
 
 ### `@opencap/cli`
 
-当前状态：CLI 包尚未配置独立 `test` 脚本，命令行为主要由 Runtime 单元测试和手动 smoke 命令覆盖。后续补测试时应优先使用临时 state dir，避免污染真实 `opencap.local/`。
+当前状态：CLI 包已配置 `test` 脚本，并通过 `packages/cli/src/smoke.test.ts` 覆盖 validate/install/list/invoke dry-run/logs 的最小闭环。后续补测试时仍应优先使用临时 state dir，避免污染真实 `opencap.local/`。
 
 必须覆盖：
 
