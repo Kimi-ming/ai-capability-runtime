@@ -34,20 +34,45 @@ Registry package
 
 ## Selection Evidence
 
-未来 Host 或 Runtime 可以记录 selection evidence：
+未来 Host 或 Runtime 可以记录 selection evidence，用来回答“Host/model 当时在什么候选工具集合里选择了哪个工具”。
+
+最小字段：
 
 ```yaml
 selection:
-  host: cursor
   profile: mcp-tools-v1
+  host: cursor
+  host_session_id: optional-redacted
   available_tools_hash: sha256:...
+  available_tools_count: 12
   selected_tool_name: github_create_issue
-  capability_id: github.create_issue
-  tool_projection_hash: sha256:...
+  selected_capability_id: github.create_issue
+  selected_tool_projection_hash: sha256:...
   selection_reason_source: host_optional
+  selection_reason_redacted: optional-redacted
 ```
 
-注意：selection evidence 只用于调试和审计，不用于 allow/deny。
+字段说明：
+
+| 字段 | 说明 | 是否用于授权 |
+| --- | --- | --- |
+| `profile` | selection evidence schema/profile 名称 | 否 |
+| `host` | Host 标识，例如 `cursor` / `claude-desktop` | 否 |
+| `available_tools_hash` | 当前 `tools/list` 候选集合的稳定 hash | 否 |
+| `available_tools_count` | 候选工具数量 | 否 |
+| `selected_tool_name` | Host/model 选择的 MCP tool name | 否 |
+| `selected_capability_id` | tool name 反查出的 Capability id | 否 |
+| `selected_tool_projection_hash` | 被选中 tool 的 projection hash | 否 |
+| `selection_reason_source` | 选择理由来源，通常是 Host optional metadata | 否 |
+| `selection_reason_redacted` | 脱敏后的选择理由，可为空 | 否 |
+
+`available_tools_hash` 应根据候选工具的稳定投影摘要计算，例如按 `toolName` 排序后 hash：
+
+```text
+[{ toolName, capabilityId, projectionHash }]
+```
+
+注意：selection evidence 只用于调试和审计，不用于 allow/deny。Runtime 授权仍必须只看 installed manifest、policy、confirmation、quota、secret/outbound/data egress 等治理结果。
 
 ## Discovery Profile V1
 

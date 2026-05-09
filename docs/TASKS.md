@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T215 P2：Selection evidence record。
 - T216 P2：Capability Review Checklist 接入 model-visible text 检查。
 - T217 P2：Tool result prompt-surface sanitizer 草案。
 - T218 P2：Host tool metadata compatibility records。
@@ -2529,7 +2528,7 @@ git diff --check
 
 ### T215 P2：Selection evidence record
 
-- [ ] T215 P2：Selection evidence record
+- [x] T215 P2：Selection evidence record
 
 目标：定义 Host/model 选择工具时可选记录的 evidence 字段。
 
@@ -2549,6 +2548,8 @@ git diff --check
 ```bash
 git diff --check
 ```
+
+完成记录：`docs/生态/discovery-and-selection-boundary.md` 已扩展 Selection Evidence schema，包含 `selected_tool_name`、`selected_capability_id`、`selected_tool_projection_hash`、`available_tools_hash` 和 `available_tools_count`；`docs/质量/execution-evidence-v1.md` 已加入 `SelectionEvidenceV1`，明确 selection evidence 只用于审计和调试，不能修改 policy、跳过 confirmation、证明授权或让未安装能力执行。
 
 ### T216 P2：Capability Review Checklist 接入 model-visible text 检查
 

@@ -18,6 +18,7 @@ Execution evidence 要回答：
 
 | 层级 | 证据 | 例子 |
 | --- | --- | --- |
+| Selection evidence | Host/model 从候选工具集合中选择了什么 | selected tool、projection hash、available tools hash |
 | Plan evidence | Runtime 准备执行什么 | method、url template、risk |
 | Policy evidence | 为什么允许/拒绝/询问 | policy rule id、decision |
 | Consent evidence | 谁确认了什么 | consent receipt、input hash |
@@ -31,9 +32,22 @@ Execution evidence 要回答：
 ## 最小字段
 
 ```ts
+type SelectionEvidenceV1 = {
+  profile: "mcp-tools-v1";
+  host?: string;
+  availableToolsHash: string;
+  availableToolsCount: number;
+  selectedToolName: string;
+  selectedCapabilityId: string;
+  selectedToolProjectionHash: string;
+  selectionReasonSource?: "host_optional" | "runtime_inferred" | "unknown";
+  selectionReasonRedacted?: string;
+};
+
 type ExecutionEvidenceV1 = {
   invocationId: string;
   capabilityId: string;
+  selection?: SelectionEvidenceV1;
   inputHash: string;
   risk: string;
   policyDecision: string;
@@ -51,6 +65,18 @@ type ExecutionEvidenceV1 = {
   sanitizerWarnings?: string[];
 };
 ```
+
+## 授权边界
+
+Selection evidence 只用于审计和调试。它不能：
+
+- 修改 Runtime policy decision。
+- 把 `ask` 改成 `allow`。
+- 跳过 human confirmation。
+- 证明某个 Capability 已被用户授权。
+- 让未安装 Capability 进入执行路径。
+
+如果 selection evidence 缺失，Runtime 仍必须按 policy/confirmation 执行；如果 selection evidence 存在，也不能降低任何治理要求。
 
 ## 不记录
 
@@ -82,6 +108,7 @@ type ExecutionEvidenceV1 = {
 - evidence 不包含 secret-like 字段。
 - success result 有 output validation status。
 - model-visible summary 和 structuredContent 有 content digest 或 provenance summary。
+- selection evidence 包含 selected tool、selected projection hash 和 available tools hash，并明确不参与授权。
 
 ## 关联任务
 
