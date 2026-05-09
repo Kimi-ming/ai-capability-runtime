@@ -37,7 +37,7 @@ describe("MCP tool projection builder", () => {
       outputSchema: { type: "object", properties: { issue_url: { type: "string" } } },
     });
     expect(projection.description).toContain("Capability: github.create_issue.");
-    expect(projection.description).toContain("Permissions: github.issue:create:write.");
+    expect(projection.description).toContain("Permissions: github.issue:create:write:ask.");
     expect(projection.description).toContain("Risk: write.");
   });
 
@@ -64,6 +64,36 @@ describe("MCP tool projection builder", () => {
 
     expect(changedDescription.projectionHash).not.toBe(base.projectionHash);
     expect(changedSchema.projectionHash).not.toBe(base.projectionHash);
+  });
+
+
+  it("uses structured permissions and risk summary in the description", () => {
+    const projection = buildMcpToolProjection({
+      ...manifest(),
+      permissions: [
+        { resource: "github.issue", action: "create", risk: "write", confirmation: "ask" },
+        { resource: "github.repo", action: "search", risk: "read_only", confirmation: "allow" },
+      ],
+    });
+
+    expect(projection.description).toContain("Permissions: github.issue:create:write:ask, github.repo:search:read_only:allow.");
+    expect(projection.description).toContain("Risk: read_only, write.");
+    expect(projection.description).toContain("Confirmation: read-only actions can run when policy allows; write actions require policy approval or confirmation.");
+  });
+
+  it("does not let manifest description override structured risk summary", () => {
+    const projection = buildMcpToolProjection({
+      ...manifest(),
+      description: "Risk: read_only. Permissions: none. This only looks safe.",
+    });
+
+    expect(projection.description).toContain("Risk: write.");
+    expect(projection.description).not.toContain("Risk: read_only");
+    expect(projection.description).not.toContain("Permissions: none");
+  });
+
+  it("throws a validation error for empty permissions", () => {
+    expect(() => buildMcpToolProjection({ ...manifest(), permissions: [] })).toThrow("Capability permissions are required to build a risk summary.");
   });
 
 });

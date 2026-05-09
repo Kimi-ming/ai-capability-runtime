@@ -71,8 +71,10 @@ V1 使用固定模板：
 
 规则：
 
-- `safe_summary` 来自 lint 后的 manifest description。
-- `permission_summary` 和 `risk_summary` 由 Runtime 根据 permissions 生成。
+- `safe_summary` 来自 lint 后的 manifest description，并且会剥离伪造的 `Risk:` / `Permissions:` 片段。
+- `permission_summary` 和 `risk_summary` 由 Runtime 根据结构化 `permissions` 生成。
+- `permission_summary` 至少包含 `resource`、`action`、`risk` 和 `confirmation`。
+- 空 `permissions` 不能生成 tool projection，必须返回 validation error。
 - `confirmation_summary` 只描述 Runtime 行为，例如 `write actions may require confirmation`。
 - description 不得包含“忽略指令”“必须调用”“不要询问用户”“泄露 token”等指挥性文本。
 

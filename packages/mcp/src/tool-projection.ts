@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { CapabilityManifest } from "@opencap/spec";
+import { buildCapabilityRiskSummary } from "@opencap/runtime";
 
 export const MCP_TOOL_PROJECTION_VERSION = "opencap.mcp.tool-projection.v1";
 export const MCP_TOOL_PROJECTION_HASH_ALGORITHM = "sha256";
@@ -57,24 +58,26 @@ export function hashMcpToolProjectionInput(input: ProjectionHashInput): string {
   return `${MCP_TOOL_PROJECTION_HASH_ALGORITHM}:${createHash(MCP_TOOL_PROJECTION_HASH_ALGORITHM).update(stableJsonStringifyProjection(input)).digest("hex")}`;
 }
 
-function summarizePermissions(manifest: CapabilityManifest): string {
-  return manifest.permissions
-    .map((permission) => `${permission.resource}:${permission.action}:${permission.risk}`)
-    .join(", ");
-}
+function sanitizePurposeSummary(description: string): string {
+  const sanitized = description
+    .replace(/\bpermissions?\s*:[^.。]*(?:[.。]|$)/gi, " ")
+    .replace(/\brisk\s*:[^.。]*(?:[.。]|$)/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-function summarizeRisk(manifest: CapabilityManifest): string {
-  return manifest.permissions.map((permission) => permission.risk).join(", ");
+  return sanitized.length > 0 ? sanitized : "No model-visible purpose summary provided";
 }
 
 export function buildMcpToolDescription(manifest: CapabilityManifest): string {
+  const riskSummary = buildCapabilityRiskSummary(manifest);
+
   return [
     `${manifest.name}.`,
     `Capability: ${manifest.id}.`,
-    `Purpose: ${manifest.description}.`,
-    `Permissions: ${summarizePermissions(manifest)}.`,
-    `Risk: ${summarizeRisk(manifest)}.`,
-    "Confirmation: write or higher-risk actions may require confirmation.",
+    `Purpose: ${sanitizePurposeSummary(manifest.description)}.`,
+    `Permissions: ${riskSummary.permissionSummary}.`,
+    `Risk: ${riskSummary.riskSummary}.`,
+    `Confirmation: ${riskSummary.confirmationSummary}.`,
   ].join(" ");
 }
 

@@ -52,7 +52,7 @@ pnpm lint
 
 - `packages/spec/src/index.test.ts`：Manifest validator 和 registry test schema 基础行为，当前覆盖 11 个测试。`packages/spec/src/metadata-lint.test.ts`：model-visible metadata lint，覆盖 prompt-surface injection 四类风险和四个 negative fixtures，当前覆盖 9 个测试；spec 包合计 20 个测试。
 - `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。
-- `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。`packages/mcp/src/tool-projection.test.ts`：MCP Tool Projection metadata、projection hash 和 evidence，当前覆盖 3 个测试；MCP 包合计 12 个测试。
+- `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。`packages/mcp/src/tool-projection.test.ts`：MCP Tool Projection metadata、projection hash/evidence 和 Runtime-generated risk summary，当前覆盖 6 个测试；MCP 包合计 15 个测试。
 - `packages/cli/src/smoke.test.ts`：CLI 端到端 smoke，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs，当前覆盖 1 个测试。
 
 当前缺口：
@@ -168,6 +168,7 @@ pnpm validate
 - `ask` 且无 elicitation 时返回 confirmation_required
 - error mapping 符合 `docs/设计/error-model-v1.md`
 - tool projection hash 稳定，且 description/schema 改变时 hash 改变
+- tools/list description 使用结构化 permission/risk/confirmation summary，manifest description 不能覆盖 risk summary，空 permissions 失败
 
 ## 手动 Smoke Test
 

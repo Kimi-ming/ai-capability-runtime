@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T213 P1：MCP tools/list 使用 Runtime-generated risk summary。
 - T214 P2：Discovery profile RFC。
 - T215 P2：Selection evidence record。
 - T216 P2：Capability Review Checklist 接入 model-visible text 检查。
@@ -2481,7 +2480,7 @@ pnpm --filter @opencap/mcp test
 
 ### T213 P1：MCP tools/list 使用 Runtime-generated risk summary
 
-- [ ] T213 P1：MCP tools/list 使用 Runtime-generated risk summary
+- [x] T213 P1：MCP tools/list 使用 Runtime-generated risk summary
 
 目标：tools/list 的风险和权限摘要来自 Runtime/manifest structured permissions，而不是自由文本。
 
@@ -2501,6 +2500,8 @@ pnpm --filter @opencap/mcp test
 ```bash
 pnpm --filter @opencap/mcp test
 ```
+
+完成记录：新增 Runtime 导出的 `buildCapabilityRiskSummary`，MCP tool projection description 使用结构化 permission/risk/confirmation summary；permission summary 包含 `resource:action:risk:confirmation`，risk summary 使用 Runtime 风险顺序。Manifest description 中伪造的 `Risk:` / `Permissions:` 片段不会进入 purpose summary；空 `permissions` 会抛出 validation error，不再生成空风险描述。
 
 ### T214 P2：Discovery profile RFC
 

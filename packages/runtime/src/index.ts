@@ -1458,9 +1458,69 @@ export async function loadInstalledCapabilities(options: ResolveStateDirOptions 
   return { capabilities, invalid };
 }
 
+export interface CapabilityRiskSummary {
+  permissionSummary: string;
+  riskSummary: string;
+  confirmationSummary: string;
+  risks: Array<CapabilityManifest["permissions"][number]["risk"]>;
+}
+
+export class CapabilityRiskSummaryValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CapabilityRiskSummaryValidationError";
+  }
+}
+
+const RISK_SUMMARY_ORDER: Array<CapabilityManifest["permissions"][number]["risk"]> = [
+  "read_only",
+  "write",
+  "external_send",
+  "destructive",
+  "financial",
+  "code_execution",
+  "secret_access",
+];
+
+function summarizeConfirmation(permissions: CapabilityManifest["permissions"]): string {
+  const risks = new Set(permissions.map((permission) => permission.risk));
+  const parts: string[] = [];
+
+  if (risks.has("read_only")) {
+    parts.push("read-only actions can run when policy allows");
+  }
+
+  if (risks.has("write")) {
+    parts.push("write actions require policy approval or confirmation");
+  }
+
+  if (["external_send", "destructive", "financial", "code_execution", "secret_access"].some((risk) => risks.has(risk as CapabilityManifest["permissions"][number]["risk"]))) {
+    parts.push("higher-risk actions require explicit policy approval and confirmation");
+  }
+
+  return parts.length > 0 ? parts.join("; ") : "policy decides whether confirmation is required";
+}
+
+export function buildCapabilityRiskSummary(manifest: Pick<CapabilityManifest, "permissions">): CapabilityRiskSummary {
+  if (!Array.isArray(manifest.permissions) || manifest.permissions.length === 0) {
+    throw new CapabilityRiskSummaryValidationError("Capability permissions are required to build a risk summary.");
+  }
+
+  const riskSet = new Set(manifest.permissions.map((permission) => permission.risk));
+  const risks = RISK_SUMMARY_ORDER.filter((risk) => riskSet.has(risk));
+
+  return {
+    permissionSummary: manifest.permissions
+      .map((permission) => `${permission.resource}:${permission.action}:${permission.risk}:${permission.confirmation}`)
+      .join(", "),
+    riskSummary: risks.join(", "),
+    confirmationSummary: summarizeConfirmation(manifest.permissions),
+    risks,
+  };
+}
+
 function summarizeRisk(manifest: CapabilityManifest): string {
-  const risks = [...new Set(manifest.permissions.map((permission) => permission.risk))];
-  return risks.join(",");
+  return buildCapabilityRiskSummary(manifest).riskSummary.replaceAll(", ", ",");
 }
 
 function metadataString(manifest: CapabilityManifest, key: string): string | undefined {
