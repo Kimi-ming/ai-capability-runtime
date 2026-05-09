@@ -71,6 +71,7 @@
 ### 我要贡献 Capability 或 Registry 条目
 
 - [编写一个 Capability](教程/write-a-capability.md)
+- [评审一个 Capability PR](教程/review-a-capability.md)
 - [Registry 指南](社区/registry-guidelines.md)
 - [能力包结构](设计/capability-package-v1.md)
 - [能力评审清单](社区/capability-review-checklist.md)

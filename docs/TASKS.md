@@ -28,7 +28,6 @@
 
 ### P1：V1 完整体验
 
-- T081 P1：Capability Review Checklist。
 - T082 P1：补充 Registry README。
 - T091 P1：最小 outbound policy 设计。
 - T092 P1：审计日志隐私分级。
@@ -1443,7 +1442,7 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 
 ### T081 P1：Capability Review Checklist
 
-- [ ] T081 P1：Capability Review Checklist
+- [x] T081 P1：Capability Review Checklist
 
 新增：
 
@@ -1465,6 +1464,14 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已新增 `docs/教程/review-a-capability.md`。
+- 文档给出维护者评审 Capability PR 的操作流程和结论分类。
+- 清单覆盖 manifest schema、权限最小化、风险等级、外部端点、auth/secret、README、registry tests、审计和 unsafe-by-default 标记。
+- 文档明确阻止合并项和可作为 follow-up 的问题。
+- `docs/README.md` 和 `docs/INDEX.md` 已加入入口。
+
 ### T082 P1：补充 Registry README
 
 - [ ] T082 P1：补充 Registry README
@@ -1475,6 +1482,21 @@ git diff --check
 - 分类说明
 - trust level 说明
 - 提交流程
+
+验收标准：
+
+- `registry/README.md` 说明 registry 目录结构、分类、Capability 条目要求和提交流程。
+- 文档解释 trust level 的含义和新条目的默认等级。
+- 文档链接到 Capability 编写教程、Capability PR 评审指南和 Registry 指南。
+- 文档明确 registry 不接收真实 secret、私有数据或绕过安全边界的能力。
+
+验证：
+
+```bash
+pnpm validate
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T083 P2：添加 GitHub Issue/PR templates
 

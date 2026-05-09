@@ -83,6 +83,13 @@
 6. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
 7. [开发工作流](WORKFLOW.md)
 
+### Capability 贡献评审路径
+
+1. [编写一个 Capability](教程/write-a-capability.md)
+2. [评审一个 Capability PR](教程/review-a-capability.md)
+3. [注册表指南](社区/registry-guidelines.md)
+4. [能力评审清单](社区/capability-review-checklist.md)
+
 ## 维护规则
 
 - 新增主路径文档时，同步 `docs/README.md` 和本文件。
