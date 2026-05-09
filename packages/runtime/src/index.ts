@@ -290,6 +290,117 @@ export async function loadPolicySet(options: ResolveStateDirOptions | string = {
   }
 }
 
+export interface PolicyEvaluationPermission {
+  resource: string;
+  action: string;
+  risk: PolicyRisk;
+}
+
+export interface PolicyEvaluationInput {
+  capabilityId: string;
+  permissions: PolicyEvaluationPermission[];
+  channel?: string;
+  host?: string;
+  trustLevel?: string;
+}
+
+export interface PolicyPermissionDecision {
+  permission: PolicyEvaluationPermission;
+  decision: PolicyDecision;
+  reason: string;
+  matchedRuleId?: string;
+  matchedRuleIndex?: number;
+  defaulted: boolean;
+}
+
+export interface PolicyEvaluationResult {
+  decision: PolicyDecision;
+  reason: string;
+  matchedRuleId?: string;
+  matchedRuleIndex?: number;
+  sourcePath: string;
+  permissionDecisions: PolicyPermissionDecision[];
+}
+
+const POLICY_DECISION_RANK: Record<PolicyDecision, number> = {
+  allow: 1,
+  ask: 2,
+  deny: 3,
+};
+
+function policyRuleMatches(rule: PolicyRule, input: PolicyEvaluationInput, permission: PolicyEvaluationPermission): boolean {
+  const match = rule.match;
+
+  return (
+    (match.capabilityId === undefined || match.capabilityId === input.capabilityId) &&
+    (match.risk === undefined || match.risk === permission.risk) &&
+    (match.resource === undefined || match.resource === permission.resource) &&
+    (match.action === undefined || match.action === permission.action) &&
+    (match.channel === undefined || match.channel === input.channel) &&
+    (match.host === undefined || match.host === input.host) &&
+    (match.trustLevel === undefined || match.trustLevel === input.trustLevel)
+  );
+}
+
+function evaluatePermission(
+  policySet: PolicySet,
+  input: PolicyEvaluationInput,
+  permission: PolicyEvaluationPermission,
+): PolicyPermissionDecision {
+  const matchedRuleIndex = policySet.rules.findIndex((rule) => policyRuleMatches(rule, input, permission));
+
+  if (matchedRuleIndex >= 0) {
+    const matchedRule = policySet.rules[matchedRuleIndex];
+
+    return {
+      permission,
+      decision: matchedRule.decision,
+      reason: matchedRule.reason ?? `Matched policy rule ${matchedRule.id ?? matchedRuleIndex}.`,
+      matchedRuleId: matchedRule.id,
+      matchedRuleIndex,
+      defaulted: false,
+    };
+  }
+
+  return {
+    permission,
+    decision: policySet.default,
+    reason: `Default policy decision: ${policySet.default}.`,
+    defaulted: true,
+  };
+}
+
+function stricterPolicyDecision(
+  current: PolicyPermissionDecision,
+  next: PolicyPermissionDecision,
+): PolicyPermissionDecision {
+  return POLICY_DECISION_RANK[next.decision] > POLICY_DECISION_RANK[current.decision] ? next : current;
+}
+
+export function evaluatePolicy(policySet: PolicySet, input: PolicyEvaluationInput): PolicyEvaluationResult {
+  const permissionDecisions = input.permissions.map((permission) => evaluatePermission(policySet, input, permission));
+
+  if (permissionDecisions.length === 0) {
+    return {
+      decision: policySet.default,
+      reason: `Default policy decision: ${policySet.default}.`,
+      sourcePath: policySet.sourcePath,
+      permissionDecisions: [],
+    };
+  }
+
+  const finalPermissionDecision = permissionDecisions.reduce(stricterPolicyDecision);
+
+  return {
+    decision: finalPermissionDecision.decision,
+    reason: finalPermissionDecision.reason,
+    matchedRuleId: finalPermissionDecision.matchedRuleId,
+    matchedRuleIndex: finalPermissionDecision.matchedRuleIndex,
+    sourcePath: policySet.sourcePath,
+    permissionDecisions,
+  };
+}
+
 function firstNonEmpty(...values: Array<string | undefined>): string | undefined {
   return values.find((value) => typeof value === "string" && value.trim().length > 0)?.trim();
 }

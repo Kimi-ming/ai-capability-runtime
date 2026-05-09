@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T031 P0：实现 Policy Engine。
 - T032 P0：实现 Confirmation Handler 接口。
 - T040 P0：确定并实现日志存储。
 - T041 P0：实现 redaction 和 input hash。
@@ -254,6 +253,7 @@
 - 已完成：T021 P1：实现 Capability id 与 MCP tool name 映射表。
 - 已完成：T022 P1：实现本地状态初始化。
 - 已完成：T030 P0：实现 policy 文件格式和 parser。
+- 已完成：T031 P0：实现 Policy Engine。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T031 Policy Engine
+1. T032 Confirmation Handler 接口
 2. T040 Audit log
 3. T050 HTTP executor dry-run
 4. T060 `opencap invoke`
@@ -722,7 +722,7 @@ pnpm lint
 
 ### T031 P0：实现 Policy Engine
 
-- [ ] T031 P0：实现 Policy Engine
+- [x] T031 P0：实现 Policy Engine
 
 输入：
 
@@ -741,9 +741,10 @@ pnpm lint
 
 验收标准：
 
-- read_only -> allow
-- write -> ask
-- destructive -> deny
+- 显式匹配 `read_only -> allow` 规则时返回 allow
+- 显式匹配 `write -> ask` 规则时返回 ask
+- 显式匹配 `destructive -> deny` 规则时返回 deny
+- 多权限 Capability 使用 deny > ask > allow 聚合
 - 无匹配使用 default
 
 验证：
@@ -753,6 +754,13 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/runtime build
 pnpm lint
 ```
+
+完成记录：
+
+- `@opencap/runtime` 已导出 `evaluatePolicy`、`PolicyEvaluationInput` 和 `PolicyEvaluationResult`。
+- Engine 按每个 permission 选择第一条匹配规则。
+- 多权限聚合使用 deny > ask > allow，保证高风险权限不会被低风险权限覆盖。
+- 无规则匹配时使用 policy set 的 `default`，不会默认静默放行 read-only。
 
 ### T032 P0：实现 Confirmation Handler 接口
 
@@ -770,6 +778,14 @@ V1 handler：
 - CLI ask 可以 prompt
 - MCP ask 返回 `confirmation_required`
 - deny 不进入 confirmation
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T033 P1：记录 ask/deny 的审计日志
 

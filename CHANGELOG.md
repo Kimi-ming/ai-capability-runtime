@@ -22,6 +22,7 @@
 - Runtime Installed Capability Loader，加载合法 installed capability 并报告 invalid entries。
 - Runtime 本地状态初始化会创建 `installed/`、`tmp/` 和默认 `policies.yml`，并保留用户已有策略文件。
 - Runtime Policy parser，支持 `policies.yml` 解析、默认 ask policy、decision/risk 校验和结构化错误。
+- Runtime Policy Engine，支持按规则匹配 permission、默认决策和 deny/ask/allow 聚合。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。

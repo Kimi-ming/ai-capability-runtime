@@ -4,6 +4,8 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_POLICIES_YML,
+  defaultPolicySet,
+  evaluatePolicy,
   DEFAULT_STATE_DIR_NAME,
   OPENCAP_STATE_DIR_ENV,
   InstallCapabilityError,
@@ -223,6 +225,95 @@ rules:
     decision: allow
 `),
     ).toThrow(PolicyParseError);
+  });
+});
+
+describe("policy engine", () => {
+  it("allows a permission when an explicit rule matches", () => {
+    const policy = parsePolicyYml(`default: ask
+rules:
+  - id: allow-read-only
+    match:
+      risk: read_only
+    decision: allow
+    reason: Read-only is allowed.
+`);
+
+    expect(
+      evaluatePolicy(policy, {
+        capabilityId: "github.search_repo",
+        permissions: [{ resource: "github.repo", action: "search", risk: "read_only" }],
+      }),
+    ).toMatchObject({
+      decision: "allow",
+      matchedRuleId: "allow-read-only",
+      reason: "Read-only is allowed.",
+    });
+  });
+
+  it("uses the default decision when no rule matches", () => {
+    expect(
+      evaluatePolicy(defaultPolicySet(), {
+        capabilityId: "github.create_issue",
+        permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+      }),
+    ).toMatchObject({
+      decision: "ask",
+      reason: "Default policy decision: ask.",
+      permissionDecisions: [{ defaulted: true }],
+    });
+  });
+
+  it("uses first matching rule for each permission", () => {
+    const policy = parsePolicyYml(`default: ask
+rules:
+  - id: first
+    match:
+      risk: write
+    decision: ask
+  - id: second
+    match:
+      risk: write
+    decision: deny
+`);
+
+    expect(
+      evaluatePolicy(policy, {
+        capabilityId: "github.create_issue",
+        permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+      }),
+    ).toMatchObject({
+      decision: "ask",
+      matchedRuleId: "first",
+    });
+  });
+
+  it("returns the strictest decision across permissions", () => {
+    const policy = parsePolicyYml(`default: allow
+rules:
+  - id: ask-write
+    match:
+      risk: write
+    decision: ask
+  - id: deny-destructive
+    match:
+      risk: destructive
+    decision: deny
+`);
+
+    expect(
+      evaluatePolicy(policy, {
+        capabilityId: "github.dangerous",
+        permissions: [
+          { resource: "github.issue", action: "create", risk: "write" },
+          { resource: "github.issue", action: "delete", risk: "destructive" },
+        ],
+      }),
+    ).toMatchObject({
+      decision: "deny",
+      matchedRuleId: "deny-destructive",
+      permissionDecisions: [{ decision: "ask" }, { decision: "deny" }],
+    });
   });
 });
 

@@ -109,6 +109,8 @@ rules:
 
 这保证高风险权限不会被低风险权限覆盖。
 
+Runtime Engine 对每个 permission 选择第一条匹配规则；没有匹配规则时使用 `default`。默认 `ask` 不会静默允许 read-only，读操作自动允许必须由显式规则表达。
+
 ## 审计字段
 
 PolicyDecision 必须记录：

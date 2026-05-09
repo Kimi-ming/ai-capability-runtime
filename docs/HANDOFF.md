@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser 和 `loadPolicySet`
+- Policy parser、`loadPolicySet` 和 Policy Engine
 
 ## 当前代码状态
 
@@ -24,7 +24,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities 和 policy parser。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser 和 Policy Engine。
 - `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
 - `@opencap/sdk` 暂缓实现。
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T031 P0：实现 Policy Engine。
+Next task: T032 P0：实现 Confirmation Handler 接口。
 
 推荐第一个任务：
 
 ```text
-T031：实现 Policy Engine
+T032：实现 Confirmation Handler 接口
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities 并解析 policy 文件
-- T031 将把 parser 输出接入决策逻辑，生成 allow/ask/deny 结果
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy 文件并计算 allow/ask/deny
+- T032 将把 ask/deny 之后的人类确认边界定义成接口
 
 ## 最近验证
 
@@ -66,14 +66,14 @@ T031：实现 Policy Engine
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- Policy Engine 尚未实现，parser 输出还未用于执行决策。
+- Confirmation Handler 尚未实现，ask 决策还不能转为 CLI prompt 或 MCP confirmation_required。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T031：Policy Engine。
-2. 实现 T032：Confirmation Handler 接口。
+1. 实现 T032：Confirmation Handler 接口。
+2. 实现 T033：记录 ask/deny 的审计日志。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
@@ -355,3 +355,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T030：`@opencap/runtime` 新增 `parsePolicyYml`、`loadPolicySet`、`defaultPolicySet` 和 `PolicyParseError`。缺少 `policies.yml` 时返回默认 `ask` policy set；非法 decision、非法 risk 和非法 YAML 会返回结构化错误。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 23 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过。下一步按任务表进入 T031：实现 Policy Engine。
+
+## Policy Engine 已实现
+
+已完成 T031：`@opencap/runtime` 新增 `evaluatePolicy`。Engine 会按每个 permission 选择第一条匹配规则，无匹配时使用 policy set 的 `default`，并按 deny > ask > allow 聚合多权限 Capability 的最终决策。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 27 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过。下一步按任务表进入 T032：实现 Confirmation Handler 接口。
