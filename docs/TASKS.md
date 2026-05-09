@@ -43,7 +43,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T074 P2：MCP Host 手动测试文档。
 - T083 P2：添加 GitHub Issue/PR templates。
 - T084 P2：新增更多示例 Capability。
 - T093 P2：威胁模型文档。
@@ -1374,7 +1373,7 @@ pnpm lint
 
 ### T074 P2：MCP Host 手动测试文档
 
-- [ ] T074 P2：MCP Host 手动测试文档
+- [x] T074 P2：MCP Host 手动测试文档
 
 新增：
 
@@ -1395,6 +1394,14 @@ pnpm validate
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 ```
 
+完成记录：
+
+- 已新增 `docs/教程/connect-mcp-host.md`。
+- 文档覆盖 Claude Desktop、Claude Code、Cursor 和通用 MCP stdio 配置。
+- 文档覆盖 tools/list、tools/call allow/deny/confirmation_required 的手动验证期望。
+- 文档明确当前 `opencap serve --mcp` 仍是骨架，V1 不生成 confirmation token，并给出 state dir、policy、manifest、stdout 和审计日志排障清单。
+- `docs/README.md` 和 `docs/INDEX.md` 已加入入口。
+
 ---
 
 ## Epic I：Registry 和 Capability 生态
@@ -1410,6 +1417,21 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 - `pnpm validate` 覆盖 registry
 - schema 错误 fail CI
 - 示例 tests 格式也校验
+
+验收标准：
+
+- 新增或更新 GitHub Actions workflow，在 push 和 pull_request 时运行 registry 校验。
+- workflow 使用项目固定的 Node/pnpm 版本，并执行 `pnpm install --frozen-lockfile` 与 `pnpm validate`。
+- workflow 名称、job 名称和失败信息能让贡献者知道是 manifest 或 registry test 校验失败。
+- 不引入需要外部 secret 的步骤。
+
+验证：
+
+```bash
+pnpm validate
+yaml 解析检查
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+```
 
 ### T081 P1：Capability Review Checklist
 

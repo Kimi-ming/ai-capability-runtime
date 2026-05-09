@@ -80,7 +80,8 @@
 3. 当前任务引用的 `docs/设计/` 或 `docs/安全/` 文档
 4. [整体系统设计 V1](设计/整体系统设计-v1.md) 中对应平面和链路
 5. [验证策略](TESTING.md)
-6. [开发工作流](WORKFLOW.md)
+6. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
+7. [开发工作流](WORKFLOW.md)
 
 ## 维护规则
 

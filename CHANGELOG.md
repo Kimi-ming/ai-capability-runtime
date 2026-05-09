@@ -13,6 +13,7 @@
 - Manifest validator 单元测试覆盖合法和非法 schema 场景。
 - Registry test case schema 与 `pnpm validate` 集成。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
+- MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
 - Runtime 本地状态路径 helper，支持默认路径、env 和显式 state dir。
 - `opencap install <id>` 已接入本地 state dir 安装逻辑，支持 `--state-dir`、`--registry` 和 `--force`。
 - `opencap list` 已接入本地 state dir 读取，支持普通输出和 `--json`。
