@@ -103,6 +103,7 @@
 - Resource Delivery Profile V1 RFC，定义 large result 默认 summary + handle、resource handle 不是授权、resource content 读取前仍需 sanitizer/policy/audit 的边界。
 - 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
+- Runtime input classification engine，导出 `classifyInput`，识别 secret_like、pii、internal_url、source_code、financial_data 和 free_text_unknown，并生成 redacted preview。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。
 - 中文文档中心、中文文档规范、维护者索引和中文 GitHub 模板。
 

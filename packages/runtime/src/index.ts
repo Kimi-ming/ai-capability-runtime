@@ -1,3 +1,5 @@
+export { classifyInput } from "./input-classifier.js";
+export type { InputClassificationAction, InputClassificationConfidence, InputClassificationFinding, InputClassificationOptions, InputClassificationResult, InputDataClass } from "./input-classifier.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";

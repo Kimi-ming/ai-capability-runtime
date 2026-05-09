@@ -81,6 +81,25 @@ type DataClassificationFindingV1 = {
 };
 ```
 
+## Runtime 实现状态
+
+当前 `@opencap/runtime` 导出 `classifyInput(input)`，返回：
+
+- `findings`：字段级 path、dataClass、confidence、action、reason。
+- `dataClasses`：本次 input 命中的聚合数据类别。
+- `redactedPreview`：可用于确认摘要和审计预览的脱敏结构。
+
+已实现的 V1 heuristic 覆盖：
+
+- secret-like field/value：token、api_key、authorization、JWT、GitHub token、private key。
+- pii：email、phone-like string。
+- internal_url：localhost、private IPv4、link-local metadata、`.local`、`.internal`。
+- source_code/config：diff、stack trace、`.env`/config secret assignment。
+- financial_data：基础账号/卡号样式。
+- free_text_unknown：超过阈值且未命中其他分类的大段自由文本。
+
+这不是合规 DLP；它是 Runtime pre-secret gate 的安全信号。
+
 ## Redaction Preview
 
 确认和 audit 只能展示 redacted preview：

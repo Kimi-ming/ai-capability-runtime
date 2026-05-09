@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T234 P1：实现 input classification engine。
 - T235 P1：补充 sensitive input classification fixtures。
 - T236 P1：实现 Data Egress Policy Gate。
 - T237 P1：记录 egress decision audit fields。
@@ -2989,7 +2988,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 ### T234 P1：实现 input classification engine
 
-- [ ] T234 P1：实现 input classification engine
+- [x] T234 P1：实现 input classification engine
 
 目标：对 validated input 执行本地分类，识别 secret_like、pii、source_code、internal_url、financial_data、free_text_unknown 等类别。
 
@@ -3010,6 +3009,8 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/input-classifier.ts` 和 `input-classifier.test.ts`，导出 `classifyInput`，覆盖 secret_like、pii、internal_url、source_code/config、financial_data 和 free_text_unknown，并生成字段级 findings、聚合 dataClasses 和 redactedPreview。TDD 红灯为模块缺失，补齐实现后测试转绿。
 
 ### T235 P1：补充 sensitive input classification fixtures
 
