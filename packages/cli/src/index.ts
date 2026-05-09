@@ -11,8 +11,10 @@ import {
   InstallCapabilityError,
   SqliteAuditLogger,
   type AuditInvocationStatus,
+  CliConfirmationHandler,
   buildHttpDryRunPlan,
   evaluatePolicy,
+  executeHttpCapability,
   getLocalStatePaths,
   hashInput,
   installCapability,
@@ -180,6 +182,16 @@ async function parseInvokeInput(options: { input?: string; inputJson?: string })
   return {};
 }
 
+
+function printInvokeResult(result: unknown, json: boolean | undefined): void {
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  console.log(JSON.stringify(result, null, 2));
+}
+
 function trustLevelFromMetadata(metadata: Record<string, unknown>): string | undefined {
   return typeof metadata.trust_level === "string" ? metadata.trust_level : undefined;
 }
@@ -314,12 +326,10 @@ program
   .option("--input <file>", "JSON input file")
   .option("--input-json <json>", "Inline JSON input")
   .option("--dry-run", "Build an invocation plan without external execution")
+  .option("--yes", "Approve CLI ask confirmations when allowed")
+  .option("--json", "Output JSON")
   .description("Invoke an installed Capability.")
-  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean }) => runCliAction(async () => {
-    if (!options.dryRun) {
-      throw new Error("Real invoke is not implemented yet. Use --dry-run.");
-    }
-
+  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean; yes?: boolean; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const input = await parseInvokeInput(options);
     const loaded = await loadInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
@@ -336,29 +346,64 @@ program
       channel: "cli",
       trustLevel: trustLevelFromMetadata(capability.manifest.metadata),
     });
-    const plan = await buildHttpDryRunPlan(capability.manifest, input);
     const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
 
     try {
-      await logger.record({
-        id: randomUUID(),
-        timestamp: new Date().toISOString(),
-        channel: "cli",
+      if (options.dryRun) {
+        const plan = await buildHttpDryRunPlan(capability.manifest, input);
+        await logger.record({
+          id: randomUUID(),
+          timestamp: new Date().toISOString(),
+          channel: "cli",
+          capabilityId: capability.id,
+          status: "dry_run",
+          policyDecision: policy.decision,
+          confirmationStatus: policy.decision === "deny" ? "denied" : "approved",
+          reason: `Dry run plan generated. ${policy.reason}`,
+          matchedRuleId: policy.matchedRuleId,
+          inputHash: hashInput(input),
+          inputRedactedJson: stableJsonStringify(redactInput(input)),
+          resolvedUrl: plan.url,
+        });
+        printInvokeResult({ capabilityId: capability.id, mode: "dry_run", policy, plan }, options.json);
+        return;
+      }
+
+      const confirmation = await new CliConfirmationHandler({ assumeYes: options.yes }).confirm({
         capabilityId: capability.id,
-        status: "dry_run",
-        policyDecision: policy.decision,
-        confirmationStatus: policy.decision === "deny" ? "denied" : "approved",
-        reason: `Dry run plan generated. ${policy.reason}`,
-        matchedRuleId: policy.matchedRuleId,
-        inputHash: hashInput(input),
-        inputRedactedJson: stableJsonStringify(redactInput(input)),
-        resolvedUrl: plan.url,
+        policy,
+        channel: "cli",
+        operationSummary: capability.id,
+        input,
       });
+
+      if (confirmation.status !== "approved") {
+        await logger.record({
+          id: randomUUID(),
+          timestamp: new Date().toISOString(),
+          channel: "cli",
+          capabilityId: capability.id,
+          status: confirmation.status === "denied" ? "denied" : "blocked",
+          policyDecision: policy.decision,
+          confirmationStatus: confirmation.status,
+          reason: confirmation.reason,
+          matchedRuleId: policy.matchedRuleId,
+          inputHash: hashInput(input),
+          inputRedactedJson: stableJsonStringify(redactInput(input)),
+        });
+        process.exitCode = 1;
+        printInvokeResult({ capabilityId: capability.id, mode: "invoke", policy, confirmation }, options.json);
+        return;
+      }
+
+      const result = await executeHttpCapability(capability.manifest, input, { env: process.env, auditLogger: logger, channel: "cli" });
+      if (!result.ok) {
+        process.exitCode = 1;
+      }
+      printInvokeResult({ capabilityId: capability.id, mode: "invoke", policy, confirmation, result }, options.json);
     } finally {
       logger.close();
     }
-
-    console.log(JSON.stringify({ capabilityId: capability.id, mode: "dry_run", policy, plan }, null, 2));
   }, `Failed to invoke ${id}`));
 
 program

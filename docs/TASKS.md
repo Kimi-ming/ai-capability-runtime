@@ -30,7 +30,6 @@
 
 ### P1：V1 完整体验
 
-- T061 P1：实现真实 `opencap invoke`。
 - T062 P1：添加示例 input 文件。
 - T073 P1：定义 MCP `confirmation_required` 结果格式。
 - T080 P1：Registry manifest CI 校验。
@@ -254,6 +253,7 @@
 - 已完成：T054 P1：实现 output normalization。
 - 已完成：T055 P1：处理 arbitrary URL Capability 风险。
 - 已完成：T060 P0：实现 `opencap invoke <id> --dry-run`。
+- 已完成：T061 P1：实现真实 `opencap invoke`。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1212,7 +1212,7 @@ pnpm lint
 
 ### T061 P1：实现真实 `opencap invoke`
 
-- [ ] T061 P1：实现真实 `opencap invoke`
+- [x] T061 P1：实现真实 `opencap invoke`
 
 验收标准：
 
@@ -1229,14 +1229,35 @@ pnpm --filter @opencap/runtime test
 pnpm lint
 ```
 
+完成记录：
+
+- CLI `invoke` 不带 `--dry-run` 时会走 Confirmation Handler 和真实 HTTP executor。
+- 新增 `--yes`，用于非交互批准允许范围内的 CLI ask。
+- 新增 `--json`，输出结构化 invoke 结果。
+- write 操作默认 ask；未批准时不会执行。
+- read_only 能在 policy allow 下自动执行。
+- secret 缺失会返回 `SECRET_MISSING` 结构化结果并设置非零 exit code。
+- 完整 URL 模板 `url: "{{url}}"` 已保留原始 URL，不再错误 URL encode。
+
+
 ### T062 P1：添加示例 input 文件
 
 - [ ] T062 P1：添加示例 input 文件
 
-新增：
+验收标准：
 
-- `examples/github-issue-capability/input.json`
-- `examples/simple-http-capability/input.json`
+- 新增 `examples/github-issue-capability/input.json`。
+- 新增 `examples/simple-http-capability/input.json`。
+- 示例输入能用于 `opencap invoke <id> --dry-run --input <file>`。
+- README 或教程中给出示例命令。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli build
+pnpm validate
+pnpm lint
+```
 
 ---
 

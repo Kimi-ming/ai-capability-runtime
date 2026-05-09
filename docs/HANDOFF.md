@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T061 P1：实现真实 `opencap invoke`。
+Next task: T062 P1：添加示例 input 文件。
 
 推荐第一个任务：
 
 ```text
-T061：实现真实 `opencap invoke`
+T062：添加示例 input 文件
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan，并执行真实 HTTP 请求
-- T061 将把真实 HTTP executor 接入 CLI `opencap invoke`
+- T062 将补充可直接用于 CLI invoke 的示例输入文件
 
 ## 最近验证
 
@@ -66,12 +66,12 @@ T061：实现真实 `opencap invoke`
 ## 已知风险
 
 - `invoke`、`serve` 仍是骨架命令。
-- `opencap invoke` 已接入 dry-run，但尚未接入真实执行。
+- `opencap invoke` 已接入 dry-run 和真实 HTTP 执行。
 - MCP server 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T061：实现真实 `opencap invoke`。
+1. 实现 T062：添加示例 input 文件。
 2. 实现 T054：output normalization。
 3. 再回到 T060/T061：`opencap invoke` 接入。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
@@ -143,6 +143,17 @@ T060 已完成。`opencap invoke <id> --dry-run` 现在会从 installed capabili
 - `opencap logs --status dry_run --json` smoke
 
 下一步推荐：T061 P1：实现真实 `opencap invoke`。
+
+## 真实 CLI invoke 已实现
+
+T061 已完成。`opencap invoke <id>` 现在会评估 policy、调用 CLI Confirmation Handler，并在批准后进入真实 HTTP executor；新增 `--yes` 和 `--json`。write 操作默认 ask，read_only 可在 policy allow 下自动执行，secret 缺失会返回 `SECRET_MISSING` 结构化结果并设置非零 exit code。完整 URL 模板 `url: "{{url}}"` 已修复为保留原始 URL，避免 arbitrary URL capability 被错误 encode。
+
+本轮 smoke：
+
+- `github.create_issue` + `--yes --json` 返回 `SECRET_MISSING`。
+- `http.request_demo` + read_only allow policy 请求本地 HTTP server 成功。
+
+下一步推荐：T062 P1：添加示例 input 文件。
 
 ## 本轮体系化补充
 
@@ -474,4 +485,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T061：实现真实 `opencap invoke`。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T062：添加示例 input 文件。

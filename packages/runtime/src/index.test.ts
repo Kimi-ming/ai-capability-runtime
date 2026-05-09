@@ -223,6 +223,7 @@ describe("arbitrary URL risk detection", () => {
     expect(capabilityRiskWarnings(manifest)).toContain("arbitrary_url");
 
     const plan = await buildHttpDryRunPlan(manifest, { url: "https://example.com" });
+    expect(plan.url).toBe("https://example.com");
     expect(plan.warnings).toContain("arbitrary_url");
   });
 

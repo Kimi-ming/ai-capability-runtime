@@ -150,6 +150,11 @@ function templateValueToString(fieldName: string, value: unknown): string {
 
 export function renderUrlTemplate(template: string, input: unknown): string {
   const record = templateInputRecord(input);
+  const fullMatch = template.match(FULL_TEMPLATE_PATTERN);
+
+  if (fullMatch) {
+    return templateValueToString(fullMatch[1], record[fullMatch[1]]);
+  }
 
   return template.replace(/{{\s*([A-Za-z0-9_-]+)\s*}}/g, (_match, fieldName: string) => {
     const rawValue = templateValueToString(fieldName, record[fieldName]);
