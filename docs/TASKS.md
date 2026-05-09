@@ -39,7 +39,6 @@
 
 ### P1：V1 完整体验
 
-- T022 P1：实现本地状态初始化。
 - T033 P1：记录 ask/deny 的审计日志。
 - T042 P1：实现 `opencap logs`。
 - T053 P1：定义 HTTP request body manifest 字段。
@@ -254,6 +253,7 @@
 - 已完成：T015 P2：增加 `opencap doctor`。
 - 已完成：T020 P0：实现 Installed Capability Loader。
 - 已完成：T021 P1：实现 Capability id 与 MCP tool name 映射表。
+- 已完成：T022 P1：实现本地状态初始化。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T022 本地状态初始化
-2. T030 Policy parser/engine
-3. T040 Audit log
-4. T050 HTTP executor dry-run
-5. T060 `opencap invoke`
-6. T070 MCP bridge
-7. T080 Registry manifest CI 校验
-8. T081 Capability Review Checklist
-9. T023 Runtime loader CLI integration
-10. T031 默认 policy 模板
+1. T030 Policy parser/engine
+2. T040 Audit log
+3. T050 HTTP executor dry-run
+4. T060 `opencap invoke`
+5. T070 MCP bridge
+6. T080 Registry manifest CI 校验
+7. T081 Capability Review Checklist
+8. T023 Runtime loader CLI integration
+9. T031 默认 policy 模板
+10. T033 记录 ask/deny 的审计日志
 
 ---
 
@@ -647,7 +647,7 @@ pnpm --filter @opencap/mcp build
 
 ### T022 P1：实现本地状态初始化
 
-- [ ] T022 P1：实现本地状态初始化
+- [x] T022 P1：实现本地状态初始化
 
 目标：首次运行命令时自动创建必要目录。
 
@@ -672,6 +672,13 @@ pnpm --filter @opencap/cli build
 pnpm lint
 ```
 
+完成记录：
+
+- `ensureLocalStateDir` 现在会创建 `installed/`、`tmp/` 和默认 `policies.yml`。
+- 默认策略文件内容为 `default: ask` 与空 `rules`，符合 Policy DSL V1。
+- 已存在的 `policies.yml` 不会被覆盖，`logs.sqlite` 仍由后续 Audit Logger 首次写入创建。
+- `listInstalledCapabilities` 与 `OpenCapRuntime.ensureLocalStateDir()` 已复用该初始化逻辑。
+
 ---
 
 ## Epic D：Policy 和 Confirmation
@@ -686,23 +693,25 @@ pnpm lint
 
 ```yaml
 default: ask
-rules:
-  - match:
-      risk: read_only
-    decision: allow
-  - match:
-      risk: write
-    decision: ask
-  - match:
-      risk: destructive
-    decision: deny
+rules: []
 ```
+
+说明：默认策略不静默放行任何 Capability。读操作自动允许可以通过用户或后续默认模板任务显式添加规则表达。
 
 验收标准：
 
 - 缺 policy 文件时使用默认策略
 - 非法 decision 报错
 - 非法 risk 报错
+- parser 输出结构化 policy set，后续 Policy Engine 可复用
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T031 P0：实现 Policy Engine
 

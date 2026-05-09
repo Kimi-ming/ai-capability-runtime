@@ -42,12 +42,13 @@ opencap.local/
   cache/
 ```
 
-V1 必须创建：
+V1 初始化必须创建：
 
 - `installed/`
 - `tmp/`
+- `policies.yml` 默认模板
 
-`policies.yml` 不存在时使用默认 ask。`logs.sqlite` 首次写入时创建。
+默认 `policies.yml` 等同于 `default: ask` 和空 `rules`。如果用户已经创建或编辑过 `policies.yml`，初始化不得覆盖。`logs.sqlite` 由 Audit Logger 首次写入时创建。
 
 ## 写入规则
 

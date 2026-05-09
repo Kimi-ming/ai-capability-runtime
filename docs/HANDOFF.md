@@ -15,6 +15,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - registry test case schema 与 `pnpm validate` 集成
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
+- 本地状态初始化和默认 `policies.yml`
 
 ## 当前代码状态
 
@@ -22,7 +23,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir helper、install/list/load installed capabilities 能力。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities 能力。
 - `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
 - `@opencap/sdk` 暂缓实现。
 
@@ -30,26 +31,27 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T022 P1：实现本地状态初始化。
+Next task: T030 P0：实现 policy 文件格式和 parser。
 
 推荐第一个任务：
 
 ```text
-T022：实现本地状态初始化
+T030：实现 policy 文件格式和 parser
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021 已完成
-- Runtime 已能解析 state dir、安装能力、列出能力并加载合法 installed capabilities
-- T022 将把首次运行的 state 初始化补完整，尤其是默认 policy 和日志目录
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力并加载合法 installed capabilities
+- T030 将把默认 policy 文件从静态模板推进到可解析、可验证的策略模型
 
 ## 最近验证
 
 项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮已运行：
 
-- `pnpm --filter @opencap/mcp test`
-- `pnpm --filter @opencap/mcp build`
+- `pnpm --filter @opencap/runtime test`
+- `pnpm --filter @opencap/cli build`
+- CLI `list --state-dir /private/tmp/opencap-t022-smoke` smoke
 - `pnpm build`
 - `pnpm test`
 - `pnpm lint`
@@ -64,14 +66,14 @@ T022：实现本地状态初始化
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- 本地状态初始化还缺默认 `policies.yml` 和日志父目录。
+- Policy parser/engine 尚未实现，目前默认 `policies.yml` 只是模板。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T022：首次运行自动初始化本地状态、默认 policy 和日志目录。
-2. 实现 T030/T031：policy parser/engine 与默认 policy 模板。
+1. 实现 T030：policy 文件格式和 parser。
+2. 实现 T031：默认 policy 模板和 parser 联动测试。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
@@ -341,3 +343,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T021：`@opencap/mcp` 新增 `buildMcpToolNameMap`，将 Capability id 稳定投影为 MCP tool name，并在启动前检测 `.` 与 `_` 归一化带来的冲突。`describeCapabilityAsTool` 现在会在 metadata 中保留原始 `capabilityId`。
 
 本轮验证：`pnpm --filter @opencap/mcp test` 通过 4 个测试；`pnpm --filter @opencap/mcp build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过。下一步按任务表进入 T022：实现本地状态初始化。
+
+## 本地状态初始化已实现
+
+已完成 T022：`ensureLocalStateDir` 现在会创建 `installed/`、`tmp/` 和默认 `policies.yml`，默认策略为 `default: ask` 与空 `rules`。已存在的 `policies.yml` 不会被覆盖，`logs.sqlite` 仍由后续 Audit Logger 在首次写入时创建。`listInstalledCapabilities` 与 `OpenCapRuntime.ensureLocalStateDir()` 已复用该初始化逻辑。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 19 个测试；`pnpm --filter @opencap/cli build`、CLI `list --state-dir /private/tmp/opencap-t022-smoke` smoke、`pnpm build`、`pnpm test`、`pnpm validate`、`pnpm lint`、`check_docs.py` 和 `git diff --check` 通过。下一步按任务表进入 T030：实现 policy 文件格式和 parser。

@@ -1,4 +1,4 @@
-import { cp, mkdir, readdir, rename, rm, stat } from "node:fs/promises";
+import { cp, mkdir, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
@@ -7,6 +7,9 @@ export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
 export const DEFAULT_REGISTRY_DIR_NAME = "registry";
 export const OPENCAP_REGISTRY_DIR_ENV = "OPENCAP_REGISTRY_DIR";
+export const DEFAULT_POLICIES_YML = `default: ask
+rules: []
+`;
 
 export interface ResolveStateDirOptions {
   cwd?: string;
@@ -143,9 +146,21 @@ export async function ensureLocalStateDir(options: ResolveStateDirOptions | stri
   await mkdir(paths.installedDir, { recursive: true });
   await mkdir(paths.tmpDir, { recursive: true });
 
+  try {
+    await writeFile(paths.policiesFile, DEFAULT_POLICIES_YML, { flag: "wx" });
+  } catch (error) {
+    if (!isFileExistsError(error)) {
+      throw error;
+    }
+  }
+
   return paths;
 }
 
+
+function isFileExistsError(error: unknown): error is NodeJS.ErrnoException {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "EEXIST";
+}
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -320,7 +335,8 @@ function metadataString(manifest: CapabilityManifest, key: string): string | und
 }
 
 export async function listInstalledCapabilities(options: ResolveStateDirOptions = {}): Promise<InstalledCapabilitySummary[]> {
-  const loaded = await loadInstalledCapabilities(options);
+  const paths = await ensureLocalStateDir(options);
+  const loaded = await loadInstalledCapabilities(paths.root);
   const summaries: InstalledCapabilitySummary[] = [];
 
   for (const capability of loaded.capabilities) {
@@ -361,6 +377,10 @@ export class OpenCapRuntime {
 
   get statePaths(): LocalStatePaths {
     return this.paths;
+  }
+
+  async ensureLocalStateDir(): Promise<LocalStatePaths> {
+    return ensureLocalStateDir(this.paths.root);
   }
 
   async loadInstalledCapabilities(): Promise<InstalledCapability[]> {

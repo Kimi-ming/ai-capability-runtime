@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_POLICIES_YML,
   DEFAULT_STATE_DIR_NAME,
   OPENCAP_STATE_DIR_ENV,
   InstallCapabilityError,
@@ -111,15 +112,30 @@ describe("state dir helpers", () => {
     expect(paths.logsDatabaseFile).toBe(resolve(root, "logs.sqlite"));
   });
 
-  it("creates only the required V1 state directories", async () => {
+  it("creates the required V1 state files and directories", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "opencap-runtime-"));
     const paths = await ensureLocalStateDir({ cwd, env: {} });
 
     expect(await exists(paths.root)).toBe(true);
     expect(await exists(paths.installedDir)).toBe(true);
     expect(await exists(paths.tmpDir)).toBe(true);
+    expect(await readFile(paths.policiesFile, "utf8")).toBe(DEFAULT_POLICIES_YML);
+    expect(await exists(paths.logsDatabaseFile)).toBe(false);
     expect(await exists(paths.cacheDir)).toBe(false);
     expect(await exists(resolve(cwd, "registry"))).toBe(false);
+  });
+
+  it("does not overwrite an existing policies file", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-runtime-"));
+    const paths = getLocalStatePaths({ cwd, env: {} });
+    const customPolicy = "default: deny\nrules: []\n";
+
+    await mkdir(paths.root, { recursive: true });
+    await writeFile(paths.policiesFile, customPolicy);
+
+    await ensureLocalStateDir({ cwd, env: {} });
+
+    await expect(readFile(paths.policiesFile, "utf8")).resolves.toBe(customPolicy);
   });
 
   it("initializes OpenCapRuntime with resolved state paths", () => {
@@ -127,6 +143,15 @@ describe("state dir helpers", () => {
 
     expect(runtime.stateDir).toBe(resolve("/tmp/opencap-project", DEFAULT_STATE_DIR_NAME));
     expect(runtime.statePaths.installedDir).toBe(resolve(runtime.stateDir, "installed"));
+  });
+
+  it("lets OpenCapRuntime initialize local state on demand", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-runtime-"));
+    const runtime = new OpenCapRuntime({ cwd, env: {} });
+    const paths = await runtime.ensureLocalStateDir();
+
+    expect(await exists(paths.installedDir)).toBe(true);
+    await expect(readFile(paths.policiesFile, "utf8")).resolves.toBe(DEFAULT_POLICIES_YML);
   });
 });
 
@@ -191,10 +216,13 @@ describe("installCapability", () => {
 
 
 describe("listInstalledCapabilities", () => {
-  it("returns an empty list when no capabilities are installed", async () => {
+  it("returns an empty list and initializes state when no capabilities are installed", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "opencap-list-"));
+    const paths = getLocalStatePaths({ cwd, env: {} });
 
     await expect(listInstalledCapabilities({ cwd, env: {} })).resolves.toEqual([]);
+    expect(await exists(paths.installedDir)).toBe(true);
+    await expect(readFile(paths.policiesFile, "utf8")).resolves.toBe(DEFAULT_POLICIES_YML);
   });
 
   it("lists installed capability summaries", async () => {
