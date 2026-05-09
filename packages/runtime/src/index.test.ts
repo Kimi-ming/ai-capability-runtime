@@ -1,9 +1,11 @@
 import { mkdtemp, readFile, stat, writeFile, mkdir } from "node:fs/promises";
+import { createServer, type IncomingMessage } from "node:http";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildHttpDryRunPlan,
+  executeHttpCapability,
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
   confirmWithAudit,
@@ -33,6 +35,15 @@ import {
   stableJsonStringify,
 } from "./index.js";
 
+
+
+async function readRequestBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
 
 async function writeCapability(root: string, category: string, id: string, manifestId = id): Promise<string> {
   const dir = join(root, "registry", category, id);
@@ -191,6 +202,183 @@ describe("HTTP dry-run plan", () => {
       inputRedactedJson: '{"body":"broken","labels":[],"owner":"opencap","repo":"runtime","title":"Bug","token":"[REDACTED]"}',
     });
   });
+});
+
+
+describe("HTTP executor", () => {
+  it("executes a POST JSON request with bearer auth and writes an audit event without leaking the secret", async () => {
+    const logger = new InMemoryAuditLogger();
+    const requests: Array<{ method?: string; url?: string; authorization?: string; body: string }> = [];
+    const server = createServer(async (request, response) => {
+      requests.push({
+        method: request.method,
+        url: request.url,
+        authorization: request.headers.authorization,
+        body: await readRequestBody(request),
+      });
+      response.writeHead(201, { "content-type": "application/json" });
+      response.end(JSON.stringify({ issue_url: "https://example.test/issues/1", issue_number: 1 }));
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+    try {
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        throw new Error("expected TCP server address");
+      }
+
+      const manifest = {
+        ...dryRunManifest(),
+        execution: {
+          ...dryRunManifest().execution,
+          url: `http://127.0.0.1:${address.port}/repos/{{owner}}/{{repo}}/issues`,
+        },
+      };
+
+      const result = await executeHttpCapability(
+        manifest,
+        { owner: "opencap", repo: "runtime", title: "Bug", body: "broken", labels: ["bug"], token: "input-secret" },
+        { env: { GITHUB_TOKEN: "provider-secret" }, auditLogger: logger, channel: "cli" },
+      );
+
+      expect(result).toMatchObject({
+        ok: true,
+        capabilityId: "github.create_issue",
+        method: "POST",
+        status: "success",
+        statusCode: 201,
+        output: { issue_url: "https://example.test/issues/1", issue_number: 1 },
+      });
+      expect(requests).toEqual([
+        {
+          method: "POST",
+          url: "/repos/opencap/runtime/issues",
+          authorization: "Bearer provider-secret",
+          body: JSON.stringify({ title: "Bug", body: "Issue: broken", labels: ["bug"] }),
+        },
+      ]);
+      expect(logger.events).toHaveLength(1);
+      expect(logger.events[0]).toMatchObject({
+        capabilityId: "github.create_issue",
+        status: "executed",
+        confirmationStatus: "approved",
+        resolvedUrl: `http://127.0.0.1:${address.port}/repos/opencap/runtime/issues`,
+        inputRedactedJson: '{"body":"broken","labels":["bug"],"owner":"opencap","repo":"runtime","title":"Bug","token":"[REDACTED]"}',
+      });
+      expect(JSON.stringify(logger.events[0])).not.toContain("provider-secret");
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it("sends api_key auth with custom header placement", async () => {
+    const requests: Array<{ apiKey?: string }> = [];
+    const server = createServer((request, response) => {
+      requests.push({ apiKey: request.headers["x-api-key"] as string | undefined });
+      response.writeHead(200, { "content-type": "text/plain" });
+      response.end("ok");
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+    try {
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        throw new Error("expected TCP server address");
+      }
+
+      const manifest = {
+        ...dryRunManifest(),
+        auth: { type: "api_key" as const, provider: "demo", env: "DEMO_TOKEN", placement: { type: "header", name: "X-API-Key" } },
+        execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/search/{{repo}}`, body: undefined },
+      };
+
+      const result = await executeHttpCapability(manifest, { repo: "runtime" }, { env: { DEMO_TOKEN: "header-secret" } });
+
+      expect(result).toMatchObject({ ok: true, status: "success", output: "ok" });
+      expect(requests).toEqual([{ apiKey: "header-secret" }]);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it("returns a structured HTTP error for non-2xx responses", async () => {
+    const server = createServer((_, response) => {
+      response.writeHead(404, { "content-type": "application/json" });
+      response.end(JSON.stringify({ message: "not found", token: "provider-secret" }));
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+    try {
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        throw new Error("expected TCP server address");
+      }
+      const manifest = {
+        ...dryRunManifest(),
+        execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/missing`, body: undefined },
+      };
+
+      await expect(executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" } })).resolves.toMatchObject({
+        ok: false,
+        status: "http_error",
+        statusCode: 404,
+        error: { code: "HTTP_ERROR", statusCode: 404, response: { message: "not found", token: "[REDACTED]" } },
+      });
+      const result = await executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" } });
+      expect(JSON.stringify(result)).not.toContain("provider-secret");
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it("returns a structured timeout error", async () => {
+    const server = createServer((_, response) => {
+      setTimeout(() => {
+        response.writeHead(200, { "content-type": "text/plain" });
+        response.end("late");
+      }, 80);
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+    try {
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        throw new Error("expected TCP server address");
+      }
+      const manifest = {
+        ...dryRunManifest(),
+        execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/slow`, body: undefined, timeout_ms: 10 },
+      };
+
+      await expect(executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" } })).resolves.toMatchObject({
+        ok: false,
+        status: "timeout",
+        error: { code: "HTTP_TIMEOUT" },
+      });
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
+  it("returns a structured missing-secret error before sending the request", async () => {
+    const logger = new InMemoryAuditLogger();
+    const result = await executeHttpCapability(dryRunManifest(), { owner: "opencap", repo: "runtime", title: "Bug", body: "broken" }, { env: {}, auditLogger: logger });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: "secret_missing",
+      error: { code: "SECRET_MISSING" },
+    });
+    expect(result.error?.message).toContain("GITHUB_TOKEN");
+    expect(JSON.stringify(result)).not.toContain("provider-secret");
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0]).toMatchObject({ status: "blocked", resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues" });
+  });
+
 });
 
 describe("state dir helpers", () => {
@@ -691,6 +879,35 @@ describe("SQLite audit logger", () => {
       );
 
       await expect(logger.recent(1)).resolves.toMatchObject([{ reason: "second" }]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("persists resolved URL evidence for executed events", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-url-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+
+    try {
+      await logger.record({
+        id: "evt-url",
+        timestamp: "2026-05-09T00:00:00.000Z",
+        channel: "cli",
+        capabilityId: "github.create_issue",
+        status: "executed",
+        policyDecision: "allow",
+        confirmationStatus: "approved",
+        reason: "HTTP execution succeeded.",
+        resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+      });
+
+      await expect(logger.recent(10)).resolves.toMatchObject([
+        {
+          capabilityId: "github.create_issue",
+          status: "executed",
+          resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+        },
+      ]);
     } finally {
       logger.close();
     }

@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T052 P0：实现 HTTP executor。
 - T060 P0：实现 `opencap invoke <id> --dry-run`。
 - T070 P0：选择 MCP TypeScript SDK 并接入。
 - T071 P0：实现 MCP `tools/list`。
@@ -254,6 +253,7 @@
 - 已完成：T043 P2：增加日志筛选。
 - 已完成：T050 P0：实现 URL 模板渲染。
 - 已完成：T051 P0：实现 dry-run executor。
+- 已完成：T052 P0：实现 HTTP executor。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1055,7 +1055,7 @@ pnpm lint
 
 ### T052 P0：实现 HTTP executor
 
-- [ ] T052 P0：实现 HTTP executor
+- [x] T052 P0：实现 HTTP executor
 
 支持：
 
@@ -1085,23 +1085,37 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `executeHttpCapability`。
+- 支持 GET/POST/PUT/PATCH/DELETE 等 manifest 声明 method，支持 JSON body 渲染。
+- 支持 `auth.placement: bearer` 和 `auth.placement: header`，secret 只从 env 读取，不进入审计事件。
+- 支持 timeout、缺凭据、网络错误、HTTP 非 2xx 的结构化结果。
+- HTTP 2xx 响应会归一化为 JSON 或 text。
+- 执行事件会写入 audit log，并持久化 `resolvedUrl` evidence。
+
+
 ### T053 P1：定义 HTTP request body manifest 字段
 
 - [ ] T053 P1：定义 HTTP request body manifest 字段
 
-当前 manifest 没有明确 body 映射。
+当前 manifest 已开始使用 `execution.body.fields`，但需要把 body 映射契约正式落到 schema、示例和文档中。
 
-需要设计：
+验收标准：
 
-- 默认 body 是否等于 input 去掉 path params？
-- 是否引入 `execution.body` 模板？
-- labels 等字段如何进入 GitHub API body？
+- `manifest.schema.json` 明确定义 `execution.body.type: json` 和 `execution.body.fields`。
+- 字段值完全等于 `{{field}}` 时保留原始 JSON 类型。
+- 字符串内嵌 `{{field}}` 时按字符串插值。
+- 可选完整变量缺失时省略字段，URL 模板缺失仍然报错。
+- `github.create_issue` 示例 manifest 与文档保持一致。
 
-产出：
+验证：
 
-- RFC 或 ADR
-- schema 更新
-- `github.create_issue` manifest 更新
+```bash
+pnpm --filter @opencap/spec test
+pnpm --filter @opencap/runtime test
+pnpm validate
+```
 
 ### T054 P1：实现 output normalization
 
@@ -1140,6 +1154,14 @@ pnpm lint
 - 支持 `--input <file>`
 - 支持 inline JSON input
 - 走 validate/policy/audit/executor dry-run
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli build
+pnpm --filter @opencap/runtime test
+pnpm lint
+```
 
 ### T061 P1：实现真实 `opencap invoke`
 

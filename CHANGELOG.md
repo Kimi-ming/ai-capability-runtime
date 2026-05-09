@@ -32,6 +32,7 @@
 - `opencap logs` 支持 `--capability`、`--status`、`--since` 筛选。
 - Runtime URL 模板渲染，支持 `{{field}}`、URL encoding 和结构化错误。
 - Runtime dry-run executor，生成 HTTP 调用计划并写入 `dry_run` 审计事件。
+- Runtime HTTP executor，支持真实请求、env 凭据、timeout、2xx/非 2xx 归一化结果和 resolved URL 审计证据。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。

@@ -210,7 +210,8 @@ function renderBodyTemplate(value: unknown, input: Record<string, unknown>): unk
 
   const fullMatch = value.match(FULL_TEMPLATE_PATTERN);
   if (fullMatch) {
-    return readTemplateField(input, fullMatch[1]);
+    const rendered = input[fullMatch[1]];
+    return rendered === null ? undefined : rendered;
   }
 
   return value.replace(TEMPLATE_PATTERN, (_match, fieldName: string) => String(readTemplateField(input, fieldName)));
@@ -272,6 +273,194 @@ export async function buildHttpDryRunPlan(
   }
 
   return plan;
+}
+
+export type HttpExecutionStatus = "success" | "http_error" | "timeout" | "network_error" | "secret_missing";
+
+export interface HttpExecutionResult {
+  ok: boolean;
+  capabilityId: string;
+  method: string;
+  url: string;
+  status: HttpExecutionStatus;
+  statusCode?: number;
+  output?: unknown;
+  error?: {
+    code: string;
+    message: string;
+    statusCode?: number;
+    response?: unknown;
+  };
+}
+
+export interface HttpExecutionOptions extends HttpDryRunOptions {
+  env?: Record<string, string | undefined>;
+  fetch?: typeof fetch;
+}
+
+function authEnvName(manifest: CapabilityManifest): string | undefined {
+  const auth = manifest.auth as CapabilityAuth & { env?: unknown };
+  return typeof auth.env === "string" ? auth.env : undefined;
+}
+
+function authHeaders(manifest: CapabilityManifest, env: Record<string, string | undefined>): { headers: Record<string, string>; missingEnv?: string } {
+  const auth = manifest.auth as CapabilityAuth & { env?: unknown; placement?: { type?: string; name?: string } };
+
+  if (auth.type === "none") {
+    return { headers: {} };
+  }
+
+  if (auth.type !== "api_key") {
+    return { headers: {} };
+  }
+
+  const envName = authEnvName(manifest);
+  const secret = envName === undefined ? undefined : env[envName];
+
+  if (envName === undefined || secret === undefined || secret.length === 0) {
+    return { headers: {}, missingEnv: envName ?? "<unknown>" };
+  }
+
+  if (auth.placement?.type === "header" && typeof auth.placement.name === "string") {
+    return { headers: { [auth.placement.name]: secret } };
+  }
+
+  return { headers: { Authorization: `Bearer ${secret}` } };
+}
+
+function executionAuditEvent(
+  manifest: CapabilityManifest,
+  input: unknown,
+  result: HttpExecutionResult,
+  channel: ConfirmationChannel,
+): AuditEvent {
+  return {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    channel,
+    capabilityId: manifest.id,
+    status: result.status === "secret_missing" ? "blocked" : "executed",
+    policyDecision: "allow",
+    confirmationStatus: "approved",
+    reason: result.ok ? "HTTP execution succeeded." : result.error?.message ?? "HTTP execution failed.",
+    inputHash: hashInput(input),
+    inputRedactedJson: stableJsonStringify(redactInput(input)),
+    resolvedUrl: result.url,
+  };
+}
+
+async function responseBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (text.length === 0) {
+    return undefined;
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.toLowerCase().includes("application/json")) {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+
+  return text;
+}
+
+function timeoutErrorResult(plan: HttpDryRunPlan): HttpExecutionResult {
+  return {
+    ok: false,
+    capabilityId: plan.capabilityId,
+    method: plan.method,
+    url: plan.url,
+    status: "timeout",
+    error: { code: "HTTP_TIMEOUT", message: `HTTP request timed out after ${plan.timeoutMs}ms.` },
+  };
+}
+
+export async function executeHttpCapability(
+  manifest: CapabilityManifest,
+  input: unknown,
+  options: HttpExecutionOptions = {},
+): Promise<HttpExecutionResult> {
+  const plan = await buildHttpDryRunPlan(manifest, input);
+  const env = options.env ?? process.env;
+  const auth = authHeaders(manifest, env);
+
+  if (auth.missingEnv !== undefined) {
+    const result: HttpExecutionResult = {
+      ok: false,
+      capabilityId: manifest.id,
+      method: plan.method,
+      url: plan.url,
+      status: "secret_missing",
+      error: { code: "SECRET_MISSING", message: `Missing required environment credential: ${auth.missingEnv}.` },
+    };
+    if (options.auditLogger !== undefined) {
+      await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli"));
+    }
+    return result;
+  }
+
+  const headers: Record<string, string> = { ...auth.headers };
+  const init: RequestInit = { method: plan.method, headers };
+  if (plan.body !== undefined) {
+    headers["content-type"] = "application/json";
+    init.body = JSON.stringify(plan.body);
+  }
+
+  const controller = new AbortController();
+  init.signal = controller.signal;
+  const timeout = setTimeout(() => controller.abort(), plan.timeoutMs);
+  const fetchImpl = options.fetch ?? globalThis.fetch;
+  let result: HttpExecutionResult;
+
+  try {
+    const response = await fetchImpl(plan.url, init);
+    const body = await responseBody(response);
+    if (response.ok) {
+      result = {
+        ok: true,
+        capabilityId: manifest.id,
+        method: plan.method,
+        url: plan.url,
+        status: "success",
+        statusCode: response.status,
+        output: body,
+      };
+    } else {
+      result = {
+        ok: false,
+        capabilityId: manifest.id,
+        method: plan.method,
+        url: plan.url,
+        status: "http_error",
+        statusCode: response.status,
+        error: { code: "HTTP_ERROR", message: `HTTP request failed with status ${response.status}.`, statusCode: response.status, response: redactInput(body) },
+      };
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      result = timeoutErrorResult(plan);
+    } else {
+      result = {
+        ok: false,
+        capabilityId: manifest.id,
+        method: plan.method,
+        url: plan.url,
+        status: "network_error",
+        error: { code: "NETWORK_ERROR", message: error instanceof Error ? error.message : String(error) },
+      };
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  if (options.auditLogger !== undefined) {
+    await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli"));
+  }
+
+  return result;
 }
 
 export const POLICY_DECISIONS = ["allow", "ask", "deny"] as const;
@@ -767,6 +956,7 @@ export interface AuditEvent {
   matchedRuleId?: string;
   inputHash?: string;
   inputRedactedJson?: string;
+  resolvedUrl?: string;
 }
 
 export interface AuditLogger {
@@ -847,6 +1037,7 @@ interface AuditEventRow {
   matched_rule_id: string | null;
   input_hash: string | null;
   input_redacted_json: string | null;
+  resolved_url: string | null;
 }
 
 const require = createRequire(import.meta.url);
@@ -870,9 +1061,20 @@ CREATE TABLE IF NOT EXISTS invocations (
   reason TEXT NOT NULL,
   matched_rule_id TEXT,
   input_hash TEXT,
-  input_redacted_json TEXT
+  input_redacted_json TEXT,
+  resolved_url TEXT
 ) STRICT;
 `;
+
+
+function ensureAuditSchema(database: DatabaseSync): void {
+  const columns = database.prepare("PRAGMA table_info(invocations)").all() as unknown as Array<{ name: string }>;
+  const columnNames = new Set(columns.map((column) => column.name));
+
+  if (!columnNames.has("resolved_url")) {
+    database.exec("ALTER TABLE invocations ADD COLUMN resolved_url TEXT");
+  }
+}
 
 function auditEventFromRow(row: AuditEventRow): AuditEvent {
   return {
@@ -887,6 +1089,7 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     matchedRuleId: row.matched_rule_id ?? undefined,
     inputHash: row.input_hash ?? undefined,
     inputRedactedJson: row.input_redacted_json ?? undefined,
+    resolvedUrl: row.resolved_url ?? undefined,
   };
 }
 
@@ -906,8 +1109,8 @@ export class SqliteAuditLogger implements AuditLogger {
       .prepare(
         `INSERT INTO invocations (
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
-          input_hash, input_redacted_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          input_hash, input_redacted_json, resolved_url
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -921,6 +1124,7 @@ export class SqliteAuditLogger implements AuditLogger {
         event.matchedRuleId ?? null,
         event.inputHash ?? null,
         event.inputRedactedJson ?? null,
+        event.resolvedUrl ?? null,
       );
   }
 
@@ -948,7 +1152,7 @@ export class SqliteAuditLogger implements AuditLogger {
     const rows = this.database
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
-                input_hash, input_redacted_json
+                input_hash, input_redacted_json, resolved_url
          FROM invocations
          ${whereSql}
          ORDER BY timestamp DESC, id DESC
