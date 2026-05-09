@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T226 P2：Host result compatibility records。
 - T227 P2：Output selector RFC。
 - T228 P2：Resource delivery profile RFC。
 - T229 P1：Result sanitizer negative fixtures。
@@ -2797,7 +2796,7 @@ pnpm --filter @opencap/runtime test
 
 ### T226 P2：Host result compatibility records
 
-- [ ] T226 P2：Host result compatibility records
+- [x] T226 P2：Host result compatibility records
 
 目标：记录不同 MCP Host 对 structuredContent、content text、isError、outputSchema 的处理差异。
 
@@ -2816,6 +2815,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 git diff --check
 ```
+
+完成记录：补充 Tool Result 字段兼容性记录，按 Claude Desktop 1.3561.0、Cursor 3.3.16 和自定义 MCP client 记录 `structuredContent`、`content[].text`、`isError`、`outputSchema` 行为与证据等级；`pending-smoke` 与 `supported/runtime-owned` 分开标注。`result-delivery-boundary.md` 新增安全边界声明，明确 OpenCap 安全结论由 Runtime 持有，Host 兼容性记录只作为互操作证据。
 
 ### T227 P2：Output selector RFC
 

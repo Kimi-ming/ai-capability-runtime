@@ -40,6 +40,18 @@ MCP V1 优先：
 
 OpenCap 的安全承诺不能依赖 Host 正确处理这些字段。Runtime 必须先完成 validation、redaction、sanitization，再投递。
 
+## 安全边界声明
+
+OpenCap V1 的安全结论由 Runtime 持有，Host 只负责接收和展示投递结果。具体含义：
+
+- Host 是否展示 `outputSchema`，不能替代 Runtime output validation。
+- Host 是否保留 `structuredContent`，不能替代 Runtime redaction、sanitization、size limit 和 provenance evidence。
+- Host 是否把 `content[].text` 放回模型上下文，不会获得 provider raw body，因为该字段只允许 Runtime-generated summary。
+- Host 是否正确展示 `isError`，不能改变 audit outcome、policy decision、confirmation decision 或 retry/reconcile 语义。
+- 如果 Host 忽略 `structuredContent`，OpenCap 只损失机器可读细节展示，不损失授权、审计或脱敏边界；调试时以 Result Envelope 和 audit log 为准。
+
+因此，Host compatibility record 是互操作证据，不是安全授权证据。任何 Host smoke 只能证明“该 Host 当时如何显示/保留字段”，不能降低 Runtime gate、Policy Engine、Secret Resolver、Data Egress Gate、Outbound Gate 或 Audit Logger 的要求。
+
 ## CLI 投递策略
 
 CLI 可以展示更多调试信息，但仍然：

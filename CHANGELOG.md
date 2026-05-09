@@ -94,6 +94,7 @@
 - Runtime Result Provenance evidence，记录 redacted structured content digest、transformations 和 taint labels，并覆盖 failed/unknown summary。
 - Runtime oversized result handling，限制 provider structured/text result 大小，超限结构化结果替换为 `[TRUNCATED_RESULT]`，超长文本截断，并保留 sanitizer warning、redaction evidence 和 Runtime-generated MCP summary。
 - Host tool metadata compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 title、description、outputSchema、annotations 和 `_meta` 的字段兼容性。
+- Host result compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 `structuredContent`、`content[].text`、`isError` 和 `outputSchema` 的结果字段行为，并明确 Host 兼容性不是安全授权证据。
 - 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。
