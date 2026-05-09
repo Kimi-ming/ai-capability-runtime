@@ -43,6 +43,26 @@ export interface InstallCapabilityResult {
   manifest: CapabilityManifest;
 }
 
+export interface InstalledCapability {
+  id: string;
+  version: string;
+  installPath: string;
+  manifestPath: string;
+  manifest: CapabilityManifest;
+}
+
+export interface InstalledCapabilityLoadIssue {
+  id: string;
+  installPath: string;
+  manifestPath: string;
+  error: string;
+}
+
+export interface InstalledCapabilityLoadResult {
+  capabilities: InstalledCapability[];
+  invalid: InstalledCapabilityLoadIssue[];
+}
+
 export interface InstalledCapabilitySummary {
   id: string;
   installPath: string;
@@ -238,6 +258,57 @@ export async function installCapability(options: InstallCapabilityOptions): Prom
 }
 
 
+
+async function installedEntries(installedDir: string): Promise<Array<{ name: string; installPath: string; manifestPath: string }>> {
+  if (!(await pathExists(installedDir))) {
+    return [];
+  }
+
+  const entries = await readdir(installedDir, { withFileTypes: true });
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((entry) => {
+      const installPath = join(installedDir, entry.name);
+      return {
+        name: entry.name,
+        installPath,
+        manifestPath: join(installPath, "manifest.yml"),
+      };
+    });
+}
+
+export async function loadInstalledCapabilities(options: ResolveStateDirOptions | string = {}): Promise<InstalledCapabilityLoadResult> {
+  const paths = getLocalStatePaths(options);
+  const entries = await installedEntries(paths.installedDir);
+  const capabilities: InstalledCapability[] = [];
+  const invalid: InstalledCapabilityLoadIssue[] = [];
+
+  for (const entry of entries) {
+    const validation = await validateManifestFile(entry.manifestPath);
+
+    if (!validation.ok) {
+      invalid.push({
+        id: entry.name,
+        installPath: entry.installPath,
+        manifestPath: entry.manifestPath,
+        error: validation.issues.map((issue) => `${issue.fieldPath} ${issue.message}`).join("; "),
+      });
+      continue;
+    }
+
+    capabilities.push({
+      id: validation.manifest.id,
+      version: validation.manifest.version,
+      installPath: entry.installPath,
+      manifestPath: entry.manifestPath,
+      manifest: validation.manifest,
+    });
+  }
+
+  return { capabilities, invalid };
+}
+
 function summarizeRisk(manifest: CapabilityManifest): string {
   const risks = [...new Set(manifest.permissions.map((permission) => permission.risk))];
   return risks.join(",");
@@ -249,44 +320,32 @@ function metadataString(manifest: CapabilityManifest, key: string): string | und
 }
 
 export async function listInstalledCapabilities(options: ResolveStateDirOptions = {}): Promise<InstalledCapabilitySummary[]> {
-  const paths = getLocalStatePaths(options);
-
-  if (!(await pathExists(paths.installedDir))) {
-    return [];
-  }
-
-  const entries = await readdir(paths.installedDir, { withFileTypes: true });
-  const installed = entries.filter((entry) => entry.isDirectory()).sort((a, b) => a.name.localeCompare(b.name));
+  const loaded = await loadInstalledCapabilities(options);
   const summaries: InstalledCapabilitySummary[] = [];
 
-  for (const entry of installed) {
-    const installPath = join(paths.installedDir, entry.name);
-    const manifestPath = join(installPath, "manifest.yml");
-    const validation = await validateManifestFile(manifestPath);
-
-    if (!validation.ok) {
-      summaries.push({
-        id: entry.name,
-        installPath,
-        risk: "unknown",
-        status: "invalid",
-        error: validation.issues.map((issue) => `${issue.fieldPath} ${issue.message}`).join("; "),
-      });
-      continue;
-    }
-
+  for (const capability of loaded.capabilities) {
     summaries.push({
-      id: validation.manifest.id,
-      installPath,
-      version: validation.manifest.version,
-      type: validation.manifest.type,
-      risk: summarizeRisk(validation.manifest),
-      trustLevel: metadataString(validation.manifest, "trust_level"),
+      id: capability.id,
+      installPath: capability.installPath,
+      version: capability.manifest.version,
+      type: capability.manifest.type,
+      risk: summarizeRisk(capability.manifest),
+      trustLevel: metadataString(capability.manifest, "trust_level"),
       status: "enabled",
     });
   }
 
-  return summaries;
+  for (const invalid of loaded.invalid) {
+    summaries.push({
+      id: invalid.id,
+      installPath: invalid.installPath,
+      risk: "unknown",
+      status: "invalid",
+      error: invalid.error,
+    });
+  }
+
+  return summaries.sort((a, b) => a.id.localeCompare(b.id));
 }
 
 export class OpenCapRuntime {
@@ -304,8 +363,8 @@ export class OpenCapRuntime {
     return this.paths;
   }
 
-  async loadInstalledCapabilities(): Promise<CapabilityManifest[]> {
-    return [];
+  async loadInstalledCapabilities(): Promise<InstalledCapability[]> {
+    return (await loadInstalledCapabilities(this.paths.root)).capabilities;
   }
 
   async invoke(_request: InvocationRequest): Promise<InvocationResult> {

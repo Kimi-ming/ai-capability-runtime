@@ -11,6 +11,7 @@ import {
   getLocalStatePaths,
   installCapability,
   listInstalledCapabilities,
+  loadInstalledCapabilities,
   resolveStateDir,
 } from "./index.js";
 
@@ -230,5 +231,60 @@ describe("listInstalledCapabilities", () => {
       status: "invalid",
       risk: "unknown",
     });
+  });
+});
+
+
+describe("loadInstalledCapabilities", () => {
+  it("loads valid installed capabilities with install path and manifest version", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-loader-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    await installCapability({ cwd, id: "github.create_issue", env: {} });
+
+    const result = await loadInstalledCapabilities({ cwd, env: {} });
+
+    expect(result.invalid).toEqual([]);
+    expect(result.capabilities).toMatchObject([
+      {
+        id: "github.create_issue",
+        version: "0.1.0",
+        installPath: resolve(cwd, "opencap.local", "installed", "github.create_issue"),
+        manifestPath: resolve(cwd, "opencap.local", "installed", "github.create_issue", "manifest.yml"),
+      },
+    ]);
+  });
+
+  it("does not load invalid installed manifests", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-loader-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    await installCapability({ cwd, id: "github.create_issue", env: {} });
+
+    const badDir = join(cwd, "opencap.local", "installed", "bad.capability");
+    await mkdir(badDir, { recursive: true });
+    await writeFile(join(badDir, "manifest.yml"), "id: bad.capability\n");
+
+    const result = await loadInstalledCapabilities({ cwd, env: {} });
+
+    expect(result.capabilities.map((capability) => capability.id)).toEqual(["github.create_issue"]);
+    expect(result.invalid).toMatchObject([
+      {
+        id: "bad.capability",
+        installPath: badDir,
+      },
+    ]);
+  });
+
+  it("wires OpenCapRuntime.loadInstalledCapabilities to the loader", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-loader-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    await installCapability({ cwd, id: "github.create_issue", env: {} });
+    const runtime = new OpenCapRuntime({ cwd, env: {} });
+
+    await expect(runtime.loadInstalledCapabilities()).resolves.toMatchObject([
+      {
+        id: "github.create_issue",
+        version: "0.1.0",
+      },
+    ]);
   });
 });

@@ -35,19 +35,19 @@ OpenCap 处于 V1 前期实现准备阶段。
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T020 P0：实现 Installed Capability Loader。
+Next task: T021 P1：实现 Capability id 与 MCP tool name 映射表。
 
 推荐第一个任务：
 
 ```text
-T020：实现 Installed Capability Loader
+T021：实现 Capability id 与 MCP tool name 映射表
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015 已完成
-- CLI 已具备 validate/install/list/doctor 主路径
-- T020 将把已安装 Capability 加载为 Runtime 对象
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020 已完成
+- Runtime 已能加载合法 installed capabilities 并报告坏条目
+- T021 将补 MCP tool name 映射表
 
 ## 最近验证
 
@@ -270,7 +270,7 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 
 已完成 T003：新增 `packages/spec/src/index.test.ts`，直接测试 `validateManifest` API。覆盖合法 HTTP manifest、`type: mcp`、缺少 `permissions`、非法 risk、timeout 小于 100、metadata 缺少 `trust_level`，并断言失败结果包含 JSON Pointer 风格字段路径。
 
-本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+本轮验证：`pnpm --filter @opencap/spec test` 通过，6 个测试全部通过；`pnpm --filter @opencap/spec build` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## Registry test case schema 已定义
@@ -279,28 +279,28 @@ T267 已完成并从待办列表移入已完成区。下一步仍然是 T001：�
 
 现有四个示例测试文件已补齐 `capability`、`mode` 和 `expect.status`，并保留 `expect.request` 与 `expect.permission`。Registry 指南和测试格式文档已同步说明最小字段、用途和校验命令。
 
-本轮验证：`pnpm validate` 通过，输出 4 个 valid manifest 和 4 个 valid registry test；`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec test` 和 `pnpm build` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+本轮验证：`pnpm validate` 通过，输出 4 个 valid manifest 和 4 个 valid registry test；`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec test` 和 `pnpm build` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## Capability 编写教程已新增
 
 已完成 T005：新增 `docs/教程/write-a-capability.md`，作为 Tutorial 类型文档，面向第一次贡献 Capability 的开发者。教程从空目录开始，覆盖 `manifest.yml`、README、`tests/basic.yml`、`opencap validate <path>`、`pnpm validate` 和常见错误。
 
-`docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径已加入该教程。下一步按任务表进入 T020：实现 Installed Capability Loader。
+`docs/README.md` 的“我要贡献 Capability 或 Registry 条目”路径已加入该教程。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## 本地状态路径 helper 已实现
 
 已完成 T010：`@opencap/runtime` 现在导出 `resolveStateDir`、`getLocalStatePaths` 和 `ensureLocalStateDir`。解析优先级符合本地状态设计：显式 `stateDir`、`OPENCAP_STATE_DIR`、默认 `<cwd>/opencap.local`。
 
-`ensureLocalStateDir` 只创建 V1 必需的 `installed/` 和 `tmp/`，不会创建或修改 `registry/`。`OpenCapRuntime` 构造时会保存解析后的 `statePaths`。本轮验证：`pnpm --filter @opencap/runtime test` 通过，6 个测试全部通过；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+`ensureLocalStateDir` 只创建 V1 必需的 `installed/` 和 `tmp/`，不会创建或修改 `registry/`。`OpenCapRuntime` 构造时会保存解析后的 `statePaths`。本轮验证：`pnpm --filter @opencap/runtime test` 通过，6 个测试全部通过；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## Capability install 已实现
 
 已完成 T011：`@opencap/runtime` 新增 `installCapability`，CLI `opencap install <id>` 已接入真实安装逻辑。安装会在 registry 中查找唯一 Capability 目录，校验 `manifest.yml`，复制完整目录到 `opencap.local/installed/<id>/`，默认拒绝覆盖，`--force` 可替换。
 
-CLI 支持 `--state-dir`、`--registry` 和 `--force`。本轮验证：`pnpm --filter @opencap/runtime test` 通过 11 个测试；CLI smoke 安装到 `/private/tmp/opencap-cli-install-smoke` 成功，重复安装无 `--force` 返回 exit 1 并提示 `Use --force`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+CLI 支持 `--state-dir`、`--registry` 和 `--force`。本轮验证：`pnpm --filter @opencap/runtime test` 通过 11 个测试；CLI smoke 安装到 `/private/tmp/opencap-cli-install-smoke` 成功，重复安装无 `--force` 返回 exit 1 并提示 `Use --force`；`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## Capability list 已实现
@@ -314,18 +314,25 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T013：CLI 新增统一错误处理 helper，validate/install/list 已通过 `runCliAction`、`handleCliError` 和 `setCliError` 处理错误。用户错误返回 exit 1，未知内部错误返回 exit 2，默认不输出 stack trace。
 
-本轮验证：`pnpm --filter @opencap/cli build` 通过；`validate /private/tmp/non-existent-opencap-path` 返回 exit 1 且无 stack trace；`install missing.capability` 返回 exit 1 且无 stack trace；成功的 validate/list smoke 行为保持不变；`pnpm lint` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+本轮验证：`pnpm --filter @opencap/cli build` 通过；`validate /private/tmp/non-existent-opencap-path` 返回 exit 1 且无 stack trace；`install missing.capability` 返回 exit 1 且无 stack trace；成功的 validate/list smoke 行为保持不变；`pnpm lint` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## CLI state-dir 参数面已补齐
 
 已完成 T014：`install` 和 `list` 保持真实 `--state-dir` 行为；新增 `invoke` 骨架命令并支持 `--state-dir`、`--input`、`--dry-run`；`logs` 和 `serve` 已接受 `--state-dir` 并保持骨架输出。
 
-本轮验证：`install --state-dir /private/tmp/opencap-cli-state-dir-smoke --force` 成功；`list --state-dir` 能列出 `github.create_issue`；`invoke --state-dir --dry-run`、`logs --state-dir`、`serve --state-dir --mcp` 均接受参数并输出骨架信息；`pnpm --filter @opencap/cli build` 和 `pnpm lint` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+本轮验证：`install --state-dir /private/tmp/opencap-cli-state-dir-smoke --force` 成功；`list --state-dir` 能列出 `github.create_issue`；`invoke --state-dir --dry-run`、`logs --state-dir`、`serve --state-dir --mcp` 均接受参数并输出骨架信息；`pnpm --filter @opencap/cli build` 和 `pnpm lint` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
 
 
 ## Doctor 命令已实现
 
 已完成 T015：CLI 新增 `opencap doctor`，用于只读诊断本地环境。当前输出 Node 版本、pnpm 版本、registry 路径状态、state dir 路径状态、state dir writable、installed summary 和 policy status。命令支持 `--state-dir` 和 `--registry`，不会修改 registry 或 state dir。
 
-本轮验证：`pnpm --filter @opencap/cli dev -- doctor --state-dir /private/tmp/opencap-cli-state-dir-smoke` 通过，输出 1 个 installed、0 个 invalid；`pnpm --filter @opencap/cli build`、`pnpm lint`、`pnpm test` 通过。下一步按任务表进入 T020：实现 Installed Capability Loader。
+本轮验证：`pnpm --filter @opencap/cli dev -- doctor --state-dir /private/tmp/opencap-cli-state-dir-smoke` 通过，输出 1 个 installed、0 个 invalid；`pnpm --filter @opencap/cli build`、`pnpm lint`、`pnpm test` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
+
+
+## Installed Capability Loader 已实现
+
+已完成 T020：`@opencap/runtime` 新增 `loadInstalledCapabilities`，返回合法 installed capabilities 和 invalid entries。合法对象包含 id、version、installPath、manifestPath 和 manifest；损坏 manifest 不会进入 capabilities，但会形成可展示错误。`OpenCapRuntime.loadInstalledCapabilities()` 已接入该 loader。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 17 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。

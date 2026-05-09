@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T020 P0：实现 Installed Capability Loader。
 - T030 P0：实现 policy 文件格式和 parser。
 - T031 P0：实现 Policy Engine。
 - T032 P0：实现 Confirmation Handler 接口。
@@ -254,6 +253,7 @@
 - 已完成：T013 P1：实现 CLI 统一错误处理和 exit code。
 - 已完成：T014 P1：增加 `--state-dir` 参数。
 - 已完成：T015 P2：增加 `opencap doctor`。
+- 已完成：T020 P0：实现 Installed Capability Loader。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T020 Installed Capability Loader
-2. T030 Policy parser/engine
-3. T040 Audit log
-4. T050 HTTP executor dry-run
-5. T060 `opencap invoke`
-6. T070 MCP bridge
-7. T080 Registry manifest CI 校验
-8. T081 Capability Review Checklist
-9. T021 Capability id 与 MCP tool name 映射表
-10. T022 本地状态初始化
+1. T021 Capability id 与 MCP tool name 映射表
+2. T022 本地状态初始化
+3. T030 Policy parser/engine
+4. T040 Audit log
+5. T050 HTTP executor dry-run
+6. T060 `opencap invoke`
+7. T070 MCP bridge
+8. T080 Registry manifest CI 校验
+9. T081 Capability Review Checklist
+10. T023 Runtime loader CLI integration
 
 ---
 
@@ -598,7 +598,7 @@ pnpm --filter @opencap/cli build
 
 ### T020 P0：实现 Installed Capability Loader
 
-- [ ] T020 P0：实现 Installed Capability Loader
+- [x] T020 P0：实现 Installed Capability Loader
 
 目标：Runtime 能从 `opencap.local/installed` 加载能力。
 
@@ -617,15 +617,27 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/runtime build
 ```
 
+完成记录：Runtime 已导出 `loadInstalledCapabilities`，返回合法 `InstalledCapability[]` 和 invalid entries；`OpenCapRuntime.loadInstalledCapabilities()` 已接入 loader。坏 manifest 不会进入 capabilities，但会形成可展示错误。
+
 ### T021 P1：实现 Capability id 与 MCP tool name 映射表
 
 - [ ] T021 P1：实现 Capability id 与 MCP tool name 映射表
+
+目标：为 MCP tools/list 和 tools/call 提供稳定、可检测冲突的 tool name 映射。
 
 验收标准：
 
 - `github.create_issue` -> `github_create_issue`
 - 启动时检测冲突
 - tool metadata 保留原始 id
+- mapping helper 可被 `@opencap/mcp` 复用
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+pnpm --filter @opencap/mcp build
+```
 
 ### T022 P1：实现本地状态初始化
 
