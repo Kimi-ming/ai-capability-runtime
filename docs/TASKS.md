@@ -31,7 +31,6 @@
 
 ### P1：V1 完整体验
 
-- T054 P1：实现 output normalization。
 - T055 P1：处理 arbitrary URL Capability 风险。
 - T061 P1：实现真实 `opencap invoke`。
 - T062 P1：添加示例 input 文件。
@@ -254,6 +253,7 @@
 - 已完成：T051 P0：实现 dry-run executor。
 - 已完成：T052 P0：实现 HTTP executor。
 - 已完成：T053 P1：定义 HTTP request body manifest 字段。
+- 已完成：T054 P1：实现 output normalization。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1119,7 +1119,7 @@ pnpm validate
 
 ### T054 P1：实现 output normalization
 
-- [ ] T054 P1：实现 output normalization
+- [x] T054 P1：实现 output normalization
 
 目标：HTTP 响应转成 Capability output。
 
@@ -1140,15 +1140,34 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `normalizeHttpResponse`。
+- JSON 响应归一化为结构化 output。
+- 非 JSON 响应归一化为 text output。
+- 空响应归一化为 `bodyKind: empty`，不虚构 output。
+- `HttpExecutionResult` 已携带 `statusCode`、`contentType` 和 `bodyKind`。
+- HTTP 非 2xx 错误继续使用脱敏响应摘要。
+
+
 ### T055 P1：处理 arbitrary URL Capability 风险
 
 - [ ] T055 P1：处理 arbitrary URL Capability 风险
 
-要求：
+验收标准：
 
-- `http.request_demo` 标记 unsafe-by-default
-- docs 说明 outbound policy 风险
-- Runtime 可检测 URL 完全由输入提供的情况并提高风险提示
+- `http.request_demo` manifest 明确标记 arbitrary URL / unsafe-by-default。
+- 中文文档说明 arbitrary URL、SSRF、metadata service、private network 的 outbound policy 风险。
+- Runtime 可以检测 URL 完全由输入模板提供的 Capability。
+- 检测结果能提高 risk summary 或返回风险提示，供 dry-run、invoke 和未来 MCP tool projection 使用。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm validate
+pnpm lint
+```
 
 ---
 

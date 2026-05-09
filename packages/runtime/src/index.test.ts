@@ -18,6 +18,7 @@ import {
   InMemoryAuditLogger,
   InstallCapabilityError,
   McpNoElicitationConfirmationHandler,
+  normalizeHttpResponse,
   PolicyParseError,
   UrlTemplateRenderError,
   renderUrlTemplate,
@@ -204,6 +205,48 @@ describe("HTTP dry-run plan", () => {
   });
 });
 
+
+
+describe("HTTP output normalization", () => {
+  it("normalizes JSON responses with status and content type", async () => {
+    const normalized = await normalizeHttpResponse(new Response(JSON.stringify({ ok: true }), {
+      status: 201,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    }));
+
+    expect(normalized).toEqual({
+      statusCode: 201,
+      contentType: "application/json; charset=utf-8",
+      bodyKind: "json",
+      output: { ok: true },
+    });
+  });
+
+  it("normalizes non-JSON responses as text output", async () => {
+    const normalized = await normalizeHttpResponse(new Response("created", {
+      status: 200,
+      headers: { "content-type": "text/plain" },
+    }));
+
+    expect(normalized).toEqual({
+      statusCode: 200,
+      contentType: "text/plain",
+      bodyKind: "text",
+      output: "created",
+    });
+  });
+
+  it("normalizes empty responses without inventing output", async () => {
+    const normalized = await normalizeHttpResponse(new Response(null, { status: 204 }));
+
+    expect(normalized).toEqual({
+      statusCode: 204,
+      contentType: undefined,
+      bodyKind: "empty",
+      output: undefined,
+    });
+  });
+});
 
 describe("HTTP executor", () => {
   it("executes a POST JSON request with bearer auth and writes an audit event without leaking the secret", async () => {

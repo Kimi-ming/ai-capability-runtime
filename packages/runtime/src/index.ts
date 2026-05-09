@@ -277,6 +277,15 @@ export async function buildHttpDryRunPlan(
 
 export type HttpExecutionStatus = "success" | "http_error" | "timeout" | "network_error" | "secret_missing";
 
+export type HttpBodyKind = "json" | "text" | "empty";
+
+export interface NormalizedHttpResponse {
+  statusCode: number;
+  contentType?: string;
+  bodyKind: HttpBodyKind;
+  output?: unknown;
+}
+
 export interface HttpExecutionResult {
   ok: boolean;
   capabilityId: string;
@@ -284,6 +293,8 @@ export interface HttpExecutionResult {
   url: string;
   status: HttpExecutionStatus;
   statusCode?: number;
+  contentType?: string;
+  bodyKind?: HttpBodyKind;
   output?: unknown;
   error?: {
     code: string;
@@ -349,22 +360,43 @@ function executionAuditEvent(
   };
 }
 
-async function responseBody(response: Response): Promise<unknown> {
+export async function normalizeHttpResponse(response: Response): Promise<NormalizedHttpResponse> {
+  const contentType = response.headers.get("content-type") ?? undefined;
   const text = await response.text();
+
   if (text.length === 0) {
-    return undefined;
+    return {
+      statusCode: response.status,
+      contentType,
+      bodyKind: "empty",
+      output: undefined,
+    };
   }
 
-  const contentType = response.headers.get("content-type") ?? "";
-  if (contentType.toLowerCase().includes("application/json")) {
+  if (contentType?.toLowerCase().includes("application/json")) {
     try {
-      return JSON.parse(text);
+      return {
+        statusCode: response.status,
+        contentType,
+        bodyKind: "json",
+        output: JSON.parse(text),
+      };
     } catch {
-      return text;
+      return {
+        statusCode: response.status,
+        contentType,
+        bodyKind: "text",
+        output: text,
+      };
     }
   }
 
-  return text;
+  return {
+    statusCode: response.status,
+    contentType,
+    bodyKind: "text",
+    output: text,
+  };
 }
 
 function timeoutErrorResult(plan: HttpDryRunPlan): HttpExecutionResult {
@@ -417,7 +449,7 @@ export async function executeHttpCapability(
 
   try {
     const response = await fetchImpl(plan.url, init);
-    const body = await responseBody(response);
+    const normalized = await normalizeHttpResponse(response);
     if (response.ok) {
       result = {
         ok: true,
@@ -425,8 +457,10 @@ export async function executeHttpCapability(
         method: plan.method,
         url: plan.url,
         status: "success",
-        statusCode: response.status,
-        output: body,
+        statusCode: normalized.statusCode,
+        contentType: normalized.contentType,
+        bodyKind: normalized.bodyKind,
+        output: normalized.output,
       };
     } else {
       result = {
@@ -435,8 +469,15 @@ export async function executeHttpCapability(
         method: plan.method,
         url: plan.url,
         status: "http_error",
-        statusCode: response.status,
-        error: { code: "HTTP_ERROR", message: `HTTP request failed with status ${response.status}.`, statusCode: response.status, response: redactInput(body) },
+        statusCode: normalized.statusCode,
+        contentType: normalized.contentType,
+        bodyKind: normalized.bodyKind,
+        error: {
+          code: "HTTP_ERROR",
+          message: `HTTP request failed with status ${normalized.statusCode}.`,
+          statusCode: normalized.statusCode,
+          response: redactInput(normalized.output),
+        },
       };
     }
   } catch (error) {
