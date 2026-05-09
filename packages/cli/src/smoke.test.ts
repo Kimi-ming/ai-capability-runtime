@@ -14,9 +14,15 @@ const cliEntry = resolve(repoRoot, "packages/cli/src/index.ts");
 type CliResult = {
   stdout: string;
   stderr: string;
+  exitCode: number | string;
 };
 
-async function runOpenCapSmokeStage(stage: string, args: string[], env: NodeJS.ProcessEnv = {}): Promise<CliResult> {
+async function runOpenCapSmokeStage(
+  stage: string,
+  args: string[],
+  env: NodeJS.ProcessEnv = {},
+  options: { allowFailure?: boolean } = {},
+): Promise<CliResult> {
   try {
     const result = await execFileAsync("tsx", [cliEntry, ...args], {
       cwd: repoRoot,
@@ -25,9 +31,13 @@ async function runOpenCapSmokeStage(stage: string, args: string[], env: NodeJS.P
       maxBuffer: 1024 * 1024,
     });
 
-    return { stdout: result.stdout, stderr: result.stderr };
+    return { stdout: result.stdout, stderr: result.stderr, exitCode: 0 };
   } catch (error) {
     const failure = error as Error & { stdout?: string; stderr?: string; code?: number | string };
+    if (options.allowFailure) {
+      return { stdout: failure.stdout ?? "", stderr: failure.stderr ?? "", exitCode: failure.code ?? "unknown" };
+    }
+
     throw new Error(
       [
         `OpenCap CLI smoke stage failed: ${stage}`,
@@ -64,16 +74,59 @@ describe("OpenCap CLI smoke test", () => {
         "examples/github-issue-capability/input.json",
         "--json",
       ]);
-      expect(JSON.parse(dryRun.stdout)).toMatchObject({
+      const dryRunEnvelope = JSON.parse(dryRun.stdout);
+      expect(dryRunEnvelope).toMatchObject({
+        envelopeVersion: "opencap.result_envelope.v1",
         capabilityId: "github.create_issue",
-        mode: "dry_run",
-        plan: { method: "POST" },
+        status: "dry_run",
+        isError: false,
+        structuredContent: { request: { method: "POST" } },
       });
+      expect(dryRunEnvelope).not.toHaveProperty("policy");
+      expect(dryRunEnvelope).not.toHaveProperty("plan");
+
+      const humanDryRun = await runOpenCapSmokeStage("invoke dry-run human", [
+        "invoke",
+        "github.create_issue",
+        "--dry-run",
+        "--state-dir",
+        stateDir,
+        "--input",
+        "examples/github-issue-capability/input.json",
+      ]);
+      expect(humanDryRun.stdout).toContain("github.create_issue dry run generated.");
+      expect(humanDryRun.stdout).toContain("status: dry_run");
+      expect(humanDryRun.stdout).toContain("warnings: none");
+      expect(humanDryRun.stdout).not.toContain("policy");
+      expect(humanDryRun.stdout).not.toContain("resolvedUrl");
+
+      const failedInvoke = await runOpenCapSmokeStage("invoke secret missing", [
+        "invoke",
+        "github.create_issue",
+        "--state-dir",
+        stateDir,
+        "--input-json",
+        JSON.stringify({ owner: "opencap", repo: "runtime", title: "Bug", body: "broken", token: "input-secret" }),
+        "--yes",
+        "--json",
+        "--verbose",
+      ], {}, { allowFailure: true });
+      expect(failedInvoke.exitCode).toBe(1);
+      const failedEnvelope = JSON.parse(failedInvoke.stdout);
+      expect(failedEnvelope).toMatchObject({
+        envelopeVersion: "opencap.result_envelope.v1",
+        capabilityId: "github.create_issue",
+        status: "blocked",
+        isError: true,
+        structuredContent: { error: { code: "SECRET_MISSING" } },
+      });
+      expect(failedEnvelope.evidence).toBeDefined();
+      expect(JSON.stringify(failedEnvelope)).not.toContain("input-secret");
 
       const logs = await runOpenCapSmokeStage("logs", ["logs", "--state-dir", stateDir, "--status", "dry_run", "--json"]);
-      expect(JSON.parse(logs.stdout)).toMatchObject([
-        { capabilityId: "github.create_issue", status: "dry_run" },
-      ]);
+      expect(JSON.parse(logs.stdout)).toEqual(expect.arrayContaining([
+        expect.objectContaining({ capabilityId: "github.create_issue", status: "dry_run" }),
+      ]));
     } finally {
       await rm(stateDir, { recursive: true, force: true });
     }

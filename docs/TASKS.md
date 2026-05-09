@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T231 P1：CLI result envelope output。
 - T232 P2：Result Envelope public type exports。
 - T234 P1：实现 input classification engine。
 - T235 P1：补充 sensitive input classification fixtures。
@@ -2916,7 +2915,7 @@ pnpm --filter @opencap/runtime test
 
 ### T231 P1：CLI result envelope output
 
-- [ ] T231 P1：CLI result envelope output
+- [x] T231 P1：CLI result envelope output
 
 目标：CLI `invoke` 支持 Result Envelope 子集输出，并保持 secret redaction。
 
@@ -2936,6 +2935,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/cli test
 ```
+
+完成记录：CLI `opencap invoke` 现在输出 Result Envelope 子集；默认人类输出只显示 Runtime summary、status、warnings；`--json` 默认不含 evidence；`--verbose` 才输出脱敏 evidence。dry-run、secret missing 失败和 logs 均由 CLI smoke 覆盖，且 verbose JSON 不包含 input secret。
 
 ### T232 P2：Result Envelope public type exports
 

@@ -53,6 +53,7 @@
 - Arbitrary URL 风险标记和 Runtime 检测，`http.request_demo` 已声明 unsafe-by-default，dry-run plan 会暴露 `arbitrary_url` warning。
 - `opencap invoke <id> --dry-run`，支持 installed capability、`--input`、`--input-json`、policy evaluation、dry-run plan 和 SQLite 审计记录。
 - 真实 `opencap invoke` 接入 CLI confirmation 和 HTTP executor，支持 `--yes`、`--json`、secret missing 错误和 read-only policy allow 执行。
+- CLI `opencap invoke` 输出 Result Envelope 子集：默认人类输出只显示 summary/status/warnings，`--json` 输出结构化 envelope，`--verbose` 仅追加脱敏 evidence。
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。
 - MCP `tools/list` projection builder，支持 installed Capability 到 MCP tool payload，并保留 tool name collision 检测。
 - MCP Tool Projection builder，统一生成 `projectionVersion`、capability id、tool name、title、description、input/output schema 等模型可见 metadata。

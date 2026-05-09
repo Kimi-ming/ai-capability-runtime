@@ -12,6 +12,7 @@ import {
   SqliteAuditLogger,
   type AuditInvocationStatus,
   CliConfirmationHandler,
+  blockedResultEnvelope,
   buildHttpDryRunPlan,
   evaluatePolicy,
   executeHttpCapability,
@@ -23,7 +24,10 @@ import {
   loadPolicySet,
   redactInput,
   resolveRegistryDir,
+  resultEnvelopeFromDryRunPlan,
+  resultEnvelopeFromHttpExecutionResult,
   stableJsonStringify,
+  type ResultEnvelopeV1,
 } from "@opencap/runtime";
 
 const program = new Command();
@@ -183,13 +187,36 @@ async function parseInvokeInput(options: { input?: string; inputJson?: string })
 }
 
 
-function printInvokeResult(result: unknown, json: boolean | undefined): void {
-  if (json) {
-    console.log(JSON.stringify(result, null, 2));
+function cliEnvelopeSubset(envelope: ResultEnvelopeV1, verbose: boolean | undefined): Omit<ResultEnvelopeV1, "evidence"> | ResultEnvelopeV1 {
+  if (verbose) {
+    return envelope;
+  }
+
+  const { evidence: _evidence, ...withoutEvidence } = envelope;
+  return withoutEvidence;
+}
+
+function printInvokeResult(envelope: ResultEnvelopeV1, options: { json?: boolean; verbose?: boolean }): void {
+  if (options.json) {
+    console.log(JSON.stringify(cliEnvelopeSubset(envelope, options.verbose), null, 2));
     return;
   }
 
-  console.log(JSON.stringify(result, null, 2));
+  console.log(envelope.textSummary ?? `${envelope.capabilityId} ${envelope.status}.`);
+  console.log(`status: ${envelope.status}`);
+  if (envelope.warnings.length === 0) {
+    console.log("warnings: none");
+  } else {
+    console.log("warnings:");
+    for (const warning of envelope.warnings) {
+      console.log(`- ${warning.severity} ${warning.code}: ${warning.message}`);
+    }
+  }
+
+  if (options.verbose) {
+    console.log("evidence:");
+    console.log(JSON.stringify(envelope.evidence, null, 2));
+  }
 }
 
 function trustLevelFromMetadata(metadata: Record<string, unknown>): string | undefined {
@@ -328,8 +355,9 @@ program
   .option("--dry-run", "Build an invocation plan without external execution")
   .option("--yes", "Approve CLI ask confirmations when allowed")
   .option("--json", "Output JSON")
+  .option("--verbose", "Include redacted evidence in invoke output")
   .description("Invoke an installed Capability.")
-  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean; yes?: boolean; json?: boolean }) => runCliAction(async () => {
+  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean; yes?: boolean; json?: boolean; verbose?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const input = await parseInvokeInput(options);
     const loaded = await loadInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
@@ -365,7 +393,13 @@ program
           inputRedactedJson: stableJsonStringify(redactInput(input)),
           resolvedUrl: plan.url,
         });
-        printInvokeResult({ capabilityId: capability.id, mode: "dry_run", policy, plan }, options.json);
+        const envelope = resultEnvelopeFromDryRunPlan(plan, {
+          evidence: {
+            policyDecision: policy.decision,
+            inputHash: hashInput(input),
+          },
+        });
+        printInvokeResult(envelope, { json: options.json, verbose: options.verbose });
         return;
       }
 
@@ -392,15 +426,31 @@ program
           inputRedactedJson: stableJsonStringify(redactInput(input)),
         });
         process.exitCode = 1;
-        printInvokeResult({ capabilityId: capability.id, mode: "invoke", policy, confirmation }, options.json);
+        const envelope = blockedResultEnvelope({
+          capabilityId: capability.id,
+          reason: confirmation.reason,
+          evidence: {
+            policyDecision: policy.decision,
+            confirmationStatus: confirmation.status,
+            inputHash: hashInput(input),
+          },
+        });
+        printInvokeResult(envelope, { json: options.json, verbose: options.verbose });
         return;
       }
 
       const result = await executeHttpCapability(capability.manifest, input, { env: process.env, auditLogger: logger, channel: "cli" });
-      if (!result.ok) {
+      const envelope = resultEnvelopeFromHttpExecutionResult(result, {
+        evidence: {
+          policyDecision: policy.decision,
+          confirmationStatus: confirmation.status,
+          inputHash: hashInput(input),
+        },
+      });
+      if (envelope.isError) {
         process.exitCode = 1;
       }
-      printInvokeResult({ capabilityId: capability.id, mode: "invoke", policy, confirmation, result }, options.json);
+      printInvokeResult(envelope, { json: options.json, verbose: options.verbose });
     } finally {
       logger.close();
     }

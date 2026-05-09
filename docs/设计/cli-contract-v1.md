@@ -18,6 +18,7 @@
 | `--registry <path>` | 指定 registry 根目录 | 默认 `./registry` |
 | `--json` | 输出 JSON | V1 可先只在 list/logs/invoke 支持 |
 | `--quiet` | 减少非必要输出 | 不影响错误输出 |
+| `--verbose` | 输出调试信息 | invoke 仅输出脱敏 evidence，不输出 raw provider body 或 secret |
 
 ## `opencap validate [path]`
 
@@ -122,6 +123,8 @@ opencap invoke github.create_issue --input input.json
 | `--input <file>` | JSON 输入文件 |
 | `--dry-run` | 生成调用计划，不发外部请求 |
 | `--yes` | 非交互允许 ask，仅限 CLI，V1 可暂缓 |
+| `--json` | 输出 Result Envelope 子集 | 默认不含 evidence |
+| `--verbose` | 输出脱敏 evidence | 可与 `--json` 或人类输出组合 |
 
 行为：
 
@@ -132,6 +135,43 @@ opencap invoke github.create_issue --input input.json
 - 必要时确认。
 - dry-run 不解析 secret、不发请求。
 - 写 audit log。
+
+输出：
+
+默认人类输出只显示 Runtime 生成的 summary、status 和 warnings，不打印 policy、完整 plan、provider raw body 或 raw evidence。
+
+```text
+github.create_issue dry run generated.
+status: dry_run
+warnings: none
+```
+
+`--json` 输出 Result Envelope 子集：
+
+```json
+{
+  "envelopeVersion": "opencap.result_envelope.v1",
+  "invocationId": "...",
+  "capabilityId": "github.create_issue",
+  "status": "dry_run",
+  "outcome": "dry_run",
+  "isError": false,
+  "structuredContent": {
+    "request": {
+      "method": "POST",
+      "url": "https://api.github.com/repos/opencap/runtime/issues"
+    },
+    "authMode": "api_key:bearer",
+    "risk": "write"
+  },
+  "textSummary": "github.create_issue dry run generated.",
+  "warnings": []
+}
+```
+
+`--json --verbose` 会额外包含 `evidence`，但 evidence 必须是 redacted evidence：允许 input hash、policy decision、request metadata、sanitizer findings、digest，不允许 secret、Authorization/Cookie value、provider raw body 或未脱敏 input。
+
+失败语义：如果 Result Envelope `isError: true`，CLI exit code 为 `1`，stdout 仍可输出结构化 envelope，stderr 只用于 CLI 自身错误。
 
 ## `opencap logs`
 
