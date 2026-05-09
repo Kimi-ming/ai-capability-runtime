@@ -26,7 +26,6 @@
 
 ### P1：V1 完整体验
 
-- T103 P1：临时目录测试工具。
 - T112 P1：README 跟随实现更新。
 - T113 P1：新增贡献者上手教程。
 - T116 P1：维护术语表和文档索引。
@@ -1795,7 +1794,7 @@ git diff --check
 
 ### T103 P1：临时目录测试工具
 
-- [ ] T103 P1：临时目录测试工具
+- [x] T103 P1：临时目录测试工具
 
 目标：测试 install/list/logs 不污染真实 `opencap.local/`。
 
@@ -1815,11 +1814,28 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：`packages/runtime/src/index.test.ts` 已新增 `createTempOpenCapTestProject(prefix)` helper，基于 `mkdtemp(join(tmpdir(), ...))` 创建临时 cwd、显式 `stateDir` 和 cleanup；新增测试覆盖 install/list/logs 写入显式临时 state dir，并断言临时 cwd 下默认 `opencap.local/` 未被创建。`docs/TESTING.md` 已补充临时目录测试策略，手动 CLI smoke 已改为使用 `--state-dir "$SMOKE_STATE_DIR"` 覆盖 install/list/doctor/invoke/logs。
+
 ### T104 P2：端到端 smoke test
 
 - [ ] T104 P2：端到端 smoke test
 
 目标：用 fixture 跑通 validate/install/list/invoke dry-run/logs。
+
+验收标准：
+
+- 提供一个可重复运行的 smoke test 脚本或测试入口。
+- smoke test 使用临时 `--state-dir`，不污染真实 `opencap.local/`。
+- 覆盖 validate、install、list、invoke dry-run 和 logs 的最小闭环。
+- 失败时输出足够定位是 schema、install、policy、invoke 还是 logs 阶段失败。
+
+验证：
+
+```bash
+pnpm test
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ---
 

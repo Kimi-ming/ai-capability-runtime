@@ -51,14 +51,25 @@ pnpm lint
 当前测试入口：
 
 - `packages/spec/src/index.test.ts`：Manifest validator 和 registry test schema 基础行为，当前覆盖 11 个测试。
-- `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 62 个测试。
+- `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。
 - `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。
 
 当前缺口：
 
 - `@opencap/cli` 尚未配置独立 `test` 脚本，CLI 行为需要在 T134/T137 中补齐 command snapshot、stdout/stderr 和 exit code 测试。
 - `apps/console` 和 `apps/registry-web` 仍是占位应用，当前没有前端单元测试要求。
-- Secret Resolver、outbound policy、audit failure preflight、临时目录 helper 和端到端 smoke test 仍是后续任务，需要按下面的模块计划继续补齐。
+- Secret Resolver、outbound policy、audit failure preflight 和端到端 smoke test 仍是后续任务，需要按下面的模块计划继续补齐。
+
+## 临时目录测试策略
+
+所有会写入本地状态的自动化测试和 smoke 命令必须使用显式临时 state dir，不能直接写入仓库根目录或用户真实项目下的 `opencap.local/`。Runtime 单元测试优先使用 `createTempOpenCapTestProject(prefix)`，该 helper 基于 `mkdtemp(join(tmpdir(), prefix))` 创建临时 cwd，并提供独立 `stateDir`、默认 state dir 断言路径和 `cleanup()`。
+
+测试要求：
+
+- install/list/load/logs 相关单测使用临时 cwd 或显式 `stateDir`。
+- 需要证明不污染默认 `opencap.local/` 时，传入显式 `stateDir` 并断言临时 cwd 下的默认 `opencap.local/` 不存在。
+- CLI smoke 涉及 install/list/doctor/invoke/logs 时必须传 `--state-dir "$SMOKE_STATE_DIR"`，结束后删除该临时目录。
+- 不得在测试中依赖开发者机器上的真实 `opencap.local/`、真实 token 或已有安装状态。
 
 ## CI 校验
 
@@ -160,17 +171,20 @@ pnpm validate
 ### Smoke 1：本地 CLI 闭环
 
 ```bash
+SMOKE_STATE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/opencap-smoke-state.XXXXXX")"
 opencap validate registry/developer-tools/github.create_issue
-opencap install github.create_issue
-opencap list
-opencap invoke github.create_issue --dry-run --input examples/github-issue-capability/input.json
-opencap logs
+opencap install github.create_issue --state-dir "$SMOKE_STATE_DIR"
+opencap list --state-dir "$SMOKE_STATE_DIR"
+opencap doctor --state-dir "$SMOKE_STATE_DIR"
+opencap invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json
+opencap logs --state-dir "$SMOKE_STATE_DIR"
+rm -rf "$SMOKE_STATE_DIR"
 ```
 
 期望：
 
 - validate 成功
-- install 创建 `opencap.local/installed/github.create_issue`
+- install 创建 `$SMOKE_STATE_DIR/installed/github.create_issue`，不创建仓库根目录 `opencap.local/`
 - list 显示 capability
 - dry-run 不调用 GitHub API
 - logs 有记录

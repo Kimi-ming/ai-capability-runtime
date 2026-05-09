@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, stat, writeFile, mkdir } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile, mkdir } from "node:fs/promises";
 import { createServer, type IncomingMessage } from "node:http";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -104,6 +104,66 @@ async function exists(path: string): Promise<boolean> {
     return false;
   }
 }
+
+type TempOpenCapTestProject = {
+  cwd: string;
+  stateDir: string;
+  defaultStateDir: string;
+  cleanup: () => Promise<void>;
+};
+
+async function createTempOpenCapTestProject(prefix: string): Promise<TempOpenCapTestProject> {
+  const cwd = await mkdtemp(join(tmpdir(), prefix));
+
+  return {
+    cwd,
+    stateDir: join(cwd, "state"),
+    defaultStateDir: join(cwd, DEFAULT_STATE_DIR_NAME),
+    cleanup: () => rm(cwd, { recursive: true, force: true }),
+  };
+}
+
+describe("temporary OpenCap test project", () => {
+  it("keeps install, list, and logs state inside an explicit temporary state dir", async () => {
+    const project = await createTempOpenCapTestProject("opencap-temp-state-");
+
+    try {
+      await writeCapability(project.cwd, "developer-tools", "github.create_issue");
+      const installed = await installCapability({
+        cwd: project.cwd,
+        stateDir: project.stateDir,
+        id: "github.create_issue",
+        env: {},
+      });
+      const logger = new SqliteAuditLogger({ cwd: project.cwd, stateDir: project.stateDir, env: {} });
+      const policy = evaluatePolicy(parsePolicyYml("default: allow\nrules: []\n"), {
+        capabilityId: "github.create_issue",
+        permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+      });
+
+      try {
+        await logger.record(
+          createConfirmationAuditEvent(
+            { capabilityId: "github.create_issue", channel: "cli", policy },
+            { status: "approved", channel: "cli", policyDecision: "allow", prompted: false, reason: "temp state" },
+            new Date("2026-05-09T00:00:00.000Z"),
+          ),
+        );
+      } finally {
+        logger.close();
+      }
+
+      await expect(listInstalledCapabilities({ cwd: project.cwd, stateDir: project.stateDir, env: {} })).resolves.toMatchObject([
+        { id: "github.create_issue", status: "enabled" },
+      ]);
+      expect(installed.destinationDir).toBe(resolve(project.stateDir, "installed", "github.create_issue"));
+      expect(await exists(resolve(project.stateDir, "logs.sqlite"))).toBe(true);
+      expect(await exists(project.defaultStateDir)).toBe(false);
+    } finally {
+      await project.cleanup();
+    }
+  });
+});
 
 function dryRunManifest() {
   return {
