@@ -41,6 +41,30 @@ MCP Bridge
 Runtime Core
 ```
 
+## V1 Runtime 主路径图
+
+```mermaid
+flowchart TD
+  User["开发者 / 本地用户"] --> CLI["CLI\nvalidate / install / list / invoke / logs"]
+  Registry["Git-based Registry\nregistry/**/manifest.yml"] --> Install["installCapability"]
+  CLI --> Runtime["Runtime Core"]
+  Runtime --> Loader["Capability Loader\n读取 installed manifests"]
+  Install --> LocalState["Local State\nopencap.local 或显式 state dir"]
+  Loader --> LocalState
+  Runtime --> Input["Input Validation\n按 manifest input schema"]
+  Input --> Policy["Policy Engine\nallow / ask / deny"]
+  Policy --> Confirm["Confirmation Handler\nCLI 确认或 MCP confirmation_required"]
+  Confirm --> Secrets["Secret Resolver\nV1 只读声明的 env"]
+  Secrets --> Executor["HTTP Executor\n渲染 URL / body / auth"]
+  Executor --> External["External API\nGitHub / Slack / Vercel 等"]
+  Runtime --> Audit["Audit Logger\nSQLite logs.sqlite"]
+  Audit --> LocalState
+  Executor --> Result["Normalized Result\nJSON / text / empty"]
+  Result --> CLI
+```
+
+说明：上图描述当前 V1 的 CLI 到 Runtime 主路径。`@opencap/mcp` 已有 tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper，但完整 `opencap serve --mcp` server 仍在后续任务中实现。
+
 ## 包职责
 
 ### `@opencap/spec`

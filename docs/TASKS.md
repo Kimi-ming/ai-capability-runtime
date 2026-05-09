@@ -32,7 +32,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T114 P2：新增架构图。
 - T122 P2：版本策略。
 - T123 P2：npm package 发布预案。
 - T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
@@ -1916,7 +1915,7 @@ git diff --check
 
 ### T114 P2：新增架构图
 
-- [ ] T114 P2：新增架构图
+- [x] T114 P2：新增架构图
 
 候选：
 
@@ -1938,6 +1937,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：`docs/ARCHITECTURE.md` 已新增 Mermaid V1 Runtime 主路径图，体现 CLI、Runtime Core、Capability Loader、Policy Engine、Confirmation Handler、Secret Resolver、HTTP Executor、Audit Logger、Local State 和外部 API 的关系；图下注明完整 `opencap serve --mcp` server 仍未实现，避免把 MCP helper 误写成已完成 server 能力。
+
 ---
 
 ## Epic M：发布准备
@@ -1949,6 +1950,20 @@ git diff --check
 新增：
 
 - `docs/releases/alpha-checklist.md`
+
+验收标准：
+
+- 新增中文 alpha release checklist，覆盖功能、测试、文档、安全、Registry 和发布前确认项。
+- checklist 必须区分阻断项和可后续跟进项。
+- checklist 与当前真实状态一致，不把未实现的 MCP server、Console 或 Cloud 能力列为已完成。
+- 从 `docs/README.md` 或 `docs/INDEX.md` 可发现。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T121 P1：CHANGELOG
 
