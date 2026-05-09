@@ -46,6 +46,18 @@ type ResultWarningV1 = {
 };
 ```
 
+## 公共类型导出
+
+Result Envelope V1 当前由 `@opencap/runtime` 作为公共契约导出。CLI、MCP adapter 和未来 Host adapter 应直接 import `ResultEnvelopeV1` 与 `RESULT_ENVELOPE_VERSION`，不得复制本地类型定义。
+
+当前公共导出边界：
+
+- `RESULT_ENVELOPE_VERSION`：wire-level contract identity。
+- `ResultEnvelopeV1`、`ResultEnvelopeStatus`、`ResultWarningV1`、`ResultEvidenceSummaryV1`、`ResultProvenanceV1`：公共类型。
+- `createResultEnvelope`、`resultEnvelopeFromDryRunPlan`、`resultEnvelopeFromHttpExecutionResult`、`blockedResultEnvelope`、`confirmationRequiredResultEnvelope`：Runtime 生成 helper。
+
+破坏性变更规则见 `../规范/versioning-and-compatibility.md`。
+
 ## 生成流水线
 
 ```text

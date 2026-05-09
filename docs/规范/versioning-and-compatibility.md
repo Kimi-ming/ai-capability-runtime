@@ -26,6 +26,7 @@ OpenCap 的公共契约包括：
 - Policy DSL。
 - Audit log schema。
 - MCP tools 映射和 result shape。
+- Result Envelope V1 类型和 `envelopeVersion`。
 - Registry test format。
 - Package exports。
 
@@ -53,6 +54,31 @@ OpenCap 同时维护三条版本轨道：
 - `@opencap/mcp` 的 tool name、metadata、result shape 或 error mapping 变化已经写入 CHANGELOG。
 
 `0.x` 阶段允许 breaking change，但不能静默发生。每次 breaking change 至少要有 CHANGELOG 条目和迁移说明；影响 manifest、policy、audit、MCP result shape 或 registry 规则时，还需要 ADR 或 RFC。
+
+## Result Envelope Public Contract
+
+Result Envelope V1 当前由 `@opencap/runtime` 导出，暂不拆成独立 contracts package。公共导出包括：
+
+- `RESULT_ENVELOPE_VERSION`
+- `ResultEnvelopeV1`
+- `ResultEnvelopeStatus`
+- `ResultWarningV1`
+- `ResultEvidenceSummaryV1`
+- `ResultProvenanceV1`
+- `createResultEnvelope`
+- `resultEnvelopeFromDryRunPlan`
+- `resultEnvelopeFromHttpExecutionResult`
+- `blockedResultEnvelope`
+- `confirmationRequiredResultEnvelope`
+
+规则：
+
+- `envelopeVersion` 是 wire-level contract identity，当前值为 `opencap.result_envelope.v1`。
+- CLI 和 MCP adapter 必须从 `@opencap/runtime` import `ResultEnvelopeV1`，不得复制本地接口定义。
+- 新增可选 evidence/warnings 字段通常是兼容变化。
+- 删除字段、重命名字段、改变 `status`/`isError`/`structuredContent`/`warnings` 语义、改变 `envelopeVersion`，都是 breaking change。
+- breaking change 必须进入 CHANGELOG，并新增迁移说明；如果影响 Host/MCP/CLI result shape，还需要 RFC 或 ADR。
+- 未来如果创建 `@opencap/contracts`，必须先提供 re-export 过渡期，不能让 CLI/MCP/Runtime 同时维护多份类型。
 
 ## Manifest Schema Version
 

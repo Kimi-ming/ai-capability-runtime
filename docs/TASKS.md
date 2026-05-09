@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T232 P2：Result Envelope public type exports。
 - T234 P1：实现 input classification engine。
 - T235 P1：补充 sensitive input classification fixtures。
 - T236 P1：实现 Data Egress Policy Gate。
@@ -2940,7 +2939,7 @@ pnpm --filter @opencap/cli test
 
 ### T232 P2：Result Envelope public type exports
 
-- [ ] T232 P2：Result Envelope public type exports
+- [x] T232 P2：Result Envelope public type exports
 
 目标：定义 Result Envelope 是否由 `@opencap/runtime` 或独立 contract 包导出。
 
@@ -2961,6 +2960,8 @@ pnpm --filter @opencap/cli test
 ```bash
 pnpm --filter @opencap/runtime build
 ```
+
+完成记录：明确 Result Envelope V1 公共类型当前由 `@opencap/runtime` 导出，暂不拆独立 contracts package；CLI/MCP adapter 必须 import runtime 类型，不复制本地接口。`versioning-and-compatibility.md` 记录 `envelopeVersion`、兼容/破坏性变化规则和未来 `@opencap/contracts` re-export 过渡要求；`result-envelope-v1.md` 补充公共导出边界。
 
 ### T233 P0：补齐 Result Envelope、输出校验、结果净化、结果来源和投递边界体系
 

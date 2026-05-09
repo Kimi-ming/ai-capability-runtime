@@ -89,6 +89,7 @@
 - Capability Review Checklist 和 Capability 提交模板接入 model-visible text 检查，覆盖 prompt injection、secret 请求和隐藏指令。
 - Tool result prompt-surface sanitizer 草案，区分 structuredContent/free text，明确 secret redaction 和 indirect prompt injection 风险边界。
 - Runtime Result Envelope V1 builder，统一表达 success、dry_run、blocked、confirmation_required、failed 和 unknown，并为 failed/unknown 提供结构化 error。
+- Result Envelope public type export policy，明确 V1 公共类型由 `@opencap/runtime` 导出，CLI/MCP adapter 不复制类型定义，breaking change 必须进入 CHANGELOG 和迁移说明。
 - Runtime output schema validation，schema mismatch 会进入 Result Envelope evidence 并返回 `OUTPUT_SCHEMA_INVALID` failed envelope。
 - Output Selector V1 RFC，定义 provider JSON body 到 manifest `output` schema 的受限字段投影机制，禁止读取 secret/header/env/request/audit，并规定 missing required output 与 schema mismatch 的失败语义。
 - MCP Result Envelope adapter，优先返回 `structuredContent`，`content[].text` 只使用 Runtime-generated summary，并正确映射 `isError`。
