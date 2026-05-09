@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   McpToolNameCollisionError,
   buildMcpToolNameMap,
+  buildMcpToolsList,
   capabilityIdToMcpToolName,
   describeCapabilityAsTool,
 } from "./index.js";
@@ -45,6 +46,30 @@ describe("MCP tool name mapping", () => {
     expect(() => buildMcpToolNameMap([{ id: "foo.bar_baz" }, { id: "foo_bar.baz" }])).toThrow(
       McpToolNameCollisionError,
     );
+  });
+
+
+  it("builds a tools/list payload from installed capability manifests", () => {
+    const result = buildMcpToolsList([manifest()]);
+
+    expect(result).toEqual({
+      tools: [
+        expect.objectContaining({
+          name: "github_create_issue",
+          title: "Create GitHub Issue",
+          inputSchema: { type: "object" },
+          description: expect.stringContaining("Risk: write"),
+          metadata: { capabilityId: "github.create_issue" },
+        }),
+      ],
+    });
+  });
+
+  it("fails tools/list when projected tool names collide", () => {
+    expect(() => buildMcpToolsList([
+      { ...manifest(), id: "foo.bar_baz" },
+      { ...manifest(), id: "foo_bar.baz" },
+    ])).toThrow(McpToolNameCollisionError);
   });
 
   it("includes original capability id in tool metadata", () => {

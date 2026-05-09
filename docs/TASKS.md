@@ -22,7 +22,6 @@
 ### P0：V1 必须先完成
 
 - T070 P0：选择 MCP TypeScript SDK 并接入。
-- T071 P0：实现 MCP `tools/list`。
 - T072 P0：实现 MCP `tools/call` 路由。
 - T090 P0：实现禁止 token passthrough 的约束。
 - T100 P0：修正并跑通 pnpm workspace。
@@ -254,6 +253,7 @@
 - 已完成：T060 P0：实现 `opencap invoke <id> --dry-run`。
 - 已完成：T061 P1：实现真实 `opencap invoke`。
 - 已完成：T062 P1：添加示例 input 文件。
+- 已完成：T071 P0：实现 tools/list。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1291,7 +1291,7 @@ pnpm validate
 
 ### T071 P0：实现 tools/list
 
-- [ ] T071 P0：实现 tools/list
+- [x] T071 P0：实现 tools/list
 
 验收标准：
 
@@ -1308,6 +1308,15 @@ pnpm --filter @opencap/mcp build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/mcp` 已导出 `buildMcpToolsList`。
+- tools/list payload 会把 Capability manifest 投影为 MCP tool。
+- tool name 继续使用 Capability id 稳定映射。
+- name collision 会抛出 `McpToolNameCollisionError`。
+- inputSchema 来自 manifest input，description 包含权限和风险摘要。
+
+
 ### T072 P0：实现 tools/call 路由
 
 - [ ] T072 P0：实现 tools/call 路由
@@ -1319,6 +1328,14 @@ pnpm lint
 - deny 返回结构化错误
 - ask 无 elicitation 返回 confirmation_required
 - audit log 全覆盖
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+pnpm --filter @opencap/mcp build
+pnpm lint
+```
 
 ### T073 P1：MCP confirmation_required 结果格式
 

@@ -72,3 +72,15 @@ export function describeCapabilityAsTool(manifest: CapabilityManifest) {
     },
   };
 }
+
+export interface McpToolsListResult {
+  tools: ReturnType<typeof describeCapabilityAsTool>[];
+}
+
+export function buildMcpToolsList(manifests: CapabilityManifest[]): McpToolsListResult {
+  buildMcpToolNameMap(manifests);
+
+  return {
+    tools: manifests.map((manifest) => describeCapabilityAsTool(manifest)),
+  };
+}

@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T071 P0：实现 tools/list。
+Next task: T072 P0：实现 tools/call 路由。
 
 推荐第一个任务：
 
 ```text
-T071：实现 tools/list
+T072：实现 tools/call 路由
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan，并执行真实 HTTP 请求
-- T071 将把 installed capabilities 暴露为 MCP tools/list
+- T072 将把 MCP tools/call 路由到 Runtime invoke/confirmation 边界
 
 ## 最近验证
 
@@ -71,7 +71,7 @@ T071：实现 tools/list
 
 ## 下一步建议
 
-1. 实现 T071：实现 tools/list。
+1. 实现 T072：实现 tools/call 路由。
 2. 实现 T054：output normalization。
 3. 再回到 T060/T061：`opencap invoke` 接入。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
@@ -160,6 +160,17 @@ T061 已完成。`opencap invoke <id>` 现在会评估 policy、调用 CLI Confi
 T062 已完成。已新增 `examples/github-issue-capability/input.json` 和 `examples/simple-http-capability/input.json`，并在两个示例 README 中加入 `opencap invoke --dry-run --input ...` 命令。已用 CLI smoke 验证两个文件都能生成 dry-run plan。
 
 下一步推荐：T071 P0：实现 tools/list。
+
+## MCP tools/list projection 已实现
+
+T071 已完成。`@opencap/mcp` 现在导出 `buildMcpToolsList`，可以把 Capability manifest 投影为 MCP tools/list payload；inputSchema 来自 manifest，description 包含权限和风险摘要，tool name 继续使用稳定映射并保留 collision 检测。
+
+本轮验证：
+
+- `pnpm --filter @opencap/mcp test`
+- `pnpm --filter @opencap/mcp build`
+
+下一步推荐：T072 P0：实现 tools/call 路由。
 
 ## 本轮体系化补充
 
@@ -491,4 +502,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T071：实现 tools/list。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T072：实现 tools/call 路由。
