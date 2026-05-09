@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T242 P1：按 execution mapping 做 input minimization。
 - T243 P1：redacted egress preview。
 - T244 P1：dry-run egress preview。
 - T245 P1：internal URL/source/config egress negative tests。
@@ -3187,7 +3186,7 @@ git diff --check
 
 ### T242 P1：按 execution mapping 做 input minimization
 
-- [ ] T242 P1：按 execution mapping 做 input minimization
+- [x] T242 P1：按 execution mapping 做 input minimization
 
 目标：只发送 execution.url/query/header/body 引用的 input 字段。
 
@@ -3207,6 +3206,8 @@ git diff --check
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/input-minimization.ts` 和 `input-minimization.test.ts`，导出 `minimizeInputByEgressMap`。Runtime 现在可基于 field-level egress map 提取最小化 input；未引用字段不会进入结果，不会把整个 input 自动作为 body，缺失 optional 字段会被省略。
 
 ### T243 P1：redacted egress preview
 

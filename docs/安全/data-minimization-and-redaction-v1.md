@@ -14,6 +14,25 @@
 - 可选字段缺失时省略，不填入空字符串。
 - 未被 execution mapping 引用的 input 字段不得外发。
 
+## Runtime 实现状态
+
+当前 `@opencap/runtime` 导出：
+
+```ts
+buildFieldLevelEgressMap(manifest, input, classification)
+minimizeInputByEgressMap(input, map)
+```
+
+V1 最小化流程：
+
+1. 根据 HTTP manifest 的 `execution.url` 和 `execution.body.fields` 生成 field-level egress map。
+2. 根据 egress map 从 input 中提取最小化 input 视图。
+3. 未被引用的字段不会进入 minimized input。
+4. 缺失的 optional body field 会被省略。
+5. 不会因为没有 body mapping 就把整个 input 自动作为 body。
+
+当前实现不记录字段值以外的额外副本；测试会确保 unused secret 不进入 minimized result。
+
 ## Redaction Rules
 
 V1 默认脱敏：
