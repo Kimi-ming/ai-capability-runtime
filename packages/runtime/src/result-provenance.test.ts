@@ -7,6 +7,27 @@ function digest(value: unknown): string {
 }
 
 describe("result provenance evidence", () => {
+  it("labels provider output fields and runtime summaries independently", () => {
+    const result: HttpExecutionResult = {
+      ok: true,
+      capabilityId: "github.create_issue",
+      method: "POST",
+      url: "https://api.github.com/repos/opencap/runtime/issues",
+      status: "success",
+      statusCode: 201,
+      output: { issue_url: "https://example.com/1", issue_number: 1, nested: { id: "node-1" } },
+    };
+
+    const envelope = resultEnvelopeFromHttpExecutionResult(result, { invocationId: "inv-taint-fields" });
+
+    expect(envelope.evidence.resultProvenance?.taint).toMatchObject({
+      "/issue_url": expect.arrayContaining(["provider_untrusted"]),
+      "/issue_number": expect.arrayContaining(["provider_untrusted"]),
+      "/nested/id": expect.arrayContaining(["provider_untrusted"]),
+      "/textSummary": expect.arrayContaining(["runtime_generated"]),
+    });
+  });
+
   it("records digest, transformations, and taint labels for sanitized success output", () => {
     const result: HttpExecutionResult = {
       ok: true,

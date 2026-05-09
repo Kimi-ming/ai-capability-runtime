@@ -94,6 +94,7 @@
 - Runtime Tool Result Sanitizer，脱敏 secret-like result、替换 instruction-like provider text、strip HTML/script/comment，并把 findings 写入 Result Envelope warnings/evidence。
 - Runtime result sanitizer negative fixtures，覆盖 indirect prompt injection、secret leakage、HTML/script/comment 和 oversized output，并由 `result-sanitizer.test.ts` 自动加载。
 - Runtime Result Provenance evidence，记录 redacted structured content digest、transformations 和 taint labels，并覆盖 failed/unknown summary。
+- Runtime taint label tests，覆盖 provider 字段级 `provider_untrusted`、Runtime `textSummary` 的 `runtime_generated` 和 redacted 字段的 `secret_redacted`。
 - Runtime oversized result handling，限制 provider structured/text result 大小，超限结构化结果替换为 `[TRUNCATED_RESULT]`，超长文本截断，并保留 sanitizer warning、redaction evidence 和 Runtime-generated MCP summary。
 - Host tool metadata compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 title、description、outputSchema、annotations 和 `_meta` 的字段兼容性。
 - Host result compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 `structuredContent`、`content[].text`、`isError` 和 `outputSchema` 的结果字段行为，并明确 Host 兼容性不是安全授权证据。

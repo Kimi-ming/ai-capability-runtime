@@ -28,6 +28,8 @@ Taint label 不是安全认证。它只解释数据来源和处理方式。
 
 当前 Runtime 已在 Result Envelope evidence 中记录 `resultContentDigest` 和 `resultProvenance`。digest 基于已经脱敏/净化的 `structuredContent`，不是 provider raw output。
 
+当前 taint 记录应包含字段级 provider 标记，例如 `/issue_url`、`/nested/id` 标记为 `provider_untrusted`；Runtime 生成的 `textSummary` 使用 `/textSummary` 标记为 `runtime_generated`。secret redaction 和 sanitized text 会在对应字段路径追加 `secret_redacted` 或 `sanitized_text`。
+
 ## Provenance 字段
 
 ```ts
@@ -73,10 +75,11 @@ request evidence
 
 ## 测试要求
 
-- structuredContent 字段标记 provider_untrusted 或 runtime_generated。
+- structuredContent 字段标记 provider_untrusted 或 runtime_generated，provider JSON 字段需要字段级路径。
 - redacted 字段标记 secret_redacted。
 - sanitized text 有 transformation record。
 - digest 不基于 secret 原文。
+- Runtime-generated `textSummary` 标记 runtime_generated。
 - failed/unknown result 也有 provenance summary。
 
 ## 关联任务

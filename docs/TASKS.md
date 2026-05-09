@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T230 P2：Taint label tests。
 - T231 P1：CLI result envelope output。
 - T232 P2：Result Envelope public type exports。
 - T234 P1：实现 input classification engine。
@@ -2893,7 +2892,7 @@ pnpm --filter @opencap/runtime test
 
 ### T230 P2：Taint label tests
 
-- [ ] T230 P2：Taint label tests
+- [x] T230 P2：Taint label tests
 
 目标：验证 result provenance 中 provider_untrusted、runtime_generated、secret_redacted、sanitized_text labels。
 
@@ -2912,6 +2911,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：Result provenance 现在递归标记 provider 字段级 taint，并为 Runtime-generated `textSummary` 记录 `/textSummary: runtime_generated`；redacted/sanitized 字段继续在对应路径追加 `secret_redacted` 或 `sanitized_text`。新增 `result-provenance.test.ts` 用例覆盖 provider field、Runtime summary 和现有 failed/unknown provenance。
 
 ### T231 P1：CLI result envelope output
 

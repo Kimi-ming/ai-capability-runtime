@@ -577,6 +577,21 @@ function addTaint(taint: Record<string, ResultTaintLabel[]>, path: string, label
   taint[path] = [...new Set([...(taint[path] ?? []), label])];
 }
 
+function addTaintTree(taint: Record<string, ResultTaintLabel[]>, value: unknown, path: string, label: ResultTaintLabel): void {
+  addTaint(taint, path, label);
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => addTaintTree(taint, item, jsonPointer(path, String(index)), label));
+    return;
+  }
+
+  if (isRecord(value)) {
+    for (const [field, nestedValue] of Object.entries(value)) {
+      addTaintTree(taint, nestedValue, jsonPointer(path, field), label);
+    }
+  }
+}
+
 function transformationFromFinding(finding: ResultSanitizerFinding): string {
   if (finding.code === "SECRET_REDACTED") {
     return "secret_redaction";
@@ -605,13 +620,15 @@ function buildResultProvenance(
   const transformations = new Set<string>();
   const taint: Record<string, ResultTaintLabel[]> = {};
 
+  addTaint(taint, "/textSummary", "runtime_generated");
+
   if (status === "success" || status === "dry_run") {
-    addTaint(taint, "/", "provider_untrusted");
+    addTaintTree(taint, structuredContent, "/", "provider_untrusted");
   } else {
     transformations.add("runtime_error_envelope");
     addTaint(taint, "/error", "runtime_generated");
     if (isRecord(structuredContent) && isRecord(structuredContent.error) && structuredContent.error.response !== undefined) {
-      addTaint(taint, "/error/response", "provider_untrusted");
+      addTaintTree(taint, structuredContent.error.response, "/error/response", "provider_untrusted");
     }
   }
 
