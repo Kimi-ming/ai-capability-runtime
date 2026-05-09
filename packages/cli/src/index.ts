@@ -6,6 +6,46 @@ import { InstallCapabilityError, installCapability, listInstalledCapabilities } 
 
 const program = new Command();
 
+type CliExitCode = 1 | 2;
+
+interface NodeError extends Error {
+  code?: string;
+}
+
+const USER_ERROR_CODES = new Set(["ENOENT", "ENOTDIR", "EACCES", "EPERM"]);
+
+function setCliError(message: string, exitCode: CliExitCode): void {
+  console.error(message);
+  process.exitCode = exitCode;
+}
+
+function isNodeError(error: unknown): error is NodeError {
+  return error instanceof Error;
+}
+
+function handleCliError(error: unknown, fallbackMessage: string): void {
+  if (error instanceof InstallCapabilityError) {
+    setCliError(error.message, 1);
+    return;
+  }
+
+  if (isNodeError(error) && error.code && USER_ERROR_CODES.has(error.code)) {
+    setCliError(error.message, 1);
+    return;
+  }
+
+  setCliError(error instanceof Error ? error.message : fallbackMessage, 2);
+}
+
+async function runCliAction(action: () => Promise<void>, fallbackMessage: string): Promise<void> {
+  try {
+    await action();
+  } catch (error) {
+    handleCliError(error, fallbackMessage);
+  }
+}
+
+
 program
   .name("opencap")
   .description("OpenCap CLI for Capability development and runtime control.")
@@ -23,36 +63,30 @@ program
   .command("validate")
   .argument("[path]", "Capability or registry path", ".")
   .description("Validate Capability manifests.")
-  .action(async (path: string) => {
-    try {
-      const targetPath = isAbsolute(path) ? path : resolve(process.env.INIT_CWD ?? process.cwd(), path);
-      const result = await validateManifestPath(targetPath);
+  .action((path: string) => runCliAction(async () => {
+    const targetPath = isAbsolute(path) ? path : resolve(process.env.INIT_CWD ?? process.cwd(), path);
+    const result = await validateManifestPath(targetPath);
 
-      if (result.manifests.length === 0) {
-        console.error(`No manifests found under ${path}`);
-        process.exitCode = 1;
-        return;
-      }
+    if (result.manifests.length === 0) {
+      setCliError(`No manifests found under ${path}`, 1);
+      return;
+    }
 
-      for (const valid of result.valid) {
-        console.log(`Valid manifest: ${valid.filePath}`);
-      }
+    for (const valid of result.valid) {
+      console.log(`Valid manifest: ${valid.filePath}`);
+    }
 
-      for (const invalid of result.invalid) {
-        console.error(`Invalid manifest: ${invalid.filePath}`);
-        for (const issue of invalid.issues) {
-          console.error(`  ${formatManifestValidationIssue(issue)}`);
-        }
+    for (const invalid of result.invalid) {
+      console.error(`Invalid manifest: ${invalid.filePath}`);
+      for (const issue of invalid.issues) {
+        console.error(`  ${formatManifestValidationIssue(issue)}`);
       }
+    }
 
-      if (result.invalid.length > 0) {
-        process.exitCode = 1;
-      }
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : "Failed to validate manifests");
+    if (result.invalid.length > 0) {
       process.exitCode = 1;
     }
-  });
+  }, "Failed to validate manifests"));
 
 program
   .command("install")
@@ -61,62 +95,46 @@ program
   .option("--registry <path>", "Registry root directory")
   .option("--force", "Replace an existing installed Capability")
   .description("Install a Capability from the registry.")
-  .action(async (id: string, options: { stateDir?: string; registry?: string; force?: boolean }) => {
-    try {
-      const cwd = process.env.INIT_CWD ?? process.cwd();
-      const result = await installCapability({
-        id,
-        cwd,
-        env: process.env,
-        stateDir: options.stateDir,
-        registryDir: options.registry,
-        force: options.force,
-      });
+  .action((id: string, options: { stateDir?: string; registry?: string; force?: boolean }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const result = await installCapability({
+      id,
+      cwd,
+      env: process.env,
+      stateDir: options.stateDir,
+      registryDir: options.registry,
+      force: options.force,
+    });
 
-      console.log(`Installed ${result.id} to ${result.destinationDir}`);
-    } catch (error) {
-      if (error instanceof InstallCapabilityError) {
-        console.error(error.message);
-        process.exitCode = 1;
-        return;
-      }
-
-      console.error(error instanceof Error ? error.message : `Failed to install ${id}`);
-      process.exitCode = 2;
-    }
-  });
+    console.log(`Installed ${result.id} to ${result.destinationDir}`);
+  }, `Failed to install ${id}`));
 
 program
   .command("list")
   .option("--state-dir <path>", "Local OpenCap state directory")
   .option("--json", "Output JSON")
   .description("List installed Capabilities.")
-  .action(async (options: { stateDir?: string; json?: boolean }) => {
-    try {
-      const cwd = process.env.INIT_CWD ?? process.cwd();
-      const installed = await listInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
+  .action((options: { stateDir?: string; json?: boolean }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const installed = await listInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
 
-      if (options.json) {
-        console.log(JSON.stringify(installed, null, 2));
-        return;
-      }
-
-      if (installed.length === 0) {
-        console.log("No installed capabilities found.");
-        return;
-      }
-
-      console.log("id version type risk trust status");
-      for (const capability of installed) {
-        console.log(
-          `${capability.id} ${capability.version ?? "-"} ${capability.type ?? "-"} ${capability.risk} ${capability.trustLevel ?? "-"} ${capability.status}`,
-        );
-      }
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : "Failed to list installed capabilities");
-      process.exitCode = 1;
+    if (options.json) {
+      console.log(JSON.stringify(installed, null, 2));
+      return;
     }
-  });
+
+    if (installed.length === 0) {
+      console.log("No installed capabilities found.");
+      return;
+    }
+
+    console.log("id version type risk trust status");
+    for (const capability of installed) {
+      console.log(
+        `${capability.id} ${capability.version ?? "-"} ${capability.type ?? "-"} ${capability.risk} ${capability.trustLevel ?? "-"} ${capability.status}`,
+      );
+    }
+  }, "Failed to list installed capabilities"));
 
 program
   .command("serve")

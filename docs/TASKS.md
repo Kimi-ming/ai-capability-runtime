@@ -40,7 +40,6 @@
 
 ### P1：V1 完整体验
 
-- T013 P1：实现 CLI 统一错误处理和 exit code。
 - T014 P1：增加 `--state-dir` 参数。
 - T021 P1：实现 Capability id 与 MCP tool name 映射表。
 - T022 P1：实现本地状态初始化。
@@ -254,6 +253,7 @@
 - 已完成：T010 P0：实现 OpenCap 本地状态路径 helper。
 - 已完成：T011 P0：实现 `opencap install <id>`。
 - 已完成：T012 P0：实现 `opencap list`。
+- 已完成：T013 P1：实现 CLI 统一错误处理和 exit code。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T013 CLI 统一错误处理
+1. T014 `--state-dir` 参数补齐
 2. T020 Installed Capability Loader
 3. T030 Policy parser/engine
 4. T040 Audit log
@@ -299,7 +299,7 @@ git diff --check
 7. T070 MCP bridge
 8. T080 Registry manifest CI 校验
 9. T081 Capability Review Checklist
-10. T014 `--state-dir` 参数补齐
+10. T015 `opencap doctor`
 
 ---
 
@@ -508,7 +508,7 @@ pnpm --filter @opencap/runtime test
 
 ### T013 P1：实现 CLI 统一错误处理和 exit code
 
-- [ ] T013 P1：实现 CLI 统一错误处理和 exit code
+- [x] T013 P1：实现 CLI 统一错误处理和 exit code
 
 目标：让 CLI 命令使用统一错误格式和 exit code，避免每个 command 自己散写 `try/catch`。
 
@@ -529,6 +529,8 @@ pnpm --filter @opencap/cli dev -- validate /private/tmp/non-existent-opencap-pat
 pnpm --filter @opencap/cli dev -- install missing.capability --state-dir /private/tmp/opencap-cli-install-smoke
 ```
 
+完成记录：CLI 新增 `runCliAction`、`handleCliError` 和 `setCliError` helper；validate/install/list 已统一使用 helper。已验证用户错误 exit 1、成功路径保持 exit 0，默认不输出 stack trace。
+
 ### T014 P1：增加 `--state-dir` 参数
 
 - [ ] T014 P1：增加 `--state-dir` 参数
@@ -542,6 +544,20 @@ pnpm --filter @opencap/cli dev -- install missing.capability --state-dir /privat
 - `invoke`
 - `logs`
 - `serve`
+
+验收标准：
+
+- 已实现命令 `install` 和 `list` 保持 `--state-dir` 行为。
+- 尚未实现的 `invoke`、`logs` 和 `serve` 先接受 `--state-dir` 参数并保持骨架行为。
+- `--state-dir` 解析结果仍覆盖 `OPENCAP_STATE_DIR` 和默认路径。
+
+验证：
+
+```bash
+pnpm --filter @opencap/cli dev -- install github.create_issue --state-dir /private/tmp/opencap-cli-state-dir-smoke --force
+pnpm --filter @opencap/cli dev -- list --state-dir /private/tmp/opencap-cli-state-dir-smoke
+pnpm --filter @opencap/cli build
+```
 
 ### T015 P2：增加 `opencap doctor`
 
