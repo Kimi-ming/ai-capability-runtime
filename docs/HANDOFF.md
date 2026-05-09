@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化
 
 ## 当前代码状态
 
@@ -25,39 +25,36 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke`、`serve` 仍是骨架。
 - `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
-- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过。
+- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化。
 - `@opencap/sdk` 暂缓实现。
 
 ## 当前任务入口
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T102 P1：单元测试基础设施。
+Next task: T103 P1：临时目录测试工具。
 
 推荐第一个任务：
 
 ```text
-T102：单元测试基础设施
+T103：临时目录测试工具
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T102 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- T102 将复核单元测试基础设施，确认 spec、runtime、mcp helper 和 CLI 行为测试现状
+- T103 将把测试临时目录策略固化，确保 install/list/logs/doctor/invoke smoke 不污染真实 `opencap.local/`
 
 ## 最近验证
 
-项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮已运行：
+项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。T102 本轮已运行：
 
-- `pnpm build`
 - `pnpm test`
-- `pnpm lint`
-- `pnpm validate`
 - `check_docs.py`
 - `git diff --check`
 
-当前已知：上述验证均通过。
+当前已知：上述验证均通过。上一轮 T100 的 `pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 全量验证也已通过。
 
 ## 已知风险
 
@@ -115,10 +112,14 @@ T100 已完成。当前 conda 环境下 `pnpm build`、`pnpm test`、`pnpm lint`
 
 ## 下一步建议
 
-1. 实现 T102：单元测试基础设施。
-2. 复核现有 spec、runtime、mcp helper 和 CLI 行为测试覆盖。
-3. 如果基础设施已存在，补完成记录和剩余缺口，不重复搭建。
-4. 完成后跑 `pnpm test`、`check_docs.py` 和 `git diff --check`。
+1. 实现 T103：临时目录测试工具。
+2. 统一测试中的临时 state dir 策略，避免污染真实 `opencap.local/`。
+3. 同步 `docs/TESTING.md` 的临时目录测试说明。
+4. 完成后跑 `pnpm --filter @opencap/runtime test`、`pnpm test`、`check_docs.py` 和 `git diff --check`。
+
+## 单元测试基础设施现状已文档化
+
+T102 已完成。`docs/TESTING.md` 已记录当前根目录 `pnpm test` 通过 `pnpm -r test` 运行 workspace 中声明测试脚本的包；现有单元测试覆盖 `@opencap/spec` 的 manifest validator 和 registry test schema、`@opencap/runtime` 的 state dir/install/list/load/policy/confirmation/audit/redaction/HTTP 执行路径，以及 `@opencap/mcp` 的 tool mapping、tools/list 和 tools/call routing。CLI 独立 command snapshot、stdout/stderr 和 exit code 测试仍作为 T134/T137 后续缺口。
 
 ## HTTP dry-run executor 已实现
 
@@ -556,4 +557,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T102：单元测试基础设施。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表继续。

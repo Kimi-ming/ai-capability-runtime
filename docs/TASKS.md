@@ -26,7 +26,6 @@
 
 ### P1：V1 完整体验
 
-- T102 P1：单元测试基础设施。
 - T103 P1：临时目录测试工具。
 - T112 P1：README 跟随实现更新。
 - T113 P1：新增贡献者上手教程。
@@ -1768,7 +1767,7 @@ git diff --check
 
 ### T102 P1：单元测试基础设施
 
-- [ ] T102 P1：单元测试基础设施
+- [x] T102 P1：单元测试基础设施
 
 范围：
 
@@ -1792,11 +1791,29 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：当前根目录 `pnpm test` 已通过 `pnpm -r test` 运行 workspace 中声明测试脚本的包；`packages/spec/src/index.test.ts` 覆盖 manifest validator 和 registry test schema，`packages/runtime/src/index.test.ts` 覆盖 state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor 和 token passthrough 禁止，`packages/mcp/src/index.test.ts` 覆盖 tool mapping、tools/list 和 tools/call routing。CLI 行为当前主要由 Runtime 单元测试、手动 smoke 命令和历史验证间接覆盖，独立 CLI snapshot/exit code 测试作为 T134/T137 后续补齐。
+
 ### T103 P1：临时目录测试工具
 
 - [ ] T103 P1：临时目录测试工具
 
 目标：测试 install/list/logs 不污染真实 `opencap.local/`。
+
+验收标准：
+
+- 明确测试临时目录策略，优先复用 `mkdtemp(join(tmpdir(), ...))` 或等价 helper/pattern。
+- install/list/logs/doctor/invoke smoke 不写入真实 `opencap.local/`。
+- 测试结束清理临时目录，或只写入系统临时目录下的可丢弃路径。
+- `docs/TESTING.md` 说明该策略和相关命令。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm test
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T104 P2：端到端 smoke test
 
