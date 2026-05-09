@@ -1,0 +1,70 @@
+id: slack.send_message
+name: Send Slack Message
+description: Send a message to a Slack channel from structured input.
+version: 0.1.0
+type: http
+
+input:
+  type: object
+  required:
+    - channel_id
+    - text
+  properties:
+    channel_id:
+      type: string
+      description: Slack channel id such as C0123456789.
+    text:
+      type: string
+      description: Message text to send.
+    thread_ts:
+      type: string
+      description: Optional Slack thread timestamp for replies.
+
+output:
+  type: object
+  required:
+    - ok
+    - channel
+    - ts
+  properties:
+    ok:
+      type: boolean
+    channel:
+      type: string
+    ts:
+      type: string
+
+auth:
+  type: api_key
+  provider: slack
+  env: SLACK_BOT_TOKEN
+  placement:
+    type: bearer
+  scopes:
+    - chat:write
+
+permissions:
+  - resource: slack.message
+    action: send
+    risk: external_send
+    confirmation: ask
+
+execution:
+  method: POST
+  url: https://slack.com/api/chat.postMessage
+  body:
+    type: json
+    fields:
+      channel: "{{channel_id}}"
+      text: "{{text}}"
+      thread_ts: "{{thread_ts}}"
+  timeout_ms: 10000
+
+metadata:
+  category: developer-tools
+  maintainer: opencap
+  license: MIT
+  trust_level: experimental
+  homepage: https://api.slack.com/methods/chat.postMessage
+  network_access: fixed_url
+  risk_notes: Sends user-provided text outside the local OpenCap boundary to Slack.

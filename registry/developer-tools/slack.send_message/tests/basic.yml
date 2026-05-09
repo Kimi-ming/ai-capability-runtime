@@ -1,0 +1,17 @@
+name: sends a Slack message payload
+capability: slack.send_message
+mode: dry_run
+input:
+  channel_id: C0123456789
+  text: OpenCap smoke test message
+expect:
+  status: dry_run
+  request:
+    method: POST
+    url: https://slack.com/api/chat.postMessage
+    body:
+      channel: C0123456789
+      text: OpenCap smoke test message
+  permission:
+    risk: external_send
+    decision: ask

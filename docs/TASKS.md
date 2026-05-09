@@ -40,7 +40,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T084 P2：新增更多示例 Capability。
 - T093 P2：威胁模型文档。
 - T104 P2：端到端 smoke test。
 - T114 P2：新增架构图。
@@ -1540,7 +1539,7 @@ git diff --check
 
 ### T084 P2：新增更多示例 Capability
 
-- [ ] T084 P2：新增更多示例 Capability
+- [x] T084 P2：新增更多示例 Capability
 
 候选：
 
@@ -1564,6 +1563,14 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已新增 `registry/developer-tools/slack.send_message/manifest.yml`。
+- 已新增 `registry/developer-tools/slack.send_message/README.md`。
+- 已新增 `registry/developer-tools/slack.send_message/tests/basic.yml`。
+- 示例覆盖 `external_send` 风险、Slack `chat.postMessage` 固定 URL、`SLACK_BOT_TOKEN` env bearer auth 和 dry-run fixture。
+- 示例不包含真实 secret、私有 URL 或生产用户数据。
+
 ---
 
 ## Epic J：安全加固
@@ -1577,6 +1584,22 @@ git diff --check
 - Runtime 不接受 Host 直接传入 token 作为普通 input 替代 auth
 - manifest auth.env 是 V1 唯一 credential 来源
 - logs 脱敏 authorization 类字段
+
+验收标准：
+
+- HTTP executor 不从普通 input 中读取 token、api_key、authorization 等字段作为 auth。
+- 当 manifest 声明 `auth.type: api_key` 时，只从 `auth.env` 对应环境变量解析凭据。
+- dry-run plan 和 audit log 不记录 secret 原值。
+- 增加测试覆盖 input token 不能替代 env credential，以及 authorization 类字段会被 redaction。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm validate
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T091 P1：最小 outbound policy 设计
 

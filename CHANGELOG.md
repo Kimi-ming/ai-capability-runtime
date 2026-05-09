@@ -57,6 +57,7 @@
 - GitHub issue 和 pull request 模板已中文化。
 - GitHub feature request issue template，并修正 Capability 提交模板的 secret 提示和安全政策链接。
 - 初始开发者工具注册表示例能力。
+- 新增 `slack.send_message` 示例 Capability，覆盖 `external_send` 风险和 Slack `chat.postMessage` dry-run fixture。
 - 互操作 profile、确认同意模型、能力包契约、一致性测试和 Agentic 风险映射文档。
 - 身份授权模型、Secret Resolver 契约、凭据生命周期手册、最小权限评审和远程 OAuth 边界文档。
 - 执行语义、重试幂等规则、失败恢复手册和执行证据文档。
