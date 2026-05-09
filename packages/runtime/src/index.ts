@@ -668,6 +668,12 @@ export interface SqliteAuditLoggerOptions extends ResolveStateDirOptions {
   databaseFile?: string;
 }
 
+export interface AuditLogQuery {
+  capabilityId?: string;
+  status?: AuditInvocationStatus;
+  since?: string;
+}
+
 interface AuditEventRow {
   id: string;
   timestamp: string;
@@ -757,16 +763,37 @@ export class SqliteAuditLogger implements AuditLogger {
       );
   }
 
-  async recent(limit = 20): Promise<AuditEvent[]> {
+  async recent(limit = 20, query: AuditLogQuery = {}): Promise<AuditEvent[]> {
+    const where: string[] = [];
+    const params: Array<string | number> = [];
+
+    if (query.capabilityId !== undefined) {
+      where.push("capability_id = ?");
+      params.push(query.capabilityId);
+    }
+
+    if (query.status !== undefined) {
+      where.push("status = ?");
+      params.push(query.status);
+    }
+
+    if (query.since !== undefined) {
+      where.push("timestamp >= ?");
+      params.push(query.since);
+    }
+
+    params.push(limit);
+    const whereSql = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
     const rows = this.database
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
                 input_hash, input_redacted_json
          FROM invocations
+         ${whereSql}
          ORDER BY timestamp DESC, id DESC
          LIMIT ?`,
       )
-      .all(limit) as unknown as AuditEventRow[];
+      .all(...params) as unknown as AuditEventRow[];
 
     return rows.map(auditEventFromRow);
   }

@@ -55,7 +55,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T043 P2：增加日志筛选。
 - T074 P2：MCP Host 手动测试文档。
 - T083 P2：添加 GitHub Issue/PR templates。
 - T084 P2：新增更多示例 Capability。
@@ -254,6 +253,7 @@
 - 已完成：T040 P0：确定并实现日志存储。
 - 已完成：T041 P0：实现 redaction 和 input hash。
 - 已完成：T042 P1：实现 `opencap logs`。
+- 已完成：T043 P2：增加日志筛选。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T043 日志筛选
-2. T050 HTTP executor dry-run
-3. T060 `opencap invoke`
-4. T070 MCP bridge
-5. T080 Registry manifest CI 校验
-6. T081 Capability Review Checklist
-7. T023 Runtime loader CLI integration
-8. T050 HTTP executor dry-run
-9. T061 真实 `opencap invoke`
-10. T062 示例 input 文件
+1. T050 HTTP executor dry-run
+2. T060 `opencap invoke`
+3. T070 MCP bridge
+4. T080 Registry manifest CI 校验
+5. T081 Capability Review Checklist
+6. T023 Runtime loader CLI integration
+7. T061 真实 `opencap invoke`
+8. T062 示例 input 文件
+9. T063 invoke policy/confirmation 接入
+10. T064 invoke audit 接入
 
 ---
 
@@ -955,7 +955,7 @@ pnpm lint
 
 ### T043 P2：增加日志筛选
 
-- [ ] T043 P2：增加日志筛选
+- [x] T043 P2：增加日志筛选
 
 参数：
 
@@ -979,6 +979,13 @@ pnpm --filter @opencap/cli build
 pnpm lint
 ```
 
+完成记录：
+
+- `SqliteAuditLogger.recent()` 支持 `capabilityId`、`status` 和 `since` 查询条件。
+- `opencap logs` 支持 `--capability`、`--status` 和 `--since`。
+- `--limit` 可与筛选条件组合使用。
+- CLI 会校验 `--status` 与 `--since` 的输入格式。
+
 ---
 
 ## Epic F：HTTP Executor
@@ -993,6 +1000,21 @@ pnpm lint
 - 缺变量时报错
 - URL encode 规则明确
 - 审计记录 resolved URL
+
+验收标准：
+
+- 支持 `{{field}}` URL 模板变量。
+- 缺少变量时返回结构化错误。
+- 插入 URL path/query 的变量必须 encode。
+- 渲染结果可被后续 dry-run plan 和 audit evidence 复用。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T051 P0：实现 dry-run executor
 

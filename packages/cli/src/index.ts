@@ -9,6 +9,7 @@ import { formatManifestValidationIssue, validateManifestPath } from "@opencap/sp
 import {
   InstallCapabilityError,
   SqliteAuditLogger,
+  type AuditInvocationStatus,
   getLocalStatePaths,
   installCapability,
   listInstalledCapabilities,
@@ -89,6 +90,33 @@ function parseLimit(value: string | undefined, fallback: number): number {
   }
 
   return parsed;
+}
+
+const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "denied", "executed"]);
+
+function parseAuditStatus(value: string | undefined): AuditInvocationStatus | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!AUDIT_INVOCATION_STATUSES.has(value as AuditInvocationStatus)) {
+    throw new Error(`Invalid --status value: ${value}`);
+  }
+
+  return value as AuditInvocationStatus;
+}
+
+function parseSince(value: string | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const timestamp = new Date(value);
+  if (Number.isNaN(timestamp.getTime())) {
+    throw new Error(`Invalid --since value: ${value}`);
+  }
+
+  return timestamp.toISOString();
 }
 
 function formatLogLine(event: {
@@ -271,14 +299,22 @@ program
   .option("--state-dir <path>", "Local OpenCap state directory")
   .option("--json", "Output JSON")
   .option("--limit <number>", "Number of recent log entries to show", "20")
+  .option("--capability <id>", "Filter logs by Capability id")
+  .option("--status <status>", "Filter logs by status: blocked, denied, executed")
+  .option("--since <iso-time>", "Filter logs at or after an ISO timestamp")
   .description("Show invocation logs.")
-  .action((options: { stateDir?: string; json?: boolean; limit?: string }) => runCliAction(async () => {
+  .action((options: { stateDir?: string; json?: boolean; limit?: string; capability?: string; status?: string; since?: string }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const limit = parseLimit(options.limit, 20);
+    const query = {
+      capabilityId: options.capability,
+      status: parseAuditStatus(options.status),
+      since: parseSince(options.since),
+    };
     const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
 
     try {
-      const events = await logger.recent(limit);
+      const events = await logger.recent(limit, query);
 
       if (options.json) {
         console.log(JSON.stringify(events, null, 2));

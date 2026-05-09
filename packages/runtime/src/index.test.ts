@@ -592,6 +592,50 @@ describe("SQLite audit logger", () => {
   });
 });
 
+describe("audit log filtering", () => {
+  it("filters recent audit events by capability, status, and since", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-filter-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+    const issuePolicy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+    const searchPolicy = evaluatePolicy(parsePolicyYml("default: allow\nrules: []\n"), {
+      capabilityId: "github.search_repo",
+      permissions: [{ resource: "github.repo", action: "search", risk: "read_only" }],
+    });
+
+    try {
+      await logger.record(
+        createConfirmationAuditEvent(
+          { capabilityId: "github.create_issue", channel: "mcp", policy: issuePolicy },
+          { status: "confirmation_required", channel: "mcp", policyDecision: "ask", prompted: false, reason: "blocked" },
+          new Date("2026-05-09T00:00:00.000Z"),
+        ),
+      );
+      await logger.record(
+        createConfirmationAuditEvent(
+          { capabilityId: "github.search_repo", channel: "cli", policy: searchPolicy },
+          { status: "approved", channel: "cli", policyDecision: "allow", prompted: false, reason: "executed" },
+          new Date("2026-05-09T00:00:01.000Z"),
+        ),
+      );
+
+      await expect(logger.recent(10, { capabilityId: "github.create_issue" })).resolves.toMatchObject([
+        { capabilityId: "github.create_issue" },
+      ]);
+      await expect(logger.recent(10, { status: "executed" })).resolves.toMatchObject([
+        { capabilityId: "github.search_repo", status: "executed" },
+      ]);
+      await expect(logger.recent(10, { since: "2026-05-09T00:00:01.000Z" })).resolves.toMatchObject([
+        { capabilityId: "github.search_repo" },
+      ]);
+    } finally {
+      logger.close();
+    }
+  });
+});
+
 describe("input redaction and hashing", () => {
   it("redacts nested sensitive fields while preserving keys", () => {
     expect(
