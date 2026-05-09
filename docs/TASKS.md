@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T236 P1：实现 Data Egress Policy Gate。
 - T237 P1：记录 egress decision audit fields。
 - T238 P1：confirmation summary 展示 data classes 和 egress target。
 - T239 P1：input provenance audit evidence。
@@ -3040,7 +3039,7 @@ pnpm --filter @opencap/runtime test
 
 ### T236 P1：实现 Data Egress Policy Gate
 
-- [ ] T236 P1：实现 Data Egress Policy Gate
+- [x] T236 P1：实现 Data Egress Policy Gate
 
 目标：根据 data classes、provider、target origin、risk 和 destination 判断外发 allow/ask/deny/redact。
 
@@ -3062,6 +3061,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/data-egress-policy.ts` 和 `data-egress-policy.test.ts`，导出 `defaultDataEgressPolicy` 与 `evaluateDataEgressPolicy`。默认规则覆盖 `secret_like` deny、`internal_url` deny、`pii/source_code` 到 `external_send` ask，并通过 `secretResolutionAllowed=false` 和 `executionAllowed=false` 锁定 deny 后不得解析 secret、不得执行。测试覆盖 provider、target origin、risk 和 destination 组合匹配。
 
 ### T237 P1：记录 egress decision audit fields
 

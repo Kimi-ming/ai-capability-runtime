@@ -75,6 +75,42 @@ type DataEgressContextV1 = {
 | `deny` | 不解析 secret，不执行，不写 provider request |
 | `redact` | 生成 redacted input 后重新校验 output/action 可行性 |
 
+## Runtime 实现状态
+
+当前 `@opencap/runtime` 导出：
+
+```ts
+defaultDataEgressPolicy()
+evaluateDataEgressPolicy(context, policy?)
+```
+
+V1 已实现独立的 pre-secret gate：
+
+- `secret_like` 默认 `deny`。
+- `internal_url` 默认 `deny`。
+- `pii` 到 `external_send` 默认 `ask`。
+- `source_code` 到 `external_send` 默认 `ask`。
+- 无敏感 data class 的普通请求默认 `allow`。
+
+`evaluateDataEgressPolicy` 的返回结果包含：
+
+- `gateId: "data_egress"`。
+- `stage: "pre_secret"`。
+- `decision: allow | ask | deny | redact`。
+- `reasonCode` 和 `matchedRuleId`。
+- `secretResolutionAllowed`。
+- `executionAllowed`。
+- `evidence`：只包含 data classes、provider、target origin、risk、rendered fields、input hash 和 redacted preview。
+
+当 `decision` 为 `deny` 时：
+
+- `secretResolutionAllowed=false`。
+- `executionAllowed=false`。
+- Runtime 不应读取 env secret。
+- Runtime 不应发起 provider request。
+
+当 `decision` 为 `ask` 时，V1 不直接执行；后续 confirmation handler 必须展示 data classes 和 egress target，并在用户确认后再继续。
+
 ## 与 Policy Engine 的关系
 
 Data egress policy 不取代 risk policy。推荐顺序：

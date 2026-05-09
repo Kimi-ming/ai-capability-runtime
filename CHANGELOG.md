@@ -105,6 +105,7 @@
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
 - Runtime input classification engine，导出 `classifyInput`，识别 secret_like、pii、internal_url、source_code、financial_data 和 free_text_unknown，并生成 redacted preview。
 - Runtime sensitive input classification fixtures，覆盖 secret-like、pii、internal URL、source/config 和 large free text unknown，并验证 redacted preview 不含敏感原文。
+- Runtime Data Egress Policy Gate，默认阻断 `secret_like` 和 `internal_url` 外发，要求 `pii/source_code` 到 `external_send` 进入确认，并在 deny 时禁止 secret resolution 和执行。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。
 - 中文文档中心、中文文档规范、维护者索引和中文 GitHub 模板。
 
