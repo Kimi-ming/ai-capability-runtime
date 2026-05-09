@@ -73,9 +73,28 @@ describe("MCP tools/call routing", () => {
       execute: async () => { throw new Error("should not execute"); },
     });
 
-    expect(result).toMatchObject({
+    expect(result).toEqual({
       isError: true,
-      structuredContent: { error: { code: "CONFIRMATION_REQUIRED" } },
+      content: [
+        {
+          type: "text",
+          text: "Confirmation required before running capability github.create_issue. OpenCap V1 does not create confirmation tokens. Update policy in the CLI/Console or retry from a future MCP elicitation-capable host.",
+        },
+      ],
+      structuredContent: {
+        error: {
+          code: "CONFIRMATION_REQUIRED",
+          message: "This capability requires human confirmation, but this MCP channel cannot prompt.",
+        },
+        metadata: {
+          capabilityId: "github.create_issue",
+          policyDecision: "ask",
+          retry: {
+            token: null,
+            hint: "OpenCap V1 does not create confirmation tokens. Update policy in the CLI/Console or retry from a future MCP elicitation-capable host.",
+          },
+        },
+      },
     });
     expect(logger.events[0]).toMatchObject({ status: "blocked", confirmationStatus: "confirmation_required" });
   });

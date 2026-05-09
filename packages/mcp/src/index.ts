@@ -117,6 +117,29 @@ function textResult(text: string, structuredContent: unknown, isError: boolean):
   };
 }
 
+function confirmationRequiredResult(manifest: CapabilityManifest, policy: ReturnType<typeof evaluatePolicy>, message: string): McpToolCallResult {
+  const retryHint = "OpenCap V1 does not create confirmation tokens. Update policy in the CLI/Console or retry from a future MCP elicitation-capable host.";
+
+  return textResult(
+    `Confirmation required before running capability ${manifest.id}. ${retryHint}`,
+    {
+      error: {
+        code: "CONFIRMATION_REQUIRED",
+        message,
+      },
+      metadata: {
+        capabilityId: manifest.id,
+        policyDecision: policy.decision,
+        retry: {
+          token: null,
+          hint: retryHint,
+        },
+      },
+    },
+    true,
+  );
+}
+
 function findManifestByToolName(manifests: CapabilityManifest[], toolName: string): CapabilityManifest | undefined {
   return manifests.find((manifest) => capabilityIdToMcpToolName(manifest.id) === toolName);
 }
@@ -149,7 +172,7 @@ export async function routeMcpToolCall(
   }
 
   if (confirmation.status === "confirmation_required") {
-    return textResult(confirmation.reason, { error: { code: "CONFIRMATION_REQUIRED", message: confirmation.reason } }, true);
+    return confirmationRequiredResult(manifest, policy, confirmation.reason);
   }
 
   if (confirmation.status !== "approved") {

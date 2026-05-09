@@ -28,7 +28,6 @@
 
 ### P1：V1 完整体验
 
-- T073 P1：定义 MCP `confirmation_required` 结果格式。
 - T080 P1：Registry manifest CI 校验。
 - T081 P1：Capability Review Checklist。
 - T082 P1：补充 Registry README。
@@ -1349,7 +1348,7 @@ pnpm lint
 
 ### T073 P1：MCP confirmation_required 结果格式
 
-- [ ] T073 P1：MCP confirmation_required 结果格式
+- [x] T073 P1：MCP confirmation_required 结果格式
 
 验收标准：
 
@@ -1366,6 +1365,13 @@ pnpm --filter @opencap/mcp build
 pnpm lint
 ```
 
+完成记录：
+
+- MCP `confirmation_required` 返回稳定 content 文案。
+- `structuredContent.error.code` 固定为 `CONFIRMATION_REQUIRED`，并保留 Runtime confirmation reason。
+- `structuredContent.metadata` 包含 Capability id、policy decision 和 retry hint。
+- V1 明确不生成 confirmation token，`retry.token` 为 `null`，用户需要调整 CLI/Console policy 或未来通过支持 elicitation 的 Host 重试。
+
 ### T074 P2：MCP Host 手动测试文档
 
 - [ ] T074 P2：MCP Host 手动测试文档
@@ -1373,6 +1379,21 @@ pnpm lint
 新增：
 
 - `docs/教程/connect-mcp-host.md`
+
+验收标准：
+
+- 文档说明如何把 OpenCap MCP Server 配到 Claude Desktop、Cursor 或其他 MCP Host。
+- 文档覆盖最小安装、启动命令、`tools/list` 预期、`tools/call` allow/deny/confirmation_required 三类结果。
+- 文档明确 V1 `confirmation_required` 不生成 confirmation token，用户需要调整 policy 或等待未来 elicitation profile。
+- 文档包含排障清单：STDIO 不打印日志、state dir、policy、manifest 校验和审计日志位置。
+
+验证：
+
+```bash
+pnpm --filter @opencap/mcp test
+pnpm validate
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+```
 
 ---
 

@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization 和 arbitrary URL 风险检测
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由和稳定的 MCP confirmation_required 结果格式
 
 ## 当前代码状态
 
@@ -25,33 +25,33 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke`、`serve` 仍是骨架。
 - `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
-- `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
+- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式。
 - `@opencap/sdk` 暂缓实现。
 
 ## 当前任务入口
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T073 P1：MCP confirmation_required 结果格式。
+Next task: T074 P2：MCP Host 手动测试文档。
 
 推荐第一个任务：
 
 ```text
-T073：MCP confirmation_required 结果格式
+T074：MCP Host 手动测试文档
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052 已完成
-- Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan，并执行真实 HTTP 请求
-- T073 将稳定 MCP confirmation_required 的 content、structuredContent 和重试提示
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073 已完成
+- Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
+- T074 将补充 MCP Host 手动测试文档，方便后续接真实 Host 做 smoke
 
 ## 最近验证
 
 项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮已运行：
 
-- `pnpm --filter @opencap/runtime test`
-- `pnpm --filter @opencap/runtime build`
+- `pnpm --filter @opencap/mcp test`
+- `pnpm --filter @opencap/mcp build`
 - `pnpm build`
 - `pnpm test`
 - `pnpm lint`
@@ -69,13 +69,16 @@ T073：MCP confirmation_required 结果格式
 - `opencap invoke` 已接入 dry-run 和真实 HTTP 执行。
 - MCP server 尚未实现。
 
+## MCP confirmation_required 结果格式已稳定
+
+T073 已完成。MCP `tools/call` 在 policy decision 为 `ask` 且当前 V1 无 MCP elicitation 通道时，会返回稳定 tool result：`isError: true`、固定 content 文案、`structuredContent.error.code = CONFIRMATION_REQUIRED`，以及包含 `capabilityId`、`policyDecision`、`retry.token = null` 和 retry hint 的 metadata。该路径不会执行 Capability，并会写入 blocked confirmation audit。
+
 ## 下一步建议
 
-1. 实现 T073：MCP confirmation_required 结果格式。
-2. 实现 T054：output normalization。
-3. 再回到 T060/T061：`opencap invoke` 接入。
-4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
-5. 更新 `docs/TASKS.md` 和本文件。
+1. 实现 T074：MCP Host 手动测试文档。
+2. 按 T074 验收标准覆盖 Host 配置、tools/list、tools/call 三类结果和排障清单。
+3. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
+4. 更新 `docs/TASKS.md` 和本文件。
 
 ## HTTP dry-run executor 已实现
 
@@ -513,4 +516,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T073：MCP confirmation_required 结果格式。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T074：MCP Host 手动测试文档。
