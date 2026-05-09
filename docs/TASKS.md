@@ -31,7 +31,6 @@
 
 ### P1：V1 完整体验
 
-- T055 P1：处理 arbitrary URL Capability 风险。
 - T061 P1：实现真实 `opencap invoke`。
 - T062 P1：添加示例 input 文件。
 - T073 P1：定义 MCP `confirmation_required` 结果格式。
@@ -254,6 +253,7 @@
 - 已完成：T052 P0：实现 HTTP executor。
 - 已完成：T053 P1：定义 HTTP request body manifest 字段。
 - 已完成：T054 P1：实现 output normalization。
+- 已完成：T055 P1：处理 arbitrary URL Capability 风险。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1152,7 +1152,7 @@ pnpm lint
 
 ### T055 P1：处理 arbitrary URL Capability 风险
 
-- [ ] T055 P1：处理 arbitrary URL Capability 风险
+- [x] T055 P1：处理 arbitrary URL Capability 风险
 
 验收标准：
 
@@ -1168,6 +1168,15 @@ pnpm --filter @opencap/runtime test
 pnpm validate
 pnpm lint
 ```
+
+完成记录：
+
+- `http.request_demo` 已标记 `metadata.network_access: arbitrary_url` 和 `unsafe_by_default: true`。
+- `manifest.schema.json` 已支持 arbitrary URL 风险 metadata。
+- Runtime 已导出 `detectArbitraryUrlCapability` 和 `capabilityRiskWarnings`。
+- `buildHttpDryRunPlan` 会在完整用户 URL 模板能力上返回 `warnings: ["arbitrary_url"]`。
+- `docs/安全/outbound-policy-v1.md` 已说明 SSRF、metadata service 和 private network 风险。
+
 
 ---
 

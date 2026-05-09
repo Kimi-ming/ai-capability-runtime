@@ -41,3 +41,6 @@ metadata:
   license: MIT
   trust_level: experimental
   homepage: https://opencap.dev
+  network_access: arbitrary_url
+  unsafe_by_default: true
+  risk_notes: User-provided URLs can cause SSRF, private network access, or metadata service exposure without outbound policy.

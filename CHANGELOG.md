@@ -35,6 +35,7 @@
 - Runtime HTTP executor，支持真实请求、env 凭据、timeout、2xx/非 2xx 归一化结果和 resolved URL 审计证据。
 - Manifest schema 正式定义 `execution.body.type: json` 与 `execution.body.fields` JSON 值映射。
 - Runtime output normalization，支持 JSON、text、empty 响应，并在 HTTP execution result 中携带 status code、content type 和 body kind。
+- Arbitrary URL 风险标记和 Runtime 检测，`http.request_demo` 已声明 unsafe-by-default，dry-run plan 会暴露 `arbitrary_url` warning。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。

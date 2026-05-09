@@ -54,6 +54,18 @@ url: "{{url}}"
 - real invoke 需要 outbound policy 显式 allow。
 - registry review 必须标记风险。
 
+
+Registry 和示例 manifest 应使用以下 metadata 明示风险：
+
+```yaml
+metadata:
+  network_access: arbitrary_url
+  unsafe_by_default: true
+  risk_notes: User-provided URLs can cause SSRF, private network access, or metadata service exposure without outbound policy.
+```
+
+Runtime 也必须检测 `url: "{{url}}"` 这类完整用户输入 URL 模板，即使 manifest 没有声明 metadata，也要产生 `arbitrary_url` 风险提示。
+
 ## policy 扩展示例
 
 ```yaml

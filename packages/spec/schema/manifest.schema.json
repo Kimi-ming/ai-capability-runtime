@@ -237,6 +237,19 @@
         },
         "homepage": {
           "type": "string"
+        },
+        "network_access": {
+          "type": "string",
+          "enum": [
+            "fixed_url",
+            "arbitrary_url"
+          ]
+        },
+        "unsafe_by_default": {
+          "type": "boolean"
+        },
+        "risk_notes": {
+          "type": "string"
         }
       }
     }

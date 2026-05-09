@@ -5,6 +5,8 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildHttpDryRunPlan,
+  capabilityRiskWarnings,
+  detectArbitraryUrlCapability,
   executeHttpCapability,
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
@@ -206,6 +208,29 @@ describe("HTTP dry-run plan", () => {
 });
 
 
+
+
+describe("arbitrary URL risk detection", () => {
+  it("detects capabilities whose URL is fully provided by input", async () => {
+    const manifest = {
+      ...dryRunManifest(),
+      id: "http.request_demo",
+      auth: { type: "none" as const },
+      execution: { method: "GET" as const, url: "{{url}}", timeout_ms: 10000 },
+    };
+
+    expect(detectArbitraryUrlCapability(manifest)).toBe(true);
+    expect(capabilityRiskWarnings(manifest)).toContain("arbitrary_url");
+
+    const plan = await buildHttpDryRunPlan(manifest, { url: "https://example.com" });
+    expect(plan.warnings).toContain("arbitrary_url");
+  });
+
+  it("does not flag fixed-origin URL templates as arbitrary URL capabilities", () => {
+    expect(detectArbitraryUrlCapability(dryRunManifest())).toBe(false);
+    expect(capabilityRiskWarnings(dryRunManifest())).not.toContain("arbitrary_url");
+  });
+});
 
 describe("HTTP output normalization", () => {
   it("normalizes JSON responses with status and content type", async () => {

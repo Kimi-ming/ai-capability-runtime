@@ -185,6 +185,7 @@ export interface HttpDryRunPlan {
   body?: unknown;
   authMode: string;
   risk: string;
+  warnings?: string[];
 }
 
 export interface HttpDryRunOptions {
@@ -233,6 +234,23 @@ function renderJsonBody(body: JsonBodyExecution | undefined, input: Record<strin
   return rendered;
 }
 
+
+export function detectArbitraryUrlCapability(manifest: CapabilityManifest): boolean {
+  const execution = manifest.execution as { url?: unknown };
+  return typeof execution.url === "string" && FULL_TEMPLATE_PATTERN.test(execution.url.trim());
+}
+
+export function capabilityRiskWarnings(manifest: CapabilityManifest): string[] {
+  const metadata = manifest.metadata as { network_access?: unknown; unsafe_by_default?: unknown };
+  const warnings: string[] = [];
+
+  if (detectArbitraryUrlCapability(manifest) || metadata.network_access === "arbitrary_url" || metadata.unsafe_by_default === true) {
+    warnings.push("arbitrary_url");
+  }
+
+  return warnings;
+}
+
 function authMode(manifest: CapabilityManifest): string {
   const auth = manifest.auth as CapabilityAuth;
   const placement = auth.placement?.type;
@@ -246,6 +264,7 @@ export async function buildHttpDryRunPlan(
 ): Promise<HttpDryRunPlan> {
   const inputRecord = templateInputRecord(input);
   const execution = manifest.execution as HttpExecution;
+  const warnings = capabilityRiskWarnings(manifest);
   const plan: HttpDryRunPlan = {
     status: "dry_run",
     capabilityId: manifest.id,
@@ -256,6 +275,10 @@ export async function buildHttpDryRunPlan(
     authMode: authMode(manifest),
     risk: summarizeRisk(manifest),
   };
+
+  if (warnings.length > 0) {
+    plan.warnings = warnings;
+  }
 
   if (options.auditLogger !== undefined) {
     await options.auditLogger.record({

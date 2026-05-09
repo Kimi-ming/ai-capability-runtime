@@ -135,6 +135,26 @@ describe("validateManifest", () => {
     await expectInvalidField(manifest, "/execution/body/fields/title");
   });
 
+
+  it("accepts arbitrary URL safety metadata", async () => {
+    const manifest = baseManifest();
+    const metadata = manifest.metadata as Record<string, unknown>;
+    metadata.network_access = "arbitrary_url";
+    metadata.unsafe_by_default = true;
+    metadata.risk_notes = "Requests a user-provided URL and requires outbound policy.";
+
+    const result = await validateManifest(manifest, "fixture.yml");
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects unknown network access metadata", async () => {
+    const manifest = baseManifest();
+    (manifest.metadata as Record<string, unknown>).network_access = "anything";
+
+    await expectInvalidField(manifest, "/metadata/network_access");
+  });
+
   it("rejects metadata without trust level", async () => {
     const manifest = baseManifest();
     delete (manifest.metadata as Record<string, unknown>).trust_level;

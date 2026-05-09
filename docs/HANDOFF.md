@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema 和 output normalization
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization 和 arbitrary URL 风险检测
 
 ## 当前代码状态
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T055 P1：处理 arbitrary URL Capability 风险。
+Next task: T060 P0：实现 `opencap invoke <id> --dry-run`。
 
 推荐第一个任务：
 
 ```text
-T055：处理 arbitrary URL Capability 风险
+T060：实现 `opencap invoke <id> --dry-run`
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan，并执行真实 HTTP 请求
-- T055 将处理 arbitrary URL Capability 的风险标记和提示
+- T060 将把 dry-run plan 接入 CLI `opencap invoke`
 
 ## 最近验证
 
@@ -71,7 +71,7 @@ T055：处理 arbitrary URL Capability 风险
 
 ## 下一步建议
 
-1. 实现 T055：处理 arbitrary URL Capability 风险。
+1. 实现 T060：实现 `opencap invoke <id> --dry-run`。
 2. 实现 T054：output normalization。
 3. 再回到 T060/T061：`opencap invoke` 接入。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
@@ -119,6 +119,17 @@ T054 已完成。Runtime 现在导出 `normalizeHttpResponse`，会把 HTTP 响�
 - `pnpm --filter @opencap/runtime build`
 
 下一步推荐：T055 P1：处理 arbitrary URL Capability 风险。
+
+## Arbitrary URL 风险处理已实现
+
+T055 已完成。`http.request_demo` 已显式声明 `metadata.network_access: arbitrary_url` 和 `metadata.unsafe_by_default: true`；schema 已支持这组风险 metadata。Runtime 现在导出 `detectArbitraryUrlCapability` 和 `capabilityRiskWarnings`，可检测 `url: "{{url}}"` 这类完整用户输入 URL 模板，并在 dry-run plan 中返回 `arbitrary_url` warning。中文 outbound policy 文档已补充 SSRF、metadata service 和 private network 风险说明。
+
+本轮针对性验证：
+
+- `pnpm --filter @opencap/spec test`
+- `pnpm --filter @opencap/runtime test`
+
+下一步推荐：T060 P0：实现 `opencap invoke <id> --dry-run`。
 
 ## 本轮体系化补充
 
@@ -450,4 +461,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T055：处理 arbitrary URL Capability 风险。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T060：实现 `opencap invoke <id> --dry-run`。
