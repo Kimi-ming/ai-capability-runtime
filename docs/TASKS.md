@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T030 P0：实现 policy 文件格式和 parser。
 - T031 P0：实现 Policy Engine。
 - T032 P0：实现 Confirmation Handler 接口。
 - T040 P0：确定并实现日志存储。
@@ -254,6 +253,7 @@
 - 已完成：T020 P0：实现 Installed Capability Loader。
 - 已完成：T021 P1：实现 Capability id 与 MCP tool name 映射表。
 - 已完成：T022 P1：实现本地状态初始化。
+- 已完成：T030 P0：实现 policy 文件格式和 parser。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T030 Policy parser/engine
+1. T031 Policy Engine
 2. T040 Audit log
 3. T050 HTTP executor dry-run
 4. T060 `opencap invoke`
@@ -298,8 +298,8 @@ git diff --check
 6. T080 Registry manifest CI 校验
 7. T081 Capability Review Checklist
 8. T023 Runtime loader CLI integration
-9. T031 默认 policy 模板
-10. T033 记录 ask/deny 的审计日志
+9. T033 记录 ask/deny 的审计日志
+10. T042 `opencap logs`
 
 ---
 
@@ -685,7 +685,7 @@ pnpm lint
 
 ### T030 P0：实现 policy 文件格式和 parser
 
-- [ ] T030 P0：实现 policy 文件格式和 parser
+- [x] T030 P0：实现 policy 文件格式和 parser
 
 目标：读取 `opencap.local/policies.yml`。
 
@@ -713,6 +713,13 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `parsePolicyYml`、`loadPolicySet`、`defaultPolicySet` 和 `PolicyParseError`。
+- 缺少 `policies.yml` 时返回默认 `ask` policy set。
+- parser 会校验 `allow/ask/deny` decision 和 manifest risk 枚举。
+- parser 将 YAML snake_case match 字段转换为 Runtime 可消费的结构化字段。
+
 ### T031 P0：实现 Policy Engine
 
 - [ ] T031 P0：实现 Policy Engine
@@ -738,6 +745,14 @@ pnpm lint
 - write -> ask
 - destructive -> deny
 - 无匹配使用 default
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T032 P0：实现 Confirmation Handler 接口
 

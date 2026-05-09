@@ -7,12 +7,15 @@ import {
   DEFAULT_STATE_DIR_NAME,
   OPENCAP_STATE_DIR_ENV,
   InstallCapabilityError,
+  PolicyParseError,
   OpenCapRuntime,
   ensureLocalStateDir,
   getLocalStatePaths,
   installCapability,
   listInstalledCapabilities,
   loadInstalledCapabilities,
+  loadPolicySet,
+  parsePolicyYml,
   resolveStateDir,
 } from "./index.js";
 
@@ -155,6 +158,73 @@ describe("state dir helpers", () => {
   });
 });
 
+
+describe("policy parser", () => {
+  it("loads the default ask policy when policies.yml is missing", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-policy-"));
+    const paths = getLocalStatePaths({ cwd, env: {} });
+
+    await expect(loadPolicySet({ cwd, env: {} })).resolves.toEqual({
+      default: "ask",
+      rules: [],
+      sourcePath: paths.policiesFile,
+    });
+  });
+
+  it("parses a structured policy set", () => {
+    expect(
+      parsePolicyYml(`default: ask
+rules:
+  - id: allow-read
+    match:
+      capability_id: github.search_repo
+      risk: read_only
+      resource: github.repo
+      action: search
+      channel: mcp
+      host: cursor
+      trust_level: tested
+    decision: allow
+    reason: Tested read-only search is allowed.
+`),
+    ).toEqual({
+      default: "ask",
+      sourcePath: "policies.yml",
+      rules: [
+        {
+          id: "allow-read",
+          match: {
+            capabilityId: "github.search_repo",
+            risk: "read_only",
+            resource: "github.repo",
+            action: "search",
+            channel: "mcp",
+            host: "cursor",
+            trustLevel: "tested",
+          },
+          decision: "allow",
+          reason: "Tested read-only search is allowed.",
+        },
+      ],
+    });
+  });
+
+  it("rejects invalid decisions", () => {
+    expect(() => parsePolicyYml("default: maybe\nrules: []\n")).toThrow(PolicyParseError);
+    expect(() => parsePolicyYml("default: maybe\nrules: []\n")).toThrow(/default/);
+  });
+
+  it("rejects invalid risk values", () => {
+    expect(() =>
+      parsePolicyYml(`default: ask
+rules:
+  - match:
+      risk: harmless
+    decision: allow
+`),
+    ).toThrow(PolicyParseError);
+  });
+});
 
 describe("installCapability", () => {
   it("copies a registry capability into local state", async () => {

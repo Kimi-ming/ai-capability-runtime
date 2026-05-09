@@ -16,6 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
+- Policy parser 和 `loadPolicySet`
 
 ## 当前代码状态
 
@@ -23,7 +24,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities 能力。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities 和 policy parser。
 - `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
 - `@opencap/sdk` 暂缓实现。
 
@@ -31,27 +32,26 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T030 P0：实现 policy 文件格式和 parser。
+Next task: T031 P0：实现 Policy Engine。
 
 推荐第一个任务：
 
 ```text
-T030：实现 policy 文件格式和 parser
+T031：实现 Policy Engine
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力并加载合法 installed capabilities
-- T030 将把默认 policy 文件从静态模板推进到可解析、可验证的策略模型
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities 并解析 policy 文件
+- T031 将把 parser 输出接入决策逻辑，生成 allow/ask/deny 结果
 
 ## 最近验证
 
 项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮已运行：
 
 - `pnpm --filter @opencap/runtime test`
-- `pnpm --filter @opencap/cli build`
-- CLI `list --state-dir /private/tmp/opencap-t022-smoke` smoke
+- `pnpm --filter @opencap/runtime build`
 - `pnpm build`
 - `pnpm test`
 - `pnpm lint`
@@ -66,14 +66,14 @@ T030：实现 policy 文件格式和 parser
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- Policy parser/engine 尚未实现，目前默认 `policies.yml` 只是模板。
+- Policy Engine 尚未实现，parser 输出还未用于执行决策。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T030：policy 文件格式和 parser。
-2. 实现 T031：默认 policy 模板和 parser 联动测试。
+1. 实现 T031：Policy Engine。
+2. 实现 T032：Confirmation Handler 接口。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
@@ -349,3 +349,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T022：`ensureLocalStateDir` 现在会创建 `installed/`、`tmp/` 和默认 `policies.yml`，默认策略为 `default: ask` 与空 `rules`。已存在的 `policies.yml` 不会被覆盖，`logs.sqlite` 仍由后续 Audit Logger 在首次写入时创建。`listInstalledCapabilities` 与 `OpenCapRuntime.ensureLocalStateDir()` 已复用该初始化逻辑。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 19 个测试；`pnpm --filter @opencap/cli build`、CLI `list --state-dir /private/tmp/opencap-t022-smoke` smoke、`pnpm build`、`pnpm test`、`pnpm validate`、`pnpm lint`、`check_docs.py` 和 `git diff --check` 通过。下一步按任务表进入 T030：实现 policy 文件格式和 parser。
+
+## Policy parser 已实现
+
+已完成 T030：`@opencap/runtime` 新增 `parsePolicyYml`、`loadPolicySet`、`defaultPolicySet` 和 `PolicyParseError`。缺少 `policies.yml` 时返回默认 `ask` policy set；非法 decision、非法 risk 和非法 YAML 会返回结构化错误。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 23 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过。下一步按任务表进入 T031：实现 Policy Engine。

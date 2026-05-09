@@ -57,6 +57,8 @@ V1 支持以下匹配键：
 
 V1 只做精确匹配，不支持复杂表达式。
 
+Runtime parser 会把 YAML 中的 `capability_id` 和 `trust_level` 转为内部结构化字段 `capabilityId` 和 `trustLevel`，但文件格式保持 snake_case，方便手写和审查。
+
 ## 规则顺序
 
 规则按顺序匹配，第一条命中即返回决策。

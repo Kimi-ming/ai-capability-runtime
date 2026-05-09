@@ -12,7 +12,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@opencap/spec": "workspace:*"
+    "@opencap/spec": "workspace:*",
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

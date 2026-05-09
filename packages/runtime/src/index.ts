@@ -1,7 +1,8 @@
-import { cp, mkdir, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
+import { parse as parseYaml } from "yaml";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -107,6 +108,188 @@ export interface InvocationResult {
   error?: string;
 }
 
+export const POLICY_DECISIONS = ["allow", "ask", "deny"] as const;
+export const POLICY_RISKS = [
+  "read_only",
+  "write",
+  "external_send",
+  "destructive",
+  "financial",
+  "code_execution",
+  "secret_access",
+] as const;
+
+export type PolicyDecision = (typeof POLICY_DECISIONS)[number];
+export type PolicyRisk = (typeof POLICY_RISKS)[number];
+
+export interface PolicyMatch {
+  capabilityId?: string;
+  risk?: PolicyRisk;
+  resource?: string;
+  action?: string;
+  channel?: string;
+  host?: string;
+  trustLevel?: string;
+}
+
+export interface PolicyRule {
+  id?: string;
+  match: PolicyMatch;
+  decision: PolicyDecision;
+  reason?: string;
+}
+
+export interface PolicySet {
+  default: PolicyDecision;
+  rules: PolicyRule[];
+  sourcePath: string;
+}
+
+export type PolicyParseErrorCode =
+  | "POLICY_YAML_INVALID"
+  | "POLICY_SCHEMA_INVALID"
+  | "POLICY_DECISION_INVALID"
+  | "POLICY_RISK_INVALID";
+
+export class PolicyParseError extends Error {
+  constructor(
+    public readonly code: PolicyParseErrorCode,
+    message: string,
+    public readonly details: Record<string, unknown> = {},
+  ) {
+    super(message);
+    this.name = "PolicyParseError";
+  }
+}
+
+const POLICY_DECISION_SET = new Set<string>(POLICY_DECISIONS);
+const POLICY_RISK_SET = new Set<string>(POLICY_RISKS);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function requireRecord(value: unknown, fieldPath: string): Record<string, unknown> {
+  if (!isRecord(value)) {
+    throw new PolicyParseError("POLICY_SCHEMA_INVALID", `${fieldPath} must be an object.`, { fieldPath });
+  }
+
+  return value;
+}
+
+function optionalString(value: unknown, fieldPath: string): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new PolicyParseError("POLICY_SCHEMA_INVALID", `${fieldPath} must be a non-empty string.`, { fieldPath });
+  }
+
+  return value;
+}
+
+function parseDecision(value: unknown, fieldPath: string): PolicyDecision {
+  if (typeof value !== "string" || !POLICY_DECISION_SET.has(value)) {
+    throw new PolicyParseError("POLICY_DECISION_INVALID", `${fieldPath} must be one of: ${POLICY_DECISIONS.join(", ")}.`, {
+      fieldPath,
+      value,
+      allowed: POLICY_DECISIONS,
+    });
+  }
+
+  return value as PolicyDecision;
+}
+
+function parseRisk(value: unknown, fieldPath: string): PolicyRisk | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string" || !POLICY_RISK_SET.has(value)) {
+    throw new PolicyParseError("POLICY_RISK_INVALID", `${fieldPath} must be one of: ${POLICY_RISKS.join(", ")}.`, {
+      fieldPath,
+      value,
+      allowed: POLICY_RISKS,
+    });
+  }
+
+  return value as PolicyRisk;
+}
+
+function parsePolicyMatch(value: unknown, fieldPath: string): PolicyMatch {
+  const raw = requireRecord(value, fieldPath);
+
+  return {
+    capabilityId: optionalString(raw.capability_id, `${fieldPath}/capability_id`),
+    risk: parseRisk(raw.risk, `${fieldPath}/risk`),
+    resource: optionalString(raw.resource, `${fieldPath}/resource`),
+    action: optionalString(raw.action, `${fieldPath}/action`),
+    channel: optionalString(raw.channel, `${fieldPath}/channel`),
+    host: optionalString(raw.host, `${fieldPath}/host`),
+    trustLevel: optionalString(raw.trust_level, `${fieldPath}/trust_level`),
+  };
+}
+
+function parsePolicyRule(value: unknown, index: number): PolicyRule {
+  const fieldPath = `/rules/${index}`;
+  const raw = requireRecord(value, fieldPath);
+
+  return {
+    id: optionalString(raw.id, `${fieldPath}/id`),
+    match: parsePolicyMatch(raw.match, `${fieldPath}/match`),
+    decision: parseDecision(raw.decision, `${fieldPath}/decision`),
+    reason: optionalString(raw.reason, `${fieldPath}/reason`),
+  };
+}
+
+export function defaultPolicySet(sourcePath = "<default>"): PolicySet {
+  return {
+    default: "ask",
+    rules: [],
+    sourcePath,
+  };
+}
+
+export function parsePolicyYml(raw: string, sourcePath = "policies.yml"): PolicySet {
+  let parsed: unknown;
+
+  try {
+    parsed = parseYaml(raw);
+  } catch (error) {
+    throw new PolicyParseError("POLICY_YAML_INVALID", `Policy YAML is invalid: ${error instanceof Error ? error.message : String(error)}`, {
+      sourcePath,
+    });
+  }
+
+  const policy = requireRecord(parsed, "");
+  const rules = policy.rules ?? [];
+
+  if (!Array.isArray(rules)) {
+    throw new PolicyParseError("POLICY_SCHEMA_INVALID", "/rules must be an array.", { fieldPath: "/rules" });
+  }
+
+  return {
+    default: parseDecision(policy.default, "/default"),
+    rules: rules.map((rule, index) => parsePolicyRule(rule, index)),
+    sourcePath,
+  };
+}
+
+export async function loadPolicySet(options: ResolveStateDirOptions | string = {}): Promise<PolicySet> {
+  const paths = getLocalStatePaths(options);
+
+  try {
+    return parsePolicyYml(await readFile(paths.policiesFile, "utf8"), paths.policiesFile);
+  } catch (error) {
+    if (hasErrorCode(error, "ENOENT")) {
+      return defaultPolicySet(paths.policiesFile);
+    }
+
+    throw error;
+  }
+}
+
 function firstNonEmpty(...values: Array<string | undefined>): string | undefined {
   return values.find((value) => typeof value === "string" && value.trim().length > 0)?.trim();
 }
@@ -158,8 +341,12 @@ export async function ensureLocalStateDir(options: ResolveStateDirOptions | stri
 }
 
 
+function hasErrorCode(error: unknown, code: string): error is NodeJS.ErrnoException {
+  return typeof error === "object" && error !== null && "code" in error && error.code === code;
+}
+
 function isFileExistsError(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "EEXIST";
+  return hasErrorCode(error, "EEXIST");
 }
 
 async function pathExists(path: string): Promise<boolean> {
