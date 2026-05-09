@@ -354,6 +354,8 @@ export interface ResultEvidenceSummaryV1 {
   httpStatus?: number;
   errorCode?: string;
   resolvedUrl?: string;
+  outputValidationStatus?: OutputValidationStatus;
+  outputValidationFindings?: OutputValidationFinding[];
 }
 
 export interface ResultEnvelopeV1 {
@@ -383,6 +385,7 @@ export interface CreateResultEnvelopeInput {
 export interface ResultEnvelopeBuildOptions {
   invocationId?: string;
   evidence?: ResultEvidenceSummaryV1;
+  outputSchema?: unknown;
 }
 
 function resultStatusIsError(status: ResultEnvelopeStatus): boolean {
@@ -442,6 +445,93 @@ export function createResultEnvelope(input: CreateResultEnvelopeInput): ResultEn
     warnings: input.warnings ?? [],
     evidence: input.evidence ?? {},
   };
+}
+
+export type OutputValidationStatus = "not_applicable" | "valid" | "invalid";
+
+export interface OutputValidationFinding {
+  path: string;
+  message: string;
+  keyword?: string;
+}
+
+export interface OutputValidationResult {
+  ok: boolean;
+  status: OutputValidationStatus;
+  findings: OutputValidationFinding[];
+}
+
+function jsonPointer(parentPath: string, segment: string): string {
+  const escaped = segment.replace(/~/g, "~0").replace(/\//g, "~1");
+  return parentPath === "/" ? `/${escaped}` : `${parentPath}/${escaped}`;
+}
+
+function schemaRecord(schema: unknown): Record<string, unknown> {
+  return isRecord(schema) ? schema : {};
+}
+
+function typeMatches(value: unknown, expectedType: string): boolean {
+  if (expectedType === "array") {
+    return Array.isArray(value);
+  }
+
+  if (expectedType === "object") {
+    return isRecord(value);
+  }
+
+  if (expectedType === "integer") {
+    return typeof value === "number" && Number.isInteger(value);
+  }
+
+  if (expectedType === "null") {
+    return value === null;
+  }
+
+  return typeof value === expectedType;
+}
+
+function validateOutputNode(value: unknown, schema: unknown, path: string, findings: OutputValidationFinding[]): void {
+  const record = schemaRecord(schema);
+  const type = record.type;
+
+  if (typeof type === "string" && !typeMatches(value, type)) {
+    findings.push({ path, message: `must be ${type}`, keyword: "type" });
+    return;
+  }
+
+  if (type === "object" || (record.properties !== undefined && isRecord(value))) {
+    const properties = schemaRecord(record.properties);
+    const required = Array.isArray(record.required) ? record.required.filter((field): field is string => typeof field === "string") : [];
+
+    for (const field of required) {
+      if (!isRecord(value) || value[field] === undefined) {
+        findings.push({ path: jsonPointer(path, field), message: "is required", keyword: "required" });
+      }
+    }
+
+    if (isRecord(value)) {
+      for (const [field, fieldSchema] of Object.entries(properties)) {
+        if (value[field] !== undefined) {
+          validateOutputNode(value[field], fieldSchema, jsonPointer(path, field), findings);
+        }
+      }
+    }
+  }
+
+  if (type === "array" && Array.isArray(value) && record.items !== undefined) {
+    value.forEach((item, index) => validateOutputNode(item, record.items, jsonPointer(path, String(index)), findings));
+  }
+}
+
+export function validateOutputAgainstSchema(output: unknown, schema: unknown): OutputValidationResult {
+  const findings: OutputValidationFinding[] = [];
+  validateOutputNode(output, schema, "/", findings);
+
+  if (findings.length === 0) {
+    return { ok: true, status: "valid", findings: [] };
+  }
+
+  return { ok: false, status: "invalid", findings };
 }
 
 function targetOrigin(url: string): string | undefined {
@@ -562,8 +652,44 @@ function structuredContentFromHttpResult(result: HttpExecutionResult): unknown {
   };
 }
 
+function baseHttpResultEvidence(result: HttpExecutionResult, options: ResultEnvelopeBuildOptions): ResultEvidenceSummaryV1 {
+  return {
+    requestStarted: requestStartedFromHttpResult(result),
+    targetOrigin: targetOrigin(result.url),
+    httpMethod: result.method,
+    httpStatus: result.statusCode,
+    errorCode: result.error?.code,
+    resolvedUrl: result.url,
+    ...options.evidence,
+  };
+}
+
 export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResult, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
-  const errorCode = result.error?.code;
+  const outputValidation = options.outputSchema === undefined
+    ? { ok: true, status: "not_applicable" as const, findings: [] }
+    : validateOutputAgainstSchema(result.output, options.outputSchema);
+
+  if (result.ok && !outputValidation.ok) {
+    const findings = outputValidation.findings;
+    return createResultEnvelope({
+      invocationId: options.invocationId,
+      capabilityId: result.capabilityId,
+      status: "failed",
+      outcome: "output_schema_invalid",
+      structuredContent: {
+        error: {
+          code: "OUTPUT_SCHEMA_INVALID",
+          message: "Output schema validation failed.",
+          findings,
+        },
+      },
+      evidence: {
+        ...baseHttpResultEvidence(result, options),
+        outputValidationStatus: "invalid",
+        outputValidationFindings: findings,
+      },
+    });
+  }
 
   return createResultEnvelope({
     invocationId: options.invocationId,
@@ -572,13 +698,9 @@ export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResul
     outcome: outcomeFromHttpResult(result),
     structuredContent: structuredContentFromHttpResult(result),
     evidence: {
-      requestStarted: requestStartedFromHttpResult(result),
-      targetOrigin: targetOrigin(result.url),
-      httpMethod: result.method,
-      httpStatus: result.statusCode,
-      errorCode,
-      resolvedUrl: result.url,
-      ...options.evidence,
+      ...baseHttpResultEvidence(result, options),
+      outputValidationStatus: outputValidation.status,
+      outputValidationFindings: outputValidation.findings,
     },
   });
 }

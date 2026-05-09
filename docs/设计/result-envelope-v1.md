@@ -140,6 +140,7 @@ MCP 支持 `structuredContent` 和 `content`。OpenCap V1 应优先返回 `struc
 
 - `content[].text` 是 Runtime 生成的摘要，不是 provider 原文。
 - `structuredContent` 必须通过 redaction 和 output validation。
+- output schema mismatch 必须返回 `status: failed` 和结构化 `OUTPUT_SCHEMA_INVALID`，不能标记 success。
 - unknown/failed result 也必须结构化，不只返回自由文本。
 - secret 不得进入 MCP result、stdout、stderr 或 audit log。
 - sanitizer warning 应进入 Result Envelope `warnings`，供 Host、Console 或 audit 查看。

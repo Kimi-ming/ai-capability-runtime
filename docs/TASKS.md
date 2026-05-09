@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T221 P1：实现 output schema validation。
 - T222 P1：MCP structuredContent adapter。
 - T223 P1：Tool result sanitizer。
 - T224 P1：Result provenance/evidence。
@@ -2673,7 +2672,7 @@ pnpm --filter @opencap/runtime test
 
 ### T221 P1：实现 output schema validation
 
-- [ ] T221 P1：实现 output schema validation
+- [x] T221 P1：实现 output schema validation
 
 目标：声明 output schema 的 Capability 只有在 structured output 校验通过后才能返回 success。
 
@@ -2695,6 +2694,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：Runtime 新增 `validateOutputAgainstSchema` 最小 JSON Schema 子集校验，覆盖 object/array/string/number/integer/boolean/null、required、properties 和 items；`resultEnvelopeFromHttpExecutionResult` 接收 `outputSchema` 后会把 output validation status/findings 写入 evidence。成功 HTTP 输出若缺 required 字段或类型不匹配，会返回 `status: failed`、`outcome: output_schema_invalid` 和结构化 `OUTPUT_SCHEMA_INVALID` error，不再标记 success。新增 `packages/runtime/src/output-validation.test.ts` 覆盖 4 个测试。
 
 ### T222 P1：MCP structuredContent adapter
 
