@@ -75,6 +75,7 @@ type ConsentReceipt = {
 | API | Future | 需要独立身份和 session 设计 |
 
 当前 Runtime 最小实现提供两个 handler：`CliConfirmationHandler` 用于 CLI 通道并支持注入 prompt，`McpNoElicitationConfirmationHandler` 用于 MCP STDIO 无确认能力场景并返回 `confirmation_required`。
+`CliConfirmationHandler` 还支持 `assumeYes` 选项，对应未来 CLI `--yes`；该选项不适用于 MCP，且不会自动批准 destructive 或 financial ask。
 
 ## MCP `confirmation_required` 结果
 

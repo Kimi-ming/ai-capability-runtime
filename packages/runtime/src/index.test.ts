@@ -400,6 +400,47 @@ describe("confirmation handlers", () => {
       prompted: false,
     });
   });
+
+  it("approves CLI ask decisions with assumeYes", async () => {
+    const handler = new CliConfirmationHandler({ assumeYes: true });
+
+    await expect(
+      handler.confirm({ capabilityId: "github.create_issue", channel: "cli", policy: askPolicy }),
+    ).resolves.toMatchObject({
+      status: "approved",
+      policyDecision: "ask",
+      prompted: false,
+      reason: "CLI --yes approved this invocation once.",
+    });
+  });
+
+  it("does not use assumeYes for destructive or financial ask decisions", async () => {
+    const destructiveAskPolicy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.delete_issue",
+      permissions: [{ resource: "github.issue", action: "delete", risk: "destructive" }],
+    });
+    const handler = new CliConfirmationHandler({ assumeYes: true });
+
+    await expect(
+      handler.confirm({ capabilityId: "github.delete_issue", channel: "cli", policy: destructiveAskPolicy }),
+    ).resolves.toMatchObject({
+      status: "rejected",
+      policyDecision: "ask",
+      prompted: false,
+    });
+  });
+
+  it("does not let assumeYes override deny decisions", async () => {
+    const handler = new CliConfirmationHandler({ assumeYes: true });
+
+    await expect(
+      handler.confirm({ capabilityId: "github.delete_issue", channel: "cli", policy: denyPolicy }),
+    ).resolves.toMatchObject({
+      status: "denied",
+      policyDecision: "deny",
+      prompted: false,
+    });
+  });
 });
 
 describe("confirmation audit", () => {

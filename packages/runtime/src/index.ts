@@ -427,6 +427,11 @@ export interface ConfirmationHandler {
 
 export type CliPrompt = (message: string) => Promise<string>;
 
+export interface CliConfirmationHandlerOptions {
+  prompt?: CliPrompt;
+  assumeYes?: boolean;
+}
+
 function confirmationResult(
   request: ConfirmationRequest,
   status: ConfirmationStatus,
@@ -457,8 +462,26 @@ function approvalQuestion(request: ConfirmationRequest): string {
   return `OpenCap wants to run ${summary}. Allow once? [y/N] `;
 }
 
+function hasManualOnlyRisk(policy: PolicyEvaluationResult): boolean {
+  return policy.permissionDecisions.some((decision) =>
+    decision.permission.risk === "financial" || decision.permission.risk === "destructive",
+  );
+}
+
 export class CliConfirmationHandler implements ConfirmationHandler {
-  constructor(private readonly prompt: CliPrompt = defaultCliPrompt) {}
+  private readonly prompt: CliPrompt;
+  private readonly assumeYes: boolean;
+
+  constructor(promptOrOptions: CliPrompt | CliConfirmationHandlerOptions = defaultCliPrompt) {
+    if (typeof promptOrOptions === "function") {
+      this.prompt = promptOrOptions;
+      this.assumeYes = false;
+      return;
+    }
+
+    this.prompt = promptOrOptions.prompt ?? defaultCliPrompt;
+    this.assumeYes = promptOrOptions.assumeYes ?? false;
+  }
 
   async confirm(request: ConfirmationRequest): Promise<ConfirmationResult> {
     if (request.policy.decision === "allow") {
@@ -467,6 +490,14 @@ export class CliConfirmationHandler implements ConfirmationHandler {
 
     if (request.policy.decision === "deny") {
       return confirmationResult(request, "denied", request.policy.reason, false);
+    }
+
+    if (this.assumeYes) {
+      if (hasManualOnlyRisk(request.policy)) {
+        return confirmationResult(request, "rejected", "Manual confirmation is required for financial or destructive actions.", false);
+      }
+
+      return confirmationResult(request, "approved", "CLI --yes approved this invocation once.", false);
     }
 
     const answer = (await this.prompt(approvalQuestion(request))).trim().toLowerCase();

@@ -58,7 +58,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T034 P2：支持 `--yes` 非交互确认。
 - T043 P2：增加日志筛选。
 - T074 P2：MCP Host 手动测试文档。
 - T083 P2：添加 GitHub Issue/PR templates。
@@ -254,6 +253,7 @@
 - 已完成：T031 P0：实现 Policy Engine。
 - 已完成：T032 P0：实现 Confirmation Handler 接口。
 - 已完成：T033 P1：记录 ask/deny 的审计日志。
+- 已完成：T034 P2：支持 `--yes` 非交互确认。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -828,7 +828,7 @@ pnpm lint
 
 ### T034 P2：支持 `--yes` 非交互确认
 
-- [ ] T034 P2：支持 `--yes` 非交互确认
+- [x] T034 P2：支持 `--yes` 非交互确认
 
 只允许 CLI 模式使用。
 
@@ -851,6 +851,13 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/runtime build
 pnpm lint
 ```
+
+完成记录：
+
+- `CliConfirmationHandler` 支持 `assumeYes`，对应未来 CLI `--yes`。
+- `assumeYes` 只影响 CLI ask 决策，不影响 MCP handler。
+- destructive/financial ask 不会被自动批准。
+- policy deny 不会被 `assumeYes` 覆盖。
 
 ---
 

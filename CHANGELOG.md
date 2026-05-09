@@ -25,6 +25,7 @@
 - Runtime Policy Engine，支持按规则匹配 permission、默认决策和 deny/ask/allow 聚合。
 - Runtime Confirmation Handler 接口，包含 CLI prompt handler 和 MCP no-elicitation handler。
 - Runtime 内存审计事件，记录 confirmation_required、deny 和 approved confirmation 的状态。
+- CLI `--yes` 确认边界，普通 CLI ask 可自动批准，destructive/financial 和 deny 不可绕过。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。

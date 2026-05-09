@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler 和内存审计事件
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界和内存审计事件
 
 ## 当前代码状态
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T034 P2：支持 `--yes` 非交互确认。
+Next task: T040 P0：确定并实现日志存储。
 
 推荐第一个任务：
 
 ```text
-T034：支持 `--yes` 非交互确认
+T040：确定并实现日志存储
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认并生成内存审计事件
-- 按当前任务文件顺序，T034 将先补 CLI `--yes` 非交互确认边界，然后再进入 T040 SQLite 审计存储
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes` 边界并生成内存审计事件
+- T040 将把审计事件持久化到 SQLite 并支持最近记录查询
 
 ## 最近验证
 
@@ -72,8 +72,8 @@ T034：支持 `--yes` 非交互确认
 
 ## 下一步建议
 
-1. 实现 T034：`--yes` 非交互确认边界。
-2. 实现 T040：SQLite audit log 的最小写入能力。
+1. 实现 T040：SQLite audit log 的最小写入能力。
+2. 实现 T041：redaction 和 input hash。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
@@ -373,3 +373,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T033：`@opencap/runtime` 新增 `AuditLogger` 接口、`InMemoryAuditLogger`、`createConfirmationAuditEvent` 和 `confirmWithAudit`。`confirmation_required` 会记录为 blocked，policy deny 记录为 denied，approved 记录为 executed。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 35 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。下一步按任务表进入 T034：支持 `--yes` 非交互确认。
+
+## CLI --yes 边界已实现
+
+已完成 T034：`CliConfirmationHandler` 新增 `assumeYes` 选项，用于未来 CLI `--yes`。它只会自动批准普通 CLI ask 决策；destructive/financial ask 仍返回 rejected，policy deny 不会被覆盖，MCP no-elicitation handler 不受影响。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 38 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。下一步按任务表进入 T040：确定并实现日志存储。
