@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T224 P1：Result provenance/evidence。
 - T225 P1：Oversized result handling。
 - T226 P2：Host result compatibility records。
 - T227 P2：Output selector RFC。
@@ -2749,7 +2748,7 @@ pnpm --filter @opencap/runtime test
 
 ### T224 P1：Result provenance/evidence
 
-- [ ] T224 P1：Result provenance/evidence
+- [x] T224 P1：Result provenance/evidence
 
 目标：记录 result provenance、content digest、transformations 和 taint labels。
 
@@ -2769,6 +2768,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：Runtime Result Envelope evidence 新增 `resultContentDigest` 和 `resultProvenance`，支持 `provider_untrusted`、`runtime_generated`、`secret_redacted`、`sanitized_text` taint labels；digest 基于已脱敏/净化 structuredContent 的稳定 JSON；transformations 会记录 `secret_redaction`、`sanitized_text`、`runtime_error_envelope`。新增 `packages/runtime/src/result-provenance.test.ts` 覆盖 success sanitized output 和 failed/unknown provenance summary。
 
 ### T225 P1：Oversized result handling
 

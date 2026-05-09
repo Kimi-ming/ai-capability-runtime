@@ -62,6 +62,11 @@ type ExecutionEvidenceV1 = {
   outcome: string;
   outputValidationStatus?: string;
   resultContentDigest?: string;
+  resultProvenance?: {
+    contentDigest: string;
+    transformations: string[];
+    taint: Record<string, string[]>;
+  };
   sanitizerWarnings?: string[];
 };
 ```
@@ -108,6 +113,7 @@ Selection evidence 只用于审计和调试。它不能：
 - evidence 不包含 secret-like 字段。
 - success result 有 output validation status。
 - model-visible summary 和 structuredContent 有 content digest 或 provenance summary。
+- result provenance 使用 provider_untrusted/runtime_generated/secret_redacted/sanitized_text taint labels。
 - selection evidence 包含 selected tool、selected projection hash 和 available tools hash，并明确不参与授权。
 
 ## 关联任务

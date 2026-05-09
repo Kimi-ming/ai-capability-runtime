@@ -26,6 +26,8 @@ V1 使用简单污染标记：
 
 Taint label 不是安全认证。它只解释数据来源和处理方式。
 
+当前 Runtime 已在 Result Envelope evidence 中记录 `resultContentDigest` 和 `resultProvenance`。digest 基于已经脱敏/净化的 `structuredContent`，不是 provider raw output。
+
 ## Provenance 字段
 
 ```ts

@@ -346,6 +346,14 @@ export interface ResultWarningV1 {
   severity: ResultWarningSeverity;
 }
 
+export type ResultTaintLabel = "provider_untrusted" | "runtime_generated" | "secret_redacted" | "sanitized_text";
+
+export interface ResultProvenanceV1 {
+  contentDigest: string;
+  transformations: string[];
+  taint: Record<string, ResultTaintLabel[]>;
+}
+
 export interface ResultEvidenceSummaryV1 {
   inputHash?: string;
   risk?: string;
@@ -360,6 +368,8 @@ export interface ResultEvidenceSummaryV1 {
   outputValidationStatus?: OutputValidationStatus;
   outputValidationFindings?: OutputValidationFinding[];
   sanitizerFindings?: ResultSanitizerFinding[];
+  resultContentDigest?: string;
+  resultProvenance?: ResultProvenanceV1;
 }
 
 export interface ResultEnvelopeV1 {
@@ -562,6 +572,60 @@ function warningFromSanitizerFinding(finding: ResultSanitizerFinding): ResultWar
   };
 }
 
+function addTaint(taint: Record<string, ResultTaintLabel[]>, path: string, label: ResultTaintLabel): void {
+  taint[path] = [...new Set([...(taint[path] ?? []), label])];
+}
+
+function transformationFromFinding(finding: ResultSanitizerFinding): string {
+  if (finding.code === "SECRET_REDACTED") {
+    return "secret_redaction";
+  }
+
+  return "sanitized_text";
+}
+
+function taintFromFinding(finding: ResultSanitizerFinding): ResultTaintLabel {
+  if (finding.code === "SECRET_REDACTED") {
+    return "secret_redacted";
+  }
+
+  return "sanitized_text";
+}
+
+function resultContentDigest(structuredContent: unknown): string {
+  return `sha256:${createHash("sha256").update(stableJsonStringify(structuredContent)).digest("hex")}`;
+}
+
+function buildResultProvenance(
+  structuredContent: unknown,
+  status: ResultEnvelopeStatus,
+  sanitizerFindings: ResultSanitizerFinding[],
+): ResultProvenanceV1 {
+  const transformations = new Set<string>();
+  const taint: Record<string, ResultTaintLabel[]> = {};
+
+  if (status === "success" || status === "dry_run") {
+    addTaint(taint, "/", "provider_untrusted");
+  } else {
+    transformations.add("runtime_error_envelope");
+    addTaint(taint, "/error", "runtime_generated");
+    if (isRecord(structuredContent) && isRecord(structuredContent.error) && structuredContent.error.response !== undefined) {
+      addTaint(taint, "/error/response", "provider_untrusted");
+    }
+  }
+
+  for (const finding of sanitizerFindings) {
+    transformations.add(transformationFromFinding(finding));
+    addTaint(taint, finding.path, taintFromFinding(finding));
+  }
+
+  return {
+    contentDigest: resultContentDigest(structuredContent),
+    transformations: [...transformations].sort(),
+    taint,
+  };
+}
+
 export function resultEnvelopeFromDryRunPlan(plan: HttpDryRunPlan, options: ResultEnvelopeBuildOptions = {}): ResultEnvelopeV1 {
   return createResultEnvelope({
     invocationId: options.invocationId,
@@ -685,40 +749,51 @@ export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResul
 
   if (result.ok && !outputValidation.ok) {
     const findings = outputValidation.findings;
+    const structuredContent = {
+      error: {
+        code: "OUTPUT_SCHEMA_INVALID",
+        message: "Output schema validation failed.",
+        findings,
+      },
+    };
+    const provenance = buildResultProvenance(structuredContent, "failed", sanitizerResult.findings);
+
     return createResultEnvelope({
       invocationId: options.invocationId,
       capabilityId: result.capabilityId,
       status: "failed",
       outcome: "output_schema_invalid",
-      structuredContent: {
-        error: {
-          code: "OUTPUT_SCHEMA_INVALID",
-          message: "Output schema validation failed.",
-          findings,
-        },
-      },
+      structuredContent,
       warnings: sanitizerWarnings,
       evidence: {
         ...baseHttpResultEvidence(result, options),
         outputValidationStatus: "invalid",
         outputValidationFindings: findings,
         sanitizerFindings: sanitizerResult.findings,
+        resultContentDigest: provenance.contentDigest,
+        resultProvenance: provenance,
       },
     });
   }
 
+  const status = envelopeStatusFromHttpResult(result);
+  const structuredContent = structuredContentFromHttpResult(result, sanitizerResult.value);
+  const provenance = buildResultProvenance(structuredContent, status, sanitizerResult.findings);
+
   return createResultEnvelope({
     invocationId: options.invocationId,
     capabilityId: result.capabilityId,
-    status: envelopeStatusFromHttpResult(result),
+    status,
     outcome: outcomeFromHttpResult(result),
-    structuredContent: structuredContentFromHttpResult(result, sanitizerResult.value),
+    structuredContent,
     warnings: sanitizerWarnings,
     evidence: {
       ...baseHttpResultEvidence(result, options),
       outputValidationStatus: outputValidation.status,
       outputValidationFindings: outputValidation.findings,
       sanitizerFindings: sanitizerResult.findings,
+      resultContentDigest: provenance.contentDigest,
+      resultProvenance: provenance,
     },
   });
 }
