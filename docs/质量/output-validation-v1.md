@@ -11,13 +11,14 @@
 ```text
 HTTP response
   -> status interpretation
-  -> size limit
+  -> response size guard
   -> content-type handling
   -> JSON/text parse
   -> output selector / raw normalized JSON
+  -> redaction and prompt-surface sanitization
+  -> result size limit
   -> manifest output schema validation
-  -> redaction
-  -> result envelope
+  -> Result Envelope evidence
 ```
 
 ## 输出形态
@@ -40,21 +41,28 @@ Manifest `output` 是 Runtime 对外承诺的能力结果形状。只要工具�
 - schema validation finding 进入 audit/evidence。
 - redacted 字段不能破坏 required field 语义；如破坏则返回 warning 或 error。
 
-## Output Selector 草案
+## Output Selector V1
 
-V1 可以先返回 raw normalized JSON。后续可加入：
+Output Selector V1 见 `../../rfcs/0005-output-selector-v1.md`。它定义从 provider JSON body 到 manifest `output` schema 的受限字段投影机制。
+
+示例：
 
 ```yaml
 output_mapping:
-  issue_url: "$.html_url"
-  issue_number: "$.number"
+  issue_url:
+    from: "$.html_url"
+  issue_number:
+    from: "$.number"
 ```
 
 规则：
 
-- selector 不能读取 headers 中的 secret。
-- selector 缺失 required field 时失败。
-- selector 输出仍需通过 output schema。
+- selector 只能读取 provider JSON body，不能读取 headers、request input、env、Secret Resolver、audit 或 Runtime context。
+- selector 语法是受限 JSONPath 子集，不支持 wildcard、filter、script、function、recursive descent 或 transform。
+- selector path 或 output field 命中 token/secret/password/api_key/authorization/cookie/credential/private_key 等 secret-like 片段时，manifest lint 或 Runtime preflight 必须拒绝或要求安全审查。
+- selector 缺失 required output field 时返回 failed Result Envelope，建议错误码为 `OUTPUT_SELECTOR_MISSING_REQUIRED`。
+- selector 输出仍需经过 redaction、sanitization、result size limit 和 manifest output schema validation。
+- schema mismatch 必须返回 `OUTPUT_SCHEMA_INVALID`，不能静默 coerce 或标记 success。
 
 ## 大小和类型限制
 
@@ -72,8 +80,8 @@ V1 实现可以先用固定默认值，后续再暴露 policy。
 ## 测试要求
 
 - 2xx JSON 且符合 output schema -> success。
-- 2xx JSON 但缺 required output 字段 -> OutputValidationError。
-- provider response 包含 secret-like 字段 -> redacted。
+- 2xx JSON 但缺 required output 字段 -> `OUTPUT_SELECTOR_MISSING_REQUIRED` 或 `OUTPUT_SCHEMA_INVALID` failed envelope。
+- selector 不能读取 secret-like path；provider response 包含 secret-like 字段 -> redacted。
 - 超大文本 -> truncated/blocked warning。
 - 非 2xx error body 不直接透传 provider 原文。
 
@@ -83,3 +91,4 @@ V1 实现可以先用固定默认值，后续再暴露 policy。
 - T221：output schema validation。
 - T224：result provenance/evidence。
 - T225：oversized result handling。
+- T227：output selector RFC。

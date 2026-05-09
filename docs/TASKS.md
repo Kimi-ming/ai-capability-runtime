@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T227 P2：Output selector RFC。
 - T228 P2：Resource delivery profile RFC。
 - T229 P1：Result sanitizer negative fixtures。
 - T230 P2：Taint label tests。
@@ -2820,7 +2819,7 @@ git diff --check
 
 ### T227 P2：Output selector RFC
 
-- [ ] T227 P2：Output selector RFC
+- [x] T227 P2：Output selector RFC
 
 目标：定义从 provider raw JSON 映射到 manifest output schema 的 selector 机制。
 
@@ -2840,6 +2839,8 @@ git diff --check
 ```bash
 git diff --check
 ```
+
+完成记录：新增 `rfcs/0005-output-selector-v1.md`，定义 `output_mapping`、受限 selector 语法、只读 provider JSON body 的输入域、secret-like path 拒绝、missing required output 失败语义、schema validation 顺序和 selector evidence。同步更新 `docs/质量/output-validation-v1.md`，把 Output Selector V1 纳入输出流水线和测试要求。
 
 ### T228 P2：Resource delivery profile RFC
 

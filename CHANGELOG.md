@@ -89,6 +89,7 @@
 - Tool result prompt-surface sanitizer 草案，区分 structuredContent/free text，明确 secret redaction 和 indirect prompt injection 风险边界。
 - Runtime Result Envelope V1 builder，统一表达 success、dry_run、blocked、confirmation_required、failed 和 unknown，并为 failed/unknown 提供结构化 error。
 - Runtime output schema validation，schema mismatch 会进入 Result Envelope evidence 并返回 `OUTPUT_SCHEMA_INVALID` failed envelope。
+- Output Selector V1 RFC，定义 provider JSON body 到 manifest `output` schema 的受限字段投影机制，禁止读取 secret/header/env/request/audit，并规定 missing required output 与 schema mismatch 的失败语义。
 - MCP Result Envelope adapter，优先返回 `structuredContent`，`content[].text` 只使用 Runtime-generated summary，并正确映射 `isError`。
 - Runtime Tool Result Sanitizer，脱敏 secret-like result、替换 instruction-like provider text、strip HTML/script/comment，并把 findings 写入 Result Envelope warnings/evidence。
 - Runtime Result Provenance evidence，记录 redacted structured content digest、transformations 和 taint labels，并覆盖 failed/unknown summary。
