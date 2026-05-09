@@ -398,6 +398,7 @@ export interface InputProvenanceEvidence {
   inputHash: string;
   inputSource: InputProvenanceSource;
   derivedFromInvocationId?: string;
+  sourceResultDigest?: string;
   dataClasses: DataEgressContext["dataClasses"];
   redactionApplied: boolean;
   minimizationApplied: boolean;
@@ -411,6 +412,8 @@ export interface CreateInputProvenanceEvidenceInput {
   input: unknown;
   inputSource: InputProvenanceSource;
   derivedFromInvocationId?: string;
+  sourceResult?: unknown;
+  sourceResultDigest?: string;
   dataClasses?: DataEgressContext["dataClasses"];
   egressTargetOrigin?: string;
   egressDecision?: DataEgressDecision;
@@ -1442,12 +1445,17 @@ function hasTransformation(transformations: string[], fragment: string): boolean
   return transformations.some((transformation) => transformation.toLowerCase().includes(fragment));
 }
 
+function digestEvidenceValue(value: unknown): string {
+  return `sha256:${createHash("sha256").update(stableJsonStringify(value)).digest("hex")}`;
+}
+
 export function createInputProvenanceEvidence(input: CreateInputProvenanceEvidenceInput): InputProvenanceEvidence {
   const transformations = [...new Set(input.transformations ?? [])].sort();
   return {
     inputHash: hashInput(input.input),
     inputSource: input.inputSource,
     derivedFromInvocationId: input.derivedFromInvocationId,
+    sourceResultDigest: input.sourceResultDigest ?? (input.sourceResult === undefined ? undefined : digestEvidenceValue(input.sourceResult)),
     dataClasses: [...(input.dataClasses ?? [])],
     redactionApplied: hasTransformation(transformations, "redact"),
     minimizationApplied: hasTransformation(transformations, "minim"),
@@ -1875,6 +1883,7 @@ function parseInputProvenance(value: string | null): InputProvenanceEvidence | u
       inputHash: parsed.inputHash,
       inputSource: parsed.inputSource as InputProvenanceSource,
       derivedFromInvocationId: typeof parsed.derivedFromInvocationId === "string" ? parsed.derivedFromInvocationId : undefined,
+      sourceResultDigest: typeof parsed.sourceResultDigest === "string" ? parsed.sourceResultDigest : undefined,
       dataClasses: Array.isArray(parsed.dataClasses) ? parsed.dataClasses.filter((item): item is DataEgressContext["dataClasses"][number] => typeof item === "string") : [],
       redactionApplied: parsed.redactionApplied === true,
       minimizationApplied: parsed.minimizationApplied === true,

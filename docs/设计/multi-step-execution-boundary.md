@@ -60,6 +60,18 @@ type CompositionPlan = {
 
 OpenCap 可以把 planHash 写入 audit，证明每一步属于同一计划。但 V1 不验证计划正确性。
 
+## Derived Input Evidence Chain
+
+当某一步的 input 来自上一步工具结果时，新的 invocation 不能继承上一步的授权结论。Runtime evidence 必须记录：
+
+- `inputSource=tool_derived`。
+- `derivedFromInvocationId`：上游 invocation id。
+- `sourceResultDigest`：上游 result 的稳定 digest。
+- `inputHash`：派生后新 input 的稳定 hash。
+- `transformations`：例如 `field_mapping`、`minimization`、`redaction`。
+
+派生 input 仍然必须重新执行 input classification、field-level egress map、Data Egress Policy Gate 和 confirmation。`sourceResultDigest` 只是可追踪性证据，不是授权凭证，也不允许跳过下游 policy。
+
 ## 测试要求
 
 - step-level deny 不执行后续 runtime step。

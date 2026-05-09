@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T241 P2：derived input evidence chain。
 - T242 P1：按 execution mapping 做 input minimization。
 - T243 P1：redacted egress preview。
 - T244 P1：dry-run egress preview。
@@ -3163,7 +3162,7 @@ pnpm --filter @opencap/runtime test
 
 ### T241 P2：derived input evidence chain
 
-- [ ] T241 P2：derived input evidence chain
+- [x] T241 P2：derived input evidence chain
 
 目标：当 input 来自上一步工具结果时，记录上游 invocation 和 result digest。
 
@@ -3183,6 +3182,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 git diff --check
 ```
+
+完成记录：`InputProvenanceEvidence` 新增 `sourceResultDigest`，`createInputProvenanceEvidence` 可从 `sourceResult` 计算稳定 digest，但不保存 source result 原文。`docs/设计/multi-step-execution-boundary.md` 已补充派生 input 不能继承上游授权，仍需重新分类和经过 egress policy。
 
 ### T242 P1：按 execution mapping 做 input minimization
 

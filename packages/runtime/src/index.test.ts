@@ -1110,11 +1110,12 @@ describe("input provenance audit evidence", () => {
     }
   });
 
-  it("records tool-derived source invocation and transformations", () => {
+  it("records tool-derived source invocation, result digest, and transformations", () => {
     const evidence = createInputProvenanceEvidence({
       input: { issue_url: "https://github.com/opencap/opencap/issues/1" },
       inputSource: "tool_derived",
       derivedFromInvocationId: "inv-upstream",
+      sourceResult: { issue_url: "https://github.com/opencap/opencap/issues/1", secret: "provider-secret" },
       dataClasses: [],
       egressTargetOrigin: "https://api.github.com",
       egressDecision: "allow",
@@ -1127,6 +1128,8 @@ describe("input provenance audit evidence", () => {
       transformations: ["field_mapping", "minimization"],
       minimizationApplied: true,
     });
+    expect(evidence.sourceResultDigest).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(JSON.stringify(evidence)).not.toContain("provider-secret");
   });
 });
 
