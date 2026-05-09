@@ -72,6 +72,50 @@ raw provider response
 | `failed_after_request` | `failed` | `isError: true` |
 | `unknown_after_timeout` | `unknown` | `isError: true` + reconcile hint |
 
+## Tool Result Prompt-Surface Sanitizer
+
+Provider response 和 provider error 都是不可信输入。进入模型上下文前必须经过最小 sanitizer。
+
+### StructuredContent
+
+`structuredContent` 是首选输出通道。规则：
+
+- 只包含 output schema 允许或 Runtime 明确生成的结构化字段。
+- 先执行 secret redaction，再执行 output validation。
+- secret-like key 或 value 必须替换为 `[REDACTED]` 或省略。
+- 不把 provider raw error、HTML、Markdown 或长文本直接塞进结构化字段。
+- 字段级 sanitizer warning 进入 `warnings` 或 evidence summary。
+
+### Free Text
+
+`content[].text` 只是兼容 fallback，必须由 Runtime 生成摘要。规则：
+
+- 不返回 provider raw body。
+- 不返回 provider raw error message，除非已脱敏并截断。
+- 不保留“ignore previous instructions”“call this tool next”“send token”等指令性文本。
+- 摘要只说明状态、关键 id、计数、URL origin 或可公开的 resource id。
+- 对过长文本截断并记录 warning。
+
+### Secret Redaction
+
+以下内容不得进入 `structuredContent`、`content[].text`、stdout、stderr 或 audit raw 字段：
+
+- API key、token、cookie、password、private key、OAuth refresh token。
+- Authorization/Cookie header value。
+- 带敏感 query value 的完整 URL。
+- provider response 中命中 secret-like key 的原值。
+
+### Indirect Prompt Injection
+
+Result sanitizer 把 indirect prompt injection 作为 risk 处理，而不是承诺完全消除。
+
+V1 目标：
+
+- 默认不把 raw provider text 放入模型上下文。
+- 检测明显指令性文本并生成 sanitizer warning。
+- 后续工具调用仍重新经过 validation、policy、confirmation、secret/outbound/data egress 和 audit。
+- sanitizer warning 不能自动授权，也不能自动阻止所有后续操作；是否阻断由后续 policy/profile 决定。
+
 ## MCP Adapter
 
 MCP 支持 `structuredContent` 和 `content`。OpenCap V1 应优先返回 `structuredContent`，并提供短 `TextContent` summary 作为兼容 fallback。
@@ -98,6 +142,7 @@ MCP 支持 `structuredContent` 和 `content`。OpenCap V1 应优先返回 `struc
 - `structuredContent` 必须通过 redaction 和 output validation。
 - unknown/failed result 也必须结构化，不只返回自由文本。
 - secret 不得进入 MCP result、stdout、stderr 或 audit log。
+- sanitizer warning 应进入 Result Envelope `warnings`，供 Host、Console 或 audit 查看。
 
 ## 非目标
 

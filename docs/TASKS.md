@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T217 P2：Tool result prompt-surface sanitizer 草案。
 - T218 P2：Host tool metadata compatibility records。
 - T220 P1：实现 Result Envelope V1。
 - T221 P1：实现 output schema validation。
@@ -2576,7 +2575,7 @@ ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| 
 
 ### T217 P2：Tool result prompt-surface sanitizer 草案
 
-- [ ] T217 P2：Tool result prompt-surface sanitizer 草案
+- [x] T217 P2：Tool result prompt-surface sanitizer 草案
 
 目标：定义 provider response/error 进入模型上下文前的最小 sanitization 和结构化输出策略。
 
@@ -2596,6 +2595,8 @@ ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| 
 ```bash
 git diff --check
 ```
+
+完成记录：`docs/安全/prompt-surface-security-v1.md` 已明确 tool result poisoning/indirect prompt injection 只能降风险，不能承诺完全消除；`docs/设计/result-envelope-v1.md` 新增 Tool Result Prompt-Surface Sanitizer，区分 `structuredContent` 和 `content[].text`，规定 provider raw response/error 不直接进入模型上下文，secret redaction 是硬约束，sanitizer warning 进入 Result Envelope。
 
 ### T218 P2：Host tool metadata compatibility records
 

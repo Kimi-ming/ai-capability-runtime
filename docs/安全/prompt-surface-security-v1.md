@@ -46,6 +46,8 @@
 
 控制：Result Envelope、结构化输出、output schema validation、结果内容脱敏和 result sanitizer。
 
+重要边界：OpenCap 不能承诺完全消除 indirect prompt injection。V1 只能降低风险：不传 raw provider text、优先使用 structuredContent、对自由文本做 Runtime-generated summary、记录 sanitizer warning，并且在后续调用前重新执行 policy/confirmation。
+
 ### Rug pull metadata update
 
 已安装能力升级后，模型可见描述发生危险变化。
@@ -60,7 +62,9 @@
 - tool descriptions 不得成为 policy、consent、quota 或 trust 的授权来源。
 - Runtime 对 tools/call 的真实输入重新做 schema validation。
 - 写操作仍然经过 policy 和 confirmation。
-- tool result text 不得写入 secret；未来进入 result sanitizer。
+- tool result text 不得写入 secret；进入模型上下文前必须经过 result sanitizer。
+- structuredContent 和 free text 分开处理，优先保留结构化字段，free text 只能是 Runtime-generated summary。
+- provider raw response/error 不直接进入 MCP `content[].text`。
 
 ## 禁止内容
 
