@@ -28,7 +28,6 @@
 
 ### P1：V1 完整体验
 
-- T080 P1：Registry manifest CI 校验。
 - T081 P1：Capability Review Checklist。
 - T082 P1：补充 Registry README。
 - T091 P1：最小 outbound policy 设计。
@@ -1408,7 +1407,7 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 
 ### T080 P1：Registry manifest CI 校验
 
-- [ ] T080 P1：Registry manifest CI 校验
+- [x] T080 P1：Registry manifest CI 校验
 
 目标：PR/push 自动校验 registry manifests。
 
@@ -1433,6 +1432,15 @@ yaml 解析检查
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 ```
 
+完成记录：
+
+- 已更新 `.github/workflows/validate.yml`。
+- workflow 在 push 到 `main` 和 pull_request 时运行。
+- `registry-manifest-validation` job 使用 Node 22、pnpm 9.15.0、`pnpm install --frozen-lockfile` 和 `pnpm validate`。
+- step 名称明确指向 registry manifests 和 registry tests。
+- workflow 不使用外部 secret，并保留 `workspace-tests` job 运行 `pnpm test`。
+- `docs/TESTING.md` 已补充 CI 校验说明。
+
 ### T081 P1：Capability Review Checklist
 
 - [ ] T081 P1：Capability Review Checklist
@@ -1441,6 +1449,21 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 
 - `docs/教程/review-a-capability.md`
 - 权限、风险、外部端点、README、测试、维护者检查
+
+验收标准：
+
+- 文档给出维护者评审 Capability PR 的逐项清单。
+- 清单覆盖 manifest schema、权限最小化、风险等级、外部端点、auth/secret、README、registry tests、审计和 unsafe-by-default 标记。
+- 文档明确哪些问题必须阻止合并，哪些可以作为 follow-up。
+- `docs/README.md` 和 `docs/INDEX.md` 加入入口。
+
+验证：
+
+```bash
+pnpm validate
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T082 P1：补充 Registry README
 

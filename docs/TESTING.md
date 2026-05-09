@@ -44,6 +44,19 @@ pnpm lint
 
 如果因为网络或依赖未安装不能运行，需要在交接文档中记录。
 
+## CI 校验
+
+GitHub Actions workflow `.github/workflows/validate.yml` 在 `push` 到 `main` 和 `pull_request` 时运行。
+
+Registry 校验 job：
+
+```bash
+pnpm install --frozen-lockfile
+pnpm validate
+```
+
+该 job 不需要外部 secret，失败时应优先检查 Capability manifest schema 和 `tests/basic.yml` registry test 格式。workflow 也保留 workspace tests job，用于运行 `pnpm test`。
+
 ## 模块测试计划
 
 ### `@opencap/spec`

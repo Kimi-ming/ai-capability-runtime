@@ -12,6 +12,7 @@
 - `@opencap/spec` 导出可复用 manifest loader/validator API。
 - Manifest validator 单元测试覆盖合法和非法 schema 场景。
 - Registry test case schema 与 `pnpm validate` 集成。
+- GitHub Actions Registry CI，push/pull_request 时使用固定 Node/pnpm 和 frozen lockfile 运行 `pnpm validate`。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
 - Runtime 本地状态路径 helper，支持默认路径、env 和显式 state dir。
