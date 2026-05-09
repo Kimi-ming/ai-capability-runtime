@@ -14,6 +14,7 @@
 - Manifest validator 单元测试覆盖合法和非法 schema 场景。
 - Registry test case schema 与 `pnpm validate` 集成。
 - GitHub Actions Registry CI，push/pull_request 时使用固定 Node/pnpm 和 frozen lockfile 运行 `pnpm validate`。
+- pnpm workspace 全量验证通过：build/test/lint/validate 均可在项目 conda 环境运行。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
 - Capability PR 评审指南，覆盖维护者合并前的阻断项、follow-up 项和安全检查。

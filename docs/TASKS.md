@@ -22,7 +22,6 @@
 ### P0：V1 必须先完成
 
 - T070 P0：选择 MCP TypeScript SDK 并接入。
-- T100 P0：修正并跑通 pnpm workspace。
 - T101 P0：CI 基础通过。
 
 ### P1：V1 完整体验
@@ -1709,7 +1708,7 @@ git diff --check
 
 ### T100 P0：修正并跑通 pnpm workspace
 
-- [ ] T100 P0：修正并跑通 pnpm workspace
+- [x] T100 P0：修正并跑通 pnpm workspace
 
 目标：首次 `pnpm install` 后仓库可 build/test。
 
@@ -1730,6 +1729,15 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- `pnpm build` 通过。
+- `pnpm test` 通过：spec 11 个测试、runtime 62 个测试、mcp 9 个测试。
+- `pnpm lint` 通过。
+- `pnpm validate` 通过，包含 5 个 registry manifest 和 5 个 registry test。
+- `check_docs.py` 和 `git diff --check` 通过。
+- `node:sqlite` ExperimentalWarning 仍是已知环境提示。
+
 ### T101 P0：CI 基础通过
 
 - [ ] T101 P0：CI 基础通过
@@ -1741,6 +1749,23 @@ git diff --check
 - test
 - build
 
+验收标准：
+
+- GitHub Actions 至少运行 install、validate、test。
+- 如 workflow 暂未运行远端结果，需本地验证 workflow YAML 结构和对应命令。
+- CI 不依赖外部 secret。
+- 失败时能区分 registry validate 和 workspace tests。
+
+验证：
+
+```bash
+ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+pnpm validate
+pnpm test
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
+
 ### T102 P1：单元测试基础设施
 
 - [ ] T102 P1：单元测试基础设施
@@ -1751,6 +1776,21 @@ git diff --check
 - runtime
 - mcp helper
 - cli command behavior
+
+验收标准：
+
+- 明确当前测试基础设施覆盖 spec、runtime、mcp helper 和 CLI 行为的现状。
+- 若基础设施已存在，补充完成记录和剩余缺口，不重复搭建。
+- `pnpm test` 能运行已有单元测试。
+- `docs/TESTING.md` 与实际测试入口保持一致。
+
+验证：
+
+```bash
+pnpm test
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T103 P1：临时目录测试工具
 
