@@ -1,79 +1,78 @@
 # 当前状态交接
 
-更新时间：2026-05-08
+更新时间：2026-05-09
 
 ## 当前阶段
 
-OpenCap 处于 V1 前期实现准备阶段。
+OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-体系化文档已补充：文档地图、工作流、里程碑、追踪矩阵、风险登记、任务模板和术语表已经建立。
-
-已经完成：
+已经完成的实现主线：
 
 - GitHub 仓库创建和推送
-- V1 项目骨架
-- 中文文档体系
-- 技术方案审查
-- V1 HTTP-only 收敛
-- 开发任务体系初版
-- 文档地图和工作流体系
-- 需求-任务-测试追踪矩阵
-- V1 里程碑门禁
-- 风险登记和任务模板
+- V1 项目骨架和中文文档体系
+- `opencap validate` 真实 schema 校验
+- manifest validator API 和单元测试
+- registry test case schema 与 `pnpm validate` 集成
+- Runtime state dir helper、install、list、doctor、Installed Capability Loader
+- MCP Capability id 到 tool name 的稳定映射和冲突检测
 
 ## 当前代码状态
 
-主要包仍是骨架：
+主要包状态：
 
-- `@opencap/spec` 有 schema、类型和可复用 manifest validator API
-- `@opencap/cli` 的 `validate` 命令已接入真实 schema 校验，其余命令仍是骨架
-- `@opencap/runtime` 有 Runtime class 骨架
-- `@opencap/mcp` 有 tool name 和 tool description helper
-- `@opencap/sdk` 暂缓实现
+- `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
+- `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
+- `@opencap/runtime` 有本地 state dir helper、install/list/load installed capabilities 能力。
+- `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
+- `@opencap/sdk` 暂缓实现。
 
 ## 当前任务入口
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T021 P1：实现 Capability id 与 MCP tool name 映射表。
+Next task: T022 P1：实现本地状态初始化。
 
 推荐第一个任务：
 
 ```text
-T021：实现 Capability id 与 MCP tool name 映射表
+T022：实现本地状态初始化
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020 已完成
-- Runtime 已能加载合法 installed capabilities 并报告坏条目
-- T021 将补 MCP tool name 映射表
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021 已完成
+- Runtime 已能解析 state dir、安装能力、列出能力并加载合法 installed capabilities
+- T022 将把首次运行的 state 初始化补完整，尤其是默认 policy 和日志目录
 
 ## 最近验证
 
-项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。最近已运行过：
+项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮已运行：
 
+- `pnpm --filter @opencap/mcp test`
+- `pnpm --filter @opencap/mcp build`
+- `pnpm build`
+- `pnpm test`
+- `pnpm lint`
+- `pnpm validate`
+- `check_docs.py`
 - `git diff --check`
 - JSON 解析检查
 - YAML 解析检查
-- `pnpm install`
-- `pnpm build`
-- `pnpm test`
 
-当前已知：`pnpm validate` 已通过；validator 单元测试仍在 T003 范围内待补。
+当前已知：上述验证均通过。
 
 ## 已知风险
 
-- validator API 还缺 T003 单元测试覆盖。
-- install/list/invoke/logs/serve 仍是骨架命令。
+- `invoke`、`logs`、`serve` 仍是骨架命令。
+- 本地状态初始化还缺默认 `policies.yml` 和日志父目录。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T010：OpenCap 本地状态路径 helper。
-2. 实现 T011/T012：install/list 的最小本地状态闭环。
-3. 补 T003：manifest validator 单元测试。
+1. 实现 T022：首次运行自动初始化本地状态、默认 policy 和日志目录。
+2. 实现 T030/T031：policy parser/engine 与默认 policy 模板。
+3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
 
@@ -336,3 +335,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T020：`@opencap/runtime` 新增 `loadInstalledCapabilities`，返回合法 installed capabilities 和 invalid entries。合法对象包含 id、version、installPath、manifestPath 和 manifest；损坏 manifest 不会进入 capabilities，但会形成可展示错误。`OpenCapRuntime.loadInstalledCapabilities()` 已接入该 loader。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 17 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint` 通过。下一步按任务表进入 T021：实现 Capability id 与 MCP tool name 映射表。
+
+## MCP tool name 映射已实现
+
+已完成 T021：`@opencap/mcp` 新增 `buildMcpToolNameMap`，将 Capability id 稳定投影为 MCP tool name，并在启动前检测 `.` 与 `_` 归一化带来的冲突。`describeCapabilityAsTool` 现在会在 metadata 中保留原始 `capabilityId`。
+
+本轮验证：`pnpm --filter @opencap/mcp test` 通过 4 个测试；`pnpm --filter @opencap/mcp build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过。下一步按任务表进入 T022：实现本地状态初始化。

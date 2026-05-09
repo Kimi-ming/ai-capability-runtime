@@ -39,7 +39,6 @@
 
 ### P1：V1 完整体验
 
-- T021 P1：实现 Capability id 与 MCP tool name 映射表。
 - T022 P1：实现本地状态初始化。
 - T033 P1：记录 ask/deny 的审计日志。
 - T042 P1：实现 `opencap logs`。
@@ -254,6 +253,7 @@
 - 已完成：T014 P1：增加 `--state-dir` 参数。
 - 已完成：T015 P2：增加 `opencap doctor`。
 - 已完成：T020 P0：实现 Installed Capability Loader。
+- 已完成：T021 P1：实现 Capability id 与 MCP tool name 映射表。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T021 Capability id 与 MCP tool name 映射表
-2. T022 本地状态初始化
-3. T030 Policy parser/engine
-4. T040 Audit log
-5. T050 HTTP executor dry-run
-6. T060 `opencap invoke`
-7. T070 MCP bridge
-8. T080 Registry manifest CI 校验
-9. T081 Capability Review Checklist
-10. T023 Runtime loader CLI integration
+1. T022 本地状态初始化
+2. T030 Policy parser/engine
+3. T040 Audit log
+4. T050 HTTP executor dry-run
+5. T060 `opencap invoke`
+6. T070 MCP bridge
+7. T080 Registry manifest CI 校验
+8. T081 Capability Review Checklist
+9. T023 Runtime loader CLI integration
+10. T031 默认 policy 模板
 
 ---
 
@@ -621,7 +621,7 @@ pnpm --filter @opencap/runtime build
 
 ### T021 P1：实现 Capability id 与 MCP tool name 映射表
 
-- [ ] T021 P1：实现 Capability id 与 MCP tool name 映射表
+- [x] T021 P1：实现 Capability id 与 MCP tool name 映射表
 
 目标：为 MCP tools/list 和 tools/call 提供稳定、可检测冲突的 tool name 映射。
 
@@ -639,6 +639,12 @@ pnpm --filter @opencap/mcp test
 pnpm --filter @opencap/mcp build
 ```
 
+完成记录：
+
+- `@opencap/mcp` 已导出 `capabilityIdToMcpToolName`、`buildMcpToolNameMap` 和 `McpToolNameCollisionError`。
+- MCP tool metadata 已保留原始 `capabilityId`，为后续 `tools/call` 回查 Runtime capability 做准备。
+- 已补充单元测试覆盖稳定映射、冲突检测和 metadata 保留。
+
 ### T022 P1：实现本地状态初始化
 
 - [ ] T022 P1：实现本地状态初始化
@@ -650,6 +656,21 @@ pnpm --filter @opencap/mcp build
 - `installed/`
 - `logs.sqlite` 或日志父目录
 - `policies.yml` 默认模板
+
+验收标准：
+
+- 首次运行需要 state 的命令时自动创建 `installed/`、`tmp/`、日志父目录和默认 `policies.yml`。
+- 已存在的 `policies.yml` 不会被覆盖。
+- 默认策略模板符合 `docs/设计/policy-dsl-v1.md` 的 V1 语义。
+- 初始化逻辑可被 Runtime 和 CLI 复用，且支持显式 `--state-dir`。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/cli build
+pnpm lint
+```
 
 ---
 

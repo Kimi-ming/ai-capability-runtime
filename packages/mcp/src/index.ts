@@ -1,7 +1,46 @@
 import type { CapabilityManifest } from "@opencap/spec";
 
+export interface CapabilityLike {
+  id: string;
+}
+
+export interface McpToolNameMapping {
+  capabilityId: string;
+  toolName: string;
+}
+
+export class McpToolNameCollisionError extends Error {
+  constructor(
+    public readonly toolName: string,
+    public readonly capabilityIds: string[],
+  ) {
+    super(`MCP tool name collision for ${toolName}: ${capabilityIds.join(", ")}`);
+    this.name = "McpToolNameCollisionError";
+  }
+}
+
 export function capabilityIdToMcpToolName(id: string): string {
   return id.replaceAll(".", "_");
+}
+
+export function buildMcpToolNameMap(capabilities: CapabilityLike[]): McpToolNameMapping[] {
+  const byToolName = new Map<string, string[]>();
+
+  for (const capability of capabilities) {
+    const toolName = capabilityIdToMcpToolName(capability.id);
+    byToolName.set(toolName, [...(byToolName.get(toolName) ?? []), capability.id]);
+  }
+
+  for (const [toolName, capabilityIds] of byToolName) {
+    if (capabilityIds.length > 1) {
+      throw new McpToolNameCollisionError(toolName, capabilityIds);
+    }
+  }
+
+  return capabilities.map((capability) => ({
+    capabilityId: capability.id,
+    toolName: capabilityIdToMcpToolName(capability.id),
+  }));
 }
 
 function summarizePermissions(manifest: CapabilityManifest): string {
@@ -19,7 +58,7 @@ export function describeCapabilityAsTool(manifest: CapabilityManifest) {
     `Purpose: ${manifest.description}.`,
     `Permissions: ${permissionSummary}.`,
     `Risk: ${riskSummary}.`,
-    "Confirmation: write or higher-risk actions may require confirmation."
+    "Confirmation: write or higher-risk actions may require confirmation.",
   ].join(" ");
 
   return {
@@ -27,6 +66,9 @@ export function describeCapabilityAsTool(manifest: CapabilityManifest) {
     title: manifest.name,
     description,
     inputSchema: manifest.input,
-    outputSchema: manifest.output
+    outputSchema: manifest.output,
+    metadata: {
+      capabilityId: manifest.id,
+    },
   };
 }
