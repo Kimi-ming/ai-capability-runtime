@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试
 
 ## 当前代码状态
 
@@ -25,31 +25,32 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke`、`serve` 仍是骨架。
 - `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
-- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增。
+- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐。
 - `@opencap/sdk` 暂缓实现。
 
 ## 当前任务入口
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T090 P0：禁止 token passthrough 的实现约束。
+Next task: T091 P1：最小 outbound policy 设计。
 
 推荐第一个任务：
 
 ```text
-T090：禁止 token passthrough 的实现约束
+T091：最小 outbound policy 设计
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- T090 将加固 Runtime，禁止 Host 通过普通 input 传 token 绕过 manifest auth.env
+- T091 将定义最小 outbound policy，限制 HTTP executor 目标域和 arbitrary_url 行为
 
 ## 最近验证
 
 项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮已运行：
 
+- `pnpm --filter @opencap/runtime test`
 - `pnpm validate`
 - `check_docs.py`
 - `git diff --check`
@@ -90,12 +91,16 @@ T083 已完成。`.github/ISSUE_TEMPLATE/` 现在包含 bug report、feature req
 
 T084 已完成。新增 `registry/developer-tools/slack.send_message/`，包含 manifest、README 和 `tests/basic.yml`。该示例覆盖 `external_send` 风险、Slack `chat.postMessage` 固定 URL、`SLACK_BOT_TOKEN` env bearer auth 和 dry-run fixture，不包含真实 secret、私有 URL 或生产用户数据。
 
+## token passthrough 禁止测试已补齐
+
+T090 已完成。Runtime 现有实现只从 manifest `auth.env` 对应环境变量读取 API key，不读取普通 input 作为凭据。新增测试覆盖 env 缺失时，即使 input 包含 `token`、`api_key`、`Authorization` 也返回 `SECRET_MISSING` 且不会发起 HTTP 请求；audit log 会脱敏 authorization 类 input 字段，不记录 input token 原值。
+
 ## 下一步建议
 
-1. 实现 T090：禁止 token passthrough 的实现约束。
-2. 在 runtime 测试中覆盖 input token/api_key/authorization 不能替代 manifest `auth.env`。
-3. 确认 dry-run plan 和 audit log 只记录 env var 名称或脱敏信息，不记录 secret 原值。
-4. 完成后跑 `pnpm --filter @opencap/runtime test`、`pnpm validate`、`check_docs.py` 和 `git diff --check`。
+1. 实现 T091：最小 outbound policy 设计。
+2. 明确 fixed_url、arbitrary_url、localhost/private network、metadata service 的默认决策。
+3. 写清 Runtime 后续实现入口：HTTP executor 在真实请求前调用 outbound policy gate。
+4. 完成后跑 `check_docs.py` 和 `git diff --check`。
 
 ## HTTP dry-run executor 已实现
 
@@ -533,4 +538,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T090：禁止 token passthrough 的实现约束。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T091：最小 outbound policy 设计。

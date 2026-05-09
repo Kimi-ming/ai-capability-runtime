@@ -372,6 +372,53 @@ describe("HTTP executor", () => {
     }
   });
 
+  it("does not accept input tokens as replacements for manifest auth env credentials", async () => {
+    const logger = new InMemoryAuditLogger();
+    const requests: string[] = [];
+    const server = createServer((request, response) => {
+      requests.push(request.url ?? "");
+      response.writeHead(200, { "content-type": "application/json" });
+      response.end(JSON.stringify({ ok: true }));
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+    try {
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        throw new Error("expected TCP server address");
+      }
+
+      const manifest = {
+        ...dryRunManifest(),
+        execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/search/{{repo}}`, body: undefined },
+      };
+
+      const result = await executeHttpCapability(
+        manifest,
+        { repo: "runtime", token: "input-token", api_key: "input-api-key", Authorization: "Bearer input-auth" },
+        { env: {}, auditLogger: logger },
+      );
+
+      expect(result).toMatchObject({
+        ok: false,
+        status: "secret_missing",
+        error: { code: "SECRET_MISSING", message: "Missing required environment credential: GITHUB_TOKEN." },
+      });
+      expect(requests).toEqual([]);
+      expect(logger.events).toHaveLength(1);
+      expect(logger.events[0]).toMatchObject({ status: "blocked", reason: "Missing required environment credential: GITHUB_TOKEN." });
+      expect(logger.events[0].inputRedactedJson).toBe(
+        '{"Authorization":"[REDACTED]","api_key":"[REDACTED]","repo":"runtime","token":"[REDACTED]"}',
+      );
+      expect(JSON.stringify(logger.events[0])).not.toContain("input-token");
+      expect(JSON.stringify(logger.events[0])).not.toContain("input-api-key");
+      expect(JSON.stringify(logger.events[0])).not.toContain("input-auth");
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
   it("returns a structured HTTP error for non-2xx responses", async () => {
     const server = createServer((_, response) => {
       response.writeHead(404, { "content-type": "application/json" });

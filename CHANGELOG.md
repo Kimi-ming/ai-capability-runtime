@@ -37,6 +37,7 @@
 - Runtime URL 模板渲染，支持 `{{field}}`、URL encoding 和结构化错误。
 - Runtime dry-run executor，生成 HTTP 调用计划并写入 `dry_run` 审计事件。
 - Runtime HTTP executor，支持真实请求、env 凭据、timeout、2xx/非 2xx 归一化结果和 resolved URL 审计证据。
+- Runtime 测试锁定 token passthrough 禁止约束：普通 input token/api_key/authorization 不能替代 manifest `auth.env`。
 - Manifest schema 正式定义 `execution.body.type: json` 与 `execution.body.fields` JSON 值映射。
 - Runtime output normalization，支持 JSON、text、empty 响应，并在 HTTP execution result 中携带 status code、content type 和 body kind。
 - Arbitrary URL 风险标记和 Runtime 检测，`http.request_demo` 已声明 unsafe-by-default，dry-run plan 会暴露 `arbitrary_url` warning。

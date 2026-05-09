@@ -22,7 +22,6 @@
 ### P0：V1 必须先完成
 
 - T070 P0：选择 MCP TypeScript SDK 并接入。
-- T090 P0：实现禁止 token passthrough 的约束。
 - T100 P0：修正并跑通 pnpm workspace。
 - T101 P0：CI 基础通过。
 
@@ -1577,7 +1576,7 @@ git diff --check
 
 ### T090 P0：禁止 token passthrough 的实现约束
 
-- [ ] T090 P0：禁止 token passthrough 的实现约束
+- [x] T090 P0：禁止 token passthrough 的实现约束
 
 要求：
 
@@ -1601,6 +1600,12 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- Runtime 已有实现只从 manifest `auth.env` 对应环境变量读取 API key，不读取普通 input 作为凭据。
+- 新增测试覆盖 env 缺失时，即使 input 包含 `token`、`api_key`、`Authorization` 也返回 `SECRET_MISSING` 且不会发起 HTTP 请求。
+- 新增断言确认 audit log 脱敏 authorization 类 input 字段，不记录 input token 原值。
+
 ### T091 P1：最小 outbound policy 设计
 
 - [ ] T091 P1：最小 outbound policy 设计
@@ -1612,6 +1617,20 @@ git diff --check
 - manifest 声明 `execution.allowed_hosts`
 - Runtime 校验 resolved URL host
 - arbitrary URL Capability 必须显式声明
+
+验收标准：
+
+- 新增 outbound policy 设计文档或更新现有设计，明确 fixed_url、arbitrary_url、localhost/private network、metadata service 的默认决策。
+- Runtime 后续实现入口清楚：HTTP executor 在真实请求前必须能调用 outbound policy gate。
+- 文档说明 dry-run 如何展示 outbound risk，真实执行如何阻断。
+- 文档包含测试计划和后续实现任务。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T092 P1：审计日志隐私分级
 
