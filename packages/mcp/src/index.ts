@@ -6,6 +6,7 @@ import {
   evaluatePolicy,
   type AuditLogger,
   type PolicySet,
+  type ResultEnvelopeV1,
 } from "@opencap/runtime";
 
 export interface CapabilityLike {
@@ -113,6 +114,31 @@ function textResult(text: string, structuredContent: unknown, isError: boolean):
   };
 }
 
+function fallbackStructuredContent(envelope: ResultEnvelopeV1): unknown {
+  return {
+    status: envelope.status,
+    outcome: envelope.outcome,
+    capabilityId: envelope.capabilityId,
+    evidence: envelope.evidence,
+    warnings: envelope.warnings,
+  };
+}
+
+export function resultEnvelopeToMcpToolCallResult(envelope: ResultEnvelopeV1): McpToolCallResult {
+  return {
+    isError: envelope.isError,
+    content: [{ type: "text", text: envelope.textSummary ?? `${envelope.capabilityId} ${envelope.status}.` }],
+    structuredContent: envelope.structuredContent ?? fallbackStructuredContent(envelope),
+  };
+}
+
+function isResultEnvelope(value: unknown): value is ResultEnvelopeV1 {
+  return typeof value === "object"
+    && value !== null
+    && "envelopeVersion" in value
+    && (value as { envelopeVersion?: unknown }).envelopeVersion === "opencap.result_envelope.v1";
+}
+
 function confirmationRequiredResult(manifest: CapabilityManifest, policy: ReturnType<typeof evaluatePolicy>, message: string): McpToolCallResult {
   const retryHint = "OpenCap V1 does not create confirmation tokens. Update policy in the CLI/Console or retry from a future MCP elicitation-capable host.";
 
@@ -176,5 +202,9 @@ export async function routeMcpToolCall(
   }
 
   const output = await options.execute(manifest, request.arguments ?? {});
+  if (isResultEnvelope(output)) {
+    return resultEnvelopeToMcpToolCallResult(output);
+  }
+
   return textResult("Tool call completed.", output, false);
 }

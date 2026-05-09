@@ -52,7 +52,7 @@ pnpm lint
 
 - `packages/spec/src/index.test.ts`：Manifest validator 和 registry test schema 基础行为，当前覆盖 11 个测试。`packages/spec/src/metadata-lint.test.ts`：model-visible metadata lint，覆盖 prompt-surface injection 四类风险和四个 negative fixtures，当前覆盖 9 个测试；spec 包合计 20 个测试。
 - `packages/runtime/src/index.test.ts`：state dir、install/list/load、policy、confirmation、audit、redaction/hash、HTTP dry-run/executor、token passthrough 禁止等 Runtime 行为，当前覆盖 63 个测试。`packages/runtime/src/result-envelope.test.ts`：Result Envelope V1 success/dry_run/blocked/confirmation_required/failed/unknown 映射，当前覆盖 5 个测试。`packages/runtime/src/output-validation.test.ts`：output schema validation required/type/finding/envelope failure，当前覆盖 4 个测试；Runtime 包合计 72 个测试。
-- `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。`packages/mcp/src/tool-projection.test.ts`：MCP Tool Projection metadata、projection hash/evidence 和 Runtime-generated risk summary，当前覆盖 6 个测试；MCP 包合计 15 个测试。
+- `packages/mcp/src/index.test.ts`：tool name mapping、tools/list projection、tools/call routing、deny/ask/confirmation_required 结果格式等 MCP helper 行为，当前覆盖 9 个测试。`packages/mcp/src/tool-projection.test.ts`：MCP Tool Projection metadata、projection hash/evidence 和 Runtime-generated risk summary，当前覆盖 6 个测试。`packages/mcp/src/result-adapter.test.ts`：Result Envelope 到 MCP structuredContent/content/isError 适配，当前覆盖 3 个测试；MCP 包合计 18 个测试。
 - `packages/cli/src/smoke.test.ts`：CLI 端到端 smoke，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs，当前覆盖 1 个测试。
 
 当前缺口：
@@ -171,6 +171,7 @@ pnpm validate
 - error mapping 符合 `docs/设计/error-model-v1.md`
 - tool projection hash 稳定，且 description/schema 改变时 hash 改变
 - tools/list description 使用结构化 permission/risk/confirmation summary，manifest description 不能覆盖 risk summary，空 permissions 失败
+- Result Envelope adapter 优先返回 structuredContent，content text 只使用 Runtime-generated summary，failed/blocked/confirmation_required 映射为 isError
 
 ## 手动 Smoke Test
 

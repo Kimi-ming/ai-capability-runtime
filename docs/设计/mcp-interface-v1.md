@@ -117,7 +117,7 @@ V1 应优先让业务/执行失败作为 tool result，协议级错误只用于�
 V1 MCP Bridge 不直接返回 provider raw response。Runtime 先生成 `ResultEnvelopeV1`，MCP Bridge 再适配：
 
 - `structuredContent` 来自 Result Envelope 的 structured content。
-- `content[].text` 是 Runtime-generated summary。
+- `content[].text` 是 Runtime-generated summary，不回退到 provider raw output。
 - `isError` 来自 envelope `isError`。
 - unknown/failed/blocked/confirmation_required 都返回结构化结果。
 

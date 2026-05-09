@@ -89,6 +89,7 @@
 - Tool result prompt-surface sanitizer 草案，区分 structuredContent/free text，明确 secret redaction 和 indirect prompt injection 风险边界。
 - Runtime Result Envelope V1 builder，统一表达 success、dry_run、blocked、confirmation_required、failed 和 unknown，并为 failed/unknown 提供结构化 error。
 - Runtime output schema validation，schema mismatch 会进入 Result Envelope evidence 并返回 `OUTPUT_SCHEMA_INVALID` failed envelope。
+- MCP Result Envelope adapter，优先返回 `structuredContent`，`content[].text` 只使用 Runtime-generated summary，并正确映射 `isError`。
 - Host tool metadata compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 title、description、outputSchema、annotations 和 `_meta` 的字段兼容性。
 - 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。

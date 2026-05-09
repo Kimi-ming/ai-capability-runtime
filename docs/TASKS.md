@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T222 P1：MCP structuredContent adapter。
 - T223 P1：Tool result sanitizer。
 - T224 P1：Result provenance/evidence。
 - T225 P1：Oversized result handling。
@@ -2699,7 +2698,7 @@ pnpm --filter @opencap/runtime test
 
 ### T222 P1：MCP structuredContent adapter
 
-- [ ] T222 P1：MCP structuredContent adapter
+- [x] T222 P1：MCP structuredContent adapter
 
 目标：MCP result 优先返回 `structuredContent`，`content[].text` 只放 Runtime-generated summary。
 
@@ -2720,6 +2719,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/mcp test
 ```
+
+完成记录：MCP 层新增 `resultEnvelopeToMcpToolCallResult`，将 Runtime Result Envelope 映射为 MCP tool result：`structuredContent` 来自 envelope structured content，`content[].text` 只使用 Runtime-generated `textSummary`，`isError` 来自 envelope。`routeMcpToolCall` 在 executor 返回 Result Envelope 时走新 adapter，同时保留普通对象兼容路径。新增 `packages/mcp/src/result-adapter.test.ts` 覆盖 success、failed、blocked 和 confirmation_required。
 
 ### T223 P1：Tool result sanitizer
 
