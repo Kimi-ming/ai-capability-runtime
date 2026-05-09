@@ -31,7 +31,6 @@
 
 ### P1：V1 完整体验
 
-- T053 P1：定义 HTTP request body manifest 字段。
 - T054 P1：实现 output normalization。
 - T055 P1：处理 arbitrary URL Capability 风险。
 - T061 P1：实现真实 `opencap invoke`。
@@ -254,6 +253,7 @@
 - 已完成：T050 P0：实现 URL 模板渲染。
 - 已完成：T051 P0：实现 dry-run executor。
 - 已完成：T052 P0：实现 HTTP executor。
+- 已完成：T053 P1：定义 HTTP request body manifest 字段。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1097,7 +1097,7 @@ pnpm lint
 
 ### T053 P1：定义 HTTP request body manifest 字段
 
-- [ ] T053 P1：定义 HTTP request body manifest 字段
+- [x] T053 P1：定义 HTTP request body manifest 字段
 
 当前 manifest 已开始使用 `execution.body.fields`，但需要把 body 映射契约正式落到 schema、示例和文档中。
 
@@ -1123,12 +1123,22 @@ pnpm validate
 
 目标：HTTP 响应转成 Capability output。
 
-要求：
+验收标准：
 
-- JSON response 解析
-- 非 JSON response 包装
-- status code 进入错误处理
-- output schema 校验
+- HTTP JSON 响应会转成结构化 JSON output。
+- 非 JSON 响应会包装为 text output。
+- 空响应会返回可区分的空 output。
+- HTTP status code 和 content type 会进入 normalization 结果。
+- 非 2xx 错误会保留脱敏响应摘要。
+- output schema validation 可以作为后续任务接入，当前任务要预留清晰接口。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T055 P1：处理 arbitrary URL Capability 风险
 

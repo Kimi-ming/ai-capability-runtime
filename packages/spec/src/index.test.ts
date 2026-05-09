@@ -104,6 +104,37 @@ describe("validateManifest", () => {
     await expectInvalidField(manifest, "/execution/timeout_ms");
   });
 
+
+  it("accepts JSON body field mappings", async () => {
+    const manifest = baseManifest();
+    const fields = manifest.execution.body.fields as Record<string, unknown>;
+    fields.title = "{{title}}";
+    fields.body = "Issue: {{body}}";
+    fields.labels = "{{labels}}";
+    fields.pinned = false;
+    fields.priority = 1;
+    fields.metadata = { source: "opencap" };
+    fields.nullable = null;
+
+    const result = await validateManifest(manifest, "fixture.yml");
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("requires JSON body fields when execution body is declared", async () => {
+    const manifest = baseManifest();
+    delete (manifest.execution.body as Record<string, unknown>).fields;
+
+    await expectInvalidField(manifest, "/execution/body/fields");
+  });
+
+  it("rejects non-JSON body field mappings", async () => {
+    const manifest = baseManifest();
+    (manifest.execution.body.fields as Record<string, unknown>).title = undefined;
+
+    await expectInvalidField(manifest, "/execution/body/fields/title");
+  });
+
   it("rejects metadata without trust level", async () => {
     const manifest = baseManifest();
     delete (manifest.metadata as Record<string, unknown>).trust_level;

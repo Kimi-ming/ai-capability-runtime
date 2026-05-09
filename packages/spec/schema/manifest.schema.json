@@ -186,7 +186,8 @@
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "type"
+            "type",
+            "fields"
           ],
           "properties": {
             "type": {
@@ -197,7 +198,9 @@
             },
             "fields": {
               "type": "object",
-              "additionalProperties": true
+              "additionalProperties": {
+                "$ref": "#/$defs/jsonValue"
+              }
             }
           }
         }
@@ -239,6 +242,26 @@
     }
   },
   "$defs": {
+    "jsonValue": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
     "jsonSchema": {
       "type": "object",
       "required": [

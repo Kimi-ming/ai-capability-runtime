@@ -112,7 +112,33 @@ execution:
   timeout_ms: 10000
 ```
 
-模板变量来自通过校验的输入。
+模板变量来自通过校验的输入。URL 中的变量会进行 URL encoding；缺少 URL 变量时调用失败。
+
+### JSON Body 映射
+
+如果 HTTP 请求需要 JSON body，使用 `execution.body.fields` 显式声明要外发的字段：
+
+```yaml
+execution:
+  method: POST
+  url: https://api.github.com/repos/{{owner}}/{{repo}}/issues
+  body:
+    type: json
+    fields:
+      title: "{{title}}"
+      body: "Issue: {{body}}"
+      labels: "{{labels}}"
+  timeout_ms: 10000
+```
+
+规则：
+
+- `body.type` 在 V1 只支持 `json`。
+- `body.fields` 必须存在，值必须是 JSON 值。
+- 值完全等于 `{{field}}` 时，保留输入字段的原始 JSON 类型，例如数组仍是数组。
+- 字符串中内嵌 `{{field}}` 时，按字符串插值处理。
+- 可选完整变量缺失或为 `null` 时省略该 body 字段。
+- Runtime 只会外发 `execution.body.fields` 显式声明的字段，不会默认发送完整 input。
 
 ## 元数据
 
