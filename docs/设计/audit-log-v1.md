@@ -53,6 +53,87 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `resolved_url` | text | 脱敏 URL |
 | `error` | text | 错误摘要 |
 
+
+## 隐私分级
+
+审计字段按默认可记录程度分为四级：
+
+| 等级 | 默认行为 | 示例 |
+| --- | --- | --- |
+| `public_metadata` | 可记录原值 | `capability_id`、`version`、`channel`、`status`、`policy_decision` |
+| `operational_metadata` | 可记录原值，但避免包含用户内容 | `duration_ms`、`matched_rule_id`、`outbound_decision`、`body_kind` |
+| `redacted_user_data` | 只能记录脱敏摘要或 hash | tool input、provider output、URL query、错误响应摘要 |
+| `never_record_secret` | 永不记录原文 | token、api key、Authorization、Cookie、password、private key、OAuth refresh token |
+
+默认写入策略：
+
+- `public_metadata` 和 `operational_metadata` 可以直接进入 SQLite。
+- `redacted_user_data` 必须先经过 redaction、classification 或 hashing。
+- `never_record_secret` 只能记录 env var 名称、存在性、缺失状态或 `[REDACTED]`。
+- 任何字段一旦无法判断等级，按 `redacted_user_data` 处理。
+
+## 字段隐私表
+
+| 字段 | 隐私等级 | V1 记录方式 |
+| --- | --- | --- |
+| `id` | `public_metadata` | 原值 |
+| `timestamp` | `public_metadata` | 原值 |
+| `channel` | `public_metadata` | 原值 |
+| `capability_id` | `public_metadata` | 原值 |
+| `status` | `public_metadata` | 原值 |
+| `policy_decision` | `public_metadata` | 原值 |
+| `confirmation_status` | `public_metadata` | 原值 |
+| `matched_rule_id` | `operational_metadata` | 原值 |
+| `resolved_url` | `redacted_user_data` | origin/path 可记录，query 必须脱敏或省略 |
+| `input_hash` | `redacted_user_data` | SHA-256 hash |
+| `input_redacted_json` | `redacted_user_data` | redacted JSON |
+| `output_redacted_json` | `redacted_user_data` | redacted JSON |
+| `error` | `redacted_user_data` | 错误 code 和脱敏 message |
+| `egress_target_origin` | `operational_metadata` | origin 原值 |
+| `policy_trace_json` | `redacted_user_data` | 不含 input 原文 |
+| `override_id` | `operational_metadata` | 原值 |
+| provider request id | `operational_metadata` | 原值，除非 provider 文档声明包含 secret |
+| env var name | `operational_metadata` | 只记录名称，例如 `GITHUB_TOKEN` |
+| env var value | `never_record_secret` | 永不记录 |
+| Authorization/Cookie header | `never_record_secret` | 永不记录原文 |
+
+## Debug / Diagnostic 模式
+
+V1 可以预留 debug 或 diagnostic 模式，但必须满足：
+
+- 默认关闭。
+- 只能由本地用户显式开启，不能由 Host、模型或 Capability manifest 开启。
+- 开启状态必须写入 audit event 或本地诊断日志。
+- 仍然不能记录 `never_record_secret` 原文。
+- 仍然不能绕过 redaction 对 token、password、authorization、cookie、credential 类字段的处理。
+- 不能把 debug 输出写到 MCP stdio stdout。
+
+Debug 模式可以增加：
+
+- 更完整的 policy trace。
+- redaction 前后的字段名列表，但不能包含字段原值。
+- outbound target 分类原因。
+- provider response headers 的非敏感白名单字段。
+
+Debug 模式不能增加：
+
+- request/response body 原文。
+- Authorization header。
+- API key、OAuth token、cookie、private key。
+- 未脱敏 URL query。
+- 用户输入中被分类为 secret、credential、internal_url 或 sensitive_text 的值。
+
+## 后续实现要求
+
+后续实现应把隐私等级变成代码中的集中规则，而不是分散在各个 logger 调用点：
+
+1. 新增 audit field privacy map。
+2. URL redaction 独立成 helper，默认删除或脱敏 query value。
+3. output redaction 复用 input redaction，并补 provider response 专用测试。
+4. debug 模式只能通过本地配置或 CLI flag 开启。
+5. SQLite 写入前执行最后一道 audit redaction guard。
+6. 测试覆盖 secret-like key、header、query、provider output 和 error message。
+
 ## 脱敏规则
 
 字段名包含以下片段时默认脱敏：

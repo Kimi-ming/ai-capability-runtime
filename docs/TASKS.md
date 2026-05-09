@@ -27,7 +27,6 @@
 
 ### P1：V1 完整体验
 
-- T092 P1：审计日志隐私分级。
 - T102 P1：单元测试基础设施。
 - T103 P1：临时目录测试工具。
 - T112 P1：README 跟随实现更新。
@@ -1641,7 +1640,7 @@ git diff --check
 
 ### T092 P1：审计日志隐私分级
 
-- [ ] T092 P1：审计日志隐私分级
+- [x] T092 P1：审计日志隐私分级
 
 定义：
 
@@ -1663,6 +1662,14 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已补强 `docs/设计/audit-log-v1.md`。
+- 文档新增 `public_metadata`、`operational_metadata`、`redacted_user_data`、`never_record_secret` 四级隐私分级。
+- 文档定义字段隐私表、默认 redaction 规则和 debug/diagnostic 模式边界。
+- 文档明确 env var value、Authorization、Cookie、password、private key、OAuth refresh token 永不记录原文。
+- 文档补充后续实现和测试要求。
+
 ### T093 P2：威胁模型文档
 
 - [ ] T093 P2：威胁模型文档
@@ -1675,6 +1682,20 @@ git diff --check
 - overbroad capability
 - secret exfiltration
 - unsafe arbitrary URL
+
+验收标准：
+
+- 威胁模型文档覆盖 SSRF、secret leakage、malicious capability、prompt injection via tool description。
+- 文档关联现有控制：permission policy、confirmation、audit redaction、outbound policy、registry review、model-visible metadata lint。
+- 文档标出当前已缓解、部分缓解和待实现的威胁。
+- 若 `docs/安全/threat-model.md` 已存在，则补齐缺口而不是重建。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ---
 
