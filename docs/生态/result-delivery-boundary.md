@@ -61,17 +61,29 @@ CLI 可以展示更多调试信息，但仍然：
 - `--json` 输出 Result Envelope 子集。
 - `--verbose` 只能展示 redacted evidence。
 
-## Future Resource Delivery
+## Resource Delivery Profile V1
 
-未来若支持 MCP resources/resource links：
+Resource Delivery Profile V1 见 `../../rfcs/0006-resource-delivery-profile-v1.md`。它定义未来大结果、resource links 和 embedded resources 的投递与读取边界。
 
-- resource URI 必须受 outbound/resource policy 管理。
-- resource content 进入模型前仍需 sanitizer。
-- large result 应默认落地到本地 state，并只给 summary + handle。
-- handle 不是授权，读取 resource 仍需 policy。
+默认策略：
+
+- large result 默认 `summary + handle`，不把完整 provider raw body 直接塞进 `structuredContent` 或 `content[].text`。
+- resource handle 不是授权，只是定位符；读取 resource 必须重新经过 ownership/lifecycle、policy、data egress、sanitizer、size/media type gate 和 audit。
+- resource content 进入模型前仍需 sanitizer，HTML/script/log/Markdown 等 provider text 不能绕过 prompt-surface 边界。
+- embedded resource 默认关闭；启用前必须有 Host compatibility record、media type gate、size gate 和 redaction evidence。
+- Host 不支持 resource links 时，adapter 只能返回 Runtime summary 和 handle metadata，不得退化为直接投递完整内容。
+
+未来若支持 MCP resources/resource links，推荐 handle 形状为：
+
+```text
+opencap://invocations/{invocationId}/resources/{resourceId}
+```
+
+该 URI 不应是公开可访问 URL，也不能被其他 Capability 当成 credential 使用。
 
 ## 关联任务
 
 - T222：MCP structuredContent adapter。
 - T226：Host result compatibility records。
+- T228：Resource delivery profile RFC。
 - T231：CLI result envelope output。

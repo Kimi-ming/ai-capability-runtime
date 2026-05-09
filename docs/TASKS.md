@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T228 P2：Resource delivery profile RFC。
 - T229 P1：Result sanitizer negative fixtures。
 - T230 P2：Taint label tests。
 - T231 P1：CLI result envelope output。
@@ -2844,7 +2843,7 @@ git diff --check
 
 ### T228 P2：Resource delivery profile RFC
 
-- [ ] T228 P2：Resource delivery profile RFC
+- [x] T228 P2：Resource delivery profile RFC
 
 目标：定义未来大结果、resource links、embedded resources 的投递和读取边界。
 
@@ -2864,6 +2863,8 @@ git diff --check
 ```bash
 git diff --check
 ```
+
+完成记录：新增 `rfcs/0006-resource-delivery-profile-v1.md`，定义 large result 默认 summary + handle、resource handle 不是授权、resource read 重新经过 policy/data egress/sanitizer/size/media/audit gate、embedded resource 默认关闭和 evidence 字段。同步更新 `docs/生态/result-delivery-boundary.md`，把 Resource Delivery Profile V1 纳入结果投递边界。
 
 ### T229 P1：Result sanitizer negative fixtures
 
