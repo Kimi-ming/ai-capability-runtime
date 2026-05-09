@@ -11,6 +11,7 @@ import {
   evaluatePolicy,
   DEFAULT_STATE_DIR_NAME,
   OPENCAP_STATE_DIR_ENV,
+  hashInput,
   InMemoryAuditLogger,
   InstallCapabilityError,
   McpNoElicitationConfirmationHandler,
@@ -24,7 +25,9 @@ import {
   loadInstalledCapabilities,
   loadPolicySet,
   parsePolicyYml,
+  redactInput,
   resolveStateDir,
+  stableJsonStringify,
 } from "./index.js";
 
 
@@ -528,7 +531,7 @@ describe("SQLite audit logger", () => {
       permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
     });
     const event = createConfirmationAuditEvent(
-      { capabilityId: "github.create_issue", channel: "mcp", policy },
+      { capabilityId: "github.create_issue", channel: "mcp", policy, input: { token: "abc", title: "Bug" } },
       {
         status: "confirmation_required",
         channel: "mcp",
@@ -550,6 +553,7 @@ describe("SQLite audit logger", () => {
           status: "blocked",
           policyDecision: "ask",
           confirmationStatus: "confirmation_required",
+          inputRedactedJson: '{"title":"Bug","token":"[REDACTED]"}',
         },
       ]);
     } finally {
@@ -585,6 +589,59 @@ describe("SQLite audit logger", () => {
     } finally {
       logger.close();
     }
+  });
+});
+
+describe("input redaction and hashing", () => {
+  it("redacts nested sensitive fields while preserving keys", () => {
+    expect(
+      redactInput({
+        token: "secret-token",
+        profile: { password: "pw", name: "Kimi" },
+        headers: [{ Authorization: "Bearer token" }],
+        regular: "value",
+      }),
+    ).toEqual({
+      token: "[REDACTED]",
+      profile: { password: "[REDACTED]", name: "Kimi" },
+      headers: [{ Authorization: "[REDACTED]" }],
+      regular: "value",
+    });
+  });
+
+  it("creates stable JSON and input hashes independent of object key order", () => {
+    const first = { b: 2, a: { d: 4, c: 3 } };
+    const second = { a: { c: 3, d: 4 }, b: 2 };
+
+    expect(stableJsonStringify(first)).toBe(stableJsonStringify(second));
+    expect(hashInput(first)).toBe(hashInput(second));
+    expect(hashInput(first)).toMatch(/^sha256:[a-f0-9]{64}$/);
+  });
+
+  it("adds redacted input and hash to confirmation audit events", () => {
+    const policy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+    const event = createConfirmationAuditEvent(
+      {
+        capabilityId: "github.create_issue",
+        channel: "mcp",
+        policy,
+        input: { title: "Bug", api_key: "abc123" },
+      },
+      {
+        status: "confirmation_required",
+        channel: "mcp",
+        policyDecision: "ask",
+        prompted: false,
+        reason: "confirmation needed",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    expect(event.inputHash).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(event.inputRedactedJson).toBe('{"api_key":"[REDACTED]","title":"Bug"}');
   });
 });
 

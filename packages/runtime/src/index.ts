@@ -1,5 +1,5 @@
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { stdin as processStdin, stdout as processStdout } from "node:process";
@@ -414,6 +414,7 @@ export interface ConfirmationRequest {
   policy: PolicyEvaluationResult;
   channel: ConfirmationChannel;
   operationSummary?: string;
+  input?: unknown;
 }
 
 export interface ConfirmationResult {
@@ -426,6 +427,65 @@ export interface ConfirmationResult {
 
 export interface ConfirmationHandler {
   confirm(request: ConfirmationRequest): Promise<ConfirmationResult>;
+}
+
+export const REDACTED_VALUE = "[REDACTED]";
+export const SENSITIVE_FIELD_FRAGMENTS = [
+  "token",
+  "secret",
+  "password",
+  "api_key",
+  "authorization",
+  "cookie",
+  "credential",
+] as const;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isSensitiveFieldName(fieldName: string): boolean {
+  const normalized = fieldName.toLowerCase();
+  return SENSITIVE_FIELD_FRAGMENTS.some((fragment) => normalized.includes(fragment));
+}
+
+export function redactInput(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => redactInput(item));
+  }
+
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, nestedValue]) => [key, isSensitiveFieldName(key) ? REDACTED_VALUE : redactInput(nestedValue)]),
+  );
+}
+
+function normalizeForStableJson(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeForStableJson(item));
+  }
+
+  if (!isPlainObject(value)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .filter((key) => value[key] !== undefined)
+      .map((key) => [key, normalizeForStableJson(value[key])]),
+  );
+}
+
+export function stableJsonStringify(value: unknown): string {
+  return JSON.stringify(normalizeForStableJson(value));
+}
+
+export function hashInput(value: unknown): string {
+  return `sha256:${createHash("sha256").update(stableJsonStringify(value)).digest("hex")}`;
 }
 
 export type CliPrompt = (message: string) => Promise<string>;
@@ -544,6 +604,8 @@ export interface AuditEvent {
   confirmationStatus: ConfirmationStatus;
   reason: string;
   matchedRuleId?: string;
+  inputHash?: string;
+  inputRedactedJson?: string;
 }
 
 export interface AuditLogger {
@@ -585,6 +647,8 @@ export function createConfirmationAuditEvent(
     confirmationStatus: confirmation.status,
     reason: confirmation.reason,
     matchedRuleId: request.policy.matchedRuleId,
+    inputHash: request.input === undefined ? undefined : hashInput(request.input),
+    inputRedactedJson: request.input === undefined ? undefined : stableJsonStringify(redactInput(request.input)),
   };
 }
 
@@ -614,6 +678,8 @@ interface AuditEventRow {
   confirmation_status: ConfirmationStatus;
   reason: string;
   matched_rule_id: string | null;
+  input_hash: string | null;
+  input_redacted_json: string | null;
 }
 
 const require = createRequire(import.meta.url);
@@ -635,7 +701,9 @@ CREATE TABLE IF NOT EXISTS invocations (
   policy_decision TEXT NOT NULL,
   confirmation_status TEXT NOT NULL,
   reason TEXT NOT NULL,
-  matched_rule_id TEXT
+  matched_rule_id TEXT,
+  input_hash TEXT,
+  input_redacted_json TEXT
 ) STRICT;
 `;
 
@@ -650,6 +718,8 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     confirmationStatus: row.confirmation_status,
     reason: row.reason,
     matchedRuleId: row.matched_rule_id ?? undefined,
+    inputHash: row.input_hash ?? undefined,
+    inputRedactedJson: row.input_redacted_json ?? undefined,
   };
 }
 
@@ -668,8 +738,9 @@ export class SqliteAuditLogger implements AuditLogger {
     this.database
       .prepare(
         `INSERT INTO invocations (
-          id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
+          input_hash, input_redacted_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -681,13 +752,16 @@ export class SqliteAuditLogger implements AuditLogger {
         event.confirmationStatus,
         event.reason,
         event.matchedRuleId ?? null,
+        event.inputHash ?? null,
+        event.inputRedactedJson ?? null,
       );
   }
 
   async recent(limit = 20): Promise<AuditEvent[]> {
     const rows = this.database
       .prepare(
-        `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id
+        `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
+                input_hash, input_redacted_json
          FROM invocations
          ORDER BY timestamp DESC, id DESC
          LIMIT ?`,

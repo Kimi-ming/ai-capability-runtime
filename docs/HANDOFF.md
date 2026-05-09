@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存审计事件和 SQLite Audit Logger
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction 和 input hash
 
 ## 当前代码状态
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T041 P0：实现 redaction 和 input hash。
+Next task: T042 P1：实现 `opencap logs`。
 
 推荐第一个任务：
 
 ```text
-T041：实现 redaction 和 input hash
+T042：实现 `opencap logs`
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes` 边界、生成内存审计事件并持久化到 SQLite
-- T041 将补齐审计输入脱敏和稳定 input hash
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes` 边界、生成审计事件、脱敏输入并持久化到 SQLite
+- T042 将把 SQLite 最近记录查询接到 CLI `opencap logs`
 
 ## 最近验证
 
@@ -66,14 +66,14 @@ T041：实现 redaction 和 input hash
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- redaction 和 input hash 尚未实现，当前 SQLite 审计事件不含脱敏输入摘要。
+- `opencap logs` 仍是骨架命令，还不能读取 SQLite 审计日志。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T041：redaction 和 input hash。
-2. 实现 T042：`opencap logs` 查询命令。
+1. 实现 T042：`opencap logs` 查询命令。
+2. 实现 T050：HTTP executor dry-run。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
@@ -385,3 +385,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T040：`@opencap/runtime` 新增 `SqliteAuditLogger`，使用 Node 内置 `node:sqlite` 自动创建 `invocations` 表，支持写入 `AuditEvent` 和查询最近 N 条。当前 Node 会对 `node:sqlite` 打印 ExperimentalWarning，但测试和构建通过。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 40 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T041：实现 redaction 和 input hash。
+
+## Redaction 和 input hash 已实现
+
+已完成 T041：`@opencap/runtime` 新增 `redactInput`、`stableJsonStringify` 和 `hashInput`。confirmation audit request 带 input 时，会生成稳定 `inputHash` 和 `inputRedactedJson`，SQLite logger 会持久化这两个字段。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 43 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T042：实现 `opencap logs`。

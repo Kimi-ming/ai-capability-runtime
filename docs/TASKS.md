@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T041 P0：实现 redaction 和 input hash。
 - T050 P0：实现 URL 模板渲染。
 - T051 P0：实现 dry-run executor。
 - T052 P0：实现 HTTP executor。
@@ -254,6 +253,7 @@
 - 已完成：T033 P1：记录 ask/deny 的审计日志。
 - 已完成：T034 P2：支持 `--yes` 非交互确认。
 - 已完成：T040 P0：确定并实现日志存储。
+- 已完成：T041 P0：实现 redaction 和 input hash。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T041 redaction 和 input hash
-2. T042 `opencap logs`
-3. T050 HTTP executor dry-run
-4. T060 `opencap invoke`
-5. T070 MCP bridge
-6. T080 Registry manifest CI 校验
-7. T081 Capability Review Checklist
-8. T023 Runtime loader CLI integration
-9. T050 HTTP executor dry-run
-10. T061 真实 `opencap invoke`
+1. T042 `opencap logs`
+2. T050 HTTP executor dry-run
+3. T060 `opencap invoke`
+4. T070 MCP bridge
+5. T080 Registry manifest CI 校验
+6. T081 Capability Review Checklist
+7. T023 Runtime loader CLI integration
+8. T050 HTTP executor dry-run
+9. T061 真实 `opencap invoke`
+10. T041 redaction 后续接入
 
 ---
 
@@ -894,7 +894,7 @@ pnpm lint
 
 ### T041 P0：实现 redaction 和 input hash
 
-- [ ] T041 P0：实现 redaction 和 input hash
+- [x] T041 P0：实现 redaction 和 input hash
 
 默认脱敏字段：
 
@@ -918,6 +918,14 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `redactInput`、`stableJsonStringify` 和 `hashInput`。
+- 默认敏感字段片段会递归脱敏，并保留字段名。
+- input hash 使用稳定 JSON 序列化和 SHA-256。
+- `createConfirmationAuditEvent` 会在 request 带 input 时写入 `inputHash` 和 `inputRedactedJson`。
+- `SqliteAuditLogger` 会持久化 input hash 和脱敏输入 JSON。
+
 ### T042 P1：实现 `opencap logs`
 
 - [ ] T042 P1：实现 `opencap logs`
@@ -928,6 +936,14 @@ pnpm lint
 - 支持 `--json`
 - 显示 capability id、decision、status、duration
 - 错误日志可读
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/cli build
+pnpm lint
+```
 
 ### T043 P2：增加日志筛选
 
