@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T210 P1：实现 model-visible metadata lint。
 - T211 P1：补充 prompt-surface negative fixtures。
 - T212 P1：记录 tool projection hash/evidence。
 - T213 P1：MCP tools/list 使用 Runtime-generated risk summary。
@@ -2404,7 +2403,7 @@ pnpm --filter @opencap/mcp test
 
 ### T210 P1：实现 model-visible metadata lint
 
-- [ ] T210 P1：实现 model-visible metadata lint
+- [x] T210 P1：实现 model-visible metadata lint
 
 目标：对 manifest name、description、input/output schema descriptions 执行 prompt-surface lint。
 
@@ -2427,6 +2426,8 @@ pnpm --filter @opencap/mcp test
 ```bash
 pnpm --filter @opencap/spec test
 ```
+
+完成记录：新增 `packages/spec/src/metadata-lint.ts` 和 `packages/spec/src/metadata-lint.test.ts`，导出 `lintModelVisibleMetadata`，扫描 manifest 的 `name`、`description` 以及 input/output schema descriptions；当前可检测 instruction override、forced tool choice、bypass governance 和 secret exfiltration，并返回包含 rule、severity、path、message、excerpt 的结构化 finding。
 
 ### T211 P1：补充 prompt-surface negative fixtures
 

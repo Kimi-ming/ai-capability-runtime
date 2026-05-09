@@ -1,3 +1,5 @@
+export { lintModelVisibleMetadata } from "./metadata-lint.js";
+export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
