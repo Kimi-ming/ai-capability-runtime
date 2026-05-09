@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T229 P1：Result sanitizer negative fixtures。
 - T230 P2：Taint label tests。
 - T231 P1：CLI result envelope output。
 - T232 P2：Result Envelope public type exports。
@@ -2868,7 +2867,7 @@ git diff --check
 
 ### T229 P1：Result sanitizer negative fixtures
 
-- [ ] T229 P1：Result sanitizer negative fixtures
+- [x] T229 P1：Result sanitizer negative fixtures
 
 目标：把间接 prompt injection、secret leakage、HTML/script、oversized output 转成测试夹具。
 
@@ -2889,6 +2888,8 @@ git diff --check
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/fixtures/result-sanitizer/`，包含 indirect prompt injection、secret leakage、HTML/script/comment 和 oversized output 四个 JSON negative fixtures。`result-sanitizer.test.ts` 现在自动加载 fixture 目录并断言 sanitized value、finding code/path 和 forbidden raw text 不会出现在结果中；TDD 红灯为 fixture 目录缺失，补齐 fixtures 后测试转绿。
 
 ### T230 P2：Taint label tests
 

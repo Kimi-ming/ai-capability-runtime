@@ -92,6 +92,7 @@
 - Output Selector V1 RFC，定义 provider JSON body 到 manifest `output` schema 的受限字段投影机制，禁止读取 secret/header/env/request/audit，并规定 missing required output 与 schema mismatch 的失败语义。
 - MCP Result Envelope adapter，优先返回 `structuredContent`，`content[].text` 只使用 Runtime-generated summary，并正确映射 `isError`。
 - Runtime Tool Result Sanitizer，脱敏 secret-like result、替换 instruction-like provider text、strip HTML/script/comment，并把 findings 写入 Result Envelope warnings/evidence。
+- Runtime result sanitizer negative fixtures，覆盖 indirect prompt injection、secret leakage、HTML/script/comment 和 oversized output，并由 `result-sanitizer.test.ts` 自动加载。
 - Runtime Result Provenance evidence，记录 redacted structured content digest、transformations 和 taint labels，并覆盖 failed/unknown summary。
 - Runtime oversized result handling，限制 provider structured/text result 大小，超限结构化结果替换为 `[TRUNCATED_RESULT]`，超长文本截断，并保留 sanitizer warning、redaction evidence 和 Runtime-generated MCP summary。
 - Host tool metadata compatibility records，记录 Claude Desktop、Cursor、自定义 MCP client 对 title、description、outputSchema、annotations 和 `_meta` 的字段兼容性。

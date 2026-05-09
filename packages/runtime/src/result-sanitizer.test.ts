@@ -1,3 +1,6 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { resultEnvelopeFromHttpExecutionResult, sanitizeToolResult, type HttpExecutionResult } from "./index.js";
 
@@ -59,4 +62,45 @@ describe("tool result sanitizer", () => {
     ]);
     expect(envelope.textSummary).toBe("github.create_issue succeeded.");
   });
+});
+
+
+interface SanitizerFixture {
+  name: string;
+  input: unknown;
+  options?: {
+    maxTextLength?: number;
+    maxStructuredBytes?: number;
+  };
+  expectedValue: unknown;
+  expectedFindings: Array<{
+    code: string;
+    path: string;
+  }>;
+  notContains: string[];
+}
+
+const fixtureDir = join(dirname(fileURLToPath(import.meta.url)), "../fixtures/result-sanitizer");
+
+function loadSanitizerFixtures(): SanitizerFixture[] {
+  return readdirSync(fixtureDir)
+    .filter((file) => file.endsWith(".json"))
+    .sort()
+    .map((file) => JSON.parse(readFileSync(join(fixtureDir, file), "utf8")) as SanitizerFixture);
+}
+
+describe("result sanitizer negative fixtures", () => {
+  for (const fixture of loadSanitizerFixtures()) {
+    it(`sanitizes fixture: ${fixture.name}`, () => {
+      const result = sanitizeToolResult(fixture.input, fixture.options);
+
+      expect(result.value).toEqual(fixture.expectedValue);
+      expect(result.findings).toEqual(expect.arrayContaining(
+        fixture.expectedFindings.map((expectedFinding) => expect.objectContaining(expectedFinding)),
+      ));
+      for (const forbidden of fixture.notContains) {
+        expect(JSON.stringify(result)).not.toContain(forbidden);
+      }
+    });
+  }
 });

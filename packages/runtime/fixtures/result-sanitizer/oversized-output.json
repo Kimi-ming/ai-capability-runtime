@@ -1,0 +1,21 @@
+{
+  "name": "oversized provider text is truncated",
+  "input": {
+    "body": "abcdefghijklmnopqrstuvwxyz"
+  },
+  "options": {
+    "maxTextLength": 8
+  },
+  "expectedValue": {
+    "body": "abcdefgh"
+  },
+  "expectedFindings": [
+    {
+      "code": "CONTENT_TRUNCATED",
+      "path": "/body"
+    }
+  ],
+  "notContains": [
+    "ijklmnopqrstuvwxyz"
+  ]
+}
