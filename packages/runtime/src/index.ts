@@ -1,5 +1,7 @@
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import { stdin as processStdin, stdout as processStdout } from "node:process";
+import { createInterface } from "node:readline/promises";
 import { join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
@@ -399,6 +401,101 @@ export function evaluatePolicy(policySet: PolicySet, input: PolicyEvaluationInpu
     sourcePath: policySet.sourcePath,
     permissionDecisions,
   };
+}
+
+export type ConfirmationChannel = "cli" | "mcp";
+export type ConfirmationStatus = "approved" | "rejected" | "confirmation_required" | "denied";
+
+export interface ConfirmationRequest {
+  capabilityId: string;
+  policy: PolicyEvaluationResult;
+  channel: ConfirmationChannel;
+  operationSummary?: string;
+}
+
+export interface ConfirmationResult {
+  status: ConfirmationStatus;
+  channel: ConfirmationChannel;
+  policyDecision: PolicyDecision;
+  prompted: boolean;
+  reason: string;
+}
+
+export interface ConfirmationHandler {
+  confirm(request: ConfirmationRequest): Promise<ConfirmationResult>;
+}
+
+export type CliPrompt = (message: string) => Promise<string>;
+
+function confirmationResult(
+  request: ConfirmationRequest,
+  status: ConfirmationStatus,
+  reason: string,
+  prompted: boolean,
+): ConfirmationResult {
+  return {
+    status,
+    channel: request.channel,
+    policyDecision: request.policy.decision,
+    prompted,
+    reason,
+  };
+}
+
+async function defaultCliPrompt(message: string): Promise<string> {
+  const rl = createInterface({ input: processStdin, output: processStdout });
+
+  try {
+    return await rl.question(message);
+  } finally {
+    rl.close();
+  }
+}
+
+function approvalQuestion(request: ConfirmationRequest): string {
+  const summary = request.operationSummary ?? request.capabilityId;
+  return `OpenCap wants to run ${summary}. Allow once? [y/N] `;
+}
+
+export class CliConfirmationHandler implements ConfirmationHandler {
+  constructor(private readonly prompt: CliPrompt = defaultCliPrompt) {}
+
+  async confirm(request: ConfirmationRequest): Promise<ConfirmationResult> {
+    if (request.policy.decision === "allow") {
+      return confirmationResult(request, "approved", "Policy allowed without confirmation.", false);
+    }
+
+    if (request.policy.decision === "deny") {
+      return confirmationResult(request, "denied", request.policy.reason, false);
+    }
+
+    const answer = (await this.prompt(approvalQuestion(request))).trim().toLowerCase();
+
+    if (answer === "y" || answer === "yes") {
+      return confirmationResult(request, "approved", "User approved this invocation once.", true);
+    }
+
+    return confirmationResult(request, "rejected", "User rejected this invocation.", true);
+  }
+}
+
+export class McpNoElicitationConfirmationHandler implements ConfirmationHandler {
+  async confirm(request: ConfirmationRequest): Promise<ConfirmationResult> {
+    if (request.policy.decision === "allow") {
+      return confirmationResult(request, "approved", "Policy allowed without confirmation.", false);
+    }
+
+    if (request.policy.decision === "deny") {
+      return confirmationResult(request, "denied", request.policy.reason, false);
+    }
+
+    return confirmationResult(
+      request,
+      "confirmation_required",
+      "This capability requires human confirmation, but this MCP channel cannot prompt.",
+      false,
+    );
+  }
 }
 
 function firstNonEmpty(...values: Array<string | undefined>): string | undefined {

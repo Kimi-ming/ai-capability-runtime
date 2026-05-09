@@ -74,6 +74,8 @@ type ConsentReceipt = {
 | Console | Future | 可以提供确认 UI，但仍调用 Runtime API |
 | API | Future | 需要独立身份和 session 设计 |
 
+当前 Runtime 最小实现提供两个 handler：`CliConfirmationHandler` 用于 CLI 通道并支持注入 prompt，`McpNoElicitationConfirmationHandler` 用于 MCP STDIO 无确认能力场景并返回 `confirmation_required`。
+
 ## MCP `confirmation_required` 结果
 
 MCP Host 无确认通道时，Runtime 返回结构化结果：

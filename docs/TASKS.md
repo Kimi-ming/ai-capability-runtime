@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T032 P0：实现 Confirmation Handler 接口。
 - T040 P0：确定并实现日志存储。
 - T041 P0：实现 redaction 和 input hash。
 - T050 P0：实现 URL 模板渲染。
@@ -254,6 +253,7 @@
 - 已完成：T022 P1：实现本地状态初始化。
 - 已完成：T030 P0：实现 policy 文件格式和 parser。
 - 已完成：T031 P0：实现 Policy Engine。
+- 已完成：T032 P0：实现 Confirmation Handler 接口。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,7 +290,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T032 Confirmation Handler 接口
+1. T033 记录 ask/deny 的审计日志
 2. T040 Audit log
 3. T050 HTTP executor dry-run
 4. T060 `opencap invoke`
@@ -298,8 +298,8 @@ git diff --check
 6. T080 Registry manifest CI 校验
 7. T081 Capability Review Checklist
 8. T023 Runtime loader CLI integration
-9. T033 记录 ask/deny 的审计日志
-10. T042 `opencap logs`
+9. T042 `opencap logs`
+10. T050 HTTP executor dry-run
 
 ---
 
@@ -764,7 +764,7 @@ pnpm lint
 
 ### T032 P0：实现 Confirmation Handler 接口
 
-- [ ] T032 P0：实现 Confirmation Handler 接口
+- [x] T032 P0：实现 Confirmation Handler 接口
 
 目标：Policy Engine 不负责用户交互。
 
@@ -787,6 +787,13 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `ConfirmationHandler`、`CliConfirmationHandler` 和 `McpNoElicitationConfirmationHandler`。
+- CLI handler 对 ask 决策调用可注入 prompt，方便后续接 CLI terminal。
+- MCP no-elicitation handler 对 ask 返回 `confirmation_required`，不会在 STDOUT prompt。
+- allow/deny 决策不会进入用户确认 prompt。
+
 ### T033 P1：记录 ask/deny 的审计日志
 
 - [ ] T033 P1：记录 ask/deny 的审计日志
@@ -796,6 +803,21 @@ pnpm lint
 - ask 未确认也写日志
 - deny 也写日志
 - 日志中 status 区分 blocked/denied/executed
+
+验收标准：
+
+- `confirmation_required` 会生成 blocked 状态审计事件。
+- policy deny 会生成 denied 状态审计事件。
+- 审计事件包含 capability id、policy decision、confirmation status 和 reason。
+- 该任务可以先使用内存 logger，为 T040 SQLite logger 留出接口。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T034 P2：支持 `--yes` 非交互确认
 

@@ -3,12 +3,14 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
   defaultPolicySet,
   evaluatePolicy,
   DEFAULT_STATE_DIR_NAME,
   OPENCAP_STATE_DIR_ENV,
   InstallCapabilityError,
+  McpNoElicitationConfirmationHandler,
   PolicyParseError,
   OpenCapRuntime,
   ensureLocalStateDir,
@@ -313,6 +315,86 @@ rules:
       decision: "deny",
       matchedRuleId: "deny-destructive",
       permissionDecisions: [{ decision: "ask" }, { decision: "deny" }],
+    });
+  });
+});
+
+describe("confirmation handlers", () => {
+  const askPolicy = evaluatePolicy(defaultPolicySet(), {
+    capabilityId: "github.create_issue",
+    permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+  });
+  const allowPolicy = evaluatePolicy(parsePolicyYml("default: allow\nrules: []\n"), {
+    capabilityId: "github.search_repo",
+    permissions: [{ resource: "github.repo", action: "search", risk: "read_only" }],
+  });
+  const denyPolicy = evaluatePolicy(parsePolicyYml("default: deny\nrules: []\n"), {
+    capabilityId: "github.delete_issue",
+    permissions: [{ resource: "github.issue", action: "delete", risk: "destructive" }],
+  });
+
+  it("prompts for CLI ask decisions and approves yes responses", async () => {
+    const handler = new CliConfirmationHandler(async () => "yes");
+
+    await expect(
+      handler.confirm({ capabilityId: "github.create_issue", channel: "cli", policy: askPolicy }),
+    ).resolves.toMatchObject({
+      status: "approved",
+      channel: "cli",
+      policyDecision: "ask",
+      prompted: true,
+    });
+  });
+
+  it("rejects CLI ask decisions when the user does not approve", async () => {
+    const handler = new CliConfirmationHandler(async () => "no");
+
+    await expect(
+      handler.confirm({ capabilityId: "github.create_issue", channel: "cli", policy: askPolicy }),
+    ).resolves.toMatchObject({
+      status: "rejected",
+      prompted: true,
+    });
+  });
+
+  it("returns confirmation_required for MCP ask decisions without prompting", async () => {
+    const handler = new McpNoElicitationConfirmationHandler();
+
+    await expect(
+      handler.confirm({ capabilityId: "github.create_issue", channel: "mcp", policy: askPolicy }),
+    ).resolves.toMatchObject({
+      status: "confirmation_required",
+      channel: "mcp",
+      policyDecision: "ask",
+      prompted: false,
+    });
+  });
+
+  it("does not prompt for deny decisions", async () => {
+    const handler = new CliConfirmationHandler(async () => {
+      throw new Error("prompt should not be called");
+    });
+
+    await expect(
+      handler.confirm({ capabilityId: "github.delete_issue", channel: "cli", policy: denyPolicy }),
+    ).resolves.toMatchObject({
+      status: "denied",
+      policyDecision: "deny",
+      prompted: false,
+    });
+  });
+
+  it("does not prompt for allow decisions", async () => {
+    const handler = new CliConfirmationHandler(async () => {
+      throw new Error("prompt should not be called");
+    });
+
+    await expect(
+      handler.confirm({ capabilityId: "github.search_repo", channel: "cli", policy: allowPolicy }),
+    ).resolves.toMatchObject({
+      status: "approved",
+      policyDecision: "allow",
+      prompted: false,
     });
   });
 });

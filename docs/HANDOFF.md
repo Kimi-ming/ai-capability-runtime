@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet` 和 Policy Engine
+- Policy parser、`loadPolicySet`、Policy Engine 和 Confirmation Handler 接口
 
 ## 当前代码状态
 
@@ -24,7 +24,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser 和 Policy Engine。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine 和 Confirmation Handler。
 - `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
 - `@opencap/sdk` 暂缓实现。
 
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T032 P0：实现 Confirmation Handler 接口。
+Next task: T033 P1：记录 ask/deny 的审计日志。
 
 推荐第一个任务：
 
 ```text
-T032：实现 Confirmation Handler 接口
+T033：记录 ask/deny 的审计日志
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031 已完成
-- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy 文件并计算 allow/ask/deny
-- T032 将把 ask/deny 之后的人类确认边界定义成接口
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032 已完成
+- Runtime 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny 并处理最小确认结果
+- T033 将开始把 ask/deny/confirmation_required 等阻断路径写入审计证据
 
 ## 最近验证
 
@@ -66,14 +66,14 @@ T032：实现 Confirmation Handler 接口
 ## 已知风险
 
 - `invoke`、`logs`、`serve` 仍是骨架命令。
-- Confirmation Handler 尚未实现，ask 决策还不能转为 CLI prompt 或 MCP confirmation_required。
+- Audit Logger 尚未实现，ask/deny/confirmation_required 还没有审计证据。
 - MCP server 尚未实现。
 - SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T032：Confirmation Handler 接口。
-2. 实现 T033：记录 ask/deny 的审计日志。
+1. 实现 T033：记录 ask/deny 的审计日志。
+2. 实现 T040：SQLite audit log 的最小写入能力。
 3. 实现 T040：SQLite audit log 的最小写入能力。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
@@ -361,3 +361,9 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 已完成 T031：`@opencap/runtime` 新增 `evaluatePolicy`。Engine 会按每个 permission 选择第一条匹配规则，无匹配时使用 policy set 的 `default`，并按 deny > ask > allow 聚合多权限 Capability 的最终决策。
 
 本轮验证：`pnpm --filter @opencap/runtime test` 通过 27 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py`、`git diff --check`、JSON 解析和 YAML 解析通过。下一步按任务表进入 T032：实现 Confirmation Handler 接口。
+
+## Confirmation Handler 接口已实现
+
+已完成 T032：`@opencap/runtime` 新增 `ConfirmationHandler`、`CliConfirmationHandler` 和 `McpNoElicitationConfirmationHandler`。CLI handler 支持注入 prompt；MCP no-elicitation handler 对 ask 返回 `confirmation_required`；allow/deny 不进入确认 prompt。
+
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 32 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate` 和 `git diff --check` 通过。下一步按任务表进入 T033：记录 ask/deny 的审计日志。
