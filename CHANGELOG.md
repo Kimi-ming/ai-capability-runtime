@@ -55,6 +55,7 @@
 - OpenCap V1 项目架构和中文文档体系。
 - 能力清单 V1 草案和 HTTP-only 范围。
 - 本地运行时、策略、审计、MCP、注册表、安全和治理设计文档。
+- 最小 outbound policy 设计补强，明确默认决策表、Runtime gate 入口、dry-run/真实执行行为和测试计划。
 - GitHub issue 和 pull request 模板已中文化。
 - GitHub feature request issue template，并修正 Capability 提交模板的 secret 提示和安全政策链接。
 - 初始开发者工具注册表示例能力。

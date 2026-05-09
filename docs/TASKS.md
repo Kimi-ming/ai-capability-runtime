@@ -27,7 +27,6 @@
 
 ### P1：V1 完整体验
 
-- T091 P1：最小 outbound policy 设计。
 - T092 P1：审计日志隐私分级。
 - T102 P1：单元测试基础设施。
 - T103 P1：临时目录测试工具。
@@ -1608,7 +1607,7 @@ git diff --check
 
 ### T091 P1：最小 outbound policy 设计
 
-- [ ] T091 P1：最小 outbound policy 设计
+- [x] T091 P1：最小 outbound policy 设计
 
 目标：限制 HTTP executor 的目标域。
 
@@ -1632,6 +1631,14 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已补强 `docs/安全/outbound-policy-v1.md`。
+- 文档新增 fixed_url、arbitrary_url、localhost/private network、metadata service、non-https 和 redirect 的默认决策表。
+- 文档明确 HTTP executor 在真实请求前、Secret Resolver 前调用 outbound policy gate。
+- 文档说明 dry-run 展示 outbound preview，真实执行阻断高风险目标。
+- 文档补充最小实现任务和测试计划。
+
 ### T092 P1：审计日志隐私分级
 
 - [ ] T092 P1：审计日志隐私分级
@@ -1641,6 +1648,20 @@ git diff --check
 - 默认 redacted
 - debug 模式可更多字段，但需要显式开启
 - 不记录 secret 原文
+
+验收标准：
+
+- 更新审计日志设计，定义字段隐私等级和默认 redaction 规则。
+- 明确哪些字段永远不能记录 secret 原文。
+- 明确 debug/diagnostic 模式的显式开启条件和仍然不能突破的边界。
+- 给出后续实现和测试要求。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T093 P2：威胁模型文档
 
