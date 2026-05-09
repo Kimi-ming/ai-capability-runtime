@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T212 P1：记录 tool projection hash/evidence。
 - T213 P1：MCP tools/list 使用 Runtime-generated risk summary。
 - T214 P2：Discovery profile RFC。
 - T215 P2：Selection evidence record。
@@ -2456,7 +2455,7 @@ pnpm --filter @opencap/spec test
 
 ### T212 P1：记录 tool projection hash/evidence
 
-- [ ] T212 P1：记录 tool projection hash/evidence
+- [x] T212 P1：记录 tool projection hash/evidence
 
 目标：Runtime 或 MCP layer 能生成 projection hash，供 audit/evidence 使用。
 
@@ -2477,6 +2476,8 @@ pnpm --filter @opencap/spec test
 ```bash
 pnpm --filter @opencap/mcp test
 ```
+
+完成记录：`packages/mcp/src/tool-projection.ts` 现在会为 MCP tool projection 生成稳定 `projectionHash` 和 `evidence`，hash 输入包含 projection version、capability id、tool name、title、Runtime-generated description、input schema 和 output schema；同一输入 hash 稳定，description 或 schema 变化会改变 hash。`describeCapabilityAsTool` 会在 metadata 中携带 `projectionHash`，`docs/设计/audit-log-v1.md` 已说明未来 audit/evidence 字段。
 
 ### T213 P1：MCP tools/list 使用 Runtime-generated risk summary
 

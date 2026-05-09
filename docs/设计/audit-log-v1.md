@@ -51,6 +51,9 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `egress_target_origin` | text | 外发目标 origin |
 | `output_redacted_json` | text | 脱敏输出 |
 | `resolved_url` | text | 脱敏 URL |
+| `tool_projection_version` | text | MCP tool projection 版本，例如 `opencap.mcp.tool-projection.v1` |
+| `tool_projection_hash` | text | 模型可见 tool projection 的稳定 SHA-256 hash |
+| `tool_projection_hash_algorithm` | text | projection hash 算法，V1 为 `sha256` |
 | `error` | text | 错误摘要 |
 
 
@@ -93,6 +96,9 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `policy_trace_json` | `redacted_user_data` | 不含 input 原文 |
 | `override_id` | `operational_metadata` | 原值 |
 | provider request id | `operational_metadata` | 原值，除非 provider 文档声明包含 secret |
+| `tool_projection_version` | `operational_metadata` | 原值 |
+| `tool_projection_hash` | `operational_metadata` | `sha256:<hex>`，不包含用户输入或 secret |
+| `tool_projection_hash_algorithm` | `operational_metadata` | 原值，例如 `sha256` |
 | env var name | `operational_metadata` | 只记录名称，例如 `GITHUB_TOKEN` |
 | env var value | `never_record_secret` | 永不记录 |
 | Authorization/Cookie header | `never_record_secret` | 永不记录原文 |
@@ -161,6 +167,22 @@ URL 脱敏：
 - 可判断两次调用输入是否相同。
 - 不需要保存完整敏感输入。
 
+`tool_projection_hash` 使用 MCP projection builder 对模型可见 tool definition 进行稳定 JSON 序列化后计算 SHA-256。hash 输入包含：
+
+- `projectionVersion`
+- `capabilityId`
+- `toolName`
+- `title`
+- Runtime-generated `description`
+- `inputSchema`
+- `outputSchema`
+
+用途：
+
+- 证明一次 MCP tool 调用对应的是哪一版模型可见 tool metadata。
+- 当 description、input schema 或 output schema 改变时，hash 必须改变。
+- hash 只记录 projection 元数据，不记录用户输入、provider output 或 secret。
+
 ## 审计失败策略
 
 V1 安全默认：
@@ -197,6 +219,7 @@ error
 - validation error 写日志。
 - secret 字段脱敏。
 - input hash 稳定。
+- tool projection hash 稳定，且 description/schema 改变时 hash 改变。
 - egress deny 不产生 request_started。
 - egress evidence 不含 input 原文或 secret-like value。
 - policy trace 不含 input 原文或 secret-like value。

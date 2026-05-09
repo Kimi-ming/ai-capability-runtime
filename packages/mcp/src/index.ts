@@ -48,11 +48,15 @@ export function buildMcpToolNameMap(capabilities: CapabilityLike[]): McpToolName
 }
 
 export {
+  MCP_TOOL_PROJECTION_HASH_ALGORITHM,
   MCP_TOOL_PROJECTION_VERSION,
   buildMcpToolDescription,
   buildMcpToolProjection,
+  hashMcpToolProjectionInput,
+  stableJsonStringifyProjection,
   capabilityIdToMcpToolName,
   type McpToolProjection,
+  type McpToolProjectionEvidence,
 } from "./tool-projection.js";
 
 export function describeCapabilityAsTool(manifest: CapabilityManifest) {
@@ -67,6 +71,7 @@ export function describeCapabilityAsTool(manifest: CapabilityManifest) {
     metadata: {
       capabilityId: projection.capabilityId,
       projectionVersion: projection.projectionVersion,
+      projectionHash: projection.projectionHash,
     },
   };
 }

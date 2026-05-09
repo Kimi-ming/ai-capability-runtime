@@ -40,4 +40,30 @@ describe("MCP tool projection builder", () => {
     expect(projection.description).toContain("Permissions: github.issue:create:write.");
     expect(projection.description).toContain("Risk: write.");
   });
+
+  it("generates a stable projection hash for identical input", () => {
+    const first = buildMcpToolProjection(manifest());
+    const second = buildMcpToolProjection(manifest());
+
+    expect(first.projectionHash).toBe(second.projectionHash);
+    expect(first.projectionHash).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(first.evidence).toEqual({
+      projectionVersion: MCP_TOOL_PROJECTION_VERSION,
+      projectionHash: first.projectionHash,
+      hashAlgorithm: "sha256",
+    });
+  });
+
+  it("changes the projection hash when description or schema changes", () => {
+    const base = buildMcpToolProjection(manifest());
+    const changedDescription = buildMcpToolProjection({ ...manifest(), description: "Create a tracked GitHub issue." });
+    const changedSchema = buildMcpToolProjection({
+      ...manifest(),
+      input: { type: "object", properties: { title: { type: "string" }, body: { type: "string" } } },
+    });
+
+    expect(changedDescription.projectionHash).not.toBe(base.projectionHash);
+    expect(changedSchema.projectionHash).not.toBe(base.projectionHash);
+  });
+
 });

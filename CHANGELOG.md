@@ -56,6 +56,7 @@
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。
 - MCP `tools/list` projection builder，支持 installed Capability 到 MCP tool payload，并保留 tool name collision 检测。
 - MCP Tool Projection builder，统一生成 `projectionVersion`、capability id、tool name、title、description、input/output schema 等模型可见 metadata。
+- MCP Tool Projection evidence，生成稳定 `projectionHash` 并在 tool metadata 中暴露，用于未来 audit/evidence 关联。
 - `@opencap/spec` 新增 model-visible metadata lint，检测 instruction override、forced tool choice、bypass governance 和 secret exfiltration，并返回结构化 finding。
 - `@opencap/spec` 新增 prompt-surface negative fixtures，覆盖 tool description injection、schema poisoning、schema token collection 和 hidden unicode injection。
 - MCP `tools/call` 核心路由，支持 allow 执行、deny 结构化错误、ask 无 elicitation 返回 `CONFIRMATION_REQUIRED`，并写入 confirmation audit。
