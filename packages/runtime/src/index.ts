@@ -157,6 +157,123 @@ export function renderUrlTemplate(template: string, input: unknown): string {
   });
 }
 
+type JsonBodyExecution = {
+  type: "json";
+  fields?: Record<string, unknown>;
+};
+
+type HttpExecution = {
+  method: string;
+  url: string;
+  timeout_ms: number;
+  body?: JsonBodyExecution;
+};
+
+type CapabilityAuth = {
+  type: string;
+  placement?: {
+    type?: string;
+  };
+};
+
+export interface HttpDryRunPlan {
+  status: "dry_run";
+  capabilityId: string;
+  method: string;
+  url: string;
+  timeoutMs: number;
+  body?: unknown;
+  authMode: string;
+  risk: string;
+}
+
+export interface HttpDryRunOptions {
+  auditLogger?: AuditLogger;
+  channel?: ConfirmationChannel;
+}
+
+const FULL_TEMPLATE_PATTERN = /^{{\s*([A-Za-z0-9_-]+)\s*}}$/;
+const TEMPLATE_PATTERN = /{{\s*([A-Za-z0-9_-]+)\s*}}/g;
+
+function readTemplateField(input: Record<string, unknown>, fieldName: string): unknown {
+  const value = input[fieldName];
+  if (value === undefined || value === null) {
+    throw new UrlTemplateRenderError("URL_TEMPLATE_FIELD_MISSING", `Missing template field: ${fieldName}`, { fieldName });
+  }
+  return value;
+}
+
+function renderBodyTemplate(value: unknown, input: Record<string, unknown>): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const fullMatch = value.match(FULL_TEMPLATE_PATTERN);
+  if (fullMatch) {
+    return readTemplateField(input, fullMatch[1]);
+  }
+
+  return value.replace(TEMPLATE_PATTERN, (_match, fieldName: string) => String(readTemplateField(input, fieldName)));
+}
+
+function renderJsonBody(body: JsonBodyExecution | undefined, input: Record<string, unknown>): unknown {
+  if (body === undefined || body.fields === undefined) {
+    return undefined;
+  }
+
+  const rendered: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(body.fields)) {
+    const renderedValue = renderBodyTemplate(value, input);
+    if (renderedValue !== undefined) {
+      rendered[key] = renderedValue;
+    }
+  }
+
+  return rendered;
+}
+
+function authMode(manifest: CapabilityManifest): string {
+  const auth = manifest.auth as CapabilityAuth;
+  const placement = auth.placement?.type;
+  return placement === undefined ? auth.type : `${auth.type}:${placement}`;
+}
+
+export async function buildHttpDryRunPlan(
+  manifest: CapabilityManifest,
+  input: unknown,
+  options: HttpDryRunOptions = {},
+): Promise<HttpDryRunPlan> {
+  const inputRecord = templateInputRecord(input);
+  const execution = manifest.execution as HttpExecution;
+  const plan: HttpDryRunPlan = {
+    status: "dry_run",
+    capabilityId: manifest.id,
+    method: execution.method,
+    url: renderUrlTemplate(execution.url, inputRecord),
+    timeoutMs: execution.timeout_ms,
+    body: renderJsonBody(execution.body, inputRecord),
+    authMode: authMode(manifest),
+    risk: summarizeRisk(manifest),
+  };
+
+  if (options.auditLogger !== undefined) {
+    await options.auditLogger.record({
+      id: randomUUID(),
+      timestamp: new Date().toISOString(),
+      channel: options.channel ?? "cli",
+      capabilityId: manifest.id,
+      status: "dry_run",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      reason: "Dry run plan generated.",
+      inputHash: hashInput(input),
+      inputRedactedJson: stableJsonStringify(redactInput(input)),
+    });
+  }
+
+  return plan;
+}
+
 export const POLICY_DECISIONS = ["allow", "ask", "deny"] as const;
 export const POLICY_RISKS = [
   "read_only",
@@ -636,7 +753,7 @@ export class McpNoElicitationConfirmationHandler implements ConfirmationHandler 
   }
 }
 
-export type AuditInvocationStatus = "blocked" | "denied" | "executed";
+export type AuditInvocationStatus = "blocked" | "denied" | "executed" | "dry_run";
 
 export interface AuditEvent {
   id: string;

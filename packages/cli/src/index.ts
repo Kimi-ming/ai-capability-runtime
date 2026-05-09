@@ -92,7 +92,7 @@ function parseLimit(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
-const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "denied", "executed"]);
+const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "denied", "executed", "dry_run"]);
 
 function parseAuditStatus(value: string | undefined): AuditInvocationStatus | undefined {
   if (value === undefined) {
@@ -300,7 +300,7 @@ program
   .option("--json", "Output JSON")
   .option("--limit <number>", "Number of recent log entries to show", "20")
   .option("--capability <id>", "Filter logs by Capability id")
-  .option("--status <status>", "Filter logs by status: blocked, denied, executed")
+  .option("--status <status>", "Filter logs by status: blocked, denied, executed, dry_run")
   .option("--since <iso-time>", "Filter logs at or after an ISO timestamp")
   .description("Show invocation logs.")
   .action((options: { stateDir?: string; json?: boolean; limit?: string; capability?: string; status?: string; since?: string }) => runCliAction(async () => {

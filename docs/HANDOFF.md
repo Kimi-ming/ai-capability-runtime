@@ -16,14 +16,14 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选和 URL 模板渲染
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染和 HTTP dry-run plan
 
 ## 当前代码状态
 
 主要包状态：
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
-- `@opencap/cli` 的 `validate`、`install`、`list`、`doctor` 已接入真实逻辑；`invoke`、`logs`、`serve` 仍是骨架。
+- `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke`、`serve` 仍是骨架。
 - `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、内存 AuditLogger 和 SQLite Audit Logger。
 - `@opencap/mcp` 有 tool name 映射、冲突检测和 tool description helper。
 - `@opencap/sdk` 暂缓实现。
@@ -32,19 +32,19 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T051 P0：实现 dry-run executor。
+Next task: T052 P0：实现 HTTP executor。
 
 推荐第一个任务：
 
 ```text
-T051：实现 dry-run executor
+T052：实现 HTTP executor
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050 已完成
-- Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，并渲染 HTTP URL 模板
-- T051 将基于 URL 渲染生成 dry-run plan
+- Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，并渲染 HTTP URL 模板、生成 HTTP dry-run plan
+- T052 将在 dry-run plan 基础上接入真实 HTTP executor
 
 ## 最近验证
 
@@ -65,18 +65,28 @@ T051：实现 dry-run executor
 
 ## 已知风险
 
-- `invoke`、`logs`、`serve` 仍是骨架命令。
-- HTTP dry-run executor 尚未实现，`opencap invoke` 仍无法生成 dry-run plan。
+- `invoke`、`serve` 仍是骨架命令。
+- HTTP executor 尚未实现，`opencap invoke` 仍无法执行真实请求。
 - MCP server 尚未实现。
-- SQLite audit logger 尚未实现。
 
 ## 下一步建议
 
-1. 实现 T051：dry-run executor。
+1. 实现 T052：HTTP executor。
 2. 实现 T060/T061：`opencap invoke` 接入。
-3. 实现 T040：SQLite audit log 的最小写入能力。
+3. 继续完善 Secret Resolver、outbound policy 和 Result Envelope。
 4. 继续保持 `pnpm validate && pnpm build && pnpm test && pnpm lint` 通过。
 5. 更新 `docs/TASKS.md` 和本文件。
+
+## HTTP dry-run executor 已实现
+
+T051 已完成。Runtime 现在导出 `buildHttpDryRunPlan`，可根据 HTTP Capability manifest 和输入生成 method、resolved URL、JSON body、auth mode 与风险摘要；dry-run 不读取 secret 原值、不发送网络请求；传入 audit logger 时会写入 `dry_run` 审计事件，并保存 input hash 与脱敏输入。CLI 日志筛选已接受 `dry_run` 状态。
+
+本轮针对性验证：
+
+- `pnpm --filter @opencap/runtime test`
+- `pnpm --filter @opencap/runtime build`
+
+下一步推荐：T052 P0：实现 HTTP executor。
 
 ## 本轮体系化补充
 
@@ -408,4 +418,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 48 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T051：实现 dry-run executor。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T052：实现 HTTP executor。

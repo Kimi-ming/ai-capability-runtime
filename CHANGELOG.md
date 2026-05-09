@@ -31,6 +31,7 @@
 - `opencap logs` 接入 SQLite 审计日志查询，支持默认最近 20 条、`--limit` 和 `--json`。
 - `opencap logs` 支持 `--capability`、`--status`、`--since` 筛选。
 - Runtime URL 模板渲染，支持 `{{field}}`、URL encoding 和结构化错误。
+- Runtime dry-run executor，生成 HTTP 调用计划并写入 `dry_run` 审计事件。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。

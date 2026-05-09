@@ -165,9 +165,20 @@ resolved_url -> outbound policy -> allow/deny
 - 如果 URL host 来自用户输入，默认需要 policy allow。
 - redirect 后的最终 URL 也必须检查。
 
+## 当前实现状态
+
+截至 2026-05-09，Runtime 已实现 HTTP dry-run plan 生成：
+
+- 渲染 method、resolved URL、JSON body、auth mode 和风险摘要。
+- 不读取 secret 原值，不发送外部网络请求。
+- 可选写入 `dry_run` 审计事件，记录 input hash 与脱敏输入。
+
+真实 HTTP executor、secret resolver、outbound policy、output normalization 和 Result Envelope 管线仍在后续任务中实现。
+
 ## 与任务对应
 
 - T050：URL 模板渲染。
+- T051：dry-run executor。
 - T052：HTTP executor。
 - T053：HTTP request body manifest 字段。
 - T055：arbitrary URL Capability 风险。

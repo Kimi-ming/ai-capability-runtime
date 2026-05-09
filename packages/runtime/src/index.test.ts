@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  buildHttpDryRunPlan,
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
   confirmWithAudit,
@@ -90,6 +91,34 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+function dryRunManifest() {
+  return {
+    id: "github.create_issue",
+    name: "Create GitHub Issue",
+    description: "Create a GitHub issue.",
+    version: "0.1.0",
+    type: "http" as const,
+    input: { type: "object" },
+    output: { type: "object" },
+    auth: { type: "api_key" as const, provider: "github", env: "GITHUB_TOKEN", placement: { type: "bearer" } },
+    permissions: [{ resource: "github.issue", action: "create", risk: "write" as const, confirmation: "ask" as const }],
+    execution: {
+      method: "POST" as const,
+      url: "https://api.github.com/repos/{{owner}}/{{repo}}/issues",
+      timeout_ms: 10000,
+      body: {
+        type: "json" as const,
+        fields: {
+          title: "{{title}}",
+          body: "Issue: {{body}}",
+          labels: "{{labels}}",
+        },
+      },
+    },
+    metadata: { category: "developer-tools", maintainer: "opencap", license: "MIT", trust_level: "experimental" },
+  };
+}
+
 describe("URL template rendering", () => {
   it("renders fields with URL encoding", () => {
     expect(
@@ -114,6 +143,53 @@ describe("URL template rendering", () => {
 
   it("requires object input", () => {
     expect(() => renderUrlTemplate("https://example.com/{{field}}", null)).toThrow(UrlTemplateRenderError);
+  });
+});
+
+describe("HTTP dry-run plan", () => {
+  it("renders method, URL, JSON body, auth mode, and risk without reading secrets", async () => {
+    const plan = await buildHttpDryRunPlan(dryRunManifest(), {
+      owner: "open cap",
+      repo: "runtime/core",
+      title: "Bug #1",
+      body: "broken",
+      labels: ["bug", "p1"],
+    });
+
+    expect(plan).toEqual({
+      status: "dry_run",
+      capabilityId: "github.create_issue",
+      method: "POST",
+      url: "https://api.github.com/repos/open%20cap/runtime%2Fcore/issues",
+      timeoutMs: 10000,
+      body: {
+        title: "Bug #1",
+        body: "Issue: broken",
+        labels: ["bug", "p1"],
+      },
+      authMode: "api_key:bearer",
+      risk: "write",
+    });
+    expect(JSON.stringify(plan)).not.toContain("GITHUB_TOKEN");
+  });
+
+  it("writes a dry-run audit event when an audit logger is provided", async () => {
+    const logger = new InMemoryAuditLogger();
+    const plan = await buildHttpDryRunPlan(
+      dryRunManifest(),
+      { owner: "opencap", repo: "runtime", title: "Bug", body: "broken", labels: [], token: "secret" },
+      { auditLogger: logger, channel: "cli" },
+    );
+
+    expect(plan.status).toBe("dry_run");
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0]).toMatchObject({
+      capabilityId: "github.create_issue",
+      status: "dry_run",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      inputRedactedJson: '{"body":"broken","labels":[],"owner":"opencap","repo":"runtime","title":"Bug","token":"[REDACTED]"}',
+    });
   });
 });
 

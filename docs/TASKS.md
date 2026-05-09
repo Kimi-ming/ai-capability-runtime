@@ -21,7 +21,6 @@
 
 ### P0：V1 必须先完成
 
-- T051 P0：实现 dry-run executor。
 - T052 P0：实现 HTTP executor。
 - T060 P0：实现 `opencap invoke <id> --dry-run`。
 - T070 P0：选择 MCP TypeScript SDK 并接入。
@@ -254,6 +253,7 @@
 - 已完成：T042 P1：实现 `opencap logs`。
 - 已完成：T043 P2：增加日志筛选。
 - 已完成：T050 P0：实现 URL 模板渲染。
+- 已完成：T051 P0：实现 dry-run executor。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -1025,7 +1025,7 @@ pnpm lint
 
 ### T051 P0：实现 dry-run executor
 
-- [ ] T051 P0：实现 dry-run executor
+- [x] T051 P0：实现 dry-run executor
 
 目标：先不发真实请求也能看到将执行什么。
 
@@ -1044,6 +1044,15 @@ pnpm --filter @opencap/runtime build
 pnpm lint
 ```
 
+完成记录：
+
+- `@opencap/runtime` 已导出 `buildHttpDryRunPlan`。
+- dry-run plan 会输出 method、resolved URL、JSON body、auth mode 和风险摘要。
+- dry-run 不读取 secret 原值、不发网络请求。
+- 传入 audit logger 时会写入 `dry_run` 审计事件，并记录 input hash 与脱敏输入。
+- `opencap logs --status` 已接受 `dry_run` 状态。
+
+
 ### T052 P0：实现 HTTP executor
 
 - [ ] T052 P0：实现 HTTP executor
@@ -1058,6 +1067,23 @@ pnpm lint
 - JSON body
 - timeout
 - API key header 策略
+
+验收标准：
+
+- Runtime 可以根据已渲染 URL 和 JSON body 发送真实 HTTP 请求。
+- 支持 `auth.placement: bearer` 和 `auth.placement: header`，并且不会把 secret 写入 plan、错误或审计摘要。
+- 支持 timeout，超时时返回结构化执行错误。
+- HTTP 2xx 响应会归一化为 JSON 或 text 结果。
+- HTTP 非 2xx 响应会返回结构化错误，包含 status code 和脱敏响应摘要。
+- 执行路径会写入 audit log，至少记录 capability id、resolved URL、状态和脱敏输入。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+pnpm lint
+```
 
 ### T053 P1：定义 HTTP request body manifest 字段
 
