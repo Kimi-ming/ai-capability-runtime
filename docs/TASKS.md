@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T214 P2：Discovery profile RFC。
 - T215 P2：Selection evidence record。
 - T216 P2：Capability Review Checklist 接入 model-visible text 检查。
 - T217 P2：Tool result prompt-surface sanitizer 草案。
@@ -2505,7 +2504,7 @@ pnpm --filter @opencap/mcp test
 
 ### T214 P2：Discovery profile RFC
 
-- [ ] T214 P2：Discovery profile RFC
+- [x] T214 P2：Discovery profile RFC
 
 目标：定义未来 registry search/discovery 的 profile，避免自动安装、自动授权或商业排名污染安全边界。
 
@@ -2525,6 +2524,8 @@ pnpm --filter @opencap/mcp test
 ```bash
 git diff --check
 ```
+
+完成记录：新增 `rfcs/0004-discovery-profile-v1.md`，定义 discovery metadata、默认过滤、ranking 边界、安装边界和 Runtime 关系；`docs/生态/discovery-and-selection-boundary.md` 已同步 Discovery Profile V1，明确 ranking 不能修改 policy、不能自动安装/授权、不能把未安装能力暴露到 MCP `tools/list`，并且 revoked/yanked 默认隐藏。
 
 ### T215 P2：Selection evidence record
 
