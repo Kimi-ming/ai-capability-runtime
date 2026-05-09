@@ -27,7 +27,6 @@
 ### P1：V1 完整体验
 
 - T116 P1：维护术语表和文档索引。
-- T121 P1：CHANGELOG。
 
 ### P2/P3：增强和后续扩展
 
@@ -1968,7 +1967,7 @@ git diff --check
 
 ### T121 P1：CHANGELOG
 
-- [ ] T121 P1：CHANGELOG
+- [x] T121 P1：CHANGELOG
 
 新增：
 
@@ -1988,6 +1987,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：`CHANGELOG.md` 已复核并更新已知缺口，明确完整 `opencap serve --mcp` server、Console、Cloud/团队能力、完整 OAuth flow、SDK/adapters、Registry signing、outbound policy 私网阻断和 CLI snapshot tests 仍未完成；已知缺口与 README、HANDOFF 和 alpha checklist 保持一致，不再把 install/list/invoke/logs 写成骨架。
+
 ### T122 P2：版本策略
 
 - [ ] T122 P2：版本策略
@@ -1997,6 +1998,20 @@ git diff --check
 - package versions
 - schema version
 - registry compatibility
+
+验收标准：
+
+- 新增或更新中文版本策略文档，说明 package、manifest schema、registry compatibility 和 alpha/beta/1.0 的兼容口径。
+- 明确 `0.x` 阶段 breaking change 记录方式。
+- 明确 manifest schema 与 registry entry 的兼容关系。
+- 从 `docs/README.md` 或 `docs/INDEX.md` 可发现。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T123 P2：npm package 发布预案
 

@@ -89,5 +89,7 @@
 
 ### 已知缺口
 
-- 命令行和运行时实现仍处于骨架阶段。
-- install/list/invoke/logs/serve 仍处于骨架阶段。
+- 完整 `opencap serve --mcp` server 尚未实现；当前已有 MCP tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper。
+- Console UI、Cloud/团队能力、完整 OAuth flow、SDK/adapters 和 Registry signing 尚未实现。
+- Outbound policy 私网阻断、Secret Resolver 调用顺序、audit failure preflight 和更多 conformance negative tests 仍需补齐。
+- CLI command snapshot、stdout/stderr 和 exit code 细粒度测试仍需补齐。
