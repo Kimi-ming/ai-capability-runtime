@@ -28,6 +28,7 @@
 ### 我要开始开发
 
 - [开发环境](教程/开发环境.md)
+- [第一次贡献 OpenCap](教程/first-contribution.md)
 - [当前状态交接](HANDOFF.md)
 - [开发任务总表](TASKS.md)
 - [开发工作流](WORKFLOW.md)

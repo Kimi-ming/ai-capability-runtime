@@ -19,6 +19,7 @@
 - Runtime 临时测试项目 helper，覆盖 install/list/logs 写入显式临时 state dir 且不污染默认 `opencap.local/`。
 - CLI 端到端 smoke test，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs。
 - README 快速开始更新为当前真实可运行的 CLI 闭环，并明确 `serve --mcp` 仍是骨架入口。
+- 第一次贡献教程，串联环境准备、任务选择、验证、文档同步和提交推送。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
 - Capability PR 评审指南，覆盖维护者合并前的阻断项、follow-up 项和安全检查。

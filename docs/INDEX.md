@@ -58,9 +58,10 @@
 
 1. [README](../README.md)
 2. [中文文档中心](README.md)
-3. [体系蓝图](SYSTEM.md)
-4. [当前状态交接](HANDOFF.md)
-5. [开发任务总表](TASKS.md)
+3. [第一次贡献 OpenCap](教程/first-contribution.md)
+4. [体系蓝图](SYSTEM.md)
+5. [当前状态交接](HANDOFF.md)
+6. [开发任务总表](TASKS.md)
 
 ### 架构评审路径
 
@@ -75,13 +76,14 @@
 
 ### 实现任务路径
 
-1. [当前状态交接](HANDOFF.md)
-2. [开发任务总表](TASKS.md)
-3. 当前任务引用的 `docs/设计/` 或 `docs/安全/` 文档
-4. [整体系统设计 V1](设计/整体系统设计-v1.md) 中对应平面和链路
-5. [验证策略](TESTING.md)
-6. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
-7. [开发工作流](WORKFLOW.md)
+1. [第一次贡献 OpenCap](教程/first-contribution.md)
+2. [当前状态交接](HANDOFF.md)
+3. [开发任务总表](TASKS.md)
+4. 当前任务引用的 `docs/设计/` 或 `docs/安全/` 文档
+5. [整体系统设计 V1](设计/整体系统设计-v1.md) 中对应平面和链路
+6. [验证策略](TESTING.md)
+7. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
+8. [开发工作流](WORKFLOW.md)
 
 ### Capability 贡献评审路径
 

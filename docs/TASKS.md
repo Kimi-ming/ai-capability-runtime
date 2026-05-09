@@ -26,7 +26,6 @@
 
 ### P1：V1 完整体验
 
-- T113 P1：新增贡献者上手教程。
 - T116 P1：维护术语表和文档索引。
 - T120 P1：定义 alpha release checklist。
 - T121 P1：CHANGELOG。
@@ -1893,7 +1892,7 @@ git diff --check
 
 ### T113 P1：新增贡献者上手教程
 
-- [ ] T113 P1：新增贡献者上手教程
+- [x] T113 P1：新增贡献者上手教程
 
 新增：
 
@@ -1913,6 +1912,8 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：新增 `docs/教程/first-contribution.md`，覆盖环境准备、任务选择、最小实现、验证、文档同步、提交推送和 Capability 贡献路径；教程链接到贡献指南、TASKS、TESTING、HANDOFF、WORKFLOW 和开发环境。`docs/README.md` 与 `docs/INDEX.md` 已增加入口。
+
 ### T114 P2：新增架构图
 
 - [ ] T114 P2：新增架构图
@@ -1922,6 +1923,20 @@ git diff --check
 - Mermaid Runtime flow
 - package dependency graph
 - invocation sequence diagram
+
+验收标准：
+
+- 至少新增或更新一个 Mermaid 架构图，解释 V1 Runtime 主路径。
+- 图中体现 CLI、Runtime、Policy、Audit、HTTP Executor、Local State 和外部 API 的关系。
+- 图所在文档从 `docs/README.md` 或 `docs/INDEX.md` 可发现。
+- 图不宣称尚未实现的 MCP server 能力已经完成。
+
+验证：
+
+```bash
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ---
 
