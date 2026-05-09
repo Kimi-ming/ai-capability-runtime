@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI 和 Capability PR 评审指南
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南和 Registry README
 
 ## 当前代码状态
 
@@ -25,26 +25,26 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API 和 registry test 校验。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke`、`serve` 仍是骨架。
 - `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
-- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增。
+- `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐。
 - `@opencap/sdk` 暂缓实现。
 
 ## 当前任务入口
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T082 P1：补充 Registry README。
+Next task: T083 P2：添加 GitHub Issue/PR templates。
 
 推荐第一个任务：
 
 ```text
-T082：补充 Registry README
+T083：添加 GitHub Issue/PR templates
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- T082 将补充 registry 根 README，说明目录结构、trust level、提交流程和安全边界
+- T083 将检查并补齐 GitHub Issue/PR templates，并确认模板 YAML 可解析
 
 ## 最近验证
 
@@ -78,12 +78,16 @@ T080 已完成。`.github/workflows/validate.yml` 现在在 push 到 `main` 和 
 
 T081 已完成。新增 `docs/教程/review-a-capability.md`，作为维护者操作指南，覆盖评审结论分类、manifest 和真实行为一致性、权限最小化、风险等级、外部端点、auth/secret、model-visible 文本、README、registry tests、trust level、阻止合并项和 follow-up 项。`docs/README.md` 和 `docs/INDEX.md` 已加入入口。
 
+## Registry README 已补齐
+
+T082 已完成。新增 `registry/README.md`，说明 Registry 目录结构、当前分类、Capability 条目要求、trust level、新条目默认 `experimental`、提交流程、安全边界和维护者评审入口。文档明确 Registry 不接收真实 secret、私有数据、绕过安全边界的能力或未标记 unsafe-by-default 的任意 URL 能力。
+
 ## 下一步建议
 
-1. 实现 T082：补充 Registry README。
-2. 新增 `registry/README.md`，覆盖目录结构、分类、trust level、提交流程和安全边界。
-3. 链接 Capability 编写教程、评审指南和 Registry 指南。
-4. 完成后跑 `pnpm validate`、`check_docs.py` 和 `git diff --check`。
+1. 实现 T083：添加 GitHub Issue/PR templates。
+2. 检查现有 `.github/ISSUE_TEMPLATE/` 和 `.github/PULL_REQUEST_TEMPLATE.md` 是否已覆盖 bug、capability submission、technical design proposal、验证、文档同步和安全影响。
+3. 必要时补 feature request 或调整模板中文字段。
+4. 完成后跑 YAML 解析、`check_docs.py` 和 `git diff --check`。
 
 ## HTTP dry-run executor 已实现
 
@@ -521,4 +525,4 @@ CLI `list` 支持 `--state-dir` 和 `--json`。本轮验证：`pnpm --filter @op
 
 已完成 T050：`@opencap/runtime` 新增 `renderUrlTemplate` 和 `UrlTemplateRenderError`。支持 `{{field}}`、缺字段结构化错误、非对象输入错误和统一 `encodeURIComponent`。
 
-本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T082：补充 Registry README。
+本轮验证：`pnpm --filter @opencap/runtime test` 通过 50 个测试；`pnpm --filter @opencap/runtime build`、`pnpm build`、`pnpm test`、`pnpm lint`、`pnpm validate`、`check_docs.py` 和 `git diff --check` 通过。`node:sqlite` 会打印 ExperimentalWarning。下一步按任务表进入 T083：添加 GitHub Issue/PR templates。

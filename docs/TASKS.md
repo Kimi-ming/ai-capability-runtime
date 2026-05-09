@@ -28,7 +28,6 @@
 
 ### P1：V1 完整体验
 
-- T082 P1：补充 Registry README。
 - T091 P1：最小 outbound policy 设计。
 - T092 P1：审计日志隐私分级。
 - T102 P1：单元测试基础设施。
@@ -1474,7 +1473,7 @@ git diff --check
 
 ### T082 P1：补充 Registry README
 
-- [ ] T082 P1：补充 Registry README
+- [x] T082 P1：补充 Registry README
 
 新增：
 
@@ -1498,6 +1497,15 @@ python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
 
+完成记录：
+
+- 已新增 `registry/README.md`。
+- 文档说明 registry 目录结构、分类、Capability 条目要求和提交流程。
+- 文档解释 trust level 和新条目默认 `experimental`。
+- 文档链接到 Capability 编写教程、Capability PR 评审指南、Registry 指南、能力评审清单、能力清单和权限模型。
+- 文档明确 registry 不接收真实 secret、私有数据、绕过安全边界的能力或未标记 unsafe-by-default 的任意 URL 能力。
+- `docs/README.md` 已加入 Registry 根目录说明入口。
+
 ### T083 P2：添加 GitHub Issue/PR templates
 
 - [ ] T083 P2：添加 GitHub Issue/PR templates
@@ -1508,6 +1516,21 @@ git diff --check
 - feature request
 - capability submission
 - technical design proposal
+
+验收标准：
+
+- `.github/ISSUE_TEMPLATE/` 至少包含 bug report、capability submission 和 technical design proposal。
+- `.github/PULL_REQUEST_TEMPLATE.md` 覆盖验证、文档同步和安全影响检查。
+- 模板使用中文，且不要求提交者填写真实 secret。
+- YAML issue templates 能通过 YAML 解析。
+
+验证：
+
+```bash
+ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
+python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
+git diff --check
+```
 
 ### T084 P2：新增更多示例 Capability
 
