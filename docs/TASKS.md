@@ -65,7 +65,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T015 P2：增加 `opencap doctor`。
 - T034 P2：支持 `--yes` 非交互确认。
 - T043 P2：增加日志筛选。
 - T074 P2：MCP Host 手动测试文档。
@@ -254,6 +253,7 @@
 - 已完成：T012 P0：实现 `opencap list`。
 - 已完成：T013 P1：实现 CLI 统一错误处理和 exit code。
 - 已完成：T014 P1：增加 `--state-dir` 参数。
+- 已完成：T015 P2：增加 `opencap doctor`。
 
 ### T267 P0：定义 Runtime Kernel public contract 设计契约
 
@@ -290,16 +290,16 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T015 `opencap doctor`
-2. T020 Installed Capability Loader
-3. T030 Policy parser/engine
-4. T040 Audit log
-5. T050 HTTP executor dry-run
-6. T060 `opencap invoke`
-7. T070 MCP bridge
-8. T080 Registry manifest CI 校验
-9. T081 Capability Review Checklist
-10. T021 Capability id 与 MCP tool name 映射表
+1. T020 Installed Capability Loader
+2. T030 Policy parser/engine
+3. T040 Audit log
+4. T050 HTTP executor dry-run
+5. T060 `opencap invoke`
+6. T070 MCP bridge
+7. T080 Registry manifest CI 校验
+8. T081 Capability Review Checklist
+9. T021 Capability id 与 MCP tool name 映射表
+10. T022 本地状态初始化
 
 ---
 
@@ -563,7 +563,7 @@ pnpm --filter @opencap/cli build
 
 ### T015 P2：增加 `opencap doctor`
 
-- [ ] T015 P2：增加 `opencap doctor`
+- [x] T015 P2：增加 `opencap doctor`
 
 目标：提供一个只读诊断命令，帮助开发者确认本地环境、registry 和 state dir 的基础健康状态。
 
@@ -590,6 +590,8 @@ pnpm --filter @opencap/cli dev -- doctor --state-dir /private/tmp/opencap-cli-st
 pnpm --filter @opencap/cli build
 ```
 
+完成记录：CLI 已新增 `doctor` 命令，输出 Node、pnpm、registry、state dir、state dir writable、installed summary 和 policy status。命令为只读诊断，不修改 registry 或 state dir。
+
 ---
 
 ## Epic C：Runtime State 和 Capability Loading
@@ -606,6 +608,14 @@ pnpm --filter @opencap/cli build
 - 返回 install path
 - 保留 manifest version
 - 错误可被 CLI/MCP 层展示
+- `OpenCapRuntime.loadInstalledCapabilities()` 使用同一 loader，不再返回空数组
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
+```
 
 ### T021 P1：实现 Capability id 与 MCP tool name 映射表
 

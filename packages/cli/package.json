@@ -15,7 +15,8 @@
   "dependencies": {
     "@opencap/runtime": "workspace:*",
     "@opencap/spec": "workspace:*",
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "yaml": "^2.6.1"
   },
   "devDependencies": {
     "tsx": "^4.19.2",

@@ -1,8 +1,18 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
+import { access, readFile, stat } from "node:fs/promises";
+import { constants as fsConstants } from "node:fs";
 import { Command } from "commander";
 import { isAbsolute, resolve } from "node:path";
+import YAML from "yaml";
 import { formatManifestValidationIssue, validateManifestPath } from "@opencap/spec";
-import { InstallCapabilityError, installCapability, listInstalledCapabilities } from "@opencap/runtime";
+import {
+  InstallCapabilityError,
+  getLocalStatePaths,
+  installCapability,
+  listInstalledCapabilities,
+  resolveRegistryDir,
+} from "@opencap/runtime";
 
 const program = new Command();
 
@@ -35,6 +45,49 @@ function handleCliError(error: unknown, fallbackMessage: string): void {
   }
 
   setCliError(error instanceof Error ? error.message : fallbackMessage, 2);
+}
+
+
+async function pathStatus(path: string): Promise<"ok" | "missing"> {
+  try {
+    await stat(path);
+    return "ok";
+  } catch {
+    return "missing";
+  }
+}
+
+async function writableStatus(path: string): Promise<"ok" | "missing" | "not_writable"> {
+  try {
+    await access(path, fsConstants.W_OK);
+    return "ok";
+  } catch (error) {
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return "missing";
+    }
+    return "not_writable";
+  }
+}
+
+function pnpmVersion(): string {
+  const result = spawnSync("pnpm", ["--version"], { encoding: "utf8" });
+  if (result.status !== 0) {
+    return "missing";
+  }
+  return result.stdout.trim() || "unknown";
+}
+
+async function policyStatus(policyPath: string): Promise<string> {
+  try {
+    const raw = await readFile(policyPath, "utf8");
+    YAML.parse(raw);
+    return "ok";
+  } catch (error) {
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return "missing_default_ask";
+    }
+    return "invalid";
+  }
 }
 
 async function runCliAction(action: () => Promise<void>, fallbackMessage: string): Promise<void> {
@@ -136,6 +189,29 @@ program
     }
   }, "Failed to list installed capabilities"));
 
+
+
+program
+  .command("doctor")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--registry <path>", "Registry root directory")
+  .description("Check local OpenCap development environment health.")
+  .action((options: { stateDir?: string; registry?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const registryDir = resolveRegistryDir({ cwd, env: process.env, registryDir: options.registry });
+    const statePaths = getLocalStatePaths({ cwd, env: process.env, stateDir: options.stateDir });
+    const installed = await listInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
+    const invalidInstalled = installed.filter((capability) => capability.status === "invalid");
+
+    console.log("OpenCap doctor");
+    console.log(`node: ${process.version}`);
+    console.log(`pnpm: ${pnpmVersion()}`);
+    console.log(`registry: ${await pathStatus(registryDir)} ${registryDir}`);
+    console.log(`state_dir: ${await pathStatus(statePaths.root)} ${statePaths.root}`);
+    console.log(`state_dir_writable: ${await writableStatus(statePaths.root)}`);
+    console.log(`installed: ${installed.length} total, ${invalidInstalled.length} invalid`);
+    console.log(`policy: ${await policyStatus(statePaths.policiesFile)} ${statePaths.policiesFile}`);
+  }, "Failed to run doctor"));
 
 program
   .command("invoke")
