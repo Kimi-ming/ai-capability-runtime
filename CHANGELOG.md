@@ -112,6 +112,7 @@
 - Runtime field-level egress map，提取 HTTP URL/query/body 模板引用字段，记录 destination、data classes 和 redacted 状态，不记录字段值。
 - Runtime derived input evidence chain，为 tool-derived input 记录上游 invocation 和 source result digest，同时要求派生 input 重新分类和经过 egress policy。
 - Runtime input minimization by execution mapping，基于 field-level egress map 只保留被 URL/query/body 引用的字段，不自动外发整个 input。
+- Runtime redacted egress preview，展示 target、fields sent、data classes 和脱敏 input，大段文本摘要化且不暴露 secret/source/internal 原文。
 - 策略决策追踪、策略生命周期/变更控制、策略模拟/差异评估和临时覆盖/紧急通道文档。
 - 中文文档中心、中文文档规范、维护者索引和中文 GitHub 模板。
 

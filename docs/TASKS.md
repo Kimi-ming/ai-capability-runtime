@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T243 P1：redacted egress preview。
 - T244 P1：dry-run egress preview。
 - T245 P1：internal URL/source/config egress negative tests。
 - T246 P2：manifest data class hint RFC。
@@ -3211,7 +3210,7 @@ pnpm --filter @opencap/runtime test
 
 ### T243 P1：redacted egress preview
 
-- [ ] T243 P1：redacted egress preview
+- [x] T243 P1：redacted egress preview
 
 目标：为 confirmation、dry-run 和 audit 生成脱敏外发预览。
 
@@ -3231,6 +3230,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/egress-preview.ts` 和 `egress-preview.test.ts`，导出 `buildRedactedEgressPreview`。Preview 包含 target origin、fields sent、data classes 和 redacted input；secret-like/source/internal/financial 会硬脱敏，PII 局部遮蔽，大段 free text 会摘要化，不包含未引用字段。
 
 ### T244 P1：dry-run egress preview
 

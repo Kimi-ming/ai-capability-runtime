@@ -21,6 +21,7 @@
 ```ts
 buildFieldLevelEgressMap(manifest, input, classification)
 minimizeInputByEgressMap(input, map)
+buildRedactedEgressPreview(options)
 ```
 
 V1 最小化流程：
@@ -32,6 +33,14 @@ V1 最小化流程：
 5. 不会因为没有 body mapping 就把整个 input 自动作为 body。
 
 当前实现不记录字段值以外的额外副本；测试会确保 unused secret 不进入 minimized result。
+
+Redacted egress preview 已实现：
+
+- 展示 `targetOrigin`。
+- 展示 `fieldsSent`、destination、data classes 和 redacted 状态。
+- `secret_like`、`source_code`、`internal_url`、`financial_data` 使用 `[redacted:...]` 替换。
+- `pii` 使用局部遮蔽。
+- `free_text_unknown` 和超长文本会摘要化，不展示完整原文。
 
 ## Redaction Rules
 
