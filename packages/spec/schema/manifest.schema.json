@@ -96,7 +96,57 @@
             }
           }
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "api_key"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "provider",
+              "env",
+              "placement"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "placement": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "const": "header"
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "placement"
+            ]
+          },
+          "then": {
+            "properties": {
+              "placement": {
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        }
+      ]
     },
     "permissions": {
       "type": "array",

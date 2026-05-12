@@ -120,6 +120,7 @@
 - Runtime policy override/breakglass controls，支持受限 `allow_once`、`allow_until`、`deny_override` 和 `breakglass` record，并把 override 结果写入 policy trace 与 audit event。
 - Runtime Secret Resolver V1 env provider，支持 env-only `api_key`、bearer/header placement、dry-run 不读取 secret、missing env 结构化错误、query/body placement 拒绝和 forbidden header 检查。
 - Runtime credential audit evidence，执行审计事件记录 credential source/env name/placement/resolved/redacted summary，SQLite 可持久化查询且不保存 secret 原文。
+- Manifest schema 约束 `api_key` 必须声明 `provider`、`env` 和 `placement`，`header` placement 必须声明 `name`，并拒绝 query/body secret placement。
 - Policy simulation fixtures，新增 baseline/scoped/broad policy fixture 和 governance scenario fixture，覆盖风险、数据分类、trust/lifecycle/advisory 事实且不包含真实敏感值。
 - Policy 事故响应手册，覆盖撤销 override、激活 deny policy、审查 audit、rollback policy、breakglass 边界和 advisory/revocation 联动。
 - Decision log export，新增脱敏 policy decision summary 导出，支持 capability、decision、since/until 过滤，并关联 invocation id、policy revision 和 trace id。
@@ -140,6 +141,7 @@
 
 - docs 子目录已从英文分类迁移为中文分类，并同步更新全仓文档链接。
 - `github.create_issue` manifest 已包含 JSON body 渲染和 bearer token placement。
+- `github.search_repo` 和 `vercel.get_deployments` manifest 已补齐 bearer token placement。
 
 ### 已知缺口
 

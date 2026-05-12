@@ -35,7 +35,6 @@
 - T127 P2：维护 MCP Host 兼容性矩阵。
 - T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
 - T129 P2：补充 Registry 供应链 review 工作流。
-- T130 P1：实现 `auth.placement` schema 测试和 executor 映射。
 - T131 P1：实现 `execution.body.fields` 渲染测试。
 - T132 P1：实现 audit failure preflight 测试。
 - T133 P1：实现 outbound policy 私网阻断测试。
@@ -139,6 +138,7 @@
 - 已完成：T256 P2：policy bundle manifest/signing RFC。
 - 已完成：T159 P0：实现 Secret Resolver V1 env provider。
 - 已完成：T164 P1：实现 secret resolution ordering 和 audit evidence tests。
+- 已完成：T130 P1：实现 `auth.placement` schema 测试和 executor 映射。
 - 已完成：T149 P0：补齐演进、发布和兼容性体系。
 - 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
 - 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
@@ -2094,6 +2094,42 @@ pnpm --filter @opencap/runtime test
 ```
 
 完成记录：`AuditEvent`、`InMemoryAuditLogger` 和 `SqliteAuditLogger` 已支持 `credentialProvider`、`credentialSource`、`credentialEnvName`、`credentialPlacement`、`credentialResolved` 和 `credentialRedacted`。HTTP executor 会把 `credentialAuditEvidence` 写入执行审计事件；SQLite `invocations` 表会持久化 credential evidence 并在 `recent()` 查询中恢复。新增 1 个 HTTP executor audit evidence 测试，Runtime 测试数从 160 增至 161。
+
+### T130 P1：实现 `auth.placement` schema 测试和 executor 映射
+
+- [x] T130 P1：实现 `auth.placement` schema 测试和 executor 映射
+
+目标：把 V1 `api_key` placement 约束固定在 manifest schema 和 executor/Secret Resolver 映射测试中，避免 secret 被放入 URL query、body 或危险 header。
+
+涉及文件：
+
+- `packages/spec/schema/manifest.schema.json`
+- `packages/spec/src/index.test.ts`
+- `packages/runtime/src/secret-resolver.test.ts`
+- `packages/runtime/src/index.test.ts`
+- `registry/developer-tools/*/manifest.yml`
+- `docs/设计/http-execution-v1.md`
+- `docs/设计/secret-resolver-v1.md`
+
+验收标准：
+
+- `auth.type: api_key` 必须声明 `provider`、`env` 和 `placement`。
+- `auth.placement.type: bearer` 不需要 header name。
+- `auth.placement.type: header` 必须声明 `name`。
+- `auth.placement.type: query/body` 在 schema 层被拒绝。
+- executor/Secret Resolver 映射保持 bearer -> `Authorization` header，header -> 指定安全 header。
+- 注册表内现有 `api_key` manifest 均通过新的 schema。
+
+验证：
+
+```bash
+pnpm --filter @opencap/spec test
+pnpm --filter @opencap/runtime test -- secret-resolver.test.ts index.test.ts
+pnpm validate
+pnpm test
+```
+
+完成记录：Manifest schema 已要求 `api_key` 声明 `provider`、`env` 和 `placement`，并要求 `header` placement 声明 `name`；schema 继续拒绝 query/body placement。`github.search_repo` 和 `vercel.get_deployments` 已补齐 bearer placement。Runtime custom header placement 测试新增 credential audit evidence 断言，确保 named header 映射被审计且不泄露 secret 原文。Spec 测试数从 20 增至 25，Runtime 定向测试保持 80 个通过。
 
 ### T115 P0：体系化项目管理文档
 

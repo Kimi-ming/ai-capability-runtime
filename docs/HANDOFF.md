@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T159 Secret Resolver V1 env provider 已实现，T164 credential audit evidence 已实现，任务模板误报 T000 的问题已修正。当前唯一明确阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T159 Secret Resolver V1 env provider、T164 credential audit evidence、T130 `auth.placement` schema 约束和 executor 映射测试均已实现，任务模板误报 T000 的问题已修正。当前唯一明确阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -18,15 +18,15 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、Secret Resolver V1 env provider、credential audit evidence、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强、MCP Tool Projection builder、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate、egress decision audit fields 和 confirmation egress summary 和 input provenance audit evidence 和 field-level egress map 和 derived input evidence chain 和 input minimization 和 redacted egress preview 和 dry-run egress preview 和 internal URL/source/config egress negative tests 和 Manifest Data Class Hint RFC 和 Organization Data Policy RFC 和 Policy Decision Trace runtime 和 Policy Explain CLI 和 Policy Change Ledger、Policy Validate Lint、Policy Simulation/Diff、Broad Allow Safety Checks 和 Policy Override/Breakglass Controls、Policy Simulation Fixtures 和 Policy Incident Runbook 和 Decision Log Export 和 Policy Governance Conformance Tests
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、Secret Resolver V1 env provider、credential audit evidence、`auth.placement` schema 约束和 executor 映射测试、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强、MCP Tool Projection builder、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate、egress decision audit fields 和 confirmation egress summary 和 input provenance audit evidence 和 field-level egress map 和 derived input evidence chain 和 input minimization 和 redacted egress preview 和 dry-run egress preview 和 internal URL/source/config egress negative tests 和 Manifest Data Class Hint RFC 和 Organization Data Policy RFC 和 Policy Decision Trace runtime 和 Policy Explain CLI 和 Policy Change Ledger、Policy Validate Lint、Policy Simulation/Diff、Broad Allow Safety Checks 和 Policy Override/Breakglass Controls、Policy Simulation Fixtures 和 Policy Incident Runbook 和 Decision Log Export 和 Policy Governance Conformance Tests
 
 ## 当前代码状态
 
 主要包状态：
 
-- `@opencap/spec` 有 schema、类型、manifest loader/validator API、registry test 校验、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate。
+- `@opencap/spec` 有 schema、类型、manifest loader/validator API、registry test 校验、`api_key` auth placement 约束测试、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、Secret Resolver V1 env provider、credential audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、Secret Resolver V1 env provider、credential audit evidence、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
 - `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现；model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate 已实现。
 - `@opencap/sdk` 暂缓实现。
 
@@ -46,9 +46,9 @@ Next task: none，目前 `next_task.py` 显示没有 open task。`check_docs.py`
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T130/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前停止条件：`next_task.py` 返回 `Mode: Blocked`，没有 ready task。
+- 当前停止条件：`next_task.py` 返回 `Mode: Handoff`，没有 ready task。
 
 ## 最近验证
 
@@ -61,9 +61,9 @@ Next task: none，目前 `next_task.py` 显示没有 open task。`check_docs.py`
 - Ruby YAML parser 校验 `.github/**/*.yml` / `.yaml`
 - `git diff --check`
 - `check_docs.py`
-- `next_task.py`（当前返回 `Mode: Blocked`，无 ready task）
+- `next_task.py`（当前返回 `Mode: Handoff`，无 ready task）
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 20 个、runtime 161 个、mcp 18 个、cli smoke 1 个测试。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 25 个、runtime 161 个、mcp 18 个、cli smoke 1 个测试。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
 
 ## 本轮文档和后续收敛
 
@@ -78,10 +78,10 @@ Next task: none，目前 `next_task.py` 显示没有 open task。`check_docs.py`
 
 在 T070 仍阻塞时，建议下一轮从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T130 P1：实现 `auth.placement` schema 测试和 executor 映射。
 - T132 P1：实现 audit failure preflight 测试。
 - T134 P1：按 CLI 契约补齐命令 snapshot tests。
 - T145 P1：定义 package public exports。
+- T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 
 如果要继续 strict `continuous-doc-dev`，下一轮先把其中一个任务展开为带验收标准和验证命令的任务块，再按 TDD 实现。
 
@@ -92,6 +92,10 @@ T159 已完成。新增 `packages/runtime/src/secret-resolver.ts` 和 `secret-re
 ## Credential audit evidence 已实现
 
 T164 已完成。`AuditEvent`、`InMemoryAuditLogger` 和 `SqliteAuditLogger` 已支持 credential provider/source/env name/placement/resolved/redacted summary。HTTP executor 成功执行时会写入 credential evidence；SQLite `invocations` 表新增 credential columns 并在 `recent()` 查询中恢复。审计事件不保存 env var value、Authorization header value 或 provider secret 原文。
+
+## Auth placement schema 和 executor 映射已实现
+
+T130 已完成。`packages/spec/schema/manifest.schema.json` 现在要求 `api_key` 显式声明 `provider`、`env` 和 `placement`，`header` placement 必须声明 `name`，query/body secret placement 在 schema 层被拒绝。`github.search_repo` 和 `vercel.get_deployments` registry manifest 已补齐 bearer placement。Runtime custom header placement 测试会断言 `credentialPlacement: named_header`、env source/name 和 redacted summary，确保 executor 映射可审计且不泄露 secret 原文。
 
 ## Data Egress Policy Gate 已实现
 

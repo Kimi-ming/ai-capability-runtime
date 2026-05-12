@@ -91,6 +91,8 @@ type ResolvedCredential =
 | `query` | 不支持 | 避免 URL、日志、代理泄露 |
 | `body` | 不支持 | 后续必须 ADR |
 
+Manifest schema 会要求 `api_key` 显式声明 `provider`、`env` 和 `placement`；`header` placement 必须声明 `name`。Runtime resolver 仍保留 query/body 和 forbidden header 的防御性拒绝，避免未校验 manifest 或旧版本调用绕过 schema。
+
 Header name 禁止：
 
 - `host`

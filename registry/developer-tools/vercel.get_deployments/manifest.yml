@@ -28,6 +28,8 @@ auth:
   type: api_key
   provider: vercel
   env: VERCEL_TOKEN
+  placement:
+    type: bearer
   scopes:
     - deployments:read
 

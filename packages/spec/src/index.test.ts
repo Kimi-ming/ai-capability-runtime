@@ -121,6 +121,47 @@ describe("validateManifest", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("accepts api_key header placement when a header name is declared", async () => {
+    const manifest = baseManifest();
+    (manifest.auth as Record<string, unknown>).placement = { type: "header", name: "X-API-Key" };
+
+    const result = await validateManifest(manifest, "fixture.yml");
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("requires explicit placement for api_key auth", async () => {
+    const manifest = baseManifest();
+    delete (manifest.auth as Record<string, unknown>).placement;
+
+    await expectInvalidField(manifest, "/auth/placement");
+  });
+
+  it("requires env and provider for api_key auth", async () => {
+    const manifest = baseManifest();
+    delete (manifest.auth as Record<string, unknown>).env;
+    delete (manifest.auth as Record<string, unknown>).provider;
+
+    await expectInvalidField(manifest, "/auth/env");
+    await expectInvalidField(manifest, "/auth/provider");
+  });
+
+  it("requires a safe header name for header placement", async () => {
+    const manifest = baseManifest();
+    manifest.auth.placement = { type: "header" };
+
+    await expectInvalidField(manifest, "/auth/placement/name");
+  });
+
+  it("rejects query and body auth placements", async () => {
+    for (const placement of ["query", "body"]) {
+      const manifest = baseManifest();
+      manifest.auth.placement = { type: placement };
+
+      await expectInvalidField(manifest, "/auth/placement/type");
+    }
+  });
+
   it("requires JSON body fields when execution body is declared", async () => {
     const manifest = baseManifest();
     delete (manifest.execution.body as Record<string, unknown>).fields;

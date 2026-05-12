@@ -173,6 +173,7 @@ resolved_url -> outbound policy -> allow/deny
 - dry-run 输出 target origin、fields sent 和 data classes，并在 Result Envelope `structuredContent.egressPreview` 中提供结构化预览。
 - dry-run 不读取 secret 原值，不发送外部网络请求，审计 evidence 明确 `requestStarted=false`。
 - executor 支持 JSON body、Secret Resolver env provider、`auth.placement: bearer`、`auth.placement: header`、timeout、缺凭据、网络错误和 HTTP 非 2xx 结构化结果。
+- Manifest schema 已要求 `api_key` 显式声明 `provider`、`env` 和 `placement`；`header` placement 必须声明 `name`，query/body secret placement 会在 schema 层被拒绝。
 - HTTP 响应会通过 `normalizeHttpResponse` 归一化为 JSON、text 或 empty，并保留 status code、content type 和 body kind。
 - dry-run 和真实执行都可以写 audit log；真实执行会持久化 `resolvedUrl` evidence。
 

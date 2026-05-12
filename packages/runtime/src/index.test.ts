@@ -423,6 +423,7 @@ describe("HTTP executor", () => {
   });
 
   it("sends api_key auth with custom header placement", async () => {
+    const logger = new InMemoryAuditLogger();
     const requests: Array<{ apiKey?: string }> = [];
     const server = createServer((request, response) => {
       requests.push({ apiKey: request.headers["x-api-key"] as string | undefined });
@@ -444,10 +445,22 @@ describe("HTTP executor", () => {
         execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/search/{{repo}}`, body: undefined },
       };
 
-      const result = await executeHttpCapability(manifest, { repo: "runtime" }, { env: { DEMO_TOKEN: "header-secret" } });
+      const result = await executeHttpCapability(
+        manifest,
+        { repo: "runtime" },
+        { env: { DEMO_TOKEN: "header-secret" }, auditLogger: logger },
+      );
 
       expect(result).toMatchObject({ ok: true, status: "success", output: "ok" });
       expect(requests).toEqual([{ apiKey: "header-secret" }]);
+      expect(logger.events[0]).toMatchObject({
+        credentialSource: "env",
+        credentialEnvName: "DEMO_TOKEN",
+        credentialPlacement: "named_header",
+        credentialResolved: true,
+      });
+      expect(logger.events[0].credentialRedacted).toMatch(/^sha256:[a-f0-9]{12}$/);
+      expect(JSON.stringify(logger.events[0])).not.toContain("header-secret");
     } finally {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     }

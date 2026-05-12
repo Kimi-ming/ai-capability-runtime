@@ -32,6 +32,8 @@ auth:
   type: api_key
   provider: github
   env: GITHUB_TOKEN
+  placement:
+    type: bearer
   scopes:
     - read
 
