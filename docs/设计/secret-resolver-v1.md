@@ -159,6 +159,23 @@ Audit log 不能记录：
 - MCP input 中出现 `token` 字段不会被当作 credential。
 - audit log 只含 env var 名称和 redacted summary。
 
+## 当前实现状态
+
+截至 2026-05-12，V1 env provider 已在 `packages/runtime/src/secret-resolver.ts` 实现，并由 `packages/runtime/src/secret-resolver.test.ts` 覆盖。
+
+当前导出的核心对象：
+
+- `resolveEnvCredential`
+- `credentialAuditEvidence`
+- `SecretMissingError`
+- `SecretUnsupportedAuthError`
+- `SecretUnsupportedPlacementError`
+- `SecretForbiddenHeaderError`
+
+HTTP executor 已通过 Secret Resolver 解析 execute 模式凭据；dry-run 仍不读取 env value。Resolved credential 使用 `applyToHeaders()` 把凭据应用到 executor 内部 header，credential 对象本身不包含可 JSON 序列化的 secret 原文。
+
+执行审计事件会记录 credential evidence：provider、source、env name、placement、resolved 状态和 redacted summary。审计事件不记录 env var value 或 Authorization header value。
+
 ## 后续扩展
 
 - macOS Keychain provider。

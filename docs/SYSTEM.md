@@ -291,8 +291,8 @@ Governance Surface
 | 互操作 Profile | 清晰 | T154 维护 evidence records |
 | 一致性测试 | 清晰 | T153 建立 suite skeleton |
 | Agentic 风险 | 清晰 | T155 转成 abuse-case smoke tests |
-| 身份授权 | 清晰 | T159/T163 按边界实现或 RFC |
-| Secret Resolver | 清晰 | T159 实现 env provider |
+| 身份授权 | 部分实现 | T159 已实现 env provider；T163 仍按 RFC 处理远程 OAuth |
+| Secret Resolver | 已实现 V1 env provider | T164 继续补 resolver ordering 和 audit evidence 集成测试 |
 | 凭据生命周期 | 清晰 | T162/T165 补操作验证和指南 |
 | 最小权限评审 | 清晰 | T161 接入 Registry lint/review |
 | 远程 OAuth 边界 | 清晰 | T163 走 RFC，不进 V1 主路径 |

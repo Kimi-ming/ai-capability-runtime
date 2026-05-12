@@ -62,12 +62,10 @@
 - T156 P2：MCP elicitation profile RFC。
 - T157 P2：A2A Agent Card mapping RFC。
 - T158 P1：Trust Card generation rules。
-- T159 P0：实现 Secret Resolver V1 env provider。
 - T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 - T161 P1：实现 least-privilege auth lint。
 - T162 P2：补充 credential lifecycle smoke/runbook 验证。
 - T163 P2：Remote Runtime OAuth profile RFC。
-- T164 P1：实现 secret resolution ordering 和 audit evidence tests。
 - T165 P2：GitHub fine-grained token setup guide。
 - T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
 - T168 P1：实现 unknown outcome audit tests。
@@ -139,6 +137,8 @@
 - 已完成：T123 P2：npm package 发布预案。
 - 已完成：T101 P0：CI 基础通过。
 - 已完成：T256 P2：policy bundle manifest/signing RFC。
+- 已完成：T159 P0：实现 Secret Resolver V1 env provider。
+- 已完成：T164 P1：实现 secret resolution ordering 和 audit evidence tests。
 - 已完成：T149 P0：补齐演进、发布和兼容性体系。
 - 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
 - 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
@@ -2029,6 +2029,71 @@ git diff --check
 ### Q004 `[?]` Secret Resolver V1 是否只支持 env
 
 当前文档倾向 env-only，但实现前应明确错误提示和扩展接口。
+
+状态：已决议并实现。V1 使用 env-only Secret Resolver，具体实现见 T159；未来 Keychain/Vault/OAuth token store 必须走独立 provider/RFC，不进入当前 V1 主路径。
+
+### T159 P0：实现 Secret Resolver V1 env provider
+
+- [x] T159 P0：实现 Secret Resolver V1 env provider
+
+目标：把 HTTP executor 中的凭据读取从内联 helper 收敛为可测试、可导出的 Secret Resolver V1 env provider。
+
+涉及文件：
+
+- `packages/runtime/src/secret-resolver.ts`
+- `packages/runtime/src/secret-resolver.test.ts`
+- `packages/runtime/src/index.ts`
+- `docs/设计/secret-resolver-v1.md`
+- `docs/TESTING.md`
+
+验收标准：
+
+- `auth.type: none` 返回 no-op credential。
+- `auth.type: api_key` 只从 manifest 声明的 `auth.env` 读取 env var，不接受 input token。
+- execute 模式下 env 缺失或空字符串返回 `SecretMissingError`。
+- dry-run 模式不读取 env value，只返回 unresolved credential metadata。
+- bearer/header placement 可生成 executor 内部 header，但 credential 对象 JSON 不暴露 secret 原文。
+- query/body placement 被 resolver 拒绝。
+- forbidden header name 被 resolver 拒绝。
+- HTTP executor 使用 Secret Resolver，而不是直接读取 manifest auth。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test -- secret-resolver.test.ts
+pnpm --filter @opencap/runtime test
+```
+
+完成记录：新增 `packages/runtime/src/secret-resolver.ts` 和 `secret-resolver.test.ts`，导出 `resolveEnvCredential`、`credentialAuditEvidence`、`SecretMissingError`、`SecretUnsupportedAuthError`、`SecretUnsupportedPlacementError` 和 `SecretForbiddenHeaderError`。HTTP executor 已改为通过 Secret Resolver apply credential headers。新增 7 个 Secret Resolver 测试，Runtime 测试数从 153 增至 160。
+
+### T164 P1：实现 secret resolution ordering 和 audit evidence tests
+
+- [x] T164 P1：实现 secret resolution ordering 和 audit evidence tests
+
+目标：让凭据解析结果进入审计证据，但不泄露 secret 原文，并把 Secret Resolver 的调用边界固定在 executor 内部。
+
+涉及文件：
+
+- `packages/runtime/src/index.ts`
+- `packages/runtime/src/index.test.ts`
+- `docs/设计/audit-log-v1.md`
+- `docs/TESTING.md`
+
+验收标准：
+
+- HTTP 执行成功时，audit event 记录 credential source、env name、placement、resolved 状态和 redacted credential summary。
+- SQLite audit logger 能持久化并查询 credential audit evidence。
+- 审计事件不包含 env var value、Authorization header value 或 provider secret 原文。
+- ask/deny/confirmation_required 路径仍不进入 executor；MCP `tools/call` 的 deny/ask 测试继续覆盖不执行 callback 的边界。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test -- index.test.ts
+pnpm --filter @opencap/runtime test
+```
+
+完成记录：`AuditEvent`、`InMemoryAuditLogger` 和 `SqliteAuditLogger` 已支持 `credentialProvider`、`credentialSource`、`credentialEnvName`、`credentialPlacement`、`credentialResolved` 和 `credentialRedacted`。HTTP executor 会把 `credentialAuditEvidence` 写入执行审计事件；SQLite `invocations` 表会持久化 credential evidence 并在 `recent()` 查询中恢复。新增 1 个 HTTP executor audit evidence 测试，Runtime 测试数从 160 增至 161。
 
 ### T115 P0：体系化项目管理文档
 

@@ -172,11 +172,11 @@ resolved_url -> outbound policy -> allow/deny
 - dry-run 会渲染 method、resolved URL、JSON body、auth mode、风险摘要和 redacted egress preview。
 - dry-run 输出 target origin、fields sent 和 data classes，并在 Result Envelope `structuredContent.egressPreview` 中提供结构化预览。
 - dry-run 不读取 secret 原值，不发送外部网络请求，审计 evidence 明确 `requestStarted=false`。
-- executor 支持 JSON body、`auth.placement: bearer`、`auth.placement: header`、timeout、缺凭据、网络错误和 HTTP 非 2xx 结构化结果。
+- executor 支持 JSON body、Secret Resolver env provider、`auth.placement: bearer`、`auth.placement: header`、timeout、缺凭据、网络错误和 HTTP 非 2xx 结构化结果。
 - HTTP 响应会通过 `normalizeHttpResponse` 归一化为 JSON、text 或 empty，并保留 status code、content type 和 body kind。
 - dry-run 和真实执行都可以写 audit log；真实执行会持久化 `resolvedUrl` evidence。
 
-Secret Resolver、完整 outbound policy 和更细粒度 policy trace 仍在后续任务中实现。
+完整 outbound policy 和更细粒度 policy trace 仍在后续任务中实现。Secret Resolver V1 env provider 已完成，后续 T164 继续补齐 resolver ordering 和 audit evidence 的集成测试。
 
 ## 与任务对应
 
@@ -186,3 +186,4 @@ Secret Resolver、完整 outbound policy 和更细粒度 policy trace 仍在后�
 - T053：HTTP request body manifest 字段。
 - T055：arbitrary URL Capability 风险。
 - T091：outbound policy。
+- T159：Secret Resolver V1 env provider。

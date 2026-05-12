@@ -576,6 +576,40 @@ describe("HTTP executor", () => {
     expect(logger.events[0]).toMatchObject({ status: "blocked", resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues" });
   });
 
+  it("records credential audit evidence without leaking the secret value", async () => {
+    const logger = new InMemoryAuditLogger();
+    const server = createServer((_, response) => {
+      response.writeHead(200, { "content-type": "application/json" });
+      response.end(JSON.stringify({ ok: true }));
+    });
+
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+    try {
+      const address = server.address();
+      if (address === null || typeof address === "string") {
+        throw new Error("expected TCP server address");
+      }
+      const manifest = {
+        ...dryRunManifest(),
+        execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/ok`, body: undefined },
+      };
+
+      await executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" }, auditLogger: logger });
+
+      expect(logger.events[0]).toMatchObject({
+        credentialResolved: true,
+        credentialSource: "env",
+        credentialEnvName: "GITHUB_TOKEN",
+        credentialPlacement: "authorization_header",
+      });
+      expect(logger.events[0].credentialRedacted).toMatch(/^sha256:[a-f0-9]{12}$/);
+      expect(JSON.stringify(logger.events[0])).not.toContain("provider-secret");
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+  });
+
 });
 
 describe("state dir helpers", () => {
@@ -1397,6 +1431,11 @@ describe("SQLite audit logger", () => {
         confirmationStatus: "approved",
         reason: "HTTP execution succeeded.",
         resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+        credentialSource: "env",
+        credentialEnvName: "GITHUB_TOKEN",
+        credentialPlacement: "authorization_header",
+        credentialResolved: true,
+        credentialRedacted: "sha256:abcdef123456",
       });
 
       await expect(logger.recent(10)).resolves.toMatchObject([
@@ -1404,6 +1443,11 @@ describe("SQLite audit logger", () => {
           capabilityId: "github.create_issue",
           status: "executed",
           resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+          credentialSource: "env",
+          credentialEnvName: "GITHUB_TOKEN",
+          credentialPlacement: "authorization_header",
+          credentialResolved: true,
+          credentialRedacted: "sha256:abcdef123456",
         },
       ]);
     } finally {

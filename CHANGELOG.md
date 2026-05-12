@@ -118,6 +118,8 @@
 - Runtime/CLI policy simulation/diff，支持在策略生效前比较 `policyBefore`/`policyAfter` 和场景 fixture，识别 new allow、ask/deny 放宽、敏感数据外发放宽和金融风险放宽，且 report 不包含 input 原文。
 - Runtime broad allow safety checks，policy validator 会标记高风险宽泛 allow，simulation 会对 `secret_like`、`pii`、`source_code` 的 broad egress allow 产生 error finding。
 - Runtime policy override/breakglass controls，支持受限 `allow_once`、`allow_until`、`deny_override` 和 `breakglass` record，并把 override 结果写入 policy trace 与 audit event。
+- Runtime Secret Resolver V1 env provider，支持 env-only `api_key`、bearer/header placement、dry-run 不读取 secret、missing env 结构化错误、query/body placement 拒绝和 forbidden header 检查。
+- Runtime credential audit evidence，执行审计事件记录 credential source/env name/placement/resolved/redacted summary，SQLite 可持久化查询且不保存 secret 原文。
 - Policy simulation fixtures，新增 baseline/scoped/broad policy fixture 和 governance scenario fixture，覆盖风险、数据分类、trust/lifecycle/advisory 事实且不包含真实敏感值。
 - Policy 事故响应手册，覆盖撤销 override、激活 deny policy、审查 audit、rollback policy、breakglass 边界和 advisory/revocation 联动。
 - Decision log export，新增脱敏 policy decision summary 导出，支持 capability、decision、since/until 过滤，并关联 invocation id、policy revision 和 trace id。
@@ -143,5 +145,5 @@
 
 - 完整 `opencap serve --mcp` server 尚未实现；当前已有 MCP tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper。
 - Console UI、Cloud/团队能力、完整 OAuth flow、SDK/adapters 和 Registry signing 尚未实现。
-- Outbound policy 私网阻断、Secret Resolver 调用顺序、audit failure preflight 和更多 conformance negative tests 仍需补齐。
+- Outbound policy 私网阻断、audit failure preflight 和更多 conformance negative tests 仍需补齐。
 - CLI command snapshot、stdout/stderr 和 exit code 细粒度测试仍需补齐。

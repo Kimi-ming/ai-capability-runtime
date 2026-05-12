@@ -10,6 +10,7 @@ export { validatePolicyYml } from "./policy-validator.js";
 export { simulatePolicyDiff } from "./policy-simulation.js";
 export { applyPolicyOverrides, consumePolicyOverride, createPolicyOverrideAuditEvent, validatePolicyOverrideRecord } from "./policy-override.js";
 export { exportDecisionLogRecords } from "./decision-log.js";
+export { credentialAuditEvidence, resolveEnvCredential } from "./secret-resolver.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
@@ -20,6 +21,7 @@ export type { PolicyValidationFinding, PolicyValidationFindingCode, PolicyValida
 export type { PolicySimulationDiffCategory, PolicySimulationFinding, PolicySimulationInput, PolicySimulationReport, PolicySimulationScenario, PolicySimulationSeverity } from "./policy-simulation.js";
 export type { ConsumedPolicyOverrideResult, PolicyOverrideCapabilityStatus, PolicyOverrideContext, PolicyOverrideCreatedBy, PolicyOverrideDataEgressDecision, PolicyOverrideRecordV1, PolicyOverrideResult, PolicyOverrideSafetyGates, PolicyOverrideType, PolicyOverrideValidationCode, PolicyOverrideValidationFinding } from "./policy-override.js";
 export type { DecisionLogRecord } from "./decision-log.js";
+export type { CredentialAuditEvidence, ResolvedCredential, ResolvedCredentialType, SecretCredentialApplyMode, SecretCredentialSource, SecretExecutionTarget, SecretResolveMode, SecretResolveRequest, SecretResolverAuth } from "./secret-resolver.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
@@ -39,6 +41,7 @@ import { minimizeInputByEgressMap as minimizeInputByEgressMapForRuntime } from "
 import { POLICY_TRACE_VERSION, type PolicyDecisionTraceV1 } from "./policy-trace.js";
 import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import type { DataEgressContext, DataEgressDecision, DataEgressDecisionResult } from "./data-egress-policy.js";
+import { SecretMissingError, credentialAuditEvidence, resolveEnvCredential, type CredentialAuditEvidence } from "./secret-resolver.js";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -205,13 +208,6 @@ type HttpExecution = {
   body?: JsonBodyExecution;
 };
 
-type CapabilityAuth = {
-  type: string;
-  placement?: {
-    type?: string;
-  };
-};
-
 export interface HttpDryRunPlan {
   status: "dry_run";
   capabilityId: string;
@@ -289,9 +285,10 @@ export function capabilityRiskWarnings(manifest: CapabilityManifest): string[] {
 }
 
 function authMode(manifest: CapabilityManifest): string {
-  const auth = manifest.auth as CapabilityAuth;
-  const placement = auth.placement?.type;
-  return placement === undefined ? auth.type : `${auth.type}:${placement}`;
+  const auth = manifest.auth as { type?: unknown; placement?: { type?: unknown } };
+  const authType = typeof auth.type === "string" ? auth.type : "unknown";
+  const placement = typeof auth.placement?.type === "string" ? auth.placement.type : undefined;
+  return placement === undefined ? authType : `${authType}:${placement}`;
 }
 
 export async function buildHttpDryRunPlan(
@@ -899,41 +896,12 @@ export interface HttpExecutionOptions extends HttpDryRunOptions {
   fetch?: typeof fetch;
 }
 
-function authEnvName(manifest: CapabilityManifest): string | undefined {
-  const auth = manifest.auth as CapabilityAuth & { env?: unknown };
-  return typeof auth.env === "string" ? auth.env : undefined;
-}
-
-function authHeaders(manifest: CapabilityManifest, env: Record<string, string | undefined>): { headers: Record<string, string>; missingEnv?: string } {
-  const auth = manifest.auth as CapabilityAuth & { env?: unknown; placement?: { type?: string; name?: string } };
-
-  if (auth.type === "none") {
-    return { headers: {} };
-  }
-
-  if (auth.type !== "api_key") {
-    return { headers: {} };
-  }
-
-  const envName = authEnvName(manifest);
-  const secret = envName === undefined ? undefined : env[envName];
-
-  if (envName === undefined || secret === undefined || secret.length === 0) {
-    return { headers: {}, missingEnv: envName ?? "<unknown>" };
-  }
-
-  if (auth.placement?.type === "header" && typeof auth.placement.name === "string") {
-    return { headers: { [auth.placement.name]: secret } };
-  }
-
-  return { headers: { Authorization: `Bearer ${secret}` } };
-}
-
 function executionAuditEvent(
   manifest: CapabilityManifest,
   input: unknown,
   result: HttpExecutionResult,
   channel: ConfirmationChannel,
+  credential?: CredentialAuditEvidence,
 ): AuditEvent {
   return {
     id: randomUUID(),
@@ -947,6 +915,12 @@ function executionAuditEvent(
     inputHash: hashInput(input),
     inputRedactedJson: stableJsonStringify(redactInput(input)),
     resolvedUrl: result.url,
+    credentialProvider: credential?.provider,
+    credentialSource: credential?.source,
+    credentialEnvName: credential?.envName,
+    credentialPlacement: credential?.placement,
+    credentialResolved: credential?.resolved,
+    credentialRedacted: credential?.redacted,
   };
 }
 
@@ -1007,24 +981,43 @@ export async function executeHttpCapability(
 ): Promise<HttpExecutionResult> {
   const plan = await buildHttpDryRunPlan(manifest, input);
   const env = options.env ?? process.env;
-  const auth = authHeaders(manifest, env);
+  const headers: Record<string, string> = {};
+  let credential: CredentialAuditEvidence | undefined;
 
-  if (auth.missingEnv !== undefined) {
+  try {
+    const resolvedCredential = resolveEnvCredential(
+      {
+        capabilityId: manifest.id,
+        auth: manifest.auth,
+        executionTarget: {
+          method: plan.method,
+          urlOrigin: new URL(plan.url).origin,
+          provider: typeof manifest.metadata.provider === "string" ? manifest.metadata.provider : undefined,
+        },
+        mode: "execute",
+      },
+      env,
+    );
+    credential = credentialAuditEvidence(resolvedCredential);
+    resolvedCredential.applyToHeaders(headers);
+  } catch (error) {
+    if (!(error instanceof SecretMissingError)) {
+      throw error;
+    }
     const result: HttpExecutionResult = {
       ok: false,
       capabilityId: manifest.id,
       method: plan.method,
       url: plan.url,
       status: "secret_missing",
-      error: { code: "SECRET_MISSING", message: `Missing required environment credential: ${auth.missingEnv}.` },
+      error: { code: "SECRET_MISSING", message: error.message },
     };
     if (options.auditLogger !== undefined) {
-      await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli"));
+      await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli", credential));
     }
     return result;
   }
 
-  const headers: Record<string, string> = { ...auth.headers };
   const init: RequestInit = { method: plan.method, headers };
   if (plan.body !== undefined) {
     headers["content-type"] = "application/json";
@@ -1088,7 +1081,7 @@ export async function executeHttpCapability(
   }
 
   if (options.auditLogger !== undefined) {
-    await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli"));
+    await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli", credential));
   }
 
   return result;
@@ -1755,6 +1748,12 @@ export interface AuditEvent {
   inputHash?: string;
   inputRedactedJson?: string;
   resolvedUrl?: string;
+  credentialProvider?: string;
+  credentialSource?: string;
+  credentialEnvName?: string;
+  credentialPlacement?: string;
+  credentialResolved?: boolean;
+  credentialRedacted?: string;
   requestStarted?: boolean;
   egressDecision?: DataEgressDecision;
   egressDataClasses?: DataEgressContext["dataClasses"];
@@ -1915,6 +1914,12 @@ interface AuditEventRow {
   input_hash: string | null;
   input_redacted_json: string | null;
   resolved_url: string | null;
+  credential_provider: string | null;
+  credential_source: string | null;
+  credential_env_name: string | null;
+  credential_placement: string | null;
+  credential_resolved: 0 | 1 | null;
+  credential_redacted: string | null;
   request_started: 0 | 1 | null;
   egress_decision: DataEgressDecision | null;
   egress_data_classes_json: string | null;
@@ -1948,6 +1953,12 @@ CREATE TABLE IF NOT EXISTS invocations (
   input_hash TEXT,
   input_redacted_json TEXT,
   resolved_url TEXT,
+  credential_provider TEXT,
+  credential_source TEXT,
+  credential_env_name TEXT,
+  credential_placement TEXT,
+  credential_resolved INTEGER,
+  credential_redacted TEXT,
   request_started INTEGER,
   egress_decision TEXT,
   egress_data_classes_json TEXT,
@@ -1969,6 +1980,12 @@ function ensureAuditSchema(database: DatabaseSync): void {
   }
 
   const additionalColumns: Array<[string, string]> = [
+    ["credential_provider", "TEXT"],
+    ["credential_source", "TEXT"],
+    ["credential_env_name", "TEXT"],
+    ["credential_placement", "TEXT"],
+    ["credential_resolved", "INTEGER"],
+    ["credential_redacted", "TEXT"],
     ["request_started", "INTEGER"],
     ["egress_decision", "TEXT"],
     ["egress_data_classes_json", "TEXT"],
@@ -2073,6 +2090,12 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     inputHash: row.input_hash ?? undefined,
     inputRedactedJson: row.input_redacted_json ?? undefined,
     resolvedUrl: row.resolved_url ?? undefined,
+    credentialProvider: row.credential_provider ?? undefined,
+    credentialSource: row.credential_source ?? undefined,
+    credentialEnvName: row.credential_env_name ?? undefined,
+    credentialPlacement: row.credential_placement ?? undefined,
+    credentialResolved: row.credential_resolved === null ? undefined : row.credential_resolved === 1,
+    credentialRedacted: row.credential_redacted ?? undefined,
     requestStarted: row.request_started === null ? undefined : row.request_started === 1,
     egressDecision: row.egress_decision ?? undefined,
     egressDataClasses: parseEgressDataClasses(row.egress_data_classes_json),
@@ -2101,9 +2124,10 @@ export class SqliteAuditLogger implements AuditLogger {
       .prepare(
         `INSERT INTO invocations (
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
-          input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
+          input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
+          credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
           egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json, policy_trace_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -2118,6 +2142,12 @@ export class SqliteAuditLogger implements AuditLogger {
         event.inputHash ?? null,
         event.inputRedactedJson ?? null,
         event.resolvedUrl ?? null,
+        event.credentialProvider ?? null,
+        event.credentialSource ?? null,
+        event.credentialEnvName ?? null,
+        event.credentialPlacement ?? null,
+        event.credentialResolved === undefined ? null : event.credentialResolved ? 1 : 0,
+        event.credentialRedacted ?? null,
         event.requestStarted === undefined ? null : event.requestStarted ? 1 : 0,
         event.egressDecision ?? null,
         event.egressDataClasses === undefined ? null : stableJsonStringify(event.egressDataClasses),
@@ -2163,7 +2193,8 @@ export class SqliteAuditLogger implements AuditLogger {
     const rows = this.database
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
-                input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
+                input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
+                credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
                 egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json, policy_trace_json
          FROM invocations
          ${whereSql}

@@ -14,6 +14,8 @@
 
 当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录。审计事件可保存 `input_hash`、`input_redacted_json`、`request_started` 和 Data Egress evidence。当前 Node 对该模块仍会打印 ExperimentalWarning。
 
+当前实现也会保存 Secret Resolver 产生的 credential evidence：只记录 provider/source/env name/placement/resolved/redacted summary，不记录 env var value、Authorization header value 或其他 secret 原文。
+
 ## 存储
 
 V1 使用 SQLite：
@@ -49,6 +51,12 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `input_redacted_json` | text | 脱敏输入 |
 | `input_data_classes_json` | text | 输入数据分类摘要 |
 | `input_provenance_json` | text | 输入来源、hash、派生来源和 transformations 的脱敏 evidence |
+| `credential_provider` | text | 凭据 provider，例如 `github` |
+| `credential_source` | text | 凭据来源，V1 为 `env` |
+| `credential_env_name` | text | manifest 声明的 env var 名称 |
+| `credential_placement` | text | `authorization_header` / `named_header` |
+| `credential_resolved` | integer | 凭据是否成功解析，`1` / `0` |
+| `credential_redacted` | text | 凭据脱敏摘要，例如 `sha256:<prefix>` |
 | `egress_decision` | text | allow/ask/deny/redact |
 | `egress_data_classes_json` | text | 本次外发涉及的数据类别数组 |
 | `egress_target_origin` | text | 外发目标 origin |
@@ -97,6 +105,12 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `input_hash` | `redacted_user_data` | SHA-256 hash |
 | `input_redacted_json` | `redacted_user_data` | redacted JSON |
 | `input_provenance_json` | `redacted_user_data` | 不含 input 原文，只含 hash、source、derived id 和 transformations |
+| `credential_provider` | `operational_metadata` | 原值 |
+| `credential_source` | `operational_metadata` | 原值 |
+| `credential_env_name` | `operational_metadata` | env var 名称，不含 value |
+| `credential_placement` | `operational_metadata` | 原值 |
+| `credential_resolved` | `operational_metadata` | 布尔状态 |
+| `credential_redacted` | `redacted_user_data` | hash 摘要，不含 secret 原文 |
 | `output_redacted_json` | `redacted_user_data` | redacted JSON |
 | `error` | `redacted_user_data` | 错误 code 和脱敏 message |
 | `egress_decision` | `operational_metadata` | 原值 |
