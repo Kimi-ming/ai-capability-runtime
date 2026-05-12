@@ -14,7 +14,7 @@ V1 使用三类信号：
 | --- | --- | --- |
 | field name heuristic | input JSON path | `token`, `password`, `email`, `ssn` |
 | value pattern heuristic | 字符串模式 | API key、JWT、email、phone、URL |
-| manifest data hints | manifest schema extension/future | `x-opencap-data-class` |
+| manifest data hints | RFC 0007 草案 | `x-opencap-data-class` |
 
 ## 初始规则
 
@@ -68,6 +68,29 @@ V1 使用三类信号：
 大段自由文本超过阈值且不能分类。
 
 默认：ask for write/external_send/third-party provider。
+
+
+## Manifest Data Class Hint
+
+RFC 0007 定义 `x-opencap-data-class` 作为 input JSON Schema 的可选扩展，用于声明字段可能包含的数据类别。
+
+示例：
+
+```yaml
+body:
+  type: string
+  x-opencap-data-class:
+    - source_code
+    - pii
+```
+
+边界：
+
+- Hint 是透明度信号，不是授权信号。
+- Hint 可以新增 data class，不能删除 classifier finding。
+- Hint 与 classifier 冲突时取并集，并采用更严格 action。
+- Hint 不能把 `secret_like`、`internal_url`、`source_code` 或 `pii` 降级为普通字段。
+- 旧 Runtime 可以忽略该扩展；未来 Runtime 支持后应把 hint 来源写入 classification evidence。
 
 ## 分类结果
 
@@ -127,3 +150,4 @@ type DataClassificationFindingV1 = {
 - T234：classification engine。
 - T235：classification fixtures。
 - T239：audit egress evidence。
+- T246：manifest data class hint RFC，见 `../../rfcs/0007-manifest-data-class-hint-v1.md`。

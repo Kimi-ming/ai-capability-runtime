@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T246 P2：manifest data class hint RFC。
 - T247 P2：organization data policy RFC。
 - T249 P1：实现 policy decision trace。
 - T250 P1：实现 policy explain CLI。
@@ -3285,7 +3284,7 @@ pnpm --filter @opencap/runtime test
 
 ### T246 P2：manifest data class hint RFC
 
-- [ ] T246 P2：manifest data class hint RFC
+- [x] T246 P2：manifest data class hint RFC
 
 目标：定义 manifest input schema 的 `x-opencap-data-class` hint。
 
@@ -3306,6 +3305,8 @@ pnpm --filter @opencap/runtime test
 git diff --check
 ```
 
+完成记录：新增 `rfcs/0007-manifest-data-class-hint-v1.md`，定义 `x-opencap-data-class` 的字段形状、与 classifier finding 的合并规则、review/lint 用法和 JSON Schema extension 兼容策略。同步更新 `docs/安全/data-classification-v1.md`，明确 hint 是透明度信号，不是授权或降级机制。
+
 ### T247 P2：organization data policy RFC
 
 - [ ] T247 P2：organization data policy RFC
@@ -3320,7 +3321,7 @@ git diff --check
 验收标准：
 
 - local-first OSS 仍可独立运行。
-- 组织策略不把 Cloud 变成 V1 主路径依赖。
+- 组织策略不把 Cloud 变成 V1 主路径前置条件。
 - 外部 DLP provider 不默认接收 input 原文。
 
 验证：
