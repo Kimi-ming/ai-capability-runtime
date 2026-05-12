@@ -69,3 +69,24 @@ type PolicyOverrideRecordV1 = {
 - T255：policy override/breakglass controls。
 - T258：policy incident runbook。
 - T260：policy conformance tests。
+
+## V1 实现状态
+
+T255 已实现 Runtime 级 override 控制模块：
+
+- `applyPolicyOverrides(basePolicyResult, records, context)`：在普通 risk policy 结果之后应用受限 override。
+- `consumePolicyOverride(...)`：应用 `allow_once` 后从 record 列表中移除对应 override。
+- `validatePolicyOverrideRecord(record, now)`：校验过期、无效时间、breakglass reason 和 breakglass 最长期限。
+- `createPolicyOverrideAuditEvent(...)`：生成包含 override policy trace 的审计事件。
+
+当前安全边界：
+
+- expired override 不生效，并在 trace facts 中记录 `override_ignored=expired`。
+- breakglass 必须有非空 reason，且 `expiresAt` 必须在当前时间后 15 分钟内。
+- `allow_once`、`allow_until`、`breakglass` 不能覆盖 data egress deny。
+- 不能覆盖 outbound private/network block。
+- 不能覆盖 revoked/malicious capability block。
+- 不能对 `financial` 风险直接放行，仍需要 explicit confirmation。
+- override trace 只保存 override id/type/applied/ignored reason，不保存 policy 原文、input 原文或 secret。
+
+后续接入 invocation 主路径时，应把该模块放在 risk policy 之后、data egress/outbound/revocation 等硬安全门之前或与其结果共同评估，确保 override 只影响普通 risk policy。

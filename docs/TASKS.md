@@ -3520,7 +3520,7 @@ pnpm --filter @opencap/runtime test
 
 ### T255 P1：实现 policy override/breakglass controls
 
-- [ ] T255 P1：实现 policy override/breakglass controls
+- [x] T255 P1：实现 policy override/breakglass controls
 
 目标：支持有限的本地临时 override，同时保证它不能变成无审计后门。
 
@@ -3542,7 +3542,10 @@ pnpm --filter @opencap/runtime test
 
 ```bash
 pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/runtime build
 ```
+
+完成记录：新增 `packages/runtime/src/policy-override.ts` 和 `policy-override.test.ts`，导出 `applyPolicyOverrides`、`consumePolicyOverride`、`validatePolicyOverrideRecord` 和 `createPolicyOverrideAuditEvent`。V1 支持 `allow_once`、`allow_until`、`deny_override`、`breakglass` record；过期 override 被忽略；breakglass 必须有 reason 且 15 分钟内过期；override 结果会写入 `decisionTrace`/`policyTrace` 和 audit event；allow/breakglass 不能覆盖 data egress deny、outbound block、revoked/malicious capability 或 financial explicit confirmation。Runtime 测试数从 138 增至 143。
 
 ### T256 P2：policy bundle manifest/signing RFC
 
