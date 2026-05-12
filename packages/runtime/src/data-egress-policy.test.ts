@@ -218,6 +218,35 @@ describe("data egress policy gate", () => {
     expect(result.evidence.matchedFields).toEqual([{ path: "/message", destination: "body", dataClasses: ["source_code"] }]);
   });
 
+  it("emits a redacted decision trace for data egress deny decisions", () => {
+    const result = evaluateDataEgressPolicy(baseContext({
+      dataClasses: ["secret_like"],
+      redactedPreview: { token: "[redacted:secret_like]" },
+      renderedFields: [{ path: "/token", destination: "body", dataClasses: ["secret_like"] }],
+    }));
+
+    expect(result.decisionTrace).toMatchObject({
+      traceVersion: "opencap.policy_trace.v1",
+      policySetId: "opencap.default_data_egress",
+      gate: "data_egress",
+      decision: "deny",
+      matchedRuleId: "deny-secret-like",
+      defaultDecisionUsed: false,
+      reasonCode: "DATA_EGRESS_SECRET_LIKE_DENIED",
+      secretResolutionAllowed: false,
+      executionAllowed: false,
+    });
+    expect(result.decisionTrace.policyRevision).toMatch(/^sha256:/);
+    expect(result.decisionTrace.evaluatedFacts).toEqual(expect.arrayContaining([
+      "capability_id=github.create_issue",
+      "provider=github",
+      "target_origin=https://api.github.com",
+      "data_classes=secret_like",
+      "rendered_fields=/token:body:secret_like",
+    ]));
+    expect(JSON.stringify(result.decisionTrace)).not.toContain("ghp_");
+  });
+
   it("keeps the default policy immutable for callers", () => {
     const policy = defaultDataEgressPolicy();
     policy.rules.length = 0;

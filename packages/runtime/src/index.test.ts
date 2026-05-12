@@ -26,6 +26,7 @@ import {
   McpNoElicitationConfirmationHandler,
   normalizeHttpResponse,
   PolicyParseError,
+  POLICY_TRACE_VERSION,
   UrlTemplateRenderError,
   renderUrlTemplate,
   SqliteAuditLogger,
@@ -786,6 +787,64 @@ rules:
     });
   });
 
+  it("adds a redacted decision trace for matched risk policy rules", () => {
+    const policy = parsePolicyYml(`default: ask
+rules:
+  - id: deny-destructive
+    match:
+      risk: destructive
+    decision: deny
+    reason: Destructive writes are blocked.
+`);
+
+    const result = evaluatePolicy(policy, {
+      capabilityId: "github.delete_issue",
+      permissions: [{ resource: "github.issue", action: "delete", risk: "destructive" }],
+      channel: "cli",
+      host: "cursor",
+      trustLevel: "tested",
+    });
+
+    expect(result.decisionTrace).toMatchObject({
+      traceVersion: POLICY_TRACE_VERSION,
+      policySetId: "policies.yml",
+      gate: "risk_policy",
+      decision: "deny",
+      matchedRuleId: "deny-destructive",
+      defaultDecisionUsed: false,
+      reasonCode: "RISK_POLICY_RULE_DENY",
+      secretResolutionAllowed: false,
+      executionAllowed: false,
+    });
+    expect(result.decisionTrace.policyRevision).toMatch(/^sha256:/);
+    expect(result.decisionTrace.evaluatedFacts).toEqual(expect.arrayContaining([
+      "capability_id=github.delete_issue",
+      "resource=github.issue",
+      "action=delete",
+      "risk=destructive",
+      "channel=cli",
+      "host=cursor",
+      "trust_level=tested",
+    ]));
+    expect(JSON.stringify(result.decisionTrace)).not.toContain("ghp_");
+  });
+
+  it("makes default risk policy decisions visible in the trace", () => {
+    const result = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+
+    expect(result.decisionTrace).toMatchObject({
+      gate: "risk_policy",
+      decision: "ask",
+      defaultDecisionUsed: true,
+      reasonCode: "RISK_POLICY_DEFAULT_ASK",
+      secretResolutionAllowed: true,
+      executionAllowed: false,
+    });
+  });
+
   it("returns the strictest decision across permissions", () => {
     const policy = parsePolicyYml(`default: allow
 rules:
@@ -1088,6 +1147,14 @@ describe("data egress audit", () => {
       egressTargetOrigin: "https://api.github.com",
       egressMatchedRuleId: "deny-secret-like",
       egressRedactedPreviewJson: '{"token":"[redacted:secret_like]"}',
+      policyTrace: {
+        gate: "data_egress",
+        decision: "deny",
+        matchedRuleId: "deny-secret-like",
+        reasonCode: "DATA_EGRESS_SECRET_LIKE_DENIED",
+        secretResolutionAllowed: false,
+        executionAllowed: false,
+      },
     });
     expect(JSON.stringify(event)).not.toContain("ghp_secret");
   });
@@ -1299,6 +1366,14 @@ describe("SQLite audit logger", () => {
           egressTargetOrigin: "https://api.github.com",
           egressMatchedRuleId: "deny-secret-like",
           egressRedactedPreviewJson: '{"token":"[redacted:secret_like]"}',
+          policyTrace: {
+            gate: "data_egress",
+            decision: "deny",
+            matchedRuleId: "deny-secret-like",
+            reasonCode: "DATA_EGRESS_SECRET_LIKE_DENIED",
+            secretResolutionAllowed: false,
+            executionAllowed: false,
+          },
         },
       ]);
       expect(JSON.stringify(recent)).not.toContain("ghp_secret");

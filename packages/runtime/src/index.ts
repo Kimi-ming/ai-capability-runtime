@@ -4,10 +4,12 @@ export { defaultDataEgressPolicy, evaluateDataEgressPolicy } from "./data-egress
 export { buildFieldLevelEgressMap } from "./egress-map.js";
 export { minimizeInputByEgressMap } from "./input-minimization.js";
 export { buildRedactedEgressPreview } from "./egress-preview.js";
+export { POLICY_TRACE_VERSION } from "./policy-trace.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
 export type { RedactedEgressPreview, RedactedEgressPreviewOptions } from "./egress-preview.js";
+export type { PolicyDecisionTraceDecision, PolicyDecisionTraceGate, PolicyDecisionTraceV1 } from "./policy-trace.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
@@ -24,6 +26,7 @@ import { buildFieldLevelEgressMap as buildFieldLevelEgressMapForRuntime } from "
 import { buildRedactedEgressPreview as buildRedactedEgressPreviewForRuntime, type RedactedEgressPreview } from "./egress-preview.js";
 import { classifyInput as classifyInputForRuntime } from "./input-classifier.js";
 import { minimizeInputByEgressMap as minimizeInputByEgressMapForRuntime } from "./input-minimization.js";
+import { POLICY_TRACE_VERSION, type PolicyDecisionTraceV1 } from "./policy-trace.js";
 import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import type { DataEgressContext, DataEgressDecision, DataEgressDecisionResult } from "./data-egress-policy.js";
 
@@ -1115,6 +1118,8 @@ export interface PolicySet {
   default: PolicyDecision;
   rules: PolicyRule[];
   sourcePath: string;
+  id?: string;
+  revision?: string;
 }
 
 export type PolicyParseErrorCode =
@@ -1292,6 +1297,82 @@ export interface PolicyEvaluationResult {
   matchedRuleIndex?: number;
   sourcePath: string;
   permissionDecisions: PolicyPermissionDecision[];
+  decisionTrace: PolicyDecisionTraceV1;
+}
+
+
+function policySetId(policySet: PolicySet): string {
+  return policySet.id ?? policySet.sourcePath;
+}
+
+function policySetRevision(policySet: PolicySet): string {
+  return policySet.revision ?? `sha256:${createHash("sha256").update(stableJsonStringify({ default: policySet.default, rules: policySet.rules })).digest("hex")}`;
+}
+
+function policyTraceReasonCode(decision: PolicyPermissionDecision | undefined, policySet: PolicySet): string {
+  if (decision === undefined || decision.defaulted) {
+    return `RISK_POLICY_DEFAULT_${policySet.default.toUpperCase()}`;
+  }
+
+  return `RISK_POLICY_RULE_${decision.decision.toUpperCase()}`;
+}
+
+function policyDecisionAllowsSecretResolution(decision: PolicyDecision): boolean {
+  return decision !== "deny";
+}
+
+function policyDecisionAllowsExecution(decision: PolicyDecision): boolean {
+  return decision === "allow";
+}
+
+function riskPolicyEvaluatedFacts(input: PolicyEvaluationInput, decision: PolicyPermissionDecision | undefined): string[] {
+  const facts = [
+    `capability_id=${input.capabilityId}`,
+    `permission_count=${input.permissions.length}`,
+  ];
+
+  if (input.channel !== undefined) {
+    facts.push(`channel=${input.channel}`);
+  }
+
+  if (input.host !== undefined) {
+    facts.push(`host=${input.host}`);
+  }
+
+  if (input.trustLevel !== undefined) {
+    facts.push(`trust_level=${input.trustLevel}`);
+  }
+
+  if (decision !== undefined) {
+    facts.push(`resource=${decision.permission.resource}`);
+    facts.push(`action=${decision.permission.action}`);
+    facts.push(`risk=${decision.permission.risk}`);
+  }
+
+  return facts;
+}
+
+function riskPolicyDecisionTrace(
+  policySet: PolicySet,
+  input: PolicyEvaluationInput,
+  decision: PolicyDecision,
+  reason: string,
+  finalPermissionDecision: PolicyPermissionDecision | undefined,
+): PolicyDecisionTraceV1 {
+  return {
+    traceVersion: POLICY_TRACE_VERSION,
+    policySetId: policySetId(policySet),
+    policyRevision: policySetRevision(policySet),
+    gate: "risk_policy",
+    decision,
+    matchedRuleId: finalPermissionDecision?.matchedRuleId,
+    defaultDecisionUsed: finalPermissionDecision?.defaulted ?? true,
+    evaluatedFacts: riskPolicyEvaluatedFacts(input, finalPermissionDecision),
+    reasonCode: policyTraceReasonCode(finalPermissionDecision, policySet),
+    humanReadableSummary: reason,
+    secretResolutionAllowed: policyDecisionAllowsSecretResolution(decision),
+    executionAllowed: policyDecisionAllowsExecution(decision),
+  };
 }
 
 const POLICY_DECISION_RANK: Record<PolicyDecision, number> = {
@@ -1353,11 +1434,13 @@ export function evaluatePolicy(policySet: PolicySet, input: PolicyEvaluationInpu
   const permissionDecisions = input.permissions.map((permission) => evaluatePermission(policySet, input, permission));
 
   if (permissionDecisions.length === 0) {
+    const reason = `Default policy decision: ${policySet.default}.`;
     return {
       decision: policySet.default,
-      reason: `Default policy decision: ${policySet.default}.`,
+      reason,
       sourcePath: policySet.sourcePath,
       permissionDecisions: [],
+      decisionTrace: riskPolicyDecisionTrace(policySet, input, policySet.default, reason, undefined),
     };
   }
 
@@ -1370,6 +1453,7 @@ export function evaluatePolicy(policySet: PolicySet, input: PolicyEvaluationInpu
     matchedRuleIndex: finalPermissionDecision.matchedRuleIndex,
     sourcePath: policySet.sourcePath,
     permissionDecisions,
+    decisionTrace: riskPolicyDecisionTrace(policySet, input, finalPermissionDecision.decision, finalPermissionDecision.reason, finalPermissionDecision),
   };
 }
 
@@ -1667,6 +1751,7 @@ export interface AuditEvent {
   egressMatchedRuleId?: string;
   egressRedactedPreviewJson?: string;
   inputProvenance?: InputProvenanceEvidence;
+  policyTrace?: PolicyDecisionTraceV1;
 }
 
 export interface AuditLogger {
@@ -1710,6 +1795,7 @@ export function createConfirmationAuditEvent(
     matchedRuleId: request.policy.matchedRuleId,
     inputHash: request.input === undefined ? undefined : hashInput(request.input),
     inputRedactedJson: request.input === undefined ? undefined : stableJsonStringify(redactInput(request.input)),
+    policyTrace: request.policy.decisionTrace,
   };
 }
 
@@ -1777,6 +1863,7 @@ export function createDataEgressAuditEvent(
     egressTargetOrigin: decision.evidence.targetOrigin,
     egressMatchedRuleId: decision.matchedRuleId,
     egressRedactedPreviewJson: stableJsonStringify(decision.evidence.redactedPreview),
+    policyTrace: decision.decisionTrace,
   };
 }
 
@@ -1822,6 +1909,7 @@ interface AuditEventRow {
   egress_matched_rule_id: string | null;
   egress_redacted_preview_json: string | null;
   input_provenance_json: string | null;
+  policy_trace_json: string | null;
 }
 
 const require = createRequire(import.meta.url);
@@ -1853,7 +1941,8 @@ CREATE TABLE IF NOT EXISTS invocations (
   egress_target_origin TEXT,
   egress_matched_rule_id TEXT,
   egress_redacted_preview_json TEXT,
-  input_provenance_json TEXT
+  input_provenance_json TEXT,
+  policy_trace_json TEXT
 ) STRICT;
 `;
 
@@ -1874,6 +1963,7 @@ function ensureAuditSchema(database: DatabaseSync): void {
     ["egress_matched_rule_id", "TEXT"],
     ["egress_redacted_preview_json", "TEXT"],
     ["input_provenance_json", "TEXT"],
+    ["policy_trace_json", "TEXT"],
   ];
 
   for (const [columnName, columnType] of additionalColumns) {
@@ -1925,6 +2015,37 @@ function parseInputProvenance(value: string | null): InputProvenanceEvidence | u
   }
 }
 
+
+function parsePolicyTrace(value: string | null): PolicyDecisionTraceV1 | undefined {
+  if (value === null) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<PolicyDecisionTraceV1>;
+    if (parsed.traceVersion !== POLICY_TRACE_VERSION || typeof parsed.policySetId !== "string" || typeof parsed.policyRevision !== "string") {
+      return undefined;
+    }
+
+    return {
+      traceVersion: POLICY_TRACE_VERSION,
+      policySetId: parsed.policySetId,
+      policyRevision: parsed.policyRevision,
+      gate: parsed.gate as PolicyDecisionTraceV1["gate"],
+      decision: parsed.decision as PolicyDecisionTraceV1["decision"],
+      matchedRuleId: typeof parsed.matchedRuleId === "string" ? parsed.matchedRuleId : undefined,
+      defaultDecisionUsed: parsed.defaultDecisionUsed === true,
+      evaluatedFacts: Array.isArray(parsed.evaluatedFacts) ? parsed.evaluatedFacts.filter((item): item is string => typeof item === "string") : [],
+      reasonCode: typeof parsed.reasonCode === "string" ? parsed.reasonCode : "UNKNOWN",
+      humanReadableSummary: typeof parsed.humanReadableSummary === "string" ? parsed.humanReadableSummary : "Policy trace unavailable.",
+      secretResolutionAllowed: parsed.secretResolutionAllowed === true,
+      executionAllowed: parsed.executionAllowed === true,
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 function auditEventFromRow(row: AuditEventRow): AuditEvent {
   return {
     id: row.id,
@@ -1946,6 +2067,7 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     egressMatchedRuleId: row.egress_matched_rule_id ?? undefined,
     egressRedactedPreviewJson: row.egress_redacted_preview_json ?? undefined,
     inputProvenance: parseInputProvenance(row.input_provenance_json),
+    policyTrace: parsePolicyTrace(row.policy_trace_json),
   };
 }
 
@@ -1967,8 +2089,8 @@ export class SqliteAuditLogger implements AuditLogger {
         `INSERT INTO invocations (
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
           input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
-          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json, policy_trace_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -1990,6 +2112,7 @@ export class SqliteAuditLogger implements AuditLogger {
         event.egressMatchedRuleId ?? null,
         event.egressRedactedPreviewJson ?? null,
         event.inputProvenance === undefined ? null : stableJsonStringify(event.inputProvenance),
+        event.policyTrace === undefined ? null : stableJsonStringify(event.policyTrace),
       );
   }
 
@@ -2018,7 +2141,7 @@ export class SqliteAuditLogger implements AuditLogger {
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
                 input_hash, input_redacted_json, resolved_url, request_started, egress_decision, egress_data_classes_json,
-                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json
+                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json, policy_trace_json
          FROM invocations
          ${whereSql}
          ORDER BY timestamp DESC, id DESC

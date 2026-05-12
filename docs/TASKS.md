@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T249 P1：实现 policy decision trace。
 - T250 P1：实现 policy explain CLI。
 - T251 P1：实现 policy change audit/ledger。
 - T252 P1：实现 policy validate lint。
@@ -3359,7 +3358,7 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 
 ### T249 P1：实现 policy decision trace
 
-- [ ] T249 P1：实现 policy decision trace
+- [x] T249 P1：实现 policy decision trace
 
 目标：每次 risk policy、data egress、quota/budget、outbound、lifecycle gate 的决策都能生成脱敏 trace。
 
@@ -3382,6 +3381,8 @@ ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/policy-trace.ts`，导出 `POLICY_TRACE_VERSION` 和 `PolicyDecisionTraceV1`；risk policy 与 data egress gate 都会生成脱敏 decision trace。`AuditEvent.policyTrace` 已接入内存审计和 SQLite `policy_trace_json`，CLI dry-run/blocked 审计和 data egress audit 会携带 trace。Runtime 测试数从 122 增至 125。
 
 ### T250 P1：实现 policy explain CLI
 

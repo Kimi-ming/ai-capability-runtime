@@ -109,6 +109,7 @@
 - Runtime Data Egress negative tests，覆盖 private IP、metadata service、`.env` secret assignment、stack trace 和 source diff 外发边界。
 - Manifest Data Class Hint RFC，定义 input schema 的 `x-opencap-data-class` 扩展、合并语义、review/lint 边界和兼容策略。
 - Organization Data Policy RFC，定义组织级 data egress policy、provider allowlist、metadata-only DLP profile 和 local-first 边界。
+- Runtime Policy Decision Trace，risk policy 和 data egress gate 现在生成脱敏 trace，并通过审计事件/SQLite `policy_trace_json` 持久化。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。
 - Runtime input provenance audit evidence，记录 input source、input hash、derived invocation、egress decision 和 transformations，SQLite 不保存 input 原文。

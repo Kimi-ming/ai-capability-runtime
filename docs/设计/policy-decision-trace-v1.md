@@ -28,6 +28,8 @@ type PolicyDecisionTraceV1 = {
   evaluatedFacts: string[];
   reasonCode: string;
   humanReadableSummary: string;
+  secretResolutionAllowed: boolean;
+  executionAllowed: boolean;
   override?: PolicyOverrideSummaryV1;
 };
 ```
@@ -74,6 +76,17 @@ type EffectiveDecisionSummaryV1 = {
   executionAllowed: boolean;
 };
 ```
+
+## Runtime 实现状态
+
+截至 2026-05-12，`@opencap/runtime` 已新增 `PolicyDecisionTraceV1` 公共类型和 `POLICY_TRACE_VERSION`：
+
+- `evaluatePolicy()` 会在 `PolicyEvaluationResult.decisionTrace` 中返回 risk policy trace。
+- `evaluateDataEgressPolicy()` 会在 `DataEgressDecisionResult.decisionTrace` 中返回 data egress trace。
+- trace 包含 `policySetId`、`policyRevision`、`gate`、`decision`、`matchedRuleId`、`defaultDecisionUsed`、`evaluatedFacts`、`reasonCode`、`secretResolutionAllowed` 和 `executionAllowed`。
+- `AuditEvent.policyTrace` 已接入内存审计和 SQLite `policy_trace_json` 持久化。
+- CLI 直接写入的 dry-run/blocked 审计事件会携带 risk policy trace；data egress audit 会携带 data egress trace。
+- trace 只记录 capability、risk、resource/action、provider、target origin、data classes 和字段 path/destination 等脱敏事实，不保存 input 原文或 secret value。
 
 ## MCP/CLI 暴露
 

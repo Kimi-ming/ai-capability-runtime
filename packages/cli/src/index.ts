@@ -446,6 +446,7 @@ program
           egressDataClasses: plan.egressPreview?.dataClasses,
           egressTargetOrigin: plan.egressPreview?.targetOrigin,
           egressRedactedPreviewJson: plan.egressPreview === undefined ? undefined : stableJsonStringify(plan.egressPreview),
+          policyTrace: policy.decisionTrace,
         });
         const envelope = resultEnvelopeFromDryRunPlan(plan, {
           evidence: {
@@ -478,6 +479,7 @@ program
           matchedRuleId: policy.matchedRuleId,
           inputHash: hashInput(input),
           inputRedactedJson: stableJsonStringify(redactInput(input)),
+          policyTrace: policy.decisionTrace,
         });
         process.exitCode = 1;
         const envelope = blockedResultEnvelope({

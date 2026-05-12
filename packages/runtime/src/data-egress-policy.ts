@@ -1,4 +1,6 @@
+import { createHash } from "node:crypto";
 import type { InputDataClass } from "./input-classifier.js";
+import { POLICY_TRACE_VERSION, type PolicyDecisionTraceV1 } from "./policy-trace.js";
 
 export type DataEgressDecision = "allow" | "ask" | "deny" | "redact";
 export type DataEgressDestination = "url" | "query" | "header" | "body";
@@ -41,6 +43,8 @@ export interface DataEgressPolicyRule {
 export interface DataEgressPolicySet {
   default: DataEgressDecision;
   rules: DataEgressPolicyRule[];
+  id?: string;
+  revision?: string;
 }
 
 export interface DataEgressDecisionEvidence {
@@ -67,6 +71,7 @@ export interface DataEgressDecisionResult {
   secretResolutionAllowed: boolean;
   executionAllowed: boolean;
   evidence: DataEgressDecisionEvidence;
+  decisionTrace: PolicyDecisionTraceV1;
 }
 
 const DEFAULT_POLICY_RULES: DataEgressPolicyRule[] = [
@@ -109,11 +114,67 @@ const DECISION_RANK: Record<DataEgressDecision, number> = {
 
 export function defaultDataEgressPolicy(): DataEgressPolicySet {
   return {
+    id: "opencap.default_data_egress",
+    revision: dataEgressPolicyRevision({ default: "allow", rules: DEFAULT_POLICY_RULES }),
     default: "allow",
     rules: DEFAULT_POLICY_RULES.map((rule) => ({
       ...rule,
       match: { ...rule.match },
     })),
+  };
+}
+
+
+function stablePolicyJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(stablePolicyJson).join(",")}]`;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    return `{${Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([key, nested]) => `${JSON.stringify(key)}:${stablePolicyJson(nested)}`).join(",")}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function dataEgressPolicyRevision(policy: DataEgressPolicySet): string {
+  return policy.revision ?? `sha256:${createHash("sha256").update(stablePolicyJson({ default: policy.default, rules: policy.rules })).digest("hex")}`;
+}
+
+function dataEgressEvaluatedFacts(context: DataEgressContext): string[] {
+  return [
+    `capability_id=${context.capabilityId}`,
+    `provider=${context.provider}`,
+    `target_origin=${context.targetOrigin}`,
+    `resource=${context.resource}`,
+    `action=${context.action}`,
+    `risk=${context.risk}`,
+    `data_classes=${context.dataClasses.join(",") || "none"}`,
+    `rendered_fields=${context.renderedFields.map((field) => `${field.path}:${field.destination}:${field.dataClasses.join("+") || "none"}`).join("|") || "none"}`,
+  ];
+}
+
+function dataEgressDecisionTrace(
+  context: DataEgressContext,
+  policy: DataEgressPolicySet,
+  decision: DataEgressDecision,
+  reasonCode: string,
+  summary: string,
+  matchedRuleId: string | undefined,
+): PolicyDecisionTraceV1 {
+  return {
+    traceVersion: POLICY_TRACE_VERSION,
+    policySetId: policy.id ?? "opencap.inline_data_egress",
+    policyRevision: dataEgressPolicyRevision(policy),
+    gate: "data_egress",
+    decision,
+    matchedRuleId,
+    defaultDecisionUsed: matchedRuleId === undefined,
+    evaluatedFacts: dataEgressEvaluatedFacts(context),
+    reasonCode,
+    humanReadableSummary: summary,
+    secretResolutionAllowed: decisionAllowsSecretResolution(decision),
+    executionAllowed: decisionAllowsExecution(decision),
   };
 }
 
@@ -247,5 +308,6 @@ export function evaluateDataEgressPolicy(
       })),
       redactedPreview: context.redactedPreview,
     },
+    decisionTrace: dataEgressDecisionTrace(context, policy, finalDecision, finalReasonCode, finalSummary, finalMatchedRuleId),
   };
 }
