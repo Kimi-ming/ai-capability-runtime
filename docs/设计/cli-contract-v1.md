@@ -263,6 +263,46 @@ Exit code：
 - 1：存在 warning/error finding 或文件不可读。
 - 2：内部错误。
 
+## `opencap decision-log export`
+
+目标：导出脱敏 policy trace 和 decision summary，用于本地复盘或组织审查。
+
+```bash
+opencap decision-log export --json
+opencap decision-log export --capability github.create_issue --decision ask --since 2026-05-12T00:00:00.000Z --until 2026-05-12T23:59:59.000Z --json
+```
+
+支持过滤：
+
+- `--capability <id>`
+- `--decision allow|ask|deny`
+- `--since <iso-time>`
+- `--until <iso-time>`
+- `--limit <number>`
+
+导出字段：
+
+- `invocationId`
+- `timestamp`
+- `capabilityId`
+- `status`
+- `policyDecision`
+- `confirmationStatus`
+- `matchedRuleId`
+- `policySetId`
+- `policyRevision`
+- `traceId`
+- `gate`
+- `reasonCode`
+- `decisionSummary`
+- `requestStarted`
+- `egressDecision`
+- `egressDataClasses`
+- `egressTargetOrigin`
+- `inputHash`
+
+导出不得包含 `inputRedactedJson`、`egressRedactedPreviewJson`、input 原文、secret-like value、Authorization/Cookie value 或 provider raw body。
+
 ## `opencap logs`
 
 目标：查看本地审计日志。

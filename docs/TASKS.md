@@ -3624,7 +3624,7 @@ git diff --check
 
 ### T259 P2：decision log export
 
-- [ ] T259 P2：decision log export
+- [x] T259 P2：decision log export
 
 目标：允许用户导出脱敏 policy trace 和 decision summary，用于本地复盘或组织审查。
 
@@ -3645,6 +3645,8 @@ git diff --check
 pnpm --filter @opencap/cli test
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/decision-log.ts` 和 `decision-log.test.ts`，导出 `exportDecisionLogRecords`，只输出 invocation id、capability、decision/status、policy revision、trace id、reason code、egress 元数据和 input hash，不输出 `inputRedactedJson` 或 egress preview 原文。`SqliteAuditLogger.recent()` 新增 `policyDecision` 和 `until` 过滤；CLI 新增 `opencap decision-log export`，支持 `--capability`、`--decision`、`--since`、`--until`、`--limit`、`--json`。Runtime 测试数从 145 增至 147，CLI smoke 已覆盖导出命令。
 
 ### T260 P1：policy governance conformance tests
 

@@ -9,6 +9,7 @@ export { FilePolicyLedger } from "./policy-ledger.js";
 export { validatePolicyYml } from "./policy-validator.js";
 export { simulatePolicyDiff } from "./policy-simulation.js";
 export { applyPolicyOverrides, consumePolicyOverride, createPolicyOverrideAuditEvent, validatePolicyOverrideRecord } from "./policy-override.js";
+export { exportDecisionLogRecords } from "./decision-log.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
@@ -18,6 +19,7 @@ export type { ActivatePolicyRevisionInput, FailedPolicyActivationInput, FilePoli
 export type { PolicyValidationFinding, PolicyValidationFindingCode, PolicyValidationOptions, PolicyValidationResult, PolicyValidationSeverity } from "./policy-validator.js";
 export type { PolicySimulationDiffCategory, PolicySimulationFinding, PolicySimulationInput, PolicySimulationReport, PolicySimulationScenario, PolicySimulationSeverity } from "./policy-simulation.js";
 export type { ConsumedPolicyOverrideResult, PolicyOverrideCapabilityStatus, PolicyOverrideContext, PolicyOverrideCreatedBy, PolicyOverrideDataEgressDecision, PolicyOverrideRecordV1, PolicyOverrideResult, PolicyOverrideSafetyGates, PolicyOverrideType, PolicyOverrideValidationCode, PolicyOverrideValidationFinding } from "./policy-override.js";
+export type { DecisionLogRecord } from "./decision-log.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
@@ -1895,7 +1897,9 @@ export interface SqliteAuditLoggerOptions extends ResolveStateDirOptions {
 export interface AuditLogQuery {
   capabilityId?: string;
   status?: AuditInvocationStatus;
+  policyDecision?: PolicyDecision;
   since?: string;
+  until?: string;
 }
 
 interface AuditEventRow {
@@ -2139,9 +2143,19 @@ export class SqliteAuditLogger implements AuditLogger {
       params.push(query.status);
     }
 
+    if (query.policyDecision !== undefined) {
+      where.push("policy_decision = ?");
+      params.push(query.policyDecision);
+    }
+
     if (query.since !== undefined) {
       where.push("timestamp >= ?");
       params.push(query.since);
+    }
+
+    if (query.until !== undefined) {
+      where.push("timestamp <= ?");
+      params.push(query.until);
     }
 
     params.push(limit);

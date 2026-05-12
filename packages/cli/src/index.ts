@@ -16,6 +16,7 @@ import {
   buildHttpDryRunPlan,
   evaluatePolicy,
   executeHttpCapability,
+  exportDecisionLogRecords,
   getLocalStatePaths,
   hashInput,
   installCapability,
@@ -29,6 +30,7 @@ import {
   stableJsonStringify,
   simulatePolicyDiff,
   validatePolicyYml,
+  type PolicyDecision,
   type PolicySimulationScenario,
   type ResultEnvelopeV1,
 } from "@opencap/runtime";
@@ -110,6 +112,42 @@ function parseLimit(value: string | undefined, fallback: number): number {
 }
 
 const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "denied", "executed", "dry_run"]);
+
+const POLICY_DECISION_VALUES = new Set<PolicyDecision>(["allow", "ask", "deny"]);
+
+function parsePolicyDecision(value: string | undefined): PolicyDecision | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!POLICY_DECISION_VALUES.has(value as PolicyDecision)) {
+    throw new Error(`Invalid --decision value: ${value}`);
+  }
+
+  return value as PolicyDecision;
+}
+
+function formatDecisionLogLine(record: {
+  timestamp: string;
+  invocationId: string;
+  capabilityId: string;
+  policyDecision: string;
+  status: string;
+  policyRevision?: string;
+  traceId?: string;
+  reasonCode?: string;
+}): string {
+  return [
+    record.timestamp,
+    record.invocationId,
+    record.capabilityId,
+    record.policyDecision,
+    record.status,
+    record.policyRevision ?? "-",
+    record.traceId ?? "-",
+    record.reasonCode ?? "-",
+  ].join(" ");
+}
 
 function parseAuditStatus(value: string | undefined): AuditInvocationStatus | undefined {
   if (value === undefined) {
@@ -699,6 +737,52 @@ program
       logger.close();
     }
   }, "Failed to read invocation logs"));
+
+const decisionLogCommand = program
+  .command("decision-log")
+  .description("Export redacted policy decision logs.");
+
+decisionLogCommand
+  .command("export")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .option("--limit <number>", "Number of recent decision records to export", "100")
+  .option("--capability <id>", "Filter by Capability id")
+  .option("--decision <decision>", "Filter by policy decision: allow, ask, deny")
+  .option("--since <iso-time>", "Filter records at or after an ISO timestamp")
+  .option("--until <iso-time>", "Filter records at or before an ISO timestamp")
+  .description("Export redacted policy trace and decision summaries.")
+  .action((options: { stateDir?: string; json?: boolean; limit?: string; capability?: string; decision?: string; since?: string; until?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+
+    try {
+      const events = await logger.recent(parseLimit(options.limit, 100), {
+        capabilityId: options.capability,
+        policyDecision: parsePolicyDecision(options.decision),
+        since: parseSince(options.since),
+        until: parseSince(options.until),
+      });
+      const records = exportDecisionLogRecords(events);
+
+      if (options.json) {
+        console.log(JSON.stringify(records, null, 2));
+        return;
+      }
+
+      if (records.length === 0) {
+        console.log("No decision log records found.");
+        return;
+      }
+
+      console.log("timestamp invocation_id capability_id decision status policy_revision trace_id reason_code");
+      for (const record of records) {
+        console.log(formatDecisionLogLine(record));
+      }
+    } finally {
+      logger.close();
+    }
+  }, "Failed to export decision logs"));
 
 const argv = process.argv[2] === "--" ? [process.argv[0], process.argv[1], ...process.argv.slice(3)] : process.argv;
 

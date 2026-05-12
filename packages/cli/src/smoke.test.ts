@@ -215,6 +215,33 @@ rules:
       expect(JSON.parse(logs.stdout)).toEqual(expect.arrayContaining([
         expect.objectContaining({ capabilityId: "github.create_issue", status: "dry_run" }),
       ]));
+
+      const decisionExport = await runOpenCapSmokeStage("decision log export", [
+        "decision-log",
+        "export",
+        "--state-dir",
+        stateDir,
+        "--capability",
+        "github.create_issue",
+        "--decision",
+        "ask",
+        "--since",
+        "1970-01-01T00:00:00.000Z",
+        "--until",
+        "2999-01-01T00:00:00.000Z",
+        "--json",
+      ]);
+      const decisionRecords = JSON.parse(decisionExport.stdout);
+      expect(decisionRecords).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          capabilityId: "github.create_issue",
+          policyDecision: "ask",
+          policyRevision: expect.stringMatching(/^sha256:/),
+          traceId: expect.stringMatching(/^sha256:/),
+        }),
+      ]));
+      expect(decisionExport.stdout).not.toContain("input-secret");
+      expect(decisionExport.stdout).not.toContain("broken");
     } finally {
       await rm(stateDir, { recursive: true, force: true });
     }
