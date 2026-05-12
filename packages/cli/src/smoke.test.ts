@@ -75,6 +75,47 @@ rules:
       expect(invalidPolicy.stdout).toContain("/rules/0/match/risk");
       expect(invalidPolicy.stdout).toContain("rule=duplicate");
 
+      const policyBeforePath = join(stateDir, "policy-before.yml");
+      const policyAfterPath = join(stateDir, "policy-after.yml");
+      const policyScenariosPath = join(stateDir, "policy-scenarios.yml");
+      await writeFile(policyBeforePath, "default: ask\nrules: []\n", "utf8");
+      await writeFile(policyAfterPath, `default: ask
+rules:
+  - id: allow-slack
+    match:
+      risk: external_send
+    decision: allow
+`, "utf8");
+      await writeFile(policyScenariosPath, `scenarios:
+  - id: slack.send_message.pii
+    capabilityId: slack.send_message
+    resource: slack.message
+    action: send
+    risk: external_send
+    dataClasses:
+      - pii
+    targetOrigin: https://slack.com
+    inputPreview: customer alice@example.com
+`, "utf8");
+      const policySimulation = await runOpenCapSmokeStage("policy simulate", [
+        "policy",
+        "simulate",
+        "--before",
+        policyBeforePath,
+        "--after",
+        policyAfterPath,
+        "--scenarios",
+        policyScenariosPath,
+        "--json",
+      ], {}, { allowFailure: true });
+      expect(policySimulation.exitCode).toBe(1);
+      const policySimulationReport = JSON.parse(policySimulation.stdout);
+      expect(policySimulationReport.findings).toEqual(expect.arrayContaining([
+        expect.objectContaining({ category: "ask_to_allow", scenarioId: "slack.send_message.pii" }),
+        expect.objectContaining({ category: "data_egress_relaxed", scenarioId: "slack.send_message.pii" }),
+      ]));
+      expect(policySimulation.stdout).not.toContain("alice@example.com");
+
       await runOpenCapSmokeStage("install", ["install", "github.create_issue", "--state-dir", stateDir]);
 
       const list = await runOpenCapSmokeStage("list", ["list", "--state-dir", stateDir, "--json"]);

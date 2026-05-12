@@ -7,6 +7,7 @@ export { buildRedactedEgressPreview } from "./egress-preview.js";
 export { POLICY_TRACE_VERSION } from "./policy-trace.js";
 export { FilePolicyLedger } from "./policy-ledger.js";
 export { validatePolicyYml } from "./policy-validator.js";
+export { simulatePolicyDiff } from "./policy-simulation.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
@@ -14,6 +15,7 @@ export type { RedactedEgressPreview, RedactedEgressPreviewOptions } from "./egre
 export type { PolicyDecisionTraceDecision, PolicyDecisionTraceGate, PolicyDecisionTraceV1 } from "./policy-trace.js";
 export type { ActivatePolicyRevisionInput, FailedPolicyActivationInput, FilePolicyLedgerOptions, PolicyActiveRevisionV1, PolicyChangedBy, PolicyChangeKind, PolicyChangeRecordV1 } from "./policy-ledger.js";
 export type { PolicyValidationFinding, PolicyValidationFindingCode, PolicyValidationOptions, PolicyValidationResult, PolicyValidationSeverity } from "./policy-validator.js";
+export type { PolicySimulationDiffCategory, PolicySimulationFinding, PolicySimulationInput, PolicySimulationReport, PolicySimulationScenario, PolicySimulationSeverity } from "./policy-simulation.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";

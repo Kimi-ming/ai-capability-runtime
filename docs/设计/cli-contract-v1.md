@@ -222,6 +222,47 @@ Exit code：
 - 1：存在 error 或文件不可读。
 - 2：内部错误。
 
+## `opencap policy simulate`
+
+目标：在 policy 生效前，根据本地 scenario fixture 预览策略变化会放开或收紧哪些调用。
+
+```bash
+opencap policy simulate --before old-policies.yml --after new-policies.yml --scenarios policy-scenarios.yml
+opencap policy simulate --after new-policies.yml --scenarios policy-scenarios.yml --json
+```
+
+行为：
+
+- `--after` 和 `--scenarios` 必填。
+- `--before` 可选；缺省时使用默认 ask policy。
+- scenarios 文件可以是数组，也可以是 `{ scenarios: [...] }`。
+- 输出 `new_allow`、`new_deny`、`ask_to_allow`、`deny_to_ask`、`data_egress_relaxed` 和 `financial_relaxed` finding。
+- 输出不得包含 scenario 中的 `inputPreview` 或任何 input 原文。
+
+JSON 输出示例：
+
+```json
+{
+  "ok": false,
+  "findings": [
+    {
+      "category": "ask_to_allow",
+      "severity": "warning",
+      "scenarioId": "slack.send_message.pii",
+      "capabilityId": "slack.send_message",
+      "beforeDecision": "ask",
+      "afterDecision": "allow"
+    }
+  ]
+}
+```
+
+Exit code：
+
+- 0：没有 warning/error finding。
+- 1：存在 warning/error finding 或文件不可读。
+- 2：内部错误。
+
 ## `opencap logs`
 
 目标：查看本地审计日志。

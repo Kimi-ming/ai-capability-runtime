@@ -3466,7 +3466,7 @@ pnpm --filter @opencap/cli test
 
 ### T253 P1：实现 policy simulation/diff
 
-- [ ] T253 P1：实现 policy simulation/diff
+- [x] T253 P1：实现 policy simulation/diff
 
 目标：策略变更生效前，能看到哪些场景从 ask/deny 变成 allow，哪些能力被收紧。
 
@@ -3487,7 +3487,10 @@ pnpm --filter @opencap/cli test
 
 ```bash
 pnpm --filter @opencap/runtime test
+pnpm --filter @opencap/cli test
 ```
+
+完成记录：新增 `packages/runtime/src/policy-simulation.ts` 和 `policy-simulation.test.ts`，导出 `simulatePolicyDiff` 及 report/finding/scenario 类型。CLI 新增 `opencap policy simulate --before <path> --after <path> --scenarios <path> [--json]`，支持策略变更前生成差异报告，检测 `new_allow`、`ask_to_allow`、`deny_to_ask`、`data_egress_relaxed` 和 `financial_relaxed`，并保证 report 不包含 input 原文。Runtime 测试数从 132 增至 135，CLI smoke 已覆盖 policy simulate。
 
 ### T254 P1：实现 broad allow safety checks
 

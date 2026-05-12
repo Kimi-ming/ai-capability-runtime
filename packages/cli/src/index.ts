@@ -27,7 +27,9 @@ import {
   resultEnvelopeFromDryRunPlan,
   resultEnvelopeFromHttpExecutionResult,
   stableJsonStringify,
+  simulatePolicyDiff,
   validatePolicyYml,
+  type PolicySimulationScenario,
   type ResultEnvelopeV1,
 } from "@opencap/runtime";
 
@@ -243,6 +245,46 @@ function printEgressPreview(preview: Record<string, unknown>): void {
 }
 
 
+function parsePolicyScenariosDocument(raw: string): PolicySimulationScenario[] {
+  const parsed = YAML.parse(raw) as unknown;
+  const scenarios = Array.isArray(parsed) ? parsed : isRecord(parsed) ? parsed.scenarios : undefined;
+
+  if (!Array.isArray(scenarios)) {
+    throw new Error("Policy simulation scenarios file must contain a scenarios array.");
+  }
+
+  return scenarios.map((scenario, index) => {
+    if (!isRecord(scenario)) {
+      throw new Error(`Policy simulation scenario at index ${index} must be an object.`);
+    }
+
+    return {
+      id: String(scenario.id ?? `scenario-${index}`),
+      capabilityId: String(scenario.capabilityId ?? scenario.capability_id ?? ""),
+      resource: String(scenario.resource ?? ""),
+      action: String(scenario.action ?? ""),
+      risk: scenario.risk as PolicySimulationScenario["risk"],
+      dataClasses: Array.isArray(scenario.dataClasses) ? scenario.dataClasses as PolicySimulationScenario["dataClasses"] : Array.isArray(scenario.data_classes) ? scenario.data_classes as PolicySimulationScenario["dataClasses"] : [],
+      targetOrigin: typeof scenario.targetOrigin === "string" ? scenario.targetOrigin : typeof scenario.target_origin === "string" ? scenario.target_origin : undefined,
+      expectedDecision: scenario.expectedDecision as PolicySimulationScenario["expectedDecision"],
+    };
+  });
+}
+
+function formatPolicySimulationFinding(finding: {
+  severity: string;
+  category: string;
+  scenarioId: string;
+  capabilityId: string;
+  beforeDecision: string;
+  afterDecision: string;
+  risk: string;
+  targetOrigin?: string;
+}): string {
+  const target = finding.targetOrigin === undefined ? "" : ` target=${finding.targetOrigin}`;
+  return `${finding.severity} ${finding.category} scenario=${finding.scenarioId} capability=${finding.capabilityId} ${finding.beforeDecision}->${finding.afterDecision} risk=${finding.risk}${target}`;
+}
+
 function printPolicyExplain(trace: ResultEnvelopeV1["evidence"]["policyTrace"]): void {
   if (trace === undefined) {
     return;
@@ -432,6 +474,38 @@ policyCommand
       process.exitCode = 1;
     }
   }, `Failed to validate policy ${path}`));
+
+policyCommand
+  .command("simulate")
+  .option("--before <path>", "Policy YAML before the change")
+  .requiredOption("--after <path>", "Policy YAML after the change")
+  .requiredOption("--scenarios <path>", "Policy simulation scenarios YAML file")
+  .option("--json", "Output JSON")
+  .description("Simulate policy changes before activation and report decision diff findings.")
+  .action((options: { before?: string; after: string; scenarios: string; json?: boolean }) => runCliAction(async () => {
+    const beforePath = options.before === undefined ? undefined : resolveCliPath(options.before);
+    const afterPath = resolveCliPath(options.after);
+    const scenariosPath = resolveCliPath(options.scenarios);
+    const report = simulatePolicyDiff({
+      policyBefore: beforePath === undefined ? undefined : await readFile(beforePath, "utf8"),
+      policyAfter: await readFile(afterPath, "utf8"),
+      scenarios: parsePolicyScenariosDocument(await readFile(scenariosPath, "utf8")),
+    });
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+    } else if (report.findings.length === 0) {
+      console.log("Policy simulation diff: no changes.");
+    } else {
+      for (const finding of report.findings) {
+        console.log(formatPolicySimulationFinding(finding));
+      }
+    }
+
+    if (!report.ok) {
+      process.exitCode = 1;
+    }
+  }, "Failed to simulate policy diff"));
 
 program
   .command("doctor")

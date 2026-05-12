@@ -88,3 +88,40 @@ rules:
 - T253：policy simulation/diff。
 - T254：broad allow safety checks。
 - T260：policy conformance tests。
+
+## V1 实现状态
+
+T253 已实现最小可运行闭环：
+
+- Runtime 导出 `simulatePolicyDiff(input)`。
+- 输入支持 `policyBefore`、`policyAfter` 和 `scenarios`；`policyBefore` 缺省时使用默认 ask。
+- Scenario 使用 `capabilityId`、`resource`、`action`、`risk`、`dataClasses` 和 `targetOrigin` 计算前后策略决策。
+- Report finding 只包含 scenario id、capability id、risk、前后 decision、data class 和 target origin，不携带 `inputPreview` 或 input 原文。
+- CLI 提供 `opencap policy simulate --before <path> --after <path> --scenarios <path> [--json]`。
+
+当前差异类别：
+
+| Category | V1 状态 | 说明 |
+| --- | --- | --- |
+| `new_allow` | 已实现 | `deny -> allow`。`destructive`/`financial` 为 error，其余为 warning。 |
+| `new_deny` | 已实现 | `allow/ask -> deny`，默认为 info。 |
+| `ask_to_allow` | 已实现 | 人类确认被移除，默认为 warning；高危风险为 error。 |
+| `deny_to_ask` | 已实现 | 阻断变成人类确认，默认为 warning。 |
+| `data_egress_relaxed` | 已实现 | 敏感 data class 从非 allow 变成 allow 时为 error。 |
+| `financial_relaxed` | 已实现 | 金融风险从非 allow 变成 allow 时为 error。 |
+
+场景文件示例：
+
+```yaml
+scenarios:
+  - id: slack.send_message.pii
+    capabilityId: slack.send_message
+    resource: slack.message
+    action: send
+    risk: external_send
+    dataClasses:
+      - pii
+    targetOrigin: https://slack.com
+```
+
+后续 T254 会继续把 broad allow 的静态安全检查接入 validator/simulation，使高风险宽泛 allow 在 activation 前成为可阻断 finding。
