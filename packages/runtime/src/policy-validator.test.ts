@@ -41,7 +41,7 @@ rules:
       risk: read_only
     decision: allow
   - match:
-      risk: destructive
+      risk: code_execution
     decision: allow
 `, { sourcePath: "opencap.local/policies.yml" });
 
@@ -95,4 +95,52 @@ rules:
       }),
     ]));
   });
+  it("flags broad allow rules that remove high-risk boundaries", () => {
+    const result = validatePolicyYml(`default: ask
+rules:
+  - id: allow-all-write
+    match:
+      risk: write
+    decision: allow
+  - id: allow-all-send
+    match:
+      risk: external_send
+    decision: allow
+`, { sourcePath: "opencap.local/policies.yml" });
+
+    expect(result.ok).toBe(false);
+    expect(result.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        severity: "warning",
+        code: "POLICY_BROAD_ALLOW_HIGH_RISK",
+        fieldPath: "/rules/0",
+        ruleId: "allow-all-write",
+      }),
+      expect.objectContaining({
+        severity: "error",
+        code: "POLICY_BROAD_ALLOW_REQUIRES_BOUNDARY",
+        fieldPath: "/rules/1",
+        ruleId: "allow-all-send",
+      }),
+    ]));
+  });
+
+  it("does not flag scoped external send allow rules as broad allow", () => {
+    const result = validatePolicyYml(`default: ask
+rules:
+  - id: allow-specific-slack-send
+    match:
+      capability_id: slack.send_message
+      resource: slack.message
+      action: send
+      risk: external_send
+    decision: allow
+`, { sourcePath: "opencap.local/policies.yml" });
+
+    expect(result.ok).toBe(true);
+    expect(result.findings).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "POLICY_BROAD_ALLOW_REQUIRES_BOUNDARY" }),
+    ]));
+  });
+
 });

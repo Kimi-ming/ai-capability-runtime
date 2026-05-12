@@ -109,6 +109,7 @@ T253 已实现最小可运行闭环：
 | `deny_to_ask` | 已实现 | 阻断变成人类确认，默认为 warning。 |
 | `data_egress_relaxed` | 已实现 | 敏感 data class 从非 allow 变成 allow 时为 error。 |
 | `financial_relaxed` | 已实现 | 金融风险从非 allow 变成 allow 时为 error。 |
+| `broad_data_egress_allow` | 已实现 | `secret_like`、`pii`、`source_code` 通过 broad allow 外发时为 error。 |
 
 场景文件示例：
 
@@ -125,3 +126,13 @@ scenarios:
 ```
 
 后续 T254 会继续把 broad allow 的静态安全检查接入 validator/simulation，使高风险宽泛 allow 在 activation 前成为可阻断 finding。
+
+## Broad Allow 实现边界
+
+T254 后，policy simulation 会结合 scenario 判断 `allow` 是否来自宽泛规则：
+
+- 默认 `allow` 视为 broad allow。
+- 命中的 allow rule 缺少 `capability_id`、`resource` 或 `action` 时视为 broad allow。
+- `secret_like`、`pii`、`source_code` 通过 broad allow 外发会产生 `broad_data_egress_allow` error。
+
+该 finding 不包含 input 原文，只记录 scenario id、capability id、risk、data classes、target origin 和前后 decision，可作为后续 policy activation gate 的输入。

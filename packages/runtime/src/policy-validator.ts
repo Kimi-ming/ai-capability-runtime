@@ -23,7 +23,9 @@ export type PolicyValidationFindingCode =
   | "POLICY_DECISION_INVALID"
   | "POLICY_RISK_INVALID"
   | "POLICY_RULE_ID_DUPLICATE"
-  | "POLICY_HIGH_RISK_ALLOW_UNNAMED";
+  | "POLICY_HIGH_RISK_ALLOW_UNNAMED"
+  | "POLICY_BROAD_ALLOW_HIGH_RISK"
+  | "POLICY_BROAD_ALLOW_REQUIRES_BOUNDARY";
 
 export interface PolicyValidationFinding {
   severity: PolicyValidationSeverity;
@@ -49,6 +51,7 @@ const MATCH_KEYS = new Set(["capability_id", "risk", "resource", "action", "chan
 const DECISIONS = new Set<string>(POLICY_DECISIONS);
 const RISKS = new Set<string>(POLICY_RISKS);
 const HIGH_RISK_ALLOW = new Set<PolicyRisk>(["write", "external_send", "destructive", "financial", "code_execution", "secret_access"]);
+const STRICT_BOUNDARY_ALLOW = new Set<PolicyRisk>(["external_send", "destructive", "financial"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -77,6 +80,50 @@ function addUnknownFields(findings: PolicyValidationFinding[], record: Record<st
       message: `Unknown policy field: ${key}.`,
       filePath,
       fieldPath: `${fieldPath}/${key}`,
+      ruleId,
+    }));
+  }
+}
+
+function hasStringField(record: Record<string, unknown>, key: string): boolean {
+  return typeof record[key] === "string" && record[key].trim().length > 0;
+}
+
+function addBroadAllowFindings(
+  findings: PolicyValidationFinding[],
+  rule: Record<string, unknown>,
+  match: Record<string, unknown>,
+  risk: PolicyRisk,
+  filePath: string,
+  fieldPath: string,
+  ruleId?: string,
+): void {
+  if (rule.decision !== "allow") {
+    return;
+  }
+
+  const hasCapability = hasStringField(match, "capability_id");
+  const hasResource = hasStringField(match, "resource");
+  const hasAction = hasStringField(match, "action");
+
+  if (risk === "write" && !hasCapability && !hasResource) {
+    findings.push(finding({
+      severity: "warning",
+      code: "POLICY_BROAD_ALLOW_HIGH_RISK",
+      message: "Broad allow for write risk should be scoped by capability_id or resource before activation.",
+      filePath,
+      fieldPath,
+      ruleId,
+    }));
+  }
+
+  if (STRICT_BOUNDARY_ALLOW.has(risk) && (!hasCapability || !hasResource || !hasAction)) {
+    findings.push(finding({
+      severity: "error",
+      code: "POLICY_BROAD_ALLOW_REQUIRES_BOUNDARY",
+      message: `Allow rule for ${risk} must be scoped by capability_id, resource, and action.`,
+      filePath,
+      fieldPath,
       ruleId,
     }));
   }
@@ -149,7 +196,9 @@ function validateRule(findings: PolicyValidationFinding[], rule: unknown, index:
   }
 
   let risk: PolicyRisk | undefined;
+  let match: Record<string, unknown> | undefined;
   if (isRecord(rule.match)) {
+    match = rule.match;
     addUnknownFields(findings, rule.match, MATCH_KEYS, filePath, `${fieldPath}/match`, ruleId);
     if (validateRisk(findings, rule.match.risk, filePath, `${fieldPath}/match/risk`, ruleId)) {
       risk = rule.match.risk;
@@ -166,6 +215,10 @@ function validateRule(findings: PolicyValidationFinding[], rule: unknown, index:
   }
 
   const decisionValid = validateDecision(findings, rule.decision, filePath, `${fieldPath}/decision`, ruleId);
+  if (decisionValid && risk !== undefined && match !== undefined) {
+    addBroadAllowFindings(findings, rule, match, risk, filePath, fieldPath, ruleId);
+  }
+
   if (decisionValid && rule.decision === "allow" && ruleId === undefined && risk !== undefined && HIGH_RISK_ALLOW.has(risk)) {
     findings.push(finding({
       severity: "warning",

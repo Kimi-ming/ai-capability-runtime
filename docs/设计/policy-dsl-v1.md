@@ -119,6 +119,8 @@ Runtime Engine 对每个 permission 选择第一条匹配规则；没有匹配�
 - 未知顶层字段、未知 rule 字段和未知 match 字段返回 `POLICY_FIELD_UNKNOWN`。
 - 重复 rule id 返回 `POLICY_RULE_ID_DUPLICATE` warning。
 - 未命名高风险 `allow` 规则返回 `POLICY_HIGH_RISK_ALLOW_UNNAMED` warning。
+- `write` broad allow 缺少 `capability_id` 和 `resource` 时返回 `POLICY_BROAD_ALLOW_HIGH_RISK` warning。
+- `external_send`、`destructive`、`financial` allow 缺少 `capability_id`、`resource` 或 `action` 时返回 `POLICY_BROAD_ALLOW_REQUIRES_BOUNDARY` error。
 - finding 包含 `filePath`、`fieldPath` 和可选 `ruleId`，方便 CLI、CI 和后续 policy activation 使用。
 
 CLI 已新增：

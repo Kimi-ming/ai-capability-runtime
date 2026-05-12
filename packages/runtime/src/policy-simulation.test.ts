@@ -104,4 +104,39 @@ rules:
     });
     expect(unchanged).toMatchObject({ ok: true, findings: [] });
   });
+  it("reports broad sensitive data egress allow as an error", () => {
+    const report = simulatePolicyDiff({
+      policyBefore: "default: ask\nrules: []\n",
+      policyAfter: `default: ask
+rules:
+  - id: allow-all-external-send
+    match:
+      risk: external_send
+    decision: allow
+`,
+      scenarios: [
+        {
+          id: "slack.send_source",
+          capabilityId: "slack.send_message",
+          resource: "slack.message",
+          action: "send",
+          risk: "external_send",
+          dataClasses: ["source_code"],
+          targetOrigin: "https://slack.com",
+        },
+      ],
+    });
+
+    expect(report.ok).toBe(false);
+    expect(report.findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        category: "broad_data_egress_allow",
+        severity: "error",
+        scenarioId: "slack.send_source",
+        afterDecision: "allow",
+        dataClasses: ["source_code"],
+      }),
+    ]));
+  });
+
 });

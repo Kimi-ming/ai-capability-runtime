@@ -3494,7 +3494,7 @@ pnpm --filter @opencap/cli test
 
 ### T254 P1：实现 broad allow safety checks
 
-- [ ] T254 P1：实现 broad allow safety checks
+- [x] T254 P1：实现 broad allow safety checks
 
 目标：防止高风险 broad allow 静默进入 active policy。
 
@@ -3515,6 +3515,8 @@ pnpm --filter @opencap/cli test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：`validatePolicyYml` 新增 `POLICY_BROAD_ALLOW_HIGH_RISK` warning 和 `POLICY_BROAD_ALLOW_REQUIRES_BOUNDARY` error。`write` broad allow 缺少 `capability_id`/`resource` 会被标记；`external_send`、`destructive`、`financial` allow 必须同时限定 `capability_id`、`resource` 和 `action`。`simulatePolicyDiff` 新增 `broad_data_egress_allow` error，用于标记 `secret_like`、`pii`、`source_code` 被 broad allow 外发的场景。Runtime 测试数从 135 增至 138。
 
 ### T255 P1：实现 policy override/breakglass controls
 
