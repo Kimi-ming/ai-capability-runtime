@@ -3599,7 +3599,7 @@ pnpm --filter @opencap/runtime test
 
 ### T258 P2：policy incident runbook
 
-- [ ] T258 P2：policy incident runbook
+- [x] T258 P2：policy incident runbook
 
 目标：当用户误放开策略、能力被滥用或需要紧急阻断时，有可操作恢复流程。
 
@@ -3619,6 +3619,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 git diff --check
 ```
+
+完成记录：新增 `docs/运营/policy-incident-runbook.md`，覆盖事故分级、撤销 override、激活 deny policy、审查 audit、rollback policy、breakglass 允许/禁止矩阵、advisory/revocation 联动和复盘清单。`docs/安全/policy-override-and-breakglass-v1.md`、`docs/README.md` 和 `docs/INDEX.md` 已加入入口或互链。
 
 ### T259 P2：decision log export
 

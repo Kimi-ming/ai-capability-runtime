@@ -27,6 +27,7 @@
 | [开发任务总表](TASKS.md) | 任务队列和验收标准 | 每次新增、拆分、完成任务时 |
 | [当前状态交接](HANDOFF.md) | 当前阶段、验证、下一步 | 每次任务结束时 |
 | [验证策略](TESTING.md) | 可运行验证和测试计划 | 命令、测试范围、缺口变化时 |
+| [Policy 事故响应手册](运营/policy-incident-runbook.md) | 策略误放开、override 滥用和紧急阻断恢复流程 | 事故响应流程、policy rollback 或 advisory/revocation 联动变化时 |
 | [版本和兼容性策略](规范/versioning-and-compatibility.md) | Package、schema 和 Registry 兼容规则 | 版本、发布或公共契约变化时 |
 | [Alpha Release Checklist](releases/alpha-checklist.md) | Alpha 发布前门禁 | 发布范围、阻断项或发布流程变化时 |
 | [决策索引](DECISIONS.md) | 已接受 ADR 总览 | 新增或调整 ADR 时 |

@@ -70,6 +70,10 @@ type PolicyOverrideRecordV1 = {
 - T258：policy incident runbook。
 - T260：policy conformance tests。
 
+## 关联运营手册
+
+出现误放开、滥用或紧急阻断时，按 `docs/运营/policy-incident-runbook.md` 执行撤销 override、激活 deny policy、审查 audit 和 rollback policy。
+
 ## V1 实现状态
 
 T255 已实现 Runtime 级 override 控制模块：
