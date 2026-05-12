@@ -87,7 +87,7 @@ evaluateDataEgressPolicy(context, policy?)
 V1 已实现独立的 pre-secret gate：
 
 - `secret_like` 默认 `deny`。
-- `internal_url` 默认 `deny`。
+- `internal_url` 默认 `deny`，覆盖 private IP、localhost、link-local、metadata service 和 internal host。
 - `pii` 到 `external_send` 默认 `ask`。
 - `source_code` 到 `external_send` 默认 `ask`。
 - 无敏感 data class 的普通请求默认 `allow`。
@@ -131,6 +131,9 @@ Data egress policy 不取代 risk policy。推荐顺序：
 - secret_like input -> deny before secret resolution。
 - pii to external_send -> ask。
 - internal_url in body/query -> deny。
+- private IP URL、metadata service URL -> deny。
+- `.env`/config 中含 secret-like assignment -> deny。
+- stack trace/source diff 到 `external_send` -> ask。
 - egress deny 写 audit，但 requestStarted false。
 - redacted preview 不含 secret 原文。
 
@@ -139,3 +142,4 @@ Data egress policy 不取代 risk policy。推荐顺序：
 - T236：data egress policy gate。
 - T237：egress decision audit fields。
 - T238：confirmation summary data classes。
+- T245：internal URL/source/config egress negative tests。

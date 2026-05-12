@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T245 P1：internal URL/source/config egress negative tests。
 - T246 P2：manifest data class hint RFC。
 - T247 P2：organization data policy RFC。
 - T249 P1：实现 policy decision trace。
@@ -3261,7 +3260,7 @@ pnpm --filter @opencap/runtime test
 
 ### T245 P1：internal URL/source/config egress negative tests
 
-- [ ] T245 P1：internal URL/source/config egress negative tests
+- [x] T245 P1：internal URL/source/config egress negative tests
 
 目标：验证内部 URL、源码、配置和 secret-like 文本不会静默外发。
 
@@ -3281,6 +3280,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：`packages/runtime/src/data-egress-policy.test.ts` 新增从真实 input classification 和 field-level egress map 生成 context 的负向测试，覆盖 private IP URL query、metadata service URL body、`.env`/config secret assignment、stack trace 和 source diff。默认策略继续确保 internal_url/secret_like deny 不解析 secret、不执行，source_code 到 external_send 进入 ask。
 
 ### T246 P2：manifest data class hint RFC
 

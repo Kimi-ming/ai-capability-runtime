@@ -16,7 +16,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
-- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强、MCP Tool Projection builder、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate、egress decision audit fields 和 confirmation egress summary 和 input provenance audit evidence 和 field-level egress map 和 derived input evidence chain 和 input minimization 和 redacted egress preview 和 dry-run egress preview
+- Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强、MCP Tool Projection builder、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate、egress decision audit fields 和 confirmation egress summary 和 input provenance audit evidence 和 field-level egress map 和 derived input evidence chain 和 input minimization 和 redacted egress preview 和 dry-run egress preview 和 internal URL/source/config egress negative tests
 
 ## 当前代码状态
 
@@ -24,7 +24,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API、registry test 校验、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；`serve` 仍是骨架。
-- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
+- `@opencap/runtime` 有本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、HTTP dry-run plan 和 HTTP executor。
 - `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现；model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate 已实现。
 - `@opencap/sdk` 暂缓实现。
 
@@ -32,27 +32,25 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: T245 P1：internal URL/source/config egress negative tests。
+Next task: T246 P2：manifest data class hint RFC。
 
 推荐第一个任务：
 
 ```text
-T245：internal URL/source/config egress negative tests
+T246：manifest data class hint RFC
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T102/T103/T104/T112/T113/T114/T120/T121/T122/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T102/T103/T104/T112/T113/T114/T120/T121/T122/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- T245 将补齐内部 URL、源码、配置和 secret-like 文本的负向外发测试，确保敏感输入不会静默外发。
+- T246 将定义 manifest input schema 的 `x-opencap-data-class` hint，作为后续 authoring 和 lint 的补充。
 
 ## 最近验证
 
-项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。T244 本轮已运行：
+项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。T245 本轮已运行：
 
-- `pnpm --filter @opencap/runtime test -- index.test.ts result-envelope.test.ts`
-- `pnpm --filter @opencap/cli test`
-- `pnpm --filter @opencap/runtime build`
+- `pnpm --filter @opencap/runtime test -- data-egress-policy.test.ts`
 - `pnpm --filter @opencap/runtime test`
 - `git diff --check`
 - `check_docs.py`
@@ -62,7 +60,7 @@ T245：internal URL/source/config egress negative tests
 
 ## Data Egress Policy Gate 已实现
 
-T236 已完成。新增 `packages/runtime/src/data-egress-policy.ts`，提供 `defaultDataEgressPolicy()` 和 `evaluateDataEgressPolicy()`；默认规则覆盖 `secret_like` deny、`internal_url` deny、`pii/source_code` 到 `external_send` ask，返回 `stage: pre_secret`、`reasonCode`、`matchedRuleId`、`secretResolutionAllowed`、`executionAllowed` 和脱敏 evidence。新增 `packages/runtime/src/data-egress-policy.test.ts`，覆盖 8 个测试，确保 egress deny 不解析 secret、不执行。
+T236 已完成。新增 `packages/runtime/src/data-egress-policy.ts`，提供 `defaultDataEgressPolicy()` 和 `evaluateDataEgressPolicy()`；默认规则覆盖 `secret_like` deny、`internal_url` deny、`pii/source_code` 到 `external_send` ask，返回 `stage: pre_secret`、`reasonCode`、`matchedRuleId`、`secretResolutionAllowed`、`executionAllowed` 和脱敏 evidence。新增 `packages/runtime/src/data-egress-policy.test.ts`，覆盖 13 个测试，确保 egress deny 不解析 secret、不执行，并覆盖 private IP、metadata service、`.env` secret assignment、stack trace 和 source diff 外发边界。
 
 ## Egress decision audit fields 已实现
 
@@ -95,6 +93,10 @@ T243 已完成。新增 `packages/runtime/src/egress-preview.ts`，导出 `build
 ## Dry-run egress preview 已接入
 
 T244 已完成。`buildHttpDryRunPlan` 现在生成 `egressPreview`，并把 target origin、fields sent、data classes 和 redacted input 放入 Result Envelope。CLI `opencap invoke --dry-run` 的人类输出会展示 egress preview；dry-run 审计事件记录 `requestStarted=false`、`egressTargetOrigin`、`egressDataClasses` 和 `egressRedactedPreviewJson`，不读取 secret 原值、不发送请求。Runtime 测试数保持 117，CLI smoke test 继续覆盖 1 个端到端测试。
+
+## Internal URL/source/config egress negative tests 已补齐
+
+T245 已完成。`packages/runtime/src/data-egress-policy.test.ts` 现在用真实 input classification 和 field-level egress map 生成 policy context，覆盖 private IP URL query、metadata service URL body、`.env`/config secret assignment、stack trace 和 source diff。Runtime 测试数从 117 增至 122。
 
 ## 已知风险
 
