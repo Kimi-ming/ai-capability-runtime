@@ -81,6 +81,17 @@ pnpm build
 | `@opencap/mcp` | 暂缓正式发布 | helper 已有 tools/list、tools/call 和 adapter 测试，但完整 `opencap serve --mcp` server 尚未实现。 |
 | `@opencap/sdk-js` | 暂缓发布 | SDK 仍是占位/后续边界，API 尚未稳定。 |
 
+## Package public exports
+
+截至 2026-05-12，workspace package 已定义 npm `exports` 边界：
+
+- `@opencap/spec`、`@opencap/runtime`、`@opencap/mcp` 和 `@opencap/sdk` 暴露 `.` public entrypoint，`types` 指向 `./dist/index.d.ts`，`import` 指向 `./dist/index.js`。
+- `@opencap/spec` 额外公开 `./schema/manifest.schema.json` 和 `./schema/registry-test.schema.json`，供 schema consumers 使用。
+- 所有 package 只额外暴露 `./package.json`，不暴露 `./src/*` 或 `./dist/*` 深层内部路径。
+- `@opencap/cli` 保持 bin-only public surface，不把 `dist/index.js` 声明成 library API。
+
+该契约由 `packages/runtime/src/package-exports.test.ts` 覆盖；发布前仍必须确认 build artifacts 和 schema files 会进入发布包。
+
 Alpha 发布必须先完成：
 
 - GitHub Actions `validate.yml` 通过 install、validate、test 和 build。

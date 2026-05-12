@@ -19,12 +19,12 @@
 
 ## 当前完成度快照
 
-截至 2026-05-12，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 161 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-12，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 170 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
 - 完整 `opencap serve --mcp` server 仍被 T070 阻塞。
-- V1 需要把 Runtime public contract、Gate、Ledger、Card 和 identity/digest 等设计对象继续落到类型与测试里。
+- V1 需要把 Runtime Gate、Ledger、Card 和 identity/digest 等设计对象继续落到类型与测试里。
 - CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
 - Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
@@ -51,8 +51,8 @@
 
 ### 模块 M1：核心契约和 Runtime Kernel
 
-- [ ] T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
-- [ ] T145 P1：定义 package public exports。
+- [x] T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
+- [x] T145 P1：定义 package public exports。
 - [ ] T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
 - [ ] T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
 - [ ] T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
@@ -2190,6 +2190,75 @@ pnpm test
 ```
 
 完成记录：Manifest schema 已要求 `api_key` 声明 `provider`、`env` 和 `placement`，并要求 `header` placement 声明 `name`；schema 继续拒绝 query/body placement。`github.search_repo` 和 `vercel.get_deployments` 已补齐 bearer placement。Runtime custom header placement 测试新增 credential audit evidence 断言，确保 named header 映射被审计且不泄露 secret 原文。Spec 测试数从 20 增至 25，Runtime 定向测试保持 80 个通过。
+
+### T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口
+
+- [x] T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口
+
+目标：把 `docs/设计/domain-model.md` 和 `docs/设计/runtime-kernel-contract-v1.md` 中已经稳定的核心对象落成 `@opencap/runtime` 可导出的 TypeScript public contract，先定义类型和最小工厂/fixture，避免 CLI、MCP 和后续 Console 各自发明调用模型。
+
+涉及文件：
+
+- `packages/runtime/src/domain.ts`
+- `packages/runtime/src/domain.test.ts`
+- `packages/runtime/src/index.ts`
+- `docs/TESTING.md`
+- `docs/HANDOFF.md`
+
+验收标准：
+
+- Runtime 导出 `RuntimeKernel`、`RuntimeContext`、`CapabilityIdentity`、`InstalledCapabilityRecord`、`InvocationRequestV1`、`InvocationPlanV1`、`GateDecision`、`ConsentRequest`、`ConsentReceipt`、`RuntimeErrorV1`、`RuntimeResultEnvelope` 和 `AuditWriteResult` 类型。
+- 新类型表达 capability identity、install metadata、trust summary、derived metadata、invocation request、plan、gate、consent、result、audit write result 和 error category。
+- Runtime channel 只能是 `cli`、`mcp`、`api`、`test`，gate stage 只能是 `pre_secret`、`pre_execution`、`post_execution`。
+- `createRuntimeRequestId()` 生成稳定前缀的 Runtime request id，便于审计和测试识别。
+- `createDryRunEnvelope()` 能用 Runtime public contract 生成最小 dry-run Result Envelope，不接触 secret、不执行外部请求。
+- `@opencap/runtime` public export 暴露上述类型和最小 helper。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test -- domain.test.ts
+pnpm --filter @opencap/runtime build
+pnpm --filter @opencap/runtime lint
+pnpm test
+```
+
+完成记录：新增 `packages/runtime/src/domain.ts` 和 `domain.test.ts`，定义并导出 Runtime public contract 类型：`RuntimeKernel`、`RuntimeContext`、`CapabilityIdentity`、`InstalledCapabilityRecord`、`InvocationRequestV1`、`InvocationPlanV1`、`GateDecision`、`ConsentRequest`、`ConsentReceipt`、`RuntimeErrorV1`、`RuntimeResultEnvelope`、`AuditWriteResult` 等。新增 `createRuntimeRequestId()` 和 `createDryRunEnvelope()` 最小 helper。`packages/runtime/src/index.ts` 已暴露这些 public exports。新增 6 个 Runtime domain contract 测试，Runtime 测试数从 161 增至 167。
+
+### T145 P1：定义 package public exports
+
+- [x] T145 P1：定义 package public exports
+
+目标：为 OpenCap workspace package 固定 npm `exports` 边界，让外部集成只依赖声明过的 public entrypoint，不能通过 `dist/*` 或 `src/*` 深层路径绑定 Runtime、Spec、MCP 或 SDK 内部实现。
+
+涉及文件：
+
+- `packages/spec/package.json`
+- `packages/runtime/package.json`
+- `packages/mcp/package.json`
+- `packages/sdk-js/package.json`
+- `packages/cli/package.json`
+- `packages/runtime/src/package-exports.test.ts`
+- `docs/运营/package-publishing-v1.md`
+- `docs/HANDOFF.md`
+
+验收标准：
+
+- `@opencap/spec`、`@opencap/runtime`、`@opencap/mcp` 和 `@opencap/sdk` 都声明 `exports["."]`，并把 `types` 指向 `./dist/index.d.ts`、`import` 指向 `./dist/index.js`。
+- `@opencap/spec` 额外声明 schema JSON public subpath：`./schema/manifest.schema.json` 和 `./schema/registry-test.schema.json`。
+- 所有 package 都只额外暴露 `./package.json`，不暴露 `./src/*`、`./dist/*` 或其他内部 subpath。
+- `@opencap/cli` 明确保持 bin-only public surface，只暴露 `./package.json`，不把命令入口当作 library API。
+- 新增测试能在 package export map 缺失或暴露内部路径时失败。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test -- package-exports.test.ts
+pnpm build
+pnpm lint
+```
+
+完成记录：`@opencap/spec`、`@opencap/runtime`、`@opencap/mcp` 和 `@opencap/sdk` 已声明 root public export map，`types` 指向 `./dist/index.d.ts`，`import` 指向 `./dist/index.js`。`@opencap/spec` 额外公开两个 schema JSON subpath；所有 package 只额外暴露 `./package.json`。`@opencap/cli` 保持 bin-only public surface，不把命令入口声明为 library API。新增 `packages/runtime/src/package-exports.test.ts` 覆盖 3 个 export map 契约测试，Runtime 测试数从 167 增至 170。
 
 ### T115 P0：体系化项目管理文档
 

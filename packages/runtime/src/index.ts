@@ -1,5 +1,7 @@
 export { classifyInput } from "./input-classifier.js";
 export type { InputClassificationAction, InputClassificationConfidence, InputClassificationFinding, InputClassificationOptions, InputClassificationResult, InputDataClass } from "./input-classifier.js";
+export { createDryRunEnvelope, createRuntimeRequestId } from "./domain.js";
+export type { AuditPreview, AuditWriteResult, CallerDescriptor, CapabilityIdentity, CapabilityLifecycleState, CapabilitySelector, ConsentReceipt, ConsentRequest, DerivedCapabilityMetadata, EgressSummary, ExecutionEvidence, GateDecision, GateDecisionKind, GateStage, HostCapability, HostDescriptor, InstallMetadata, InstalledCapabilityRecord, InvocationChannel, InvocationPlanV1, InvocationRequestV1, PlannedExecution, ResultEvidence, ResultProvenance, RiskSummary, RuntimeContext, RuntimeEnvironment, RuntimeErrorCategory, RuntimeErrorV1, RuntimeKernel, RuntimeResultEnvelope, RuntimeResultStatus, TrustSummary } from "./domain.js";
 export { defaultDataEgressPolicy, evaluateDataEgressPolicy } from "./data-egress-policy.js";
 export { buildFieldLevelEgressMap } from "./egress-map.js";
 export { minimizeInputByEgressMap } from "./input-minimization.js";
