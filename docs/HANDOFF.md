@@ -34,21 +34,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-Next task: none，目前 `next_task.py` 显示没有 open task。`check_docs.py` 会提示需要增加下一任务或刷新 handoff，本文件即为本轮 handoff 刷新。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，当前下一项为 M1 / T124：将领域模型落入 TypeScript 类型和 Runtime 接口。
 
-下一步推荐：解除 T070 阻塞后继续，或者从下面的自主排期里选择一个不需要外部依赖的任务展开为新的 `docs/TASKS.md` 任务块。
+下一步推荐：先在 M1 模块内补齐 T124 的验收标准和任务级验证，再按 TDD 进入实现。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-无 ready task
+M1 / T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T130/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前停止条件：`next_task.py` 返回 `Mode: Handoff`，没有 ready task。
+- 当前状态：`next_task.py` 返回 `Mode: Active Develop`，下一项为 T124；该任务仍需补明确验收标准和任务级验证。
 
 ## 最近验证
 
@@ -61,7 +61,7 @@ Next task: none，目前 `next_task.py` 显示没有 open task。`check_docs.py`
 - Ruby YAML parser 校验 `.github/**/*.yml` / `.yaml`
 - `git diff --check`
 - `check_docs.py`
-- `next_task.py`（当前返回 `Mode: Handoff`，无 ready task）
+- `next_task.py`（当前返回 `Mode: Active Develop`，下一项 T124）
 
 当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 25 个、runtime 161 个、mcp 18 个、cli smoke 1 个测试。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
 
@@ -72,18 +72,19 @@ Next task: none，目前 `next_task.py` 显示没有 open task。`check_docs.py`
 - T256 已完成：新增 `rfcs/0009-policy-bundle-manifest-signing-v1.md`，并同步 policy lifecycle 与 signing/provenance 文档。
 - T159 已完成：Secret Resolver V1 env provider 已从 HTTP executor 内联逻辑中抽出并导出。
 - T164 已完成：HTTP executor 审计事件现在记录 credential evidence，SQLite 可持久化查询。
+- 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
 ## 自主排期建议
 
-在 T070 仍阻塞时，建议下一轮从这些不依赖外部凭据或网络安装的任务中选择：
+在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
+- T145 P1：定义 package public exports。
 - T132 P1：实现 audit failure preflight 测试。
 - T134 P1：按 CLI 契约补齐命令 snapshot tests。
-- T145 P1：定义 package public exports。
 - T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把其中一个任务展开为带验收标准和验证命令的任务块，再按 TDD 实现。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T124 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
 
 ## Secret Resolver V1 env provider 已实现
 

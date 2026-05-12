@@ -17,109 +17,150 @@
 - P2：V1 体验和贡献质量增强
 - P3：V1 之后
 
-## 可执行任务清单
+## 当前完成度快照
 
-### P0：V1 必须先完成
+截至 2026-05-12，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 161 个、mcp 18 个、cli smoke 1 个。
 
-- T070 P0：选择 MCP TypeScript SDK 并接入。（阻塞：需要确认依赖和安装授权）
+当前主要缺口：
 
-### P1：V1 完整体验
+- 完整 `opencap serve --mcp` server 仍被 T070 阻塞。
+- V1 需要把 Runtime public contract、Gate、Ledger、Card 和 identity/digest 等设计对象继续落到类型与测试里。
+- CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
+- Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
+- Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
 
-- T116 P1：维护术语表和文档索引。
+## 模块划分
 
-### P2/P3：增强和后续扩展
+任务队列按模块组织，模块内任务按推荐顺序推进。P0/P1 任务优先进入 V1 alpha 收敛；P2 任务作为质量、生态和扩展增强；P3 任务进入 V1 之后。
 
-- T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
-- T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
-- T126 P1：把发布门禁整理成可执行 release checklist。
-- T127 P2：维护 MCP Host 兼容性矩阵。
-- T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
-- T129 P2：补充 Registry 供应链 review 工作流。
-- T131 P1：实现 `execution.body.fields` 渲染测试。
-- T132 P1：实现 audit failure preflight 测试。
-- T133 P1：实现 outbound policy 私网阻断测试。
-- T134 P1：按 CLI 契约补齐命令 snapshot tests。
-- T135 P1：按本地状态契约实现 state dir precedence tests。
-- T136 P1：按 MCP 接口契约增加 tool mapping tests。
-- T137 P1：实现错误模型和 exit code tests。
-- T138 P2：增加 privacy retention 文档测试或 lint。
-- T139 P1：CI 安全基线 workflow。
-- T140 P1：把 Capability 分类落入 Registry 指南。
-- T141 P1：把 Capability Review Checklist 接入 PR 流程。
-- T142 P2：维护 Host compatibility test records。
-- T143 P2：从 audit log 派生本地指标命令草案。
-- T144 P2：补充 RFC 模板文件。
-- T145 P1：定义 package public exports。
-- T146 P2：OpenAPI adapter RFC 草案。
-- T147 P2：Registry index signing RFC 草案。
-- T148 P1：npm trusted publishing workflow 草案。
-- T151 P1：实现 Capability Package lint。
-- T152 P1：把 consent receipt 落入 audit log 字段和测试。
-- T153 P2：建立 conformance suite skeleton。
-- T154 P2：维护 Host compatibility evidence records。
-- T155 P2：把 Agentic abuse cases 转成 smoke tests。
-- T156 P2：MCP elicitation profile RFC。
-- T157 P2：A2A Agent Card mapping RFC。
-- T158 P1：Trust Card generation rules。
-- T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
-- T161 P1：实现 least-privilege auth lint。
-- T162 P2：补充 credential lifecycle smoke/runbook 验证。
-- T163 P2：Remote Runtime OAuth profile RFC。
-- T165 P2：GitHub fine-grained token setup guide。
-- T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
-- T168 P1：实现 unknown outcome audit tests。
-- T169 P2：Retry/idempotency manifest RFC。
-- T170 P2：实现 retry policy tests。
-- T171 P2：Duplicate invocation detector 草案。
-- T172 P2：Reconcile hint manifest field。
-- T173 P2：Execution evidence conformance record。
-- T175 P2：Composition context audit fields。
-- T176 P2：Composition profile RFC。
-- T177 P2：Step-level consent tests for composition。
-- T178 P2：Plan hash and evidence chain 草案。
-- T179 P2：Capability graph metadata RFC。
-- T180 P2：Risk amplification review checklist。
-- T181 P2：Registry graph index 草案。
-- T182 P2：Compensation capability review rules。
-- T183 P2：Composition failure recovery smoke tests。
-- T185 P1：Trust level transition tests。
-- T186 P1：Revoked capability invoke warning/deny behavior。
-- T187 P1：Capability advisory YAML schema。
-- T188 P1：Revocation metadata in registry。
-- T189 P1：Installed capability advisory check。
-- T190 P2：SECURITY.md 对齐 private reporting。
-- T191 P1：Lifecycle status schema for deprecated/yanked/revoked。
-- T192 P1：Install/list/invoke lifecycle warnings。
-- T193 P2：Registry search excludes yanked/revoked by default。
-- T194 P2：Quality score rubric implementation draft。
-- T195 P2：Trust Card includes quality score。
-- T196 P1：Score cannot override policy tests。
-- T198 P1：Usage event schema。
-- T199 P1：Quota/budget policy gates。
-- T200 P1：Provider rate limit handling。
-- T201 P1：Local abuse throttle。
-- T202 P2：Paid capability manifest RFC。
-- T203 P2：Commerce profile RFC。
-- T204 P1：Financial consent/spend cap tests。
-- T205 P2：Usage export format。
-- T206 P2：Problem details for quota/rate errors。
-- T207 P2：Usage evidence conformance tests。
-- T253 P1：实现 policy simulation/diff。
-- T254 P1：实现 broad allow safety checks。
-- T255 P1：实现 policy override/breakglass controls。
-- T257 P1：policy simulation fixtures。
-- T258 P2：policy incident runbook。
-- T259 P2：decision log export。
-- T260 P1：policy governance conformance tests。
-- T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
-- T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
-- T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
-- T271 P1：定义 Interoperability Profile evidence record schema。
-- T272 P2：设计 Registry index/cache/sync RFC。
-- T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
-- T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
-- T275 P1：补齐 Capability authoring loop 和 lint 顺序。
-- T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
+| 模块 | 名称 | 目标 | 当前判断 |
+| --- | --- | --- | --- |
+| M0 | 阻塞和外部依赖 | 跟踪需要用户确认、网络、凭据或外部 SDK 的任务 | T070 仍阻塞 |
+| M1 | 核心契约和 Runtime Kernel | 把设计对象落成 public types、接口和稳定包导出 | 下一步优先 |
+| M2 | 执行安全、审计和可靠性 | 补齐调用前门禁、审计失败保护、状态路径、重试和限流 | P1 主体 |
+| M3 | CLI、MCP 和 Host 互操作 | 补齐 CLI 细粒度测试、MCP 映射、Host evidence 和 profile | 等 T070 解阻后加速 |
+| M4 | Registry、Trust、Lifecycle 和供应链 | 建立能力包、信任卡、生命周期、安全公告和供应链闭环 | V1 生态根基 |
+| M5 | Conformance、Abuse Cases、隐私和运维 | 把设计风险转为一致性测试、smoke、runbook 和文档门禁 | 质量增强 |
+| M6 | Composition、Capability Graph 和 Agentic Commerce | 规划多步组合、能力图、用量计费和商业边界 | V1 后续扩展 |
+
+## 可执行任务队列
+
+### 模块 M0：阻塞和外部依赖
+
+- [!] T070 P0：选择 MCP TypeScript SDK 并接入。（阻塞：需要确认依赖包名/版本并允许安装新 npm 依赖）
+
+### 模块 M1：核心契约和 Runtime Kernel
+
+- [ ] T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
+- [ ] T145 P1：定义 package public exports。
+- [ ] T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
+- [ ] T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
+- [ ] T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
+- [ ] T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
+- [ ] T275 P1：补齐 Capability authoring loop 和 lint 顺序。
+- [ ] T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
+
+### 模块 M2：执行安全、审计和可靠性
+
+- [ ] T131 P1：实现 `execution.body.fields` 渲染测试。
+- [ ] T132 P1：实现 audit failure preflight 测试。
+- [ ] T133 P1：实现 outbound policy 私网阻断测试。
+- [ ] T135 P1：按本地状态契约实现 state dir precedence tests。
+- [ ] T152 P1：把 consent receipt 落入 audit log 字段和测试。
+- [ ] T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
+- [ ] T161 P1：实现 least-privilege auth lint。
+- [ ] T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
+- [ ] T168 P1：实现 unknown outcome audit tests。
+- [ ] T170 P2：实现 retry policy tests。
+- [ ] T196 P1：Score cannot override policy tests。
+- [ ] T199 P1：Quota/budget policy gates。
+- [ ] T200 P1：Provider rate limit handling。
+- [ ] T201 P1：Local abuse throttle。
+- [ ] T204 P1：Financial consent/spend cap tests。
+
+### 模块 M3：CLI、MCP 和 Host 互操作
+
+- [ ] T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
+- [ ] T127 P2：维护 MCP Host 兼容性矩阵。
+- [ ] T134 P1：按 CLI 契约补齐命令 snapshot tests。
+- [ ] T136 P1：按 MCP 接口契约增加 tool mapping tests。
+- [ ] T137 P1：实现错误模型和 exit code tests。
+- [ ] T142 P2：维护 Host compatibility test records。
+- [ ] T143 P2：从 audit log 派生本地指标命令草案。
+- [ ] T154 P2：维护 Host compatibility evidence records。
+- [ ] T156 P2：MCP elicitation profile RFC。
+- [ ] T157 P2：A2A Agent Card mapping RFC。
+- [ ] T163 P2：Remote Runtime OAuth profile RFC。
+- [ ] T271 P1：定义 Interoperability Profile evidence record schema。
+
+### 模块 M4：Registry、Trust、Lifecycle 和供应链
+
+- [ ] T126 P1：把发布门禁整理成可执行 release checklist。
+- [ ] T129 P2：补充 Registry 供应链 review 工作流。
+- [ ] T139 P1：CI 安全基线 workflow。
+- [ ] T140 P1：把 Capability 分类落入 Registry 指南。
+- [ ] T141 P1：把 Capability Review Checklist 接入 PR 流程。
+- [ ] T144 P2：补充 RFC 模板文件。
+- [ ] T147 P2：Registry index signing RFC 草案。
+- [ ] T148 P1：npm trusted publishing workflow 草案。
+- [ ] T151 P1：实现 Capability Package lint。
+- [ ] T158 P1：Trust Card generation rules。
+- [ ] T185 P1：Trust level transition tests。
+- [ ] T186 P1：Revoked capability invoke warning/deny behavior。
+- [ ] T187 P1：Capability advisory YAML schema。
+- [ ] T188 P1：Revocation metadata in registry。
+- [ ] T189 P1：Installed capability advisory check。
+- [ ] T191 P1：Lifecycle status schema for deprecated/yanked/revoked。
+- [ ] T192 P1：Install/list/invoke lifecycle warnings。
+- [ ] T193 P2：Registry search excludes yanked/revoked by default。
+- [ ] T194 P2：Quality score rubric implementation draft。
+- [ ] T195 P2：Trust Card includes quality score。
+- [ ] T272 P2：设计 Registry index/cache/sync RFC。
+- [ ] T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
+
+### 模块 M5：Conformance、Abuse Cases、隐私和运维
+
+- [ ] T116 P1：维护术语表和文档索引。
+- [ ] T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
+- [ ] T138 P2：增加 privacy retention 文档测试或 lint。
+- [ ] T153 P2：建立 conformance suite skeleton。
+- [ ] T155 P2：把 Agentic abuse cases 转成 smoke tests。
+- [ ] T162 P2：补充 credential lifecycle smoke/runbook 验证。
+- [ ] T165 P2：GitHub fine-grained token setup guide。
+- [ ] T173 P2：Execution evidence conformance record。
+- [ ] T190 P2：SECURITY.md 对齐 private reporting。
+- [ ] T205 P2：Usage export format。
+- [ ] T206 P2：Problem details for quota/rate errors。
+- [ ] T207 P2：Usage evidence conformance tests。
+
+### 模块 M6：Composition、Capability Graph 和 Agentic Commerce
+
+- [ ] T146 P2：OpenAPI adapter RFC 草案。
+- [ ] T169 P2：Retry/idempotency manifest RFC。
+- [ ] T171 P2：Duplicate invocation detector 草案。
+- [ ] T172 P2：Reconcile hint manifest field。
+- [ ] T175 P2：Composition context audit fields。
+- [ ] T176 P2：Composition profile RFC。
+- [ ] T177 P2：Step-level consent tests for composition。
+- [ ] T178 P2：Plan hash and evidence chain 草案。
+- [ ] T179 P2：Capability graph metadata RFC。
+- [ ] T180 P2：Risk amplification review checklist。
+- [ ] T181 P2：Registry graph index 草案。
+- [ ] T182 P2：Compensation capability review rules。
+- [ ] T183 P2：Composition failure recovery smoke tests。
+- [ ] T198 P1：Usage event schema。
+- [ ] T202 P2：Paid capability manifest RFC。
+- [ ] T203 P2：Commerce profile RFC。
+
+### 已完成但保留历史任务号
+
+- [x] T253 P1：实现 policy simulation/diff。
+- [x] T254 P1：实现 broad allow safety checks。
+- [x] T255 P1：实现 policy override/breakglass controls。
+- [x] T257 P1：policy simulation fixtures。
+- [x] T258 P2：policy incident runbook。
+- [x] T259 P2：decision log export。
+- [x] T260 P1：policy governance conformance tests。
 
 ### 已完成
 
@@ -227,16 +268,35 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. T051 dry-run executor
-2. T060 `opencap invoke`
-3. T070 MCP bridge
-4. T080 Registry manifest CI 校验
-5. T081 Capability Review Checklist
-6. T023 Runtime loader CLI integration
-7. T061 真实 `opencap invoke`
-8. T062 示例 input 文件
-9. T063 invoke policy/confirmation 接入
-10. T064 invoke audit 接入
+1. M1 / T124：领域模型 TypeScript 类型和 Runtime 接口
+2. M1 / T145：package public exports
+3. M2 / T132：audit failure preflight 测试
+4. M3 / T134：CLI command snapshot tests
+5. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
+6. M1 / T268：Runtime Gate 接口和 GateDecision 语义
+7. M1 / T269：Ledger 存储接口
+8. M1 / T270：Card schema 和生成规则
+9. M1 / T273：Capability identity/digest/version/lifecycle
+10. M1 / T275：Capability authoring loop 和 lint 顺序
+11. M1 / T276：v0.1-v1.0 release maturity gate matrix
+12. M2 / T133：outbound policy 私网阻断测试
+13. M2 / T135：state dir precedence tests
+14. M3 / T137：错误模型和 exit code tests
+15. M4 / T151：Capability Package lint
+16. M4 / T158：Trust Card generation rules
+17. M4 / T185：Trust level transition tests
+18. M4 / T191：Lifecycle status schema
+19. M4 / T192：Install/list/invoke lifecycle warnings
+20. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+
+## 模块推进策略
+
+1. M1 先行：先把 Runtime Kernel、领域对象、Gate、Ledger、Card 和 package exports 固定住，避免后续测试围绕临时类型发散。
+2. M2 跟进：每个执行安全任务都必须先写失败测试，再实现最小代码，并更新 `docs/TESTING.md`。
+3. M3 并行：CLI snapshot 和 exit code 可以在不等待 T070 的情况下推进；完整 MCP server 等 T070 解阻。
+4. M4 分阶段：先做 package lint、trust card 和 lifecycle warning，再做 registry signing、advisory 和质量评分。
+5. M5 作为门禁：每完成一个安全或生态能力，应补一个 conformance、abuse case 或 runbook 任务，避免文档和实现脱节。
+6. M6 后置：组合、能力图和商业边界只在 M1-M4 稳定后进入实现，前期以 RFC 和 smoke 任务为主。
 
 ---
 
