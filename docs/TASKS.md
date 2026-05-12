@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T251 P1：实现 policy change audit/ledger。
 - T252 P1：实现 policy validate lint。
 - T253 P1：实现 policy simulation/diff。
 - T254 P1：实现 broad allow safety checks。
@@ -3413,7 +3412,7 @@ pnpm --filter @opencap/runtime test
 
 ### T251 P1：实现 policy change audit/ledger
 
-- [ ] T251 P1：实现 policy change audit/ledger
+- [x] T251 P1：实现 policy change audit/ledger
 
 目标：policy 激活、回滚和覆盖都留下本地可查询记录。
 
@@ -3435,6 +3434,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/policy-ledger.ts` 和 `policy-ledger.test.ts`，导出 `FilePolicyLedger` 及相关记录类型。Ledger 支持 activation、rollback 和 failed_activation；rollback 追加新记录不删除历史；failed activation 不覆盖当前 active policy；记录只含 revision、digest、reason 和 diff summary，不保存 policy 原文、secret 或 input 原文。Runtime 测试数从 125 增至 129。
 
 ### T252 P1：实现 policy validate lint
 

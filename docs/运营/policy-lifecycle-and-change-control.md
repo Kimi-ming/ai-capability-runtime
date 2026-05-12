@@ -65,6 +65,16 @@ V1 可以从简单本地文件开始：
 - policy change 记录写入本地 audit 或 policy ledger。
 - rollback 只是重新激活旧 revision，不删除历史。
 
+## Runtime 实现状态
+
+截至 2026-05-12，`@opencap/runtime` 已新增 `FilePolicyLedger`：
+
+- `activate()` 记录 activation，包含 policySetId、fromRevision、toRevision、digest、reason、diffSummary 和 activatedAt，并更新 active policy 指针。
+- `rollback()` 作为一条新的 rollback activation 记录追加到 ledger，不删除历史。
+- `recordFailedActivation()` 只追加 failed_activation 记录，不覆盖当前 active policy。
+- ledger 记录只保存 digest、revision、reason 和 diff summary，不保存 policyContent、input 原文或 secret value；reason/diff summary 会做基础 secret redaction。
+
+
 ## Future Policy Bundle
 
 未来可以引入 policy bundle，但必须保持 OSS local-first：
