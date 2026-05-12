@@ -241,6 +241,29 @@ function printEgressPreview(preview: Record<string, unknown>): void {
   }
 }
 
+
+function printPolicyExplain(trace: ResultEnvelopeV1["evidence"]["policyTrace"]): void {
+  if (trace === undefined) {
+    return;
+  }
+
+  console.log("policy explain:");
+  console.log(`final decision: ${trace.decision}`);
+  console.log(`blocking gate: ${trace.executionAllowed ? "none" : trace.gate}`);
+  console.log(`matched rule: ${trace.matchedRuleId ?? "<default>"}`);
+  console.log(`reason code: ${trace.reasonCode}`);
+  console.log(`policy revision: ${trace.policyRevision}`);
+  console.log(`secret resolution: ${trace.secretResolutionAllowed ? "allowed" : "blocked"}`);
+  console.log(`execution: ${trace.executionAllowed ? "allowed" : "blocked"}`);
+
+  if (trace.evaluatedFacts.length > 0) {
+    console.log("evaluated facts:");
+    for (const fact of trace.evaluatedFacts) {
+      console.log(`- ${fact}`);
+    }
+  }
+}
+
 function printInvokeResult(envelope: ResultEnvelopeV1, options: { json?: boolean; verbose?: boolean }): void {
   if (options.json) {
     console.log(JSON.stringify(cliEnvelopeSubset(envelope, options.verbose), null, 2));
@@ -406,8 +429,9 @@ program
   .option("--yes", "Approve CLI ask confirmations when allowed")
   .option("--json", "Output JSON")
   .option("--verbose", "Include redacted evidence in invoke output")
+  .option("--explain", "Show policy decision trace summary")
   .description("Invoke an installed Capability.")
-  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean; yes?: boolean; json?: boolean; verbose?: boolean }) => runCliAction(async () => {
+  .action((id: string, options: { stateDir?: string; input?: string; inputJson?: string; dryRun?: boolean; yes?: boolean; json?: boolean; verbose?: boolean; explain?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const input = await parseInvokeInput(options);
     const loaded = await loadInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
@@ -452,9 +476,13 @@ program
           evidence: {
             policyDecision: policy.decision,
             inputHash: hashInput(input),
+            policyTrace: policy.decisionTrace,
           },
         });
         printInvokeResult(envelope, { json: options.json, verbose: options.verbose });
+        if (options.explain && !options.json) {
+          printPolicyExplain(policy.decisionTrace);
+        }
         return;
       }
 

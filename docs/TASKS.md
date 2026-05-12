@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T250 P1：实现 policy explain CLI。
 - T251 P1：实现 policy change audit/ledger。
 - T252 P1：实现 policy validate lint。
 - T253 P1：实现 policy simulation/diff。
@@ -3386,7 +3385,7 @@ pnpm --filter @opencap/runtime test
 
 ### T250 P1：实现 policy explain CLI
 
-- [ ] T250 P1：实现 policy explain CLI
+- [x] T250 P1：实现 policy explain CLI
 
 目标：用户可以通过 CLI 理解某次调用为什么被允许、确认、拒绝或阻断。
 
@@ -3409,6 +3408,8 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/cli test
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：`opencap invoke --dry-run --explain` 已接入 policy decision trace 摘要，输出 final decision、blocking gate、matched rule、reason code、policy revision、secret/execution 状态和脱敏 evaluated facts。CLI smoke test 覆盖 explain 输出不含敏感 input 原文。
 
 ### T251 P1：实现 policy change audit/ledger
 

@@ -118,13 +118,14 @@ opencap invoke github.create_issue --input input.json
 
 参数：
 
-| 参数 | 含义 |
-| --- | --- |
-| `--input <file>` | JSON 输入文件 |
-| `--dry-run` | 生成调用计划，不发外部请求 |
-| `--yes` | 非交互允许 ask，仅限 CLI，V1 可暂缓 |
+| 参数 | 含义 | V1 行为 |
+| --- | --- | --- |
+| `--input <file>` | JSON 输入文件 | 从文件读取 input JSON |
+| `--dry-run` | 生成调用计划 | 不发外部请求 |
+| `--yes` | 非交互允许 ask | 仅限 CLI，可批准普通 ask |
 | `--json` | 输出 Result Envelope 子集 | 默认不含 evidence |
 | `--verbose` | 输出脱敏 evidence | 可与 `--json` 或人类输出组合 |
+| `--explain` | 输出 policy decision trace 摘要 | 当前用于 `invoke --dry-run` 的人类输出，不显示 input 原文 |
 
 行为：
 
@@ -138,13 +139,31 @@ opencap invoke github.create_issue --input input.json
 
 输出：
 
-默认人类输出只显示 Runtime 生成的 summary、status 和 warnings，不打印 policy、完整 plan、provider raw body 或 raw evidence。
+默认人类输出只显示 Runtime 生成的 summary、status、warnings 和 dry-run egress preview，不打印完整 policy、完整 plan、provider raw body 或 raw evidence。
 
 ```text
 github.create_issue dry run generated.
 status: dry_run
 warnings: none
 ```
+
+`--dry-run --explain` 会追加 policy explain 摘要：
+
+```text
+policy explain:
+final decision: ask
+blocking gate: risk_policy
+matched rule: <default>
+reason code: RISK_POLICY_DEFAULT_ASK
+policy revision: sha256:...
+secret resolution: allowed
+execution: blocked
+evaluated facts:
+- capability_id=github.create_issue
+- risk=write
+```
+
+Explain 输出只展示脱敏 facts，不显示 input 原文、secret-like value、Authorization/Cookie value 或完整内部 policy 文件。
 
 `--json` 输出 Result Envelope 子集：
 

@@ -107,8 +107,27 @@ describe("OpenCap CLI smoke test", () => {
       expect(humanDryRun.stdout).toContain("egress preview:");
       expect(humanDryRun.stdout).toContain("target: https://api.github.com");
       expect(humanDryRun.stdout).toContain("/body -> body");
-      expect(humanDryRun.stdout).not.toContain("policy");
+      expect(humanDryRun.stdout).not.toContain("policy explain:");
       expect(humanDryRun.stdout).not.toContain("resolvedUrl");
+
+      const explainedDryRun = await runOpenCapSmokeStage("invoke dry-run explain", [
+        "invoke",
+        "github.create_issue",
+        "--dry-run",
+        "--explain",
+        "--state-dir",
+        stateDir,
+        "--input",
+        "examples/github-issue-capability/input.json",
+      ]);
+      expect(explainedDryRun.stdout).toContain("policy explain:");
+      expect(explainedDryRun.stdout).toContain("blocking gate: risk_policy");
+      expect(explainedDryRun.stdout).toContain("matched rule: <default>");
+      expect(explainedDryRun.stdout).toContain("reason code: RISK_POLICY_DEFAULT_ASK");
+      expect(explainedDryRun.stdout).toContain("policy revision: sha256:");
+      expect(explainedDryRun.stdout).toContain("capability_id=github.create_issue");
+      expect(explainedDryRun.stdout).not.toContain("broken");
+      expect(explainedDryRun.stdout).not.toContain("input-secret");
 
       const failedInvoke = await runOpenCapSmokeStage("invoke secret missing", [
         "invoke",

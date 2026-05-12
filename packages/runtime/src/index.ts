@@ -406,6 +406,7 @@ export interface ResultEvidenceSummaryV1 {
   resultContentDigest?: string;
   resultProvenance?: ResultProvenanceV1;
   egressPreview?: RedactedEgressPreview;
+  policyTrace?: PolicyDecisionTraceV1;
 }
 
 export interface ResultEnvelopeV1 {
