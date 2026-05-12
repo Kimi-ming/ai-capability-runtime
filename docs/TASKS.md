@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T247 P2：organization data policy RFC。
 - T249 P1：实现 policy decision trace。
 - T250 P1：实现 policy explain CLI。
 - T251 P1：实现 policy change audit/ledger。
@@ -3309,7 +3308,7 @@ git diff --check
 
 ### T247 P2：organization data policy RFC
 
-- [ ] T247 P2：organization data policy RFC
+- [x] T247 P2：organization data policy RFC
 
 目标：定义未来组织级 data egress policy、provider allowlist 和 DLP provider profile。
 
@@ -3329,6 +3328,8 @@ git diff --check
 ```bash
 git diff --check
 ```
+
+完成记录：新增 `rfcs/0008-organization-data-policy-v1.md`，定义组织级 data egress policy、provider allowlist、DLP provider profile、metadata-only 默认边界和 local-first OSS 独立运行要求。同步更新 `docs/设计/data-egress-policy-v1.md`，明确组织策略不能放宽内置 safety floor、确认、secret boundary、outbound policy 或 audit。
 
 ### T248 P0：补齐输入数据治理、数据分类、外发策略、输入来源和数据最小化体系
 

@@ -111,6 +111,18 @@ V1 已实现独立的 pre-secret gate：
 
 当 `decision` 为 `ask` 时，V1 不直接执行；后续 confirmation handler 必须展示 data classes 和 egress target，并在用户确认后再继续。
 
+## 组织级策略和 DLP 边界
+
+RFC 0008 定义未来 Organization Data Policy V1。它允许团队在本地 Runtime 之上叠加 provider allowlist、data egress rules 和可选 DLP profile，但必须保持 local-first OSS 可以独立运行。
+
+边界：
+
+- 组织策略是可选增强，不是 V1 主路径前置条件。
+- 内置 safety floor、本地用户策略、确认、secret boundary 和 audit 不能被组织策略放宽。
+- Provider allowlist 不替代 outbound policy；private IP、metadata service、non-HTTPS 和 redirect 后目标仍要独立检查。
+- 外部 DLP provider 默认只能接收 data classes、paths、destination、target origin、input hash 和 redacted preview，不默认接收 input 原文。
+- 原文 DLP 扫描必须另走 profile 扩展、明确开启并写入 audit。
+
 ## 与 Policy Engine 的关系
 
 Data egress policy 不取代 risk policy。推荐顺序：
@@ -143,3 +155,4 @@ Data egress policy 不取代 risk policy。推荐顺序：
 - T237：egress decision audit fields。
 - T238：confirmation summary data classes。
 - T245：internal URL/source/config egress negative tests。
+- T247：organization data policy RFC，见 `../../rfcs/0008-organization-data-policy-v1.md`。
