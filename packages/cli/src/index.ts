@@ -27,6 +27,7 @@ import {
   resultEnvelopeFromDryRunPlan,
   resultEnvelopeFromHttpExecutionResult,
   stableJsonStringify,
+  validatePolicyYml,
   type ResultEnvelopeV1,
 } from "@opencap/runtime";
 
@@ -347,6 +348,12 @@ program
     }
   }, "Failed to validate manifests"));
 
+
+function formatPolicyFinding(finding: { severity: string; code: string; filePath: string; fieldPath: string; message: string; ruleId?: string }): string {
+  const rule = finding.ruleId === undefined ? "" : ` rule=${finding.ruleId}`;
+  return `${finding.severity} ${finding.code} ${finding.filePath}${finding.fieldPath}${rule}: ${finding.message}`;
+}
+
 program
   .command("install")
   .argument("<id>", "Capability id")
@@ -396,6 +403,35 @@ program
   }, "Failed to list installed capabilities"));
 
 
+
+
+const policyCommand = program
+  .command("policy")
+  .description("Inspect and validate OpenCap policy files.");
+
+policyCommand
+  .command("validate")
+  .argument("<path>", "Policy YAML file")
+  .option("--json", "Output JSON")
+  .description("Validate and lint a policy file before activation.")
+  .action((path: string, options: { json?: boolean }) => runCliAction(async () => {
+    const filePath = resolveCliPath(path);
+    const result = validatePolicyYml(await readFile(filePath, "utf8"), { sourcePath: filePath });
+
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else if (result.findings.length === 0) {
+      console.log(`Policy valid: ${filePath}`);
+    } else {
+      for (const finding of result.findings) {
+        console.log(formatPolicyFinding(finding));
+      }
+    }
+
+    if (!result.ok) {
+      process.exitCode = 1;
+    }
+  }, `Failed to validate policy ${path}`));
 
 program
   .command("doctor")

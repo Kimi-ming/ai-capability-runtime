@@ -192,6 +192,36 @@ Explain 输出只展示脱敏 facts，不显示 input 原文、secret-like value
 
 失败语义：如果 Result Envelope `isError: true`，CLI exit code 为 `1`，stdout 仍可输出结构化 envelope，stderr 只用于 CLI 自身错误。
 
+## `opencap policy validate <path>`
+
+目标：在 policy 生效前校验并 lint 本地策略文件。
+
+```bash
+opencap policy validate opencap.local/policies.yml
+opencap policy validate opencap.local/policies.yml --json
+```
+
+行为：
+
+- 解析 YAML。
+- 检查非法 decision/risk。
+- 检查未知字段。
+- 检查重复 rule id。
+- 检查未命名高风险 allow rule。
+- 输出包含 file path、field path 和 rule id 的 finding。
+
+普通输出：
+
+```text
+error POLICY_RISK_INVALID opencap.local/policies.yml/rules/0/match/risk rule=allow-write: Policy risk must be one of: read_only, write, external_send, destructive, financial, code_execution, secret_access.
+```
+
+Exit code：
+
+- 0：没有 error，可能包含 warning。
+- 1：存在 error 或文件不可读。
+- 2：内部错误。
+
 ## `opencap logs`
 
 目标：查看本地审计日志。

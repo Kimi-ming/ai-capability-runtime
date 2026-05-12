@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T252 P1：实现 policy validate lint。
 - T253 P1：实现 policy simulation/diff。
 - T254 P1：实现 broad allow safety checks。
 - T255 P1：实现 policy override/breakglass controls。
@@ -3439,7 +3438,7 @@ pnpm --filter @opencap/runtime test
 
 ### T252 P1：实现 policy validate lint
 
-- [ ] T252 P1：实现 policy validate lint
+- [x] T252 P1：实现 policy validate lint
 
 目标：在 policy 生效前发现语法错误、未知字段、未知 risk/decision 和危险规则。
 
@@ -3462,6 +3461,8 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/cli test
 ```
+
+完成记录：新增 `packages/runtime/src/policy-validator.ts` 和 `policy-validator.test.ts`，导出 `validatePolicyYml` 及结构化 finding 类型。CLI 新增 `opencap policy validate <path>`，普通输出包含 severity、code、file path、field path 和 rule id，`--json` 输出完整结果。Runtime 测试数从 129 增至 132，CLI smoke 已覆盖 policy validate lint。
 
 ### T253 P1：实现 policy simulation/diff
 

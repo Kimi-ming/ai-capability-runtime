@@ -111,6 +111,25 @@ rules:
 
 Runtime Engine 对每个 permission 选择第一条匹配规则；没有匹配规则时使用 `default`。默认 `ask` 不会静默允许 read-only，读操作自动允许必须由显式规则表达。
 
+## Validate/Lint 实现状态
+
+截至 2026-05-12，`@opencap/runtime` 已新增 `validatePolicyYml(raw, { sourcePath })`：
+
+- 非法 YAML、非法 decision、非法 risk 返回结构化 `error` finding。
+- 未知顶层字段、未知 rule 字段和未知 match 字段返回 `POLICY_FIELD_UNKNOWN`。
+- 重复 rule id 返回 `POLICY_RULE_ID_DUPLICATE` warning。
+- 未命名高风险 `allow` 规则返回 `POLICY_HIGH_RISK_ALLOW_UNNAMED` warning。
+- finding 包含 `filePath`、`fieldPath` 和可选 `ruleId`，方便 CLI、CI 和后续 policy activation 使用。
+
+CLI 已新增：
+
+```bash
+opencap policy validate opencap.local/policies.yml
+opencap policy validate opencap.local/policies.yml --json
+```
+
+普通输出按行展示 severity、code、filePath、fieldPath、rule id 和 message；存在 error 时 exit code 为 `1`，只有 warning 时 exit code 为 `0`。
+
 ## 审计字段
 
 PolicyDecision 必须记录：

@@ -112,6 +112,7 @@
 - Runtime Policy Decision Trace，risk policy 和 data egress gate 现在生成脱敏 trace，并通过审计事件/SQLite `policy_trace_json` 持久化。
 - CLI `opencap invoke --dry-run --explain`，在人类输出中展示 blocking gate、matched rule、reason code、policy revision 和脱敏 evaluated facts。
 - Runtime FilePolicyLedger，记录 policy activation、rollback 和 failed activation，本地 ledger 不保存 policy 原文、secret 或 input 原文。
+- Runtime/CLI policy validate lint，检测非法 decision/risk、未知字段、重复 rule id 和未命名高风险 allow 规则，并输出 file path、field path 和 rule id。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。
 - Runtime input provenance audit evidence，记录 input source、input hash、derived invocation、egress decision 和 transformations，SQLite 不保存 input 原文。

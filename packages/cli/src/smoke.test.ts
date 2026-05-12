@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -57,6 +57,24 @@ describe("OpenCap CLI smoke test", () => {
 
     try {
       await runOpenCapSmokeStage("validate", ["validate", "registry/developer-tools/github.create_issue"]);
+      const invalidPolicyPath = join(stateDir, "invalid-policy.yml");
+      await writeFile(invalidPolicyPath, `default: ask
+rules:
+  - id: duplicate
+    match:
+      risk: harmless
+    decision: allow
+  - id: duplicate
+    match:
+      risk: read_only
+    decision: allow
+`, "utf8");
+      const invalidPolicy = await runOpenCapSmokeStage("policy validate invalid", ["policy", "validate", invalidPolicyPath], {}, { allowFailure: true });
+      expect(invalidPolicy.exitCode).toBe(1);
+      expect(invalidPolicy.stdout).toContain("POLICY_RISK_INVALID");
+      expect(invalidPolicy.stdout).toContain("/rules/0/match/risk");
+      expect(invalidPolicy.stdout).toContain("rule=duplicate");
+
       await runOpenCapSmokeStage("install", ["install", "github.create_issue", "--state-dir", stateDir]);
 
       const list = await runOpenCapSmokeStage("list", ["list", "--state-dir", stateDir, "--json"]);
