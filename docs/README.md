@@ -70,6 +70,8 @@
 - [数据外发策略](设计/data-egress-policy-v1.md)
 - [策略决策追踪](设计/policy-decision-trace-v1.md)
 - [策略生命周期与变更控制](运营/policy-lifecycle-and-change-control.md)
+- [包发布策略 V1](运营/package-publishing-v1.md)
+- [签名和来源证明路线图](安全/signing-and-provenance-roadmap.md)
 - [Policy 事故响应手册](运营/policy-incident-runbook.md)
 
 ### 我要贡献 Capability 或 Registry 条目

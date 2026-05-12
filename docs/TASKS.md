@@ -21,8 +21,7 @@
 
 ### P0：V1 必须先完成
 
-- T070 P0：选择 MCP TypeScript SDK 并接入。
-- T101 P0：CI 基础通过。
+- T070 P0：选择 MCP TypeScript SDK 并接入。（阻塞：需要确认依赖和安装授权）
 
 ### P1：V1 完整体验
 
@@ -30,7 +29,6 @@
 
 ### P2/P3：增强和后续扩展
 
-- T123 P2：npm package 发布预案。
 - T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
 - T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
 - T126 P1：把发布门禁整理成可执行 release checklist。
@@ -112,7 +110,6 @@
 - T253 P1：实现 policy simulation/diff。
 - T254 P1：实现 broad allow safety checks。
 - T255 P1：实现 policy override/breakglass controls。
-- T256 P2：policy bundle manifest/signing RFC。
 - T257 P1：policy simulation fixtures。
 - T258 P2：policy incident runbook。
 - T259 P2：decision log export。
@@ -140,6 +137,8 @@
 - 已完成：T121 P1：CHANGELOG。
 - 已完成：T122 P2：版本策略。
 - 已完成：T123 P2：npm package 发布预案。
+- 已完成：T101 P0：CI 基础通过。
+- 已完成：T256 P2：policy bundle manifest/signing RFC。
 - 已完成：T149 P0：补齐演进、发布和兼容性体系。
 - 已完成：T150 P0：补齐互操作、确认同意、一致性和 Agentic 风险体系。
 - 已完成：T166 P0：补齐身份、授权和凭据生命周期体系。
@@ -1203,7 +1202,13 @@ pnpm lint
 
 ### T070 P0：选择 MCP TypeScript SDK 并接入
 
-- [ ] T070 P0：选择 MCP TypeScript SDK 并接入
+- [!] T070 P0：选择 MCP TypeScript SDK 并接入
+
+阻塞状态：
+
+- 需要确认 MCP TypeScript SDK 的包名、版本和接入边界。
+- 需要允许安装新的 npm 依赖；当前开发环境网络受限，未获批准前不自动修改依赖。
+- 如果暂不引入 SDK，可改走最小 stdio JSON-RPC server spike，但需要重新确认验收标准。
 
 验收标准：
 
@@ -1690,7 +1695,7 @@ git diff --check
 
 ### T101 P0：CI 基础通过
 
-- [ ] T101 P0：CI 基础通过
+- [x] T101 P0：CI 基础通过
 
 要求：
 
@@ -1712,9 +1717,12 @@ git diff --check
 ruby -e "require 'yaml'; Dir['.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 pnpm validate
 pnpm test
+pnpm build
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
+
+完成记录：`.github/workflows/validate.yml` 已覆盖 install、validate、test 和 build；Registry 校验与 workspace tests 分离，workflow 不依赖外部 secret。已用 Ruby YAML parser 验证 workflow 结构，并在本地项目环境中跑通 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。
 
 ### T102 P1：单元测试基础设施
 
@@ -1975,7 +1983,7 @@ git diff --check
 
 ### T123 P2：npm package 发布预案
 
-- [ ] T123 P2：npm package 发布预案
+- [x] T123 P2：npm package 发布预案
 
 范围：
 
@@ -1997,6 +2005,8 @@ git diff --check
 python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .
 git diff --check
 ```
+
+完成记录：`docs/运营/package-publishing-v1.md` 已补齐 alpha 当前发布判断、发布候选包、暂缓发布包、trusted publishing/provenance、发布前验证和不发布条件；`docs/README.md` 与 `docs/INDEX.md` 已加入入口。当前判断为 `@opencap/spec`、`@opencap/runtime`、`@opencap/cli` 可作为 alpha candidate，`@opencap/mcp` 与 `@opencap/sdk-js` 需等完整 MCP server/SDK 边界成熟后再正式发布。
 
 ---
 
@@ -3549,7 +3559,7 @@ pnpm --filter @opencap/runtime build
 
 ### T256 P2：policy bundle manifest/signing RFC
 
-- [ ] T256 P2：policy bundle manifest/signing RFC
+- [x] T256 P2：policy bundle manifest/signing RFC
 
 目标：为未来本地 bundle、组织 bundle 和签名策略留下兼容路径，但不进入 V1 主路径。
 
@@ -3570,6 +3580,8 @@ pnpm --filter @opencap/runtime build
 ```bash
 git diff --check
 ```
+
+完成记录：新增 `rfcs/0009-policy-bundle-manifest-signing-v1.md`，定义 policy bundle manifest、digest、optional signature、activation record、failed activation 和 local-first 约束；`docs/运营/policy-lifecycle-and-change-control.md` 与 `docs/安全/signing-and-provenance-roadmap.md` 已同步引用。RFC 明确签名只能证明来源和完整性，不能证明策略安全；Cloud/org bundle 不能成为开源 Runtime 启动依赖。
 
 ### T257 P1：policy simulation fixtures
 

@@ -59,3 +59,12 @@ registry commit -> generated index -> signed index -> client verifies signature/
 - 自托管企业环境可能不能用 public Sigstore。
 
 因此签名路线必须配合 Trust Card 和 review，不单独作为信任等级。
+
+## Policy Bundle
+
+Policy bundle 签名路线见 `rfcs/0009-policy-bundle-manifest-signing-v1.md`。该 RFC 明确：
+
+- bundle digest、revision 和 activation record 是未来兼容点。
+- optional signature 不能替代 validate、simulation/diff 或 broad allow safety checks。
+- failed activation 不覆盖当前 active policy。
+- Cloud/org bundle 不能成为 OSS Runtime 启动依赖。

@@ -6,6 +6,8 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
+本轮完成了项目测试与后续任务收敛：CI workflow 已增加 build 门禁，npm package 发布预案补齐 alpha 当前判断，policy bundle manifest/signing RFC 已落地，T101/T123/T256 状态已同步为完成。当前唯一 P0 阻塞项是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+
 已经完成的实现主线：
 
 - GitHub 仓库创建和推送
@@ -34,7 +36,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 Next task: none，目前 `next_task.py` 显示剩余任务均为 blocked。
 
-下一步推荐：先重新梳理 `docs/TASKS.md` 中被阻塞的剩余任务，补充可执行验收标准后再继续。
+下一步推荐：解除 T070 阻塞后继续。需要先确认 MCP TypeScript SDK 的包名、版本和接入边界，并允许安装新的 npm 依赖；如果暂不引入 SDK，可以把 T070 改为最小 stdio JSON-RPC server spike，但要同步调整验收标准。
 
 推荐第一个任务：
 
@@ -44,21 +46,31 @@ Next task: none，目前 `next_task.py` 显示剩余任务均为 blocked。
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T102/T103/T104/T112/T113/T114/T120/T121/T122/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T257/T258/T259/T260 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
 - 当前停止条件：`next_task.py` 返回 `Mode: Blocked`，没有 ready task。
 
 ## 最近验证
 
-项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。T260 本轮已运行：
+项目 conda 环境 `ai-capability-runtime` 已创建并安装依赖。本轮项目测试与文档收敛已运行：
 
-- `pnpm --filter @opencap/runtime test -- policy-governance-conformance.test.ts`
-- `pnpm --filter @opencap/runtime test`
+- `pnpm validate`
+- `pnpm lint`
+- `pnpm build`
+- `pnpm test`
+- Ruby YAML parser 校验 `.github/**/*.yml` / `.yaml`
 - `git diff --check`
 - `check_docs.py`
 - `next_task.py`（当前返回 `Mode: Blocked`，无 ready task）
 
-当前已知：上述验证均通过。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 20 个、runtime 153 个、mcp 18 个、cli smoke 1 个测试。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+
+## 本轮文档和后续收敛
+
+- T101 已完成：`.github/workflows/validate.yml` 的 workspace tests job 增加 `pnpm build`。
+- T123 已完成：`docs/运营/package-publishing-v1.md` 已补齐 alpha package 发布判断，明确 `@opencap/spec`、`@opencap/runtime`、`@opencap/cli` 可作为 alpha candidate，`@opencap/mcp` 和 `@opencap/sdk-js` 暂缓。
+- T256 已完成：新增 `rfcs/0009-policy-bundle-manifest-signing-v1.md`，并同步 policy lifecycle 与 signing/provenance 文档。
+- T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
 ## Data Egress Policy Gate 已实现
 

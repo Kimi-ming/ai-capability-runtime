@@ -77,13 +77,15 @@ V1 可以从简单本地文件开始：
 
 ## Future Policy Bundle
 
-未来可以引入 policy bundle，但必须保持 OSS local-first：
+未来可以引入 policy bundle，但必须保持 OSS local-first。RFC 0009 已定义草案方向：
 
 - bundle digest。
+- bundle revision。
 - optional signature。
 - activation record。
 - failed activation 不覆盖当前 active policy。
 - remote/org bundle 不进入 V1 主路径。
+- 签名只证明来源和完整性，不证明策略安全。
 
 ## 非目标
 

@@ -14,6 +14,7 @@
 - Manifest validator 单元测试覆盖合法和非法 schema 场景。
 - Registry test case schema 与 `pnpm validate` 集成。
 - GitHub Actions Registry CI，push/pull_request 时使用固定 Node/pnpm 和 frozen lockfile 运行 `pnpm validate`。
+- GitHub Actions workspace tests job 增加 `pnpm build` 门禁，本地已验证 workflow YAML、validate、lint、build 和 test。
 - pnpm workspace 全量验证通过：build/test/lint/validate 均可在项目 conda 环境运行。
 - 单元测试基础设施现状文档化，明确 spec、runtime、mcp helper 已覆盖的测试入口和 CLI 测试缺口。
 - Runtime 临时测试项目 helper，覆盖 install/list/logs 写入显式临时 state dir 且不污染默认 `opencap.local/`。
@@ -22,6 +23,7 @@
 - 第一次贡献教程，串联环境准备、任务选择、验证、文档同步和提交推送。
 - 架构总览新增 V1 Runtime 主路径 Mermaid 图，明确 CLI、Runtime、Policy、Audit、HTTP Executor、Local State 和外部 API 的关系。
 - Alpha release checklist，区分发布阻断项和可后续跟进项，并明确未实现能力边界。
+- npm package 发布预案补齐 alpha 当前发布判断、trusted publishing/provenance、发布前验证和暂缓发布边界。
 - 版本和兼容性策略补强，明确 package、manifest schema、Registry compatibility 和 `0.x` breaking change 记录规则。
 - Capability 编写教程，覆盖从空目录到 validate 通过的最小流程。
 - MCP Host 手动测试指南，覆盖 Claude Desktop、Claude Code、Cursor 配置、tools/list、tools/call、confirmation_required 和排障路径。
@@ -120,6 +122,7 @@
 - Policy 事故响应手册，覆盖撤销 override、激活 deny policy、审查 audit、rollback policy、breakglass 边界和 advisory/revocation 联动。
 - Decision log export，新增脱敏 policy decision summary 导出，支持 capability、decision、since/until 过滤，并关联 invocation id、policy revision 和 trace id。
 - Policy governance conformance tests，新增 C-PG 一致性测试组和 record fixture，覆盖 decision trace、policy ledger、broad allow simulation、breakglass 硬边界和 audit redaction export。
+- Policy bundle manifest/signing RFC，定义 policy bundle digest、optional signature、activation record、failed activation 和 local-first 边界。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。
 - Runtime input provenance audit evidence，记录 input source、input hash、derived invocation、egress decision 和 transformations，SQLite 不保存 input 原文。

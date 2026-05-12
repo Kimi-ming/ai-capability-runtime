@@ -44,6 +44,8 @@ pnpm lint
 
 如果因为网络或依赖未安装不能运行，需要在交接文档中记录。
 
+最近全量验证：2026-05-12 在项目 conda 环境中通过 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。当前 `pnpm validate` 覆盖 5 个 registry manifest 和 5 个 registry test；`pnpm test` 覆盖 spec 20 个、runtime 153 个、mcp 18 个、cli smoke 1 个测试。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+
 ## 当前单元测试基础设施
 
 根目录 `pnpm test` 当前执行 `pnpm -r test`，会运行 workspace 中已声明 `test` 脚本的包。现阶段测试基础设施已经覆盖 `@opencap/spec`、`@opencap/runtime`、`@opencap/mcp` 和 CLI smoke test。CLI 已有端到端 smoke 覆盖，但尚未建立完整 command snapshot tests。
@@ -83,7 +85,14 @@ pnpm install --frozen-lockfile
 pnpm validate
 ```
 
-该 job 不需要外部 secret，失败时应优先检查 Capability manifest schema 和 `tests/basic.yml` registry test 格式。workflow 也保留 workspace tests job，用于运行 `pnpm test`。
+该 job 不需要外部 secret，失败时应优先检查 Capability manifest schema 和 `tests/basic.yml` registry test 格式。workflow 也保留 workspace tests job，用于运行：
+
+```bash
+pnpm test
+pnpm build
+```
+
+本地校验 workflow 结构时使用 Ruby YAML parser；远端 Actions 结果如果尚未运行，需要在 `docs/HANDOFF.md` 记录。
 
 ## 模块测试计划
 

@@ -30,6 +30,7 @@
 | [Policy 事故响应手册](运营/policy-incident-runbook.md) | 策略误放开、override 滥用和紧急阻断恢复流程 | 事故响应流程、policy rollback 或 advisory/revocation 联动变化时 |
 | [版本和兼容性策略](规范/versioning-and-compatibility.md) | Package、schema 和 Registry 兼容规则 | 版本、发布或公共契约变化时 |
 | [Alpha Release Checklist](releases/alpha-checklist.md) | Alpha 发布前门禁 | 发布范围、阻断项或发布流程变化时 |
+| [包发布策略 V1](运营/package-publishing-v1.md) | npm package 发布范围、顺序、provenance 和不发布条件 | 包范围、发布顺序或 trusted publishing 策略变化时 |
 | [决策索引](DECISIONS.md) | 已接受 ADR 总览 | 新增或调整 ADR 时 |
 | [风险登记](RISKS.md) | High/Medium/Low 风险 | 发现、缓解或关闭风险时 |
 

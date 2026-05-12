@@ -58,3 +58,6 @@ jobs:
 
       - name: Run package tests
         run: pnpm test
+
+      - name: Run package build
+        run: pnpm build
