@@ -80,8 +80,15 @@ describe("OpenCap CLI smoke test", () => {
         capabilityId: "github.create_issue",
         status: "dry_run",
         isError: false,
-        structuredContent: { request: { method: "POST" } },
+        structuredContent: {
+          request: { method: "POST" },
+          egressPreview: {
+            targetOrigin: "https://api.github.com",
+            fieldsSent: expect.arrayContaining([expect.objectContaining({ path: "/body", destination: "body" })]),
+          },
+        },
       });
+      expect(dryRunEnvelope).not.toHaveProperty("evidence");
       expect(dryRunEnvelope).not.toHaveProperty("policy");
       expect(dryRunEnvelope).not.toHaveProperty("plan");
 
@@ -97,6 +104,9 @@ describe("OpenCap CLI smoke test", () => {
       expect(humanDryRun.stdout).toContain("github.create_issue dry run generated.");
       expect(humanDryRun.stdout).toContain("status: dry_run");
       expect(humanDryRun.stdout).toContain("warnings: none");
+      expect(humanDryRun.stdout).toContain("egress preview:");
+      expect(humanDryRun.stdout).toContain("target: https://api.github.com");
+      expect(humanDryRun.stdout).toContain("/body -> body");
       expect(humanDryRun.stdout).not.toContain("policy");
       expect(humanDryRun.stdout).not.toContain("resolvedUrl");
 

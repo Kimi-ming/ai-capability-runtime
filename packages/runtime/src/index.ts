@@ -20,6 +20,10 @@ import type { DatabaseSync } from "node:sqlite";
 import { dirname, join, resolve } from "node:path";
 import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
+import { buildFieldLevelEgressMap as buildFieldLevelEgressMapForRuntime } from "./egress-map.js";
+import { buildRedactedEgressPreview as buildRedactedEgressPreviewForRuntime, type RedactedEgressPreview } from "./egress-preview.js";
+import { classifyInput as classifyInputForRuntime } from "./input-classifier.js";
+import { minimizeInputByEgressMap as minimizeInputByEgressMapForRuntime } from "./input-minimization.js";
 import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import type { DataEgressContext, DataEgressDecision, DataEgressDecisionResult } from "./data-egress-policy.js";
 
@@ -204,6 +208,7 @@ export interface HttpDryRunPlan {
   body?: unknown;
   authMode: string;
   risk: string;
+  egressPreview?: RedactedEgressPreview;
   warnings?: string[];
 }
 
@@ -284,15 +289,26 @@ export async function buildHttpDryRunPlan(
   const inputRecord = templateInputRecord(input);
   const execution = manifest.execution as HttpExecution;
   const warnings = capabilityRiskWarnings(manifest);
+  const renderedUrl = renderUrlTemplate(execution.url, inputRecord);
+  const inputClassification = classifyInputForRuntime(input);
+  const egressMap = buildFieldLevelEgressMapForRuntime(manifest, input, inputClassification);
+  const minimizedInput = minimizeInputByEgressMapForRuntime(input, egressMap);
+  const egressPreview = buildRedactedEgressPreviewForRuntime({
+    targetOrigin: targetOrigin(renderedUrl) ?? "",
+    map: egressMap,
+    minimizedInput: minimizedInput.input,
+    classification: inputClassification,
+  });
   const plan: HttpDryRunPlan = {
     status: "dry_run",
     capabilityId: manifest.id,
     method: execution.method,
-    url: renderUrlTemplate(execution.url, inputRecord),
+    url: renderedUrl,
     timeoutMs: execution.timeout_ms,
     body: renderJsonBody(execution.body, inputRecord),
     authMode: authMode(manifest),
     risk: summarizeRisk(manifest),
+    egressPreview,
   };
 
   if (warnings.length > 0) {
@@ -311,6 +327,11 @@ export async function buildHttpDryRunPlan(
       reason: "Dry run plan generated.",
       inputHash: hashInput(input),
       inputRedactedJson: stableJsonStringify(redactInput(input)),
+      resolvedUrl: renderedUrl,
+      requestStarted: false,
+      egressDataClasses: egressPreview.dataClasses,
+      egressTargetOrigin: egressPreview.targetOrigin,
+      egressRedactedPreviewJson: stableJsonStringify(egressPreview),
     });
   }
 
@@ -381,6 +402,7 @@ export interface ResultEvidenceSummaryV1 {
   sanitizerFindings?: ResultSanitizerFinding[];
   resultContentDigest?: string;
   resultProvenance?: ResultProvenanceV1;
+  egressPreview?: RedactedEgressPreview;
 }
 
 export interface ResultEnvelopeV1 {
@@ -698,6 +720,7 @@ export function resultEnvelopeFromDryRunPlan(plan: HttpDryRunPlan, options: Resu
       },
       authMode: plan.authMode,
       risk: plan.risk,
+      egressPreview: plan.egressPreview,
     },
     warnings: (plan.warnings ?? []).map(warningFromCode),
     evidence: {
@@ -706,6 +729,7 @@ export function resultEnvelopeFromDryRunPlan(plan: HttpDryRunPlan, options: Resu
       targetOrigin: targetOrigin(plan.url),
       httpMethod: plan.method,
       resolvedUrl: plan.url,
+      egressPreview: plan.egressPreview,
       ...options.evidence,
     },
   });

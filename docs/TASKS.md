@@ -109,7 +109,6 @@
 - T205 P2：Usage export format。
 - T206 P2：Problem details for quota/rate errors。
 - T207 P2：Usage evidence conformance tests。
-- T244 P1：dry-run egress preview。
 - T245 P1：internal URL/source/config egress negative tests。
 - T246 P2：manifest data class hint RFC。
 - T247 P2：organization data policy RFC。
@@ -3235,7 +3234,7 @@ pnpm --filter @opencap/runtime test
 
 ### T244 P1：dry-run egress preview
 
-- [ ] T244 P1：dry-run egress preview
+- [x] T244 P1：dry-run egress preview
 
 目标：`opencap invoke --dry-run` 展示请求计划和 redacted egress preview，不读取 secret 原值，不发请求。
 
@@ -3257,6 +3256,8 @@ pnpm --filter @opencap/runtime test
 pnpm --filter @opencap/cli test
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：`buildHttpDryRunPlan` 现在基于 input classification、field-level egress map 和 input minimization 生成 `egressPreview`，并把 target origin、fields sent、data classes 和 redacted input 放入 dry-run Result Envelope。CLI 人类输出会展示 egress preview；dry-run 审计记录 `requestStarted=false`、`egressTargetOrigin`、`egressDataClasses` 和 `egressRedactedPreviewJson`，不读取 secret 原值、不发送请求。
 
 ### T245 P1：internal URL/source/config egress negative tests
 

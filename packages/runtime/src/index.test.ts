@@ -235,7 +235,7 @@ describe("HTTP dry-run plan", () => {
       labels: ["bug", "p1"],
     });
 
-    expect(plan).toEqual({
+    expect(plan).toMatchObject({
       status: "dry_run",
       capabilityId: "github.create_issue",
       method: "POST",
@@ -248,6 +248,17 @@ describe("HTTP dry-run plan", () => {
       },
       authMode: "api_key:bearer",
       risk: "write",
+      egressPreview: {
+        targetOrigin: "https://api.github.com",
+        dataClasses: [],
+        fieldsSent: expect.arrayContaining([
+          expect.objectContaining({ path: "/owner", destination: "url" }),
+          expect.objectContaining({ path: "/repo", destination: "url" }),
+          expect.objectContaining({ path: "/title", destination: "body" }),
+          expect.objectContaining({ path: "/body", destination: "body" }),
+          expect.objectContaining({ path: "/labels", destination: "body" }),
+        ]),
+      },
     });
     expect(JSON.stringify(plan)).not.toContain("GITHUB_TOKEN");
   });
@@ -261,12 +272,16 @@ describe("HTTP dry-run plan", () => {
     );
 
     expect(plan.status).toBe("dry_run");
+    expect(plan.egressPreview?.targetOrigin).toBe("https://api.github.com");
     expect(logger.events).toHaveLength(1);
     expect(logger.events[0]).toMatchObject({
       capabilityId: "github.create_issue",
       status: "dry_run",
       policyDecision: "allow",
       confirmationStatus: "approved",
+      requestStarted: false,
+      egressTargetOrigin: "https://api.github.com",
+      egressRedactedPreviewJson: expect.stringContaining('"targetOrigin":"https://api.github.com"'),
       inputRedactedJson: '{"body":"broken","labels":[],"owner":"opencap","repo":"runtime","title":"Bug","token":"[REDACTED]"}',
     });
   });

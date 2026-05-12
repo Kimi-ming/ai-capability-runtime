@@ -196,6 +196,51 @@ function cliEnvelopeSubset(envelope: ResultEnvelopeV1, verbose: boolean | undefi
   return withoutEvidence;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function egressPreviewFromEnvelope(envelope: ResultEnvelopeV1): Record<string, unknown> | undefined {
+  if (!isRecord(envelope.structuredContent) || !isRecord(envelope.structuredContent.egressPreview)) {
+    return undefined;
+  }
+
+  return envelope.structuredContent.egressPreview;
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function printEgressPreview(preview: Record<string, unknown>): void {
+  console.log("egress preview:");
+
+  if (typeof preview.targetOrigin === "string") {
+    console.log(`target: ${preview.targetOrigin}`);
+  }
+
+  const dataClasses = stringArray(preview.dataClasses);
+  console.log(`data classes: ${dataClasses.length === 0 ? "none" : dataClasses.join(", ")}`);
+
+  if (!Array.isArray(preview.fieldsSent) || preview.fieldsSent.length === 0) {
+    console.log("fields sent: none");
+    return;
+  }
+
+  console.log("fields sent:");
+  for (const field of preview.fieldsSent) {
+    if (!isRecord(field)) {
+      continue;
+    }
+
+    const path = typeof field.path === "string" ? field.path : "<unknown>";
+    const destination = typeof field.destination === "string" ? field.destination : "unknown";
+    const fieldClasses = stringArray(field.dataClasses);
+    const suffix = fieldClasses.length === 0 ? "" : ` [${fieldClasses.join(", ")}]`;
+    console.log(`- ${path} -> ${destination}${suffix}`);
+  }
+}
+
 function printInvokeResult(envelope: ResultEnvelopeV1, options: { json?: boolean; verbose?: boolean }): void {
   if (options.json) {
     console.log(JSON.stringify(cliEnvelopeSubset(envelope, options.verbose), null, 2));
@@ -211,6 +256,11 @@ function printInvokeResult(envelope: ResultEnvelopeV1, options: { json?: boolean
     for (const warning of envelope.warnings) {
       console.log(`- ${warning.severity} ${warning.code}: ${warning.message}`);
     }
+  }
+
+  const egressPreview = egressPreviewFromEnvelope(envelope);
+  if (egressPreview !== undefined) {
+    printEgressPreview(egressPreview);
   }
 
   if (options.verbose) {
@@ -392,6 +442,10 @@ program
           inputHash: hashInput(input),
           inputRedactedJson: stableJsonStringify(redactInput(input)),
           resolvedUrl: plan.url,
+          requestStarted: false,
+          egressDataClasses: plan.egressPreview?.dataClasses,
+          egressTargetOrigin: plan.egressPreview?.targetOrigin,
+          egressRedactedPreviewJson: plan.egressPreview === undefined ? undefined : stableJsonStringify(plan.egressPreview),
         });
         const envelope = resultEnvelopeFromDryRunPlan(plan, {
           evidence: {

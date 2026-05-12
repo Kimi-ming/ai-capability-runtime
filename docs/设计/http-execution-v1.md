@@ -167,15 +167,16 @@ resolved_url -> outbound policy -> allow/deny
 
 ## 当前实现状态
 
-截至 2026-05-09，Runtime 已实现 HTTP dry-run plan 和真实 HTTP executor：
+截至 2026-05-12，Runtime 已实现 HTTP dry-run plan 和真实 HTTP executor：
 
-- dry-run 会渲染 method、resolved URL、JSON body、auth mode 和风险摘要。
-- dry-run 不读取 secret 原值，不发送外部网络请求。
+- dry-run 会渲染 method、resolved URL、JSON body、auth mode、风险摘要和 redacted egress preview。
+- dry-run 输出 target origin、fields sent 和 data classes，并在 Result Envelope `structuredContent.egressPreview` 中提供结构化预览。
+- dry-run 不读取 secret 原值，不发送外部网络请求，审计 evidence 明确 `requestStarted=false`。
 - executor 支持 JSON body、`auth.placement: bearer`、`auth.placement: header`、timeout、缺凭据、网络错误和 HTTP 非 2xx 结构化结果。
 - HTTP 响应会通过 `normalizeHttpResponse` 归一化为 JSON、text 或 empty，并保留 status code、content type 和 body kind。
 - dry-run 和真实执行都可以写 audit log；真实执行会持久化 `resolvedUrl` evidence。
 
-Secret Resolver、outbound policy、output schema validation 和 Result Envelope 管线仍在后续任务中实现。
+Secret Resolver、完整 outbound policy 和更细粒度 policy trace 仍在后续任务中实现。
 
 ## 与任务对应
 

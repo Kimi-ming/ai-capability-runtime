@@ -47,6 +47,12 @@ describe("Result Envelope V1", () => {
       authMode: "api_key:bearer",
       risk: "write",
       warnings: ["arbitrary_url"],
+      egressPreview: {
+        targetOrigin: "https://api.github.com",
+        dataClasses: ["pii"],
+        fieldsSent: [{ path: "/body", destination: "body", dataClasses: ["pii"], redacted: true }],
+        redactedInput: { body: "d***@example.com" },
+      },
     };
 
     const envelope = resultEnvelopeFromDryRunPlan(plan, { invocationId: "inv-dry" });
@@ -58,9 +64,12 @@ describe("Result Envelope V1", () => {
       status: "dry_run",
       outcome: "dry_run",
       isError: false,
-      structuredContent: { request: { method: "POST", url: "https://api.github.com/repos/opencap/runtime/issues" } },
+      structuredContent: {
+        request: { method: "POST", url: "https://api.github.com/repos/opencap/runtime/issues" },
+        egressPreview: { targetOrigin: "https://api.github.com", dataClasses: ["pii"] },
+      },
       warnings: [{ code: "ARBITRARY_URL", severity: "warning" }],
-      evidence: { requestStarted: false, httpMethod: "POST", targetOrigin: "https://api.github.com" },
+      evidence: { requestStarted: false, httpMethod: "POST", targetOrigin: "https://api.github.com", egressPreview: { targetOrigin: "https://api.github.com" } },
     });
   });
 

@@ -41,6 +41,8 @@ Redacted egress preview 已实现：
 - `secret_like`、`source_code`、`internal_url`、`financial_data` 使用 `[redacted:...]` 替换。
 - `pii` 使用局部遮蔽。
 - `free_text_unknown` 和超长文本会摘要化，不展示完整原文。
+- `opencap invoke --dry-run` 会把该 preview 放入 Result Envelope 的 `structuredContent.egressPreview`，人类输出会展示 target、data classes 和 fields sent。
+- dry-run 审计事件记录 `requestStarted=false`、`egressTargetOrigin`、`egressDataClasses` 和 `egressRedactedPreviewJson`，但不读取 secret 原值、不发送请求。
 
 ## Redaction Rules
 
