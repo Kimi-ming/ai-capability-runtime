@@ -1,0 +1,42 @@
+default: ask
+rules:
+  - id: allow-read-only-registry
+    match:
+      capability_id: github.search_repo
+      resource: github.repo
+      action: search
+      risk: read_only
+    decision: allow
+    reason: Scoped read-only repository search is allowed for fixtures.
+  - id: allow-github-create-issue
+    match:
+      capability_id: github.create_issue
+      resource: github.issue
+      action: create
+      risk: write
+    decision: allow
+    reason: Scoped issue creation fixture.
+  - id: allow-slack-send-fixture
+    match:
+      capability_id: slack.send_message
+      resource: slack.message
+      action: send
+      risk: external_send
+    decision: allow
+    reason: Scoped external send fixture.
+  - id: allow-github-delete-fixture
+    match:
+      capability_id: github.delete_issue
+      resource: github.issue
+      action: delete
+      risk: destructive
+    decision: allow
+    reason: Scoped destructive fixture for simulation only.
+  - id: allow-stripe-payment-fixture
+    match:
+      capability_id: stripe.create_payment
+      resource: stripe.payment
+      action: create
+      risk: financial
+    decision: allow
+    reason: Scoped financial fixture for simulation only.

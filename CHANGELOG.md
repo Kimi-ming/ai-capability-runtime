@@ -116,6 +116,7 @@
 - Runtime/CLI policy simulation/diff，支持在策略生效前比较 `policyBefore`/`policyAfter` 和场景 fixture，识别 new allow、ask/deny 放宽、敏感数据外发放宽和金融风险放宽，且 report 不包含 input 原文。
 - Runtime broad allow safety checks，policy validator 会标记高风险宽泛 allow，simulation 会对 `secret_like`、`pii`、`source_code` 的 broad egress allow 产生 error finding。
 - Runtime policy override/breakglass controls，支持受限 `allow_once`、`allow_until`、`deny_override` 和 `breakglass` record，并把 override 结果写入 policy trace 与 audit event。
+- Policy simulation fixtures，新增 baseline/scoped/broad policy fixture 和 governance scenario fixture，覆盖风险、数据分类、trust/lifecycle/advisory 事实且不包含真实敏感值。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。
 - Runtime input provenance audit evidence，记录 input source、input hash、derived invocation、egress decision 和 transformations，SQLite 不保存 input 原文。

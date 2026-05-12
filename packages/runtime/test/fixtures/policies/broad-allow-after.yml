@@ -1,0 +1,12 @@
+default: ask
+rules:
+  - id: allow-all-read-only
+    match:
+      risk: read_only
+    decision: allow
+    reason: Broad read-only fixture.
+  - id: allow-all-write-fixture
+    match:
+      risk: write
+    decision: allow
+    reason: Broad write fixture for simulation warning coverage.

@@ -136,3 +136,14 @@ T254 后，policy simulation 会结合 scenario 判断 `allow` 是否来自宽�
 - `secret_like`、`pii`、`source_code` 通过 broad allow 外发会产生 `broad_data_egress_allow` error。
 
 该 finding 不包含 input 原文，只记录 scenario id、capability id、risk、data classes、target origin 和前后 decision，可作为后续 policy activation gate 的输入。
+
+## Fixture 集合
+
+T257 新增稳定 fixture：
+
+- `packages/runtime/test/fixtures/policies/baseline-ask.yml`：默认 ask baseline。
+- `packages/runtime/test/fixtures/policies/scoped-allow.yml`：对 read/write/external/destructive/financial 的 scoped allow 示例。
+- `packages/runtime/test/fixtures/policies/broad-allow-after.yml`：read-only 和 write broad allow 示例，用于 broad allow warning/simulation。
+- `packages/runtime/test/fixtures/policy-scenarios/governance.yml`：覆盖风险、数据分类、trust level、lifecycle 和 advisory status 的 scenario 集合。
+
+这些 fixture 只包含合成 id、分类标签和公共服务 origin，不包含真实 secret、真实邮箱、真实 token 或用户输入原文。后续 policy conformance tests 应优先复用这些 fixture，而不是在测试里散写场景。

@@ -3573,7 +3573,7 @@ git diff --check
 
 ### T257 P1：policy simulation fixtures
 
-- [ ] T257 P1：policy simulation fixtures
+- [x] T257 P1：policy simulation fixtures
 
 目标：建立一组稳定场景用于 policy simulation、broad allow 检查和 conformance。
 
@@ -3594,6 +3594,8 @@ git diff --check
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/test/fixtures/policies/`，包含 `baseline-ask.yml`、`scoped-allow.yml` 和 `broad-allow-after.yml`；新增 `packages/runtime/test/fixtures/policy-scenarios/governance.yml`，覆盖 read_only/write/external_send/destructive/financial、pii/secret_like/source_code/internal_url，以及 trust/lifecycle/advisoryStatus 事实。新增 `policy-fixtures.test.ts` 校验 policy fixture 无 error、scenario coverage 完整且不包含真实邮箱、GitHub token 或 bearer token。Runtime 测试数从 143 增至 145。
 
 ### T258 P2：policy incident runbook
 

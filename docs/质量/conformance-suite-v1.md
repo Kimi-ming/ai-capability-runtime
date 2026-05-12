@@ -69,6 +69,7 @@ OpenCap 的价值来自“不会做不该做的事”。因此下列测试优先
 - policy deny 时 executor 不被调用。
 - 每个 policy/gate decision 都产生 redacted trace。
 - broad allow 或 ask/deny -> allow 策略变更产生 simulation/diff finding。
+- policy governance 测试优先复用 `packages/runtime/test/fixtures/policies/` 和 `packages/runtime/test/fixtures/policy-scenarios/governance.yml`。
 - override/breakglass 不覆盖 data egress deny、outbound private block 或 revoked/malicious block。
 - ask 且没有 confirmation channel 时不执行。
 - secret 不进入 logs/stdout/MCP result。

@@ -1,0 +1,60 @@
+scenarios:
+  - id: github.search_repo.read_only
+    capabilityId: github.search_repo
+    resource: github.repo
+    action: search
+    risk: read_only
+    dataClasses: []
+    targetOrigin: https://api.github.com
+    trustLevel: tested
+    lifecycle: active
+    advisoryStatus: none
+
+  - id: github.create_issue.source_code
+    capabilityId: github.create_issue
+    resource: github.issue
+    action: create
+    risk: write
+    dataClasses:
+      - source_code
+    targetOrigin: https://api.github.com
+    trustLevel: community_listed
+    lifecycle: active
+    advisoryStatus: none
+
+  - id: slack.send_message.sensitive
+    capabilityId: slack.send_message
+    resource: slack.message
+    action: send
+    risk: external_send
+    dataClasses:
+      - pii
+      - secret_like
+    targetOrigin: https://slack.com
+    trustLevel: tested
+    lifecycle: active
+    advisoryStatus: none
+
+  - id: github.delete_issue.internal_url
+    capabilityId: github.delete_issue
+    resource: github.issue
+    action: delete
+    risk: destructive
+    dataClasses:
+      - internal_url
+    targetOrigin: https://api.github.com
+    trustLevel: unverified
+    lifecycle: deprecated
+    advisoryStatus: open_advisory
+
+  - id: stripe.create_payment.financial
+    capabilityId: stripe.create_payment
+    resource: stripe.payment
+    action: create
+    risk: financial
+    dataClasses:
+      - financial_data
+    targetOrigin: https://api.stripe.com
+    trustLevel: maintainer_verified
+    lifecycle: active
+    advisoryStatus: none
