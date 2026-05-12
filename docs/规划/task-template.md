@@ -55,9 +55,9 @@ command
 ## 好任务示例
 
 ```md
-### T001 P0：让 `opencap validate` 调用真实 schema 校验
+### 示例：让 `opencap validate` 调用真实 schema 校验
 
-- [ ] T001 P0：让 `opencap validate` 调用真实 schema 校验
+- 待办：让 `opencap validate` 调用真实 schema 校验
 
 目标：CLI 能校验 Capability manifest，而不是只输出 scaffold 文本。
 

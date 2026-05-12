@@ -119,6 +119,7 @@
 - Policy simulation fixtures，新增 baseline/scoped/broad policy fixture 和 governance scenario fixture，覆盖风险、数据分类、trust/lifecycle/advisory 事实且不包含真实敏感值。
 - Policy 事故响应手册，覆盖撤销 override、激活 deny policy、审查 audit、rollback policy、breakglass 边界和 advisory/revocation 联动。
 - Decision log export，新增脱敏 policy decision summary 导出，支持 capability、decision、since/until 过滤，并关联 invocation id、policy revision 和 trace id。
+- Policy governance conformance tests，新增 C-PG 一致性测试组和 record fixture，覆盖 decision trace、policy ledger、broad allow simulation、breakglass 硬边界和 audit redaction export。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。
 - Runtime input provenance audit evidence，记录 input source、input hash、derived invocation、egress decision 和 transformations，SQLite 不保存 input 原文。

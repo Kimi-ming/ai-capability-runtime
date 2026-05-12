@@ -1,0 +1,17 @@
+subject:
+  type: runtime
+  name: opencap-runtime
+  version: 0.1.0-dev
+profile: opencap.policy_governance.v1
+suite_version: 0.1.0
+result: pass
+checks:
+  C-PG-001-decision-trace-redacted: pass
+  C-PG-002-policy-change-ledger: pass
+  C-PG-003-broad-allow-simulation: pass
+  C-PG-004-breakglass-hard-boundary: pass
+  C-PG-005-audit-redaction-export: pass
+artifacts:
+  - path: packages/runtime/src/policy-governance-conformance.test.ts
+  - path: packages/runtime/test/fixtures/policies/
+  - path: packages/runtime/test/fixtures/policy-scenarios/governance.yml

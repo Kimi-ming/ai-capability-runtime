@@ -106,3 +106,17 @@ V1 早期先用 Vitest、CLI smoke 和 YAML record 实现，不要求一次性�
 - T137：错误模型测试。
 - T153：conformance suite skeleton。
 - T260：policy governance conformance tests。
+
+## Policy Governance V1 实现状态
+
+T260 已新增 `packages/runtime/src/policy-governance-conformance.test.ts` 和 `packages/runtime/test/fixtures/conformance/policy-governance.yml`。当前 C-PG 组包含：
+
+| Check ID | 覆盖点 |
+| --- | --- |
+| `C-PG-001-decision-trace-redacted` | 每次 policy decision 产生 redacted decision trace。 |
+| `C-PG-002-policy-change-ledger` | policy activation/rollback 保留 ledger 记录。 |
+| `C-PG-003-broad-allow-simulation` | broad allow 和敏感外发通过 simulation 产生 finding。 |
+| `C-PG-004-breakglass-hard-boundary` | breakglass 不能覆盖 data egress deny 等硬边界。 |
+| `C-PG-005-audit-redaction-export` | decision log export 不包含 input 原文或 secret-like value。 |
+
+该组测试优先验证安全不变量，不替代各模块单元测试。后续增加 policy governance 能力时，应优先向 C-PG 组添加 negative check。

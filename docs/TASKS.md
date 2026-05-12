@@ -3650,7 +3650,7 @@ pnpm --filter @opencap/runtime test
 
 ### T260 P1：policy governance conformance tests
 
-- [ ] T260 P1：policy governance conformance tests
+- [x] T260 P1：policy governance conformance tests
 
 目标：把 policy governance 的安全承诺转成一致性测试组。
 
@@ -3672,6 +3672,8 @@ pnpm --filter @opencap/runtime test
 ```bash
 pnpm --filter @opencap/runtime test
 ```
+
+完成记录：新增 `packages/runtime/src/policy-governance-conformance.test.ts` 和 `packages/runtime/test/fixtures/conformance/policy-governance.yml`。Conformance checks 覆盖 `C-PG-001` decision trace redaction、`C-PG-002` policy change ledger、`C-PG-003` broad allow simulation、`C-PG-004` breakglass hard boundary、`C-PG-005` audit redaction export。Runtime 测试数从 147 增至 153。
 
 ### T261 P0：补齐 Policy Decision Trace、策略生命周期、策略模拟和 override/breakglass 体系
 
