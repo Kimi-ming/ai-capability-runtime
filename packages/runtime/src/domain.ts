@@ -108,11 +108,34 @@ export interface InvocationRequestV1 {
   metadata?: Record<string, unknown>;
 }
 
+export type RuntimeGateId =
+  | "input_validation"
+  | "data_egress"
+  | "risk_policy"
+  | "confirmation"
+  | "secret"
+  | "outbound"
+  | "audit_preflight"
+  | "lifecycle"
+  | "quota"
+  | "budget"
+  | "output_validation"
+  | (string & {});
+
 export type GateStage = "pre_secret" | "pre_execution" | "post_execution";
-export type GateDecisionKind = "allow" | "ask" | "deny" | "block";
+export type GateDecisionKind = "allow" | "ask" | "deny" | "block" | "redact";
+export type GateTerminalStatus = "confirmation_required" | "denied" | "blocked";
+
+export interface GateDecisionSemantics {
+  secretResolutionAllowed: boolean;
+  executionAllowed: boolean;
+  confirmationRequired: boolean;
+  transformedInputRequired: boolean;
+  terminalStatus?: GateTerminalStatus;
+}
 
 export interface GateDecision<Evidence = unknown> {
-  gateId: string;
+  gateId: RuntimeGateId;
   stage: GateStage;
   decision: GateDecisionKind;
   reasonCode: string;
@@ -120,6 +143,81 @@ export interface GateDecision<Evidence = unknown> {
   evidence: Evidence;
   hardBoundary: boolean;
   traceId?: string;
+}
+
+export interface GateDecisionInput<Evidence = unknown> {
+  gateId: RuntimeGateId;
+  stage: GateStage;
+  decision: GateDecisionKind;
+  reasonCode: string;
+  summary: string;
+  evidence: Evidence;
+  hardBoundary?: boolean;
+  traceId?: string;
+}
+
+export interface RuntimeGate<Input = unknown, Evidence = unknown> {
+  gateId: RuntimeGateId;
+  stage: GateStage;
+  evaluate(input: Input): GateDecision<Evidence> | Promise<GateDecision<Evidence>>;
+}
+
+export function gateDecisionSemantics(input: GateDecisionKind | Pick<GateDecision, "decision">): GateDecisionSemantics {
+  const decision = typeof input === "string" ? input : input.decision;
+
+  switch (decision) {
+    case "allow":
+      return {
+        secretResolutionAllowed: true,
+        executionAllowed: true,
+        confirmationRequired: false,
+        transformedInputRequired: false,
+      };
+    case "ask":
+      return {
+        secretResolutionAllowed: true,
+        executionAllowed: false,
+        confirmationRequired: true,
+        transformedInputRequired: false,
+        terminalStatus: "confirmation_required",
+      };
+    case "deny":
+      return {
+        secretResolutionAllowed: false,
+        executionAllowed: false,
+        confirmationRequired: false,
+        transformedInputRequired: false,
+        terminalStatus: "denied",
+      };
+    case "block":
+      return {
+        secretResolutionAllowed: false,
+        executionAllowed: false,
+        confirmationRequired: false,
+        transformedInputRequired: false,
+        terminalStatus: "blocked",
+      };
+    case "redact":
+      return {
+        secretResolutionAllowed: false,
+        executionAllowed: false,
+        confirmationRequired: false,
+        transformedInputRequired: true,
+      };
+  }
+}
+
+export function createGateDecision<Evidence>(input: GateDecisionInput<Evidence>): GateDecision<Evidence> {
+  return {
+    gateId: input.gateId,
+    stage: input.stage,
+    decision: input.decision,
+    reasonCode: input.reasonCode,
+    summary: input.summary,
+    evidence: input.evidence,
+    hardBoundary: input.hardBoundary ?? (input.decision === "block"),
+    traceId: input.traceId,
+  };
 }
 
 export interface EgressSummary {

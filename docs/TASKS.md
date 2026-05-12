@@ -19,12 +19,12 @@
 
 ## 当前完成度快照
 
-截至 2026-05-12，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 170 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-12，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 173 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
 - 完整 `opencap serve --mcp` server 仍被 T070 阻塞。
-- V1 需要把 Runtime Gate、Ledger、Card 和 identity/digest 等设计对象继续落到类型与测试里。
+- V1 需要把 Ledger、Card 和 identity/digest 等设计对象继续落到类型与测试里。
 - CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
 - Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
@@ -53,7 +53,7 @@
 
 - [x] T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
 - [x] T145 P1：定义 package public exports。
-- [ ] T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
+- [x] T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
 - [ ] T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
 - [ ] T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
 - [ ] T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
@@ -2259,6 +2259,41 @@ pnpm lint
 ```
 
 完成记录：`@opencap/spec`、`@opencap/runtime`、`@opencap/mcp` 和 `@opencap/sdk` 已声明 root public export map，`types` 指向 `./dist/index.d.ts`，`import` 指向 `./dist/index.js`。`@opencap/spec` 额外公开两个 schema JSON subpath；所有 package 只额外暴露 `./package.json`。`@opencap/cli` 保持 bin-only public surface，不把命令入口声明为 library API。新增 `packages/runtime/src/package-exports.test.ts` 覆盖 3 个 export map 契约测试，Runtime 测试数从 167 增至 170。
+
+### T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义
+
+- [x] T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义
+
+目标：把 Runtime pipeline 中 data egress、risk policy、outbound、quota/budget、lifecycle、audit preflight 等 gate 统一到一个 public contract，固定 `GateDecision` 的执行语义，避免各模块各自解释 `allow`、`ask`、`deny`、`block` 和 `redact`。
+
+涉及文件：
+
+- `packages/runtime/src/domain.ts`
+- `packages/runtime/src/gate.test.ts`
+- `packages/runtime/src/index.ts`
+- `docs/设计/runtime-kernel-contract-v1.md`
+- `docs/TESTING.md`
+- `docs/HANDOFF.md`
+
+验收标准：
+
+- Runtime 导出 `RuntimeGate`、`RuntimeGateId`、`GateDecisionSemantics`、`GateDecisionInput`、`createGateDecision()` 和 `gateDecisionSemantics()`。
+- `GateDecisionKind` 覆盖 `allow`、`ask`、`deny`、`block` 和 `redact`，并与 `PolicyDecisionTraceV1.decision` 可表达的 gate decision 对齐。
+- `allow` 允许 secret resolution 和 execution；`ask` 需要 confirmation，不直接 execution；`deny` 不解析 secret、不执行，并映射为 denied；`block` 不解析 secret、不执行，并映射为 blocked 且默认 hard boundary；`redact` 要求 transformed input，不解析 secret、不执行。
+- `createGateDecision()` 对 `block` 默认设置 `hardBoundary=true`，其他 decision 默认 `hardBoundary=false`，但调用方可显式传入 hard boundary。
+- `RuntimeGate.evaluate()` 支持同步或异步返回 `GateDecision`，便于后续 gate registry 串联现有同步 policy 和未来异步 provider/ledger gate。
+- 新增测试覆盖上述语义、默认 hard boundary 和 public type shape。
+
+验证：
+
+```bash
+pnpm --filter @opencap/runtime test -- gate.test.ts
+pnpm --filter @opencap/runtime test -- domain.test.ts
+pnpm --filter @opencap/runtime build
+pnpm --filter @opencap/runtime lint
+```
+
+完成记录：`packages/runtime/src/domain.ts` 已新增并导出 `RuntimeGate`、`RuntimeGateId`、`GateDecisionSemantics`、`GateDecisionInput`、`createGateDecision()` 和 `gateDecisionSemantics()`；`GateDecisionKind` 已扩展为 `allow`、`ask`、`deny`、`block` 和 `redact`，与 policy trace decision 对齐。`createGateDecision()` 对 `block` 默认设置 hard boundary，`gateDecisionSemantics()` 固定 secret resolution、execution、confirmation、transformed input 和 terminal status 语义。新增 `packages/runtime/src/gate.test.ts` 覆盖 3 个 Runtime Gate contract 测试，Runtime 测试数从 170 增至 173。`docs/设计/runtime-kernel-contract-v1.md` 已同步 Gate public contract。
 
 ### T115 P0：体系化项目管理文档
 

@@ -231,13 +231,31 @@ export interface InvocationPlan {
 
 ## GateDecision
 
-T267 只固定结果形状；完整 Gate 接口由 T268 继续设计。
+T268 固定 Runtime Gate public contract 和 `GateDecision` 执行语义。Gate 是 Runtime pipeline 中产生 allow/ask/deny/block/redact 决策的统一接口，data egress、risk policy、quota/budget、outbound、lifecycle、audit preflight 等都应向这个形状靠拢。
 
 ```ts
+export type RuntimeGateId =
+  | "input_validation"
+  | "data_egress"
+  | "risk_policy"
+  | "confirmation"
+  | "secret"
+  | "outbound"
+  | "audit_preflight"
+  | "lifecycle"
+  | "quota"
+  | "budget"
+  | "output_validation"
+  | (string & {});
+
+export type GateStage = "pre_secret" | "pre_execution" | "post_execution";
+export type GateDecisionKind = "allow" | "ask" | "deny" | "block" | "redact";
+export type GateTerminalStatus = "confirmation_required" | "denied" | "blocked";
+
 export interface GateDecision<Evidence = unknown> {
-  gateId: string;
+  gateId: RuntimeGateId;
   stage: GateStage;
-  decision: "allow" | "ask" | "deny" | "block";
+  decision: GateDecisionKind;
   reasonCode: string;
   summary: string;
   evidence: Evidence;
@@ -245,15 +263,31 @@ export interface GateDecision<Evidence = unknown> {
   traceId?: string;
 }
 
-export type GateStage = "pre_secret" | "pre_execution" | "post_execution";
+export interface GateDecisionSemantics {
+  secretResolutionAllowed: boolean;
+  executionAllowed: boolean;
+  confirmationRequired: boolean;
+  transformedInputRequired: boolean;
+  terminalStatus?: GateTerminalStatus;
+}
+
+export interface RuntimeGate<Input = unknown, Evidence = unknown> {
+  gateId: RuntimeGateId;
+  stage: GateStage;
+  evaluate(input: Input): GateDecision<Evidence> | Promise<GateDecision<Evidence>>;
+}
 ```
 
 ### 规则
 
-- `block` 表示系统硬阻断，例如 revoked、audit preflight failure、private network deny。
-- `deny` 表示 policy 或用户策略拒绝。
-- `ask` 表示需要 consent，不等于 allow。
+- `allow` 允许继续 secret resolution 和 execution。
+- `ask` 表示需要 consent，不等于 allow；它可以进入 confirmation，但不得直接 execution。
+- `deny` 表示 policy 或用户策略拒绝；不得解析 secret，不得 execution，结果映射为 `denied`。
+- `block` 表示系统硬阻断，例如 revoked、audit preflight failure、private network deny；不得解析 secret，不得 execution，结果映射为 `blocked`。
+- `redact` 表示必须生成 transformed input 后重新校验；在完成转换前不得解析 secret 或 execution。
 - `hardBoundary: true` 不能被 override 或 breakglass 绕过。
+- `createGateDecision()` 对 `block` 默认设置 `hardBoundary=true`，其他决策默认 `false`，但调用方可以显式声明更严格的 hard boundary。
+- `gateDecisionSemantics()` 是公共语义 helper，adapter、future gate registry 和 conformance tests 应以它为准，不在各模块重复解释 decision。
 
 ## ConsentRequest 和 ConsentReceipt
 
