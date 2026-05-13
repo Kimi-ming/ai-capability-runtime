@@ -6,6 +6,7 @@ export { defaultDataEgressPolicy, evaluateDataEgressPolicy } from "./data-egress
 export { buildFieldLevelEgressMap } from "./egress-map.js";
 export { minimizeInputByEgressMap } from "./input-minimization.js";
 export { buildRedactedEgressPreview } from "./egress-preview.js";
+export { evaluateQuotaBudgetGate } from "./quota-budget-gate.js";
 export { POLICY_TRACE_VERSION } from "./policy-trace.js";
 export { LEDGER_RECORD_VERSION, createLedgerRecordId } from "./ledger.js";
 export { CARD_SCHEMA_VERSION, TRUST_CARD_DISCLAIMER, createCapabilityCard, createCardId, createCompatibilityCard, createConsentCard, createTrustCard } from "./card.js";
@@ -21,6 +22,7 @@ export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence,
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
 export type { RedactedEgressPreview, RedactedEgressPreviewOptions } from "./egress-preview.js";
+export type { BudgetLimit, BudgetRule, QuotaBudgetContext, QuotaBudgetDecision, QuotaBudgetEvidence, QuotaBudgetMatch, QuotaBudgetPolicy, QuotaLimit, QuotaRule } from "./quota-budget-gate.js";
 export type { PolicyDecisionTraceDecision, PolicyDecisionTraceGate, PolicyDecisionTraceV1 } from "./policy-trace.js";
 export type { CapabilityLedgerEvent, CapabilityLedgerQuery, CapabilityLedgerRecordV1, CapabilityLedgerStore, CompatibilityCheckResult, CompatibilityLedgerCapabilityRef, CompatibilityLedgerCheck, CompatibilityLedgerHostRef, CompatibilityLedgerLookup, CompatibilityLedgerProfileRef, CompatibilityLedgerQuery, CompatibilityLedgerRecordV1, CompatibilityLedgerResult, CompatibilityLedgerStore, InvocationLedgerConsentSummary, InvocationLedgerExecutionSummary, InvocationLedgerQuery, InvocationLedgerRecordV1, InvocationLedgerStore, LedgerAppendResult, LedgerQueryOptions, LedgerQueryResult, LedgerRecordBase, LedgerRecordKind, LedgerRecordV1, LedgerRecordVersion, PolicyLedgerChangedBy, PolicyLedgerEvent, PolicyLedgerQuery, PolicyLedgerRecordV1, PolicyLedgerStore, RuntimeLedgerStore } from "./ledger.js";
 export type { CapabilityCardAuthPlacement, CapabilityCardAuthSummary, CapabilityCardCapabilitySummary, CapabilityCardDocumentV1, CardDocumentBase, CardDocumentV1, CardKind, CardSchemaVersion, CardSourceKind, CardSourceRef, CompatibilityCardDocumentV1, ConsentCardDocumentV1, ConsentCardFieldSummary, CreateCapabilityCardInput, CreateCardOptions, CreateCompatibilityCardInput, CreateConsentCardInput, CreateTrustCardInput, TrustCardAdvisorySummary, TrustCardDocumentV1, TrustCardMaintainerStatus, TrustCardMaintainerSummary, TrustCardProvenanceSummary, TrustCardQualitySummary, TrustCardReviewStatus, TrustCardReviewSummary, TrustCardTestStatus, TrustCardTestSummary } from "./card.js";

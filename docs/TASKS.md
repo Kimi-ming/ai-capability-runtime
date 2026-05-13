@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 221 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 225 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -322,7 +322,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/policy-score.test.ts`，并在 `PolicyEvaluationInput` / policy decision trace 中记录可观测的 `qualityScore`。测试确认高 quality score 只能进入 `quality_score=<value>` trace fact，不能把默认 `ask` 改成 `allow`，也不能覆盖显式 `deny` rule；`secretResolutionAllowed` 和 `executionAllowed` 仍只由最终 policy decision 决定。Runtime 测试数从 219 增至 221。
-- [ ] T199 P1：Quota/budget policy gates。
+- [x] T199 P1：Quota/budget policy gates。
+  - 验收标准：
+    - Runtime 提供 quota/budget gate 纯 helper，输出统一 `GateDecision`，stage 为 `pre_secret`。
+    - count-based quota 超限返回 `deny`，其 gate semantics 不允许 secret resolution 和 execution。
+    - quota `ask` 在 gate semantics 中表现为 confirmation_required，不允许直接 execution。
+    - budget deny 不能被 trust level 或 quality score 绕过。
+    - gate evidence 记录 quota/budget rule id、decision、window 和 remaining，不包含 input/output/secret 原文。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- quota-budget-gate.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/quota-budget-gate.ts` 和 `quota-budget-gate.test.ts`，导出 `evaluateQuotaBudgetGate()` 纯 gate helper。helper 输出统一 `GateDecision`，stage 固定为 `pre_secret`；测试覆盖 count-based quota deny 阻断 secret/execution、quota ask 映射 confirmation_required、budget deny 不被 trust/quality 绕过，以及 quota/budget evidence 不携带 input/output/secret 原文。Runtime 测试数从 221 增至 225。
 - [ ] T200 P1：Provider rate limit handling。
 - [ ] T201 P1：Local abuse throttle。
 - [ ] T204 P1：Financial consent/spend cap tests。
@@ -517,7 +533,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T199：Quota/budget policy gates
+1. M2 / T200：Provider rate limit handling
 2. M3 / T134：CLI command snapshot tests
 3. M3 / T137：错误模型和 exit code tests
 4. M4 / T151：Capability Package lint

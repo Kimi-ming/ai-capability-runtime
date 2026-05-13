@@ -28,6 +28,14 @@ validate input
 
 如果 quota/budget 阻断，不得解析 secret，不得执行 HTTP。
 
+当前 Runtime 已提供纯 gate helper：
+
+```ts
+evaluateQuotaBudgetGate(context, policy)
+```
+
+该 helper 输出统一 `GateDecision`，`stage` 固定为 `pre_secret`。V1 先覆盖 count-based quota 和本地 budget deny/ask/warn evidence，不在 helper 内读取 input/output/secret 原文，也不执行真实扣费或汇率换算。`deny` 的 gate semantics 会阻断 secret resolution 和 execution；`ask` 映射为 confirmation required；`warn` 作为 allow gate 返回，但保留 `quotaDecision=warn` evidence。
+
 ## Policy 草案
 
 ```yaml
