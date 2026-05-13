@@ -37,6 +37,7 @@ function authoringManifest(overrides: Partial<CapabilityManifest> = {}): Capabil
       provider: "github",
       env: "GITHUB_TOKEN",
       placement: { type: "bearer" },
+      scopes: ["issues:write"],
     },
     permissions: [
       {

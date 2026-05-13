@@ -53,6 +53,8 @@ Review 建议：
 
 GitHub REST 文档提供 fine-grained PAT 权限到 endpoint 的映射，reviewer 应用它核对 token 权限。
 
+Manifest schema 会先做最小 credential descriptor 校验：`api_key` 必须声明非空唯一 `scopes`、安全 `env` reference、provider slug 和安全 credential placement。该 schema 只证明 descriptor 形状正确；scope 是否最小仍由本文件的 review 规则和后续 T161 lint 继续检查。
+
 ## 风险升级规则
 
 下列情况必须升级 review：

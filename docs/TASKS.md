@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 208 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 37 个、runtime 208 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -222,7 +222,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.ts` 新增 `AuditConsentReceiptEvidence`、consent receipt audit fields 和 `createConsentReceiptAuditEvidence()`；`createConfirmationAuditEvent()` 对 `ask` 的 approved/rejected/confirmation_required 写入 receipt，其中 MCP 无确认通道映射为 `unavailable`，policy allow/deny 不伪造 receipt。`SqliteAuditLogger` 新增 consent receipt columns、迁移、写入和查询恢复；HTTP execution audit event 可携带 approved consent receipt，CLI invoke approved ask 路径会把 receipt 传入执行审计事件。`packages/runtime/src/index.test.ts` 新增 5 个 consent receipt 测试，Runtime index 测试数从 88 增至 93，Runtime 包测试数从 203 增至 208。
-- [ ] T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
+- [x] T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
+  - 验收标准：
+    - Spec schema 测试覆盖 `api_key` credential descriptor：`provider`、`env`、`placement` 和 `scopes` 必须显式声明。
+    - `auth.scopes` 必须是非空、去重、非空字符串数组，能表达 provider 最小权限 review 所需范围。
+    - `auth.env` 必须是安全 env var reference，不接受空字符串、小写或带破折号的值；`provider` 必须是稳定 provider slug。
+    - custom header placement 的 `name` 必须是安全 header name，不能为空、不能包含非法字符，不能使用 `Authorization` / `Cookie` 等敏感内置 header。
+    - `auth.type: none` 不得携带 `provider`、`env`、`placement` 或 `scopes`，避免无凭据能力伪装 credential descriptor。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- index.test.ts -t "auth credential descriptor"`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/spec/schema/manifest.schema.json` 收紧 credential descriptor：`api_key` 必须声明 `provider`、`env`、`placement` 和非空唯一 `scopes`；`env` 必须是安全环境变量引用，`provider` 必须是稳定 slug，custom header name 必须是安全 header 且拒绝 `Authorization` / `Cookie` / `Set-Cookie`，`auth.type: none` 不允许携带 credential descriptor 字段。`packages/spec/src/index.test.ts` 新增 5 个 auth credential descriptor 测试，`packages/spec/src/authoring.test.ts` fixture 同步 scopes；spec 测试数从 32 增至 37。
 - [ ] T161 P1：实现 least-privilege auth lint。
 - [ ] T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
 - [ ] T168 P1：实现 unknown outcome audit tests。
@@ -423,18 +439,17 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
-2. M2 / T161：least-privilege auth lint
-3. M2 / T167：execution semantics TypeScript 类型和 audit 字段
-4. M2 / T168：unknown outcome audit tests
-5. M3 / T134：CLI command snapshot tests
-8. M3 / T137：错误模型和 exit code tests
-9. M4 / T151：Capability Package lint
-10. M4 / T158：Trust Card generation rules
-11. M4 / T185：Trust level transition tests
-12. M4 / T191：Lifecycle status schema
-13. M4 / T192：Install/list/invoke lifecycle warnings
-14. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M2 / T161：least-privilege auth lint
+2. M2 / T167：execution semantics TypeScript 类型和 audit 字段
+3. M2 / T168：unknown outcome audit tests
+4. M3 / T134：CLI command snapshot tests
+5. M3 / T137：错误模型和 exit code tests
+6. M4 / T151：Capability Package lint
+7. M4 / T158：Trust Card generation rules
+8. M4 / T185：Trust level transition tests
+9. M4 / T191：Lifecycle status schema
+10. M4 / T192：Install/list/invoke lifecycle warnings
+11. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

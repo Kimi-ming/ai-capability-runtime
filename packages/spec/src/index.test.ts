@@ -30,6 +30,7 @@ function baseManifest() {
       placement: {
         type: "bearer",
       },
+      scopes: ["issues:write"],
     },
     permissions: [
       {
@@ -146,11 +147,63 @@ describe("validateManifest", () => {
     await expectInvalidField(manifest, "/auth/provider");
   });
 
+  it("auth credential descriptor requires explicit scopes for api_key auth", async () => {
+    const manifest = baseManifest();
+    delete (manifest.auth as Record<string, unknown>).scopes;
+
+    await expectInvalidField(manifest, "/auth/scopes");
+  });
+
+  it("auth credential descriptor rejects empty, blank, or duplicate scopes", async () => {
+    for (const [scopes, fieldPath] of [
+      [[], "/auth/scopes"],
+      [[""], "/auth/scopes/0"],
+      [["issues:write", "issues:write"], "/auth/scopes"],
+    ] as const) {
+      const manifest = baseManifest();
+      (manifest.auth as Record<string, unknown>).scopes = scopes;
+
+      await expectInvalidField(manifest, fieldPath);
+    }
+  });
+
+  it("auth credential descriptor validates env var references and provider slugs", async () => {
+    const invalidEnv = baseManifest();
+    invalidEnv.auth.env = "github-token";
+    await expectInvalidField(invalidEnv, "/auth/env");
+
+    const invalidProvider = baseManifest();
+    invalidProvider.auth.provider = "GitHub";
+    await expectInvalidField(invalidProvider, "/auth/provider");
+  });
+
   it("requires a safe header name for header placement", async () => {
     const manifest = baseManifest();
     manifest.auth.placement = { type: "header" };
 
     await expectInvalidField(manifest, "/auth/placement/name");
+  });
+
+  it("auth credential descriptor rejects unsafe custom credential header names", async () => {
+    for (const headerName of ["", "Bad Header", "Authorization", "Cookie"]) {
+      const manifest = baseManifest();
+      (manifest.auth as Record<string, unknown>).placement = { type: "header", name: headerName };
+
+      await expectInvalidField(manifest, "/auth/placement/name");
+    }
+  });
+
+  it("auth credential descriptor rejects credential fields for auth none", async () => {
+    const manifest = baseManifest();
+    manifest.auth = {
+      type: "none",
+      provider: "github",
+      env: "GITHUB_TOKEN",
+      placement: { type: "bearer" },
+      scopes: ["issues:write"],
+    };
+
+    await expectInvalidField(manifest, "/auth");
   });
 
   it("rejects query and body auth placements", async () => {

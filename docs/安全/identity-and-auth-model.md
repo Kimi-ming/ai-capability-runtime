@@ -99,6 +99,8 @@ V1 auth 最小字段：
 | `placement` | 凭据放置方式 | V1 支持 `bearer` 和指定 header |
 | `scopes` | 期望权限 | 用于 least-privilege review |
 
+Manifest schema 当前会强制 `api_key` credential descriptor 显式声明 `provider`、`env`、`placement` 和非空唯一 `scopes`。`env` 只能是安全环境变量引用，`provider` 必须是稳定 slug，custom header name 不能使用 `Authorization`、`Cookie` 或 `Set-Cookie`。`auth.type: none` 不得携带 credential descriptor 字段。
+
 ## 权限与凭据的关系
 
 `permissions` 描述 Capability 会做什么。`auth` 描述 Runtime 需要什么凭据。两者必须能互相解释。

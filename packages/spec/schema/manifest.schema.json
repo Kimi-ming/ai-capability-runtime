@@ -63,15 +63,21 @@
           ]
         },
         "provider": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*(?:[.-][a-z0-9_]+)*$"
         },
         "env": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[A-Z_][A-Z0-9_]*$"
         },
         "scopes": {
           "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           }
         },
         "placement": {
@@ -89,7 +95,8 @@
               ]
             },
             "name": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^(?!(?:[Aa]uthorization|[Cc]ookie|[Ss]et-[Cc]ookie)$)[A-Za-z][A-Za-z0-9-]*$"
             },
             "prefix": {
               "type": "string"
@@ -113,8 +120,31 @@
             "required": [
               "provider",
               "env",
-              "placement"
+              "placement",
+              "scopes"
             ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "none"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                { "required": ["provider"] },
+                { "required": ["env"] },
+                { "required": ["placement"] },
+                { "required": ["scopes"] }
+              ]
+            }
           }
         },
         {
