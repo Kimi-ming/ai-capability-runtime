@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 231 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -373,7 +373,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/abuse-throttle.ts` 和 `abuse-throttle.test.ts`，导出 `evaluateAbuseThrottleGate()` 与 `defaultExternalSendAbuseThrottleRule()`。helper 输出统一 `GateDecision`，stage 固定为 `pre_secret`；测试覆盖本地调用循环 deny 阻断 secret/execution、ask 映射 confirmation_required、warn 作为 allow evidence，以及 `external_send` 默认低频 ask 基线。Runtime 测试数从 227 增至 231。
-- [ ] T204 P1：Financial consent/spend cap tests。
+- [x] T204 P1：Financial consent/spend cap tests。
+  - 验收标准：
+    - Runtime 提供 financial consent/spend cap 纯 gate helper，不执行支付、不扣费、不读取 secret。
+    - `financial` risk 在没有显式 approved consent 时必须返回 `ask`，不能被 `--yes`、trust level 或 quality score 自动放行。
+    - 已有 approved consent 后仍必须检查本地 spend cap；超额 budget `deny` 在 secret resolution 和 HTTP execution 前阻断。
+    - spend cap evidence 只记录 rule id、decision、window、remaining、currency 和 consent 状态，不记录 input/output/secret 原文或支付账号原文。
+    - 非 financial risk 不触发 financial consent gate。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- financial-consent-spend-gate.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/financial-consent-spend-gate.ts` 和 `financial-consent-spend-gate.test.ts`，导出 `evaluateFinancialConsentSpendGate()`。helper 对非 financial risk 直接 allow；financial risk 在没有 approved consent 时返回 `ask`，即使 trust/quality 很高也不能自动放行；approved consent 后仍复用本地 budget gate 检查 spend cap，超额 deny 会在 pre-secret 阶段阻断。`evaluateQuotaBudgetGate()` 同步补齐 budget warn evidence。Runtime 测试数从 231 增至 235。
 
 ### 模块 M3：CLI、MCP 和 Host 互操作
 
@@ -565,10 +581,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T204：Financial consent/spend cap tests
-2. M3 / T134：CLI command snapshot tests
-3. M3 / T137：错误模型和 exit code tests
-4. M4 / T151：Capability Package lint
+1. M3 / T125：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段
+2. M3 / T127：维护 MCP Host 兼容性矩阵
+3. M3 / T134：CLI command snapshot tests
+4. M3 / T137：错误模型和 exit code tests
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema

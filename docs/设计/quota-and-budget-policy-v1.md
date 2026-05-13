@@ -32,9 +32,12 @@ validate input
 
 ```ts
 evaluateQuotaBudgetGate(context, policy)
+evaluateFinancialConsentSpendGate(context, policy)
 ```
 
 该 helper 输出统一 `GateDecision`，`stage` 固定为 `pre_secret`。V1 先覆盖 count-based quota 和本地 budget deny/ask/warn evidence，不在 helper 内读取 input/output/secret 原文，也不执行真实扣费或汇率换算。`deny` 的 gate semantics 会阻断 secret resolution 和 execution；`ask` 映射为 confirmation required；`warn` 作为 allow gate 返回，但保留 `quotaDecision=warn` evidence。
+
+`evaluateFinancialConsentSpendGate()` 是 financial profile 的组合门禁 helper：非 financial risk 直接 allow；financial risk 必须先有 approved consent，否则返回 `FINANCIAL_CONSENT_REQUIRED` ask；approved consent 后仍会检查本地 spend budget，budget deny/ask/warn 不能被 trust level 或 quality score 绕过。该 helper 只输出 consent/spend cap evidence，不执行支付、扣费、汇率换算或 secret resolution。
 
 ## Policy 草案
 

@@ -7,6 +7,7 @@ export { buildFieldLevelEgressMap } from "./egress-map.js";
 export { minimizeInputByEgressMap } from "./input-minimization.js";
 export { buildRedactedEgressPreview } from "./egress-preview.js";
 export { evaluateQuotaBudgetGate } from "./quota-budget-gate.js";
+export { evaluateFinancialConsentSpendGate } from "./financial-consent-spend-gate.js";
 export { defaultExternalSendAbuseThrottleRule, evaluateAbuseThrottleGate } from "./abuse-throttle.js";
 export { POLICY_TRACE_VERSION } from "./policy-trace.js";
 export { LEDGER_RECORD_VERSION, createLedgerRecordId } from "./ledger.js";
@@ -24,6 +25,7 @@ export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEnt
 export type { MinimizedInputResult } from "./input-minimization.js";
 export type { RedactedEgressPreview, RedactedEgressPreviewOptions } from "./egress-preview.js";
 export type { BudgetLimit, BudgetRule, QuotaBudgetContext, QuotaBudgetDecision, QuotaBudgetEvidence, QuotaBudgetMatch, QuotaBudgetPolicy, QuotaLimit, QuotaRule } from "./quota-budget-gate.js";
+export type { FinancialConsentDecision, FinancialConsentSpendContext, FinancialConsentSpendEvidence } from "./financial-consent-spend-gate.js";
 export type { AbuseThrottleContext, AbuseThrottleDecision, AbuseThrottleEvidence, AbuseThrottleLimit, AbuseThrottleMatch, AbuseThrottlePolicy, AbuseThrottleRule, AbuseThrottleUsageSnapshot } from "./abuse-throttle.js";
 export type { PolicyDecisionTraceDecision, PolicyDecisionTraceGate, PolicyDecisionTraceV1 } from "./policy-trace.js";
 export type { CapabilityLedgerEvent, CapabilityLedgerQuery, CapabilityLedgerRecordV1, CapabilityLedgerStore, CompatibilityCheckResult, CompatibilityLedgerCapabilityRef, CompatibilityLedgerCheck, CompatibilityLedgerHostRef, CompatibilityLedgerLookup, CompatibilityLedgerProfileRef, CompatibilityLedgerQuery, CompatibilityLedgerRecordV1, CompatibilityLedgerResult, CompatibilityLedgerStore, InvocationLedgerConsentSummary, InvocationLedgerExecutionSummary, InvocationLedgerQuery, InvocationLedgerRecordV1, InvocationLedgerStore, LedgerAppendResult, LedgerQueryOptions, LedgerQueryResult, LedgerRecordBase, LedgerRecordKind, LedgerRecordV1, LedgerRecordVersion, PolicyLedgerChangedBy, PolicyLedgerEvent, PolicyLedgerQuery, PolicyLedgerRecordV1, PolicyLedgerStore, RuntimeLedgerStore } from "./ledger.js";

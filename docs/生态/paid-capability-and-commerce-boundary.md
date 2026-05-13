@@ -60,6 +60,8 @@ V1 schema 不实现该字段。它属于 future RFC。
 - 必须写 audit 和 usage event。
 - 不自动 retry。
 
+当前 Runtime 已提供 `evaluateFinancialConsentSpendGate()` 作为 V1 本地边界 helper。它只检查 explicit approved consent 和本地 spend cap evidence，不执行购买、扣费、支付账号读取或商家结算；trust level 和 quality score 不能让 financial risk 自动放行。
+
 ## Agentic Commerce 协议边界
 
 OpenAI Agentic Commerce Protocol、Google AP2 等方向说明，Agent 代表用户完成购买会需要用户授权、商家、支付网络和交易证据共同参与。OpenCap 未来可以做 commerce profile adapter，但 V1 不实现购买流程。

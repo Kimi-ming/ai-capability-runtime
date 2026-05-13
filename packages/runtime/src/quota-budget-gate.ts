@@ -137,6 +137,11 @@ export function evaluateQuotaBudgetGate(
     return quotaGate(quotaWarning);
   }
 
+  const budgetWarning = policy.budgets?.find((rule) => matches(rule.match, context) && rule.decision === "warn");
+  if (budgetWarning !== undefined) {
+    return budgetGate(budgetWarning);
+  }
+
   return createGateDecision({
     gateId: "quota",
     stage: "pre_secret",
