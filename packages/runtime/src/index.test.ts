@@ -609,8 +609,15 @@ describe("HTTP executor", () => {
         status: "executed",
         confirmationStatus: "approved",
         resolvedUrl: `http://127.0.0.1:${address.port}/repos/opencap/runtime/issues`,
+        executionOutcome: "success",
+        executionSideEffectKind: "write",
+        executionRetryAttempt: 0,
+        executionHttpStatus: 201,
+        requestStarted: true,
         inputRedactedJson: '{"body":"broken","labels":["bug"],"owner":"opencap","repo":"runtime","title":"Bug","token":"[REDACTED]"}',
       });
+      expect(logger.events[0].executionRequestStartedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(logger.events[0].executionResponseReceivedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(JSON.stringify(logger.events[0])).not.toContain("provider-secret");
     } finally {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
@@ -1787,6 +1794,46 @@ describe("SQLite audit logger", () => {
       );
 
       await expect(logger.recent(1)).resolves.toMatchObject([{ reason: "second" }]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("persists execution semantics audit fields", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-execution-semantics-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+    const event: AuditEvent = {
+      id: "audit-execution-semantics",
+      timestamp: "2026-05-13T00:00:00.000Z",
+      channel: "cli",
+      capabilityId: "github.create_issue",
+      status: "executed",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      reason: "HTTP execution succeeded.",
+      requestStarted: true,
+      executionOutcome: "success",
+      executionSideEffectKind: "write",
+      executionRequestStartedAt: "2026-05-13T00:00:00.000Z",
+      executionResponseReceivedAt: "2026-05-13T00:00:01.000Z",
+      executionHttpStatus: 201,
+      executionRetryAttempt: 0,
+    };
+
+    try {
+      await logger.record(event);
+
+      await expect(logger.recent(10)).resolves.toMatchObject([
+        {
+          capabilityId: "github.create_issue",
+          executionOutcome: "success",
+          executionSideEffectKind: "write",
+          executionRequestStartedAt: "2026-05-13T00:00:00.000Z",
+          executionResponseReceivedAt: "2026-05-13T00:00:01.000Z",
+          executionHttpStatus: 201,
+          executionRetryAttempt: 0,
+        },
+      ]);
     } finally {
       logger.close();
     }

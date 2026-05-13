@@ -1,7 +1,7 @@
 export { classifyInput } from "./input-classifier.js";
 export type { InputClassificationAction, InputClassificationConfidence, InputClassificationFinding, InputClassificationOptions, InputClassificationResult, InputDataClass } from "./input-classifier.js";
 export { createDryRunEnvelope, createGateDecision, createRuntimeRequestId, gateDecisionSemantics } from "./domain.js";
-export type { AuditPreview, AuditWriteResult, CallerDescriptor, CapabilityIdentity, CapabilityLifecycleState, CapabilitySelector, ConsentReceipt, ConsentRequest, DerivedCapabilityMetadata, EgressSummary, ExecutionEvidence, GateDecision, GateDecisionInput, GateDecisionKind, GateDecisionSemantics, GateStage, GateTerminalStatus, HostCapability, HostDescriptor, InstallMetadata, InstalledCapabilityRecord, InvocationChannel, InvocationPlanV1, InvocationRequestV1, PlannedExecution, ResultEvidence, ResultProvenance, RiskSummary, RuntimeContext, RuntimeEnvironment, RuntimeErrorCategory, RuntimeErrorV1, RuntimeGate, RuntimeGateId, RuntimeKernel, RuntimeResultEnvelope, RuntimeResultStatus, TrustSummary } from "./domain.js";
+export type { AuditPreview, AuditWriteResult, CallerDescriptor, CapabilityIdentity, CapabilityLifecycleState, CapabilitySelector, ConsentReceipt, ConsentRequest, DerivedCapabilityMetadata, EgressSummary, ExecutionEvidence, ExecutionOutcome, ExecutionSideEffectKind, GateDecision, GateDecisionInput, GateDecisionKind, GateDecisionSemantics, GateStage, GateTerminalStatus, HostCapability, HostDescriptor, InstallMetadata, InstalledCapabilityRecord, InvocationChannel, InvocationPlanV1, InvocationRequestV1, PlannedExecution, ResultEvidence, ResultProvenance, RiskSummary, RuntimeContext, RuntimeEnvironment, RuntimeErrorCategory, RuntimeErrorV1, RuntimeGate, RuntimeGateId, RuntimeKernel, RuntimeResultEnvelope, RuntimeResultStatus, TrustSummary } from "./domain.js";
 export { defaultDataEgressPolicy, evaluateDataEgressPolicy } from "./data-egress-policy.js";
 export { buildFieldLevelEgressMap } from "./egress-map.js";
 export { minimizeInputByEgressMap } from "./input-minimization.js";
@@ -40,7 +40,7 @@ import { stdin as processStdin, stdout as processStdout } from "node:process";
 import { createInterface } from "node:readline/promises";
 import type { DatabaseSync } from "node:sqlite";
 import { dirname, join, resolve } from "node:path";
-import { validateManifestFile, type CapabilityManifest } from "@opencap/spec";
+import { validateManifestFile, type CapabilityManifest, type CapabilityPermission } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
 import { buildFieldLevelEgressMap as buildFieldLevelEgressMapForRuntime } from "./egress-map.js";
 import { buildRedactedEgressPreview as buildRedactedEgressPreviewForRuntime, type RedactedEgressPreview } from "./egress-preview.js";
@@ -50,6 +50,7 @@ import { POLICY_TRACE_VERSION, type PolicyDecisionTraceV1 } from "./policy-trace
 import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import type { DataEgressContext, DataEgressDecision, DataEgressDecisionResult } from "./data-egress-policy.js";
 import { SecretMissingError, credentialAuditEvidence, resolveEnvCredential, type CredentialAuditEvidence } from "./secret-resolver.js";
+import type { ExecutionEvidence, ExecutionOutcome, ExecutionSideEffectKind } from "./domain.js";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -434,6 +435,82 @@ export interface HttpExecutionResult {
   };
 }
 
+export interface CreateHttpExecutionEvidenceOptions {
+  permissions?: CapabilityPermission[];
+  requestStartedAt?: string;
+  responseReceivedAt?: string;
+  providerRequestId?: string;
+  retryAttempt?: number;
+  idempotencyKeyHash?: string;
+  reconcileHint?: string;
+}
+
+function highestSideEffectKind(permissions: CapabilityPermission[] | undefined): ExecutionSideEffectKind {
+  const risks = permissions?.map((permission) => permission.risk) ?? [];
+
+  if (risks.includes("financial")) {
+    return "financial";
+  }
+  if (risks.includes("code_execution")) {
+    return "code_execution";
+  }
+  if (risks.includes("destructive")) {
+    return "destructive";
+  }
+  if (risks.includes("external_send")) {
+    return "send";
+  }
+  if (risks.some((risk) => risk === "write" || risk === "secret_access")) {
+    return "write";
+  }
+
+  return "read";
+}
+
+function executionOutcomeFromHttpResult(result: HttpExecutionResult): ExecutionOutcome {
+  if (result.ok) {
+    return "success";
+  }
+
+  if (result.status === "timeout") {
+    return "unknown_after_timeout";
+  }
+
+  if (result.status === "outbound_blocked" || result.status === "audit_failed") {
+    return "blocked";
+  }
+
+  if (result.status === "secret_missing") {
+    return "failed_before_request";
+  }
+
+  return "failed_after_request";
+}
+
+export function createHttpExecutionEvidence(
+  result: HttpExecutionResult,
+  options: CreateHttpExecutionEvidenceOptions = {},
+): ExecutionEvidence {
+  const requestStarted = requestStartedFromHttpResult(result);
+
+  return {
+    type: "http",
+    method: result.method,
+    targetOrigin: targetOrigin(result.url),
+    statusCode: result.statusCode,
+    httpStatus: result.statusCode,
+    requestStarted,
+    outcome: executionOutcomeFromHttpResult(result),
+    sideEffectKind: highestSideEffectKind(options.permissions),
+    requestStartedAt: requestStarted ? options.requestStartedAt : undefined,
+    responseReceivedAt: requestStarted ? options.responseReceivedAt : undefined,
+    providerRequestId: options.providerRequestId,
+    retryAttempt: options.retryAttempt ?? 0,
+    idempotencyKeyHash: options.idempotencyKeyHash,
+    reconcileHint: options.reconcileHint,
+  };
+}
+
 export const RESULT_ENVELOPE_VERSION = "opencap.result_envelope.v1";
 
 export type ResultEnvelopeStatus = "success" | "dry_run" | "blocked" | "confirmation_required" | "failed" | "unknown";
@@ -462,6 +539,14 @@ export interface ResultEvidenceSummaryV1 {
   targetOrigin?: string;
   httpMethod?: string;
   httpStatus?: number;
+  executionOutcome?: ExecutionOutcome;
+  executionSideEffectKind?: ExecutionSideEffectKind;
+  executionRetryAttempt?: number;
+  executionRequestStartedAt?: string;
+  executionResponseReceivedAt?: string;
+  executionProviderRequestId?: string;
+  executionIdempotencyKeyHash?: string;
+  executionReconcileHint?: string;
   errorCode?: string;
   resolvedUrl?: string;
   outputValidationStatus?: OutputValidationStatus;
@@ -529,6 +614,7 @@ export interface CreateResultEnvelopeInput {
 export interface ResultEnvelopeBuildOptions {
   invocationId?: string;
   evidence?: ResultEvidenceSummaryV1;
+  permissions?: CapabilityPermission[];
   outputSchema?: unknown;
   sanitizer?: ToolResultSanitizerOptions;
 }
@@ -1055,11 +1141,29 @@ function structuredContentFromHttpResult(result: HttpExecutionResult, sanitizedV
 }
 
 function baseHttpResultEvidence(result: HttpExecutionResult, options: ResultEnvelopeBuildOptions): ResultEvidenceSummaryV1 {
+  const execution = createHttpExecutionEvidence(result, {
+    permissions: options.permissions,
+    requestStartedAt: options.evidence?.executionRequestStartedAt,
+    responseReceivedAt: options.evidence?.executionResponseReceivedAt,
+    providerRequestId: options.evidence?.executionProviderRequestId,
+    retryAttempt: options.evidence?.executionRetryAttempt,
+    idempotencyKeyHash: options.evidence?.executionIdempotencyKeyHash,
+    reconcileHint: options.evidence?.executionReconcileHint,
+  });
+
   return {
     requestStarted: requestStartedFromHttpResult(result),
     targetOrigin: targetOrigin(result.url),
     httpMethod: result.method,
     httpStatus: result.statusCode,
+    executionOutcome: execution.outcome,
+    executionSideEffectKind: execution.sideEffectKind,
+    executionRetryAttempt: execution.retryAttempt,
+    executionRequestStartedAt: execution.requestStartedAt,
+    executionResponseReceivedAt: execution.responseReceivedAt,
+    executionProviderRequestId: execution.providerRequestId,
+    executionIdempotencyKeyHash: execution.idempotencyKeyHash,
+    executionReconcileHint: execution.reconcileHint,
     errorCode: result.error?.code,
     resolvedUrl: result.url,
     ...options.evidence,
@@ -1139,6 +1243,14 @@ function executionAuditEvent(
   credential?: CredentialAuditEvidence,
   consentReceipt?: AuditConsentReceiptEvidence,
 ): AuditEvent {
+  const requestStarted = requestStartedFromHttpResult(result);
+  const now = new Date().toISOString();
+  const execution = createHttpExecutionEvidence(result, {
+    permissions: manifest.permissions,
+    requestStartedAt: requestStarted ? now : undefined,
+    responseReceivedAt: requestStarted ? now : undefined,
+  });
+
   return {
     id: randomUUID(),
     timestamp: new Date().toISOString(),
@@ -1151,7 +1263,16 @@ function executionAuditEvent(
     inputHash: hashInput(input),
     inputRedactedJson: stableJsonStringify(redactInput(input)),
     resolvedUrl: result.url,
-    requestStarted: requestStartedFromHttpResult(result),
+    requestStarted,
+    executionOutcome: execution.outcome,
+    executionSideEffectKind: execution.sideEffectKind,
+    executionRequestStartedAt: execution.requestStartedAt,
+    executionResponseReceivedAt: execution.responseReceivedAt,
+    executionHttpStatus: execution.httpStatus,
+    executionRetryAttempt: execution.retryAttempt,
+    executionProviderRequestId: execution.providerRequestId,
+    executionIdempotencyKeyHash: execution.idempotencyKeyHash,
+    executionReconcileHint: execution.reconcileHint,
     credentialProvider: credential?.provider,
     credentialSource: credential?.source,
     credentialEnvName: credential?.envName,
@@ -2131,6 +2252,15 @@ export interface AuditEvent {
   credentialResolved?: boolean;
   credentialRedacted?: string;
   requestStarted?: boolean;
+  executionOutcome?: ExecutionOutcome;
+  executionSideEffectKind?: ExecutionSideEffectKind;
+  executionRequestStartedAt?: string;
+  executionResponseReceivedAt?: string;
+  executionHttpStatus?: number;
+  executionRetryAttempt?: number;
+  executionProviderRequestId?: string;
+  executionIdempotencyKeyHash?: string;
+  executionReconcileHint?: string;
   egressDecision?: DataEgressDecision;
   egressDataClasses?: DataEgressContext["dataClasses"];
   egressTargetOrigin?: string;
@@ -2391,6 +2521,15 @@ interface AuditEventRow {
   credential_resolved: 0 | 1 | null;
   credential_redacted: string | null;
   request_started: 0 | 1 | null;
+  execution_outcome: ExecutionOutcome | null;
+  execution_side_effect_kind: ExecutionSideEffectKind | null;
+  execution_request_started_at: string | null;
+  execution_response_received_at: string | null;
+  execution_http_status: number | null;
+  execution_retry_attempt: number | null;
+  execution_provider_request_id: string | null;
+  execution_idempotency_key_hash: string | null;
+  execution_reconcile_hint: string | null;
   egress_decision: DataEgressDecision | null;
   egress_data_classes_json: string | null;
   egress_target_origin: string | null;
@@ -2440,6 +2579,15 @@ CREATE TABLE IF NOT EXISTS invocations (
   credential_resolved INTEGER,
   credential_redacted TEXT,
   request_started INTEGER,
+  execution_outcome TEXT,
+  execution_side_effect_kind TEXT,
+  execution_request_started_at TEXT,
+  execution_response_received_at TEXT,
+  execution_http_status INTEGER,
+  execution_retry_attempt INTEGER,
+  execution_provider_request_id TEXT,
+  execution_idempotency_key_hash TEXT,
+  execution_reconcile_hint TEXT,
   egress_decision TEXT,
   egress_data_classes_json TEXT,
   egress_target_origin TEXT,
@@ -2477,6 +2625,15 @@ function ensureAuditSchema(database: DatabaseSync): void {
     ["credential_resolved", "INTEGER"],
     ["credential_redacted", "TEXT"],
     ["request_started", "INTEGER"],
+    ["execution_outcome", "TEXT"],
+    ["execution_side_effect_kind", "TEXT"],
+    ["execution_request_started_at", "TEXT"],
+    ["execution_response_received_at", "TEXT"],
+    ["execution_http_status", "INTEGER"],
+    ["execution_retry_attempt", "INTEGER"],
+    ["execution_provider_request_id", "TEXT"],
+    ["execution_idempotency_key_hash", "TEXT"],
+    ["execution_reconcile_hint", "TEXT"],
     ["egress_decision", "TEXT"],
     ["egress_data_classes_json", "TEXT"],
     ["egress_target_origin", "TEXT"],
@@ -2597,6 +2754,15 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     credentialResolved: row.credential_resolved === null ? undefined : row.credential_resolved === 1,
     credentialRedacted: row.credential_redacted ?? undefined,
     requestStarted: row.request_started === null ? undefined : row.request_started === 1,
+    executionOutcome: row.execution_outcome ?? undefined,
+    executionSideEffectKind: row.execution_side_effect_kind ?? undefined,
+    executionRequestStartedAt: row.execution_request_started_at ?? undefined,
+    executionResponseReceivedAt: row.execution_response_received_at ?? undefined,
+    executionHttpStatus: row.execution_http_status ?? undefined,
+    executionRetryAttempt: row.execution_retry_attempt ?? undefined,
+    executionProviderRequestId: row.execution_provider_request_id ?? undefined,
+    executionIdempotencyKeyHash: row.execution_idempotency_key_hash ?? undefined,
+    executionReconcileHint: row.execution_reconcile_hint ?? undefined,
     egressDecision: row.egress_decision ?? undefined,
     egressDataClasses: parseEgressDataClasses(row.egress_data_classes_json),
     egressTargetOrigin: row.egress_target_origin ?? undefined,
@@ -2635,11 +2801,13 @@ export class SqliteAuditLogger implements AuditLogger {
         `INSERT INTO invocations (
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
           input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
-          credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
+          credential_placement, credential_resolved, credential_redacted, request_started, execution_outcome, execution_side_effect_kind,
+          execution_request_started_at, execution_response_received_at, execution_http_status, execution_retry_attempt,
+          execution_provider_request_id, execution_idempotency_key_hash, execution_reconcile_hint, egress_decision, egress_data_classes_json,
           egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
           outbound_reason_code, consent_id, consent_decision, consent_decided_at, consent_channel, consent_subject,
           consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -2661,6 +2829,15 @@ export class SqliteAuditLogger implements AuditLogger {
         event.credentialResolved === undefined ? null : event.credentialResolved ? 1 : 0,
         event.credentialRedacted ?? null,
         event.requestStarted === undefined ? null : event.requestStarted ? 1 : 0,
+        event.executionOutcome ?? null,
+        event.executionSideEffectKind ?? null,
+        event.executionRequestStartedAt ?? null,
+        event.executionResponseReceivedAt ?? null,
+        event.executionHttpStatus ?? null,
+        event.executionRetryAttempt ?? null,
+        event.executionProviderRequestId ?? null,
+        event.executionIdempotencyKeyHash ?? null,
+        event.executionReconcileHint ?? null,
         event.egressDecision ?? null,
         event.egressDataClasses === undefined ? null : stableJsonStringify(event.egressDataClasses),
         event.egressTargetOrigin ?? null,
@@ -2735,7 +2912,9 @@ export class SqliteAuditLogger implements AuditLogger {
       .prepare(
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
                 input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
-                credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
+                credential_placement, credential_resolved, credential_redacted, request_started, execution_outcome, execution_side_effect_kind,
+                execution_request_started_at, execution_response_received_at, execution_http_status, execution_retry_attempt,
+                execution_provider_request_id, execution_idempotency_key_hash, execution_reconcile_hint, egress_decision, egress_data_classes_json,
                 egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
                 outbound_reason_code, consent_id, consent_decision, consent_decided_at, consent_channel, consent_subject,
                 consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json

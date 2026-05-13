@@ -202,6 +202,22 @@ Data Egress audit event 会记录：
 
 当 Data Egress Gate 返回 `deny` 时，事件状态为 `denied`，`policyDecision=deny`，`confirmationStatus=denied`，并且不会记录 input 原文或 secret-like value。SQLite logger 会把这些字段持久化到 `invocations` 表，并在打开既有数据库时补齐缺失列。
 
+## Execution Semantics Audit 实现状态
+
+HTTP execution audit event 会记录：
+
+- `executionOutcome`。
+- `executionSideEffectKind`。
+- `executionRequestStartedAt`。
+- `executionResponseReceivedAt`。
+- `executionHttpStatus`。
+- `executionRetryAttempt`。
+- `executionProviderRequestId`。
+- `executionIdempotencyKeyHash`。
+- `executionReconcileHint`。
+
+这些字段来自 Runtime 生成的 execution semantics evidence。`secret_missing`、`audit_failed`、`outbound_blocked` 等请求前失败或阻断不会伪造 request start timestamp；SQLite logger 会持久化这些字段并在打开既有数据库时补齐缺失列。
+
 ## 脱敏规则
 
 字段名包含以下片段时默认脱敏：

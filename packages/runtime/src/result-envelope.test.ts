@@ -4,6 +4,7 @@ import {
   blockedResultEnvelope,
   confirmationRequiredResultEnvelope,
   createResultEnvelope,
+  createHttpExecutionEvidence,
   resultEnvelopeFromDryRunPlan,
   resultEnvelopeFromHttpExecutionResult,
   type HttpDryRunPlan,
@@ -122,7 +123,10 @@ describe("Result Envelope V1", () => {
       error: { code: "HTTP_TIMEOUT", message: "HTTP request timed out after 10ms." },
     };
 
-    const envelope = resultEnvelopeFromHttpExecutionResult(result, { invocationId: "inv-timeout" });
+    const envelope = resultEnvelopeFromHttpExecutionResult(result, {
+      invocationId: "inv-timeout",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write", confirmation: "ask" }],
+    });
 
     expect(envelope).toMatchObject({
       status: "unknown",
@@ -130,7 +134,41 @@ describe("Result Envelope V1", () => {
       isError: true,
       structuredContent: { error: { code: "HTTP_TIMEOUT" } },
       textSummary: "github.create_issue outcome is unknown after timeout.",
-      evidence: { requestStarted: true, errorCode: "HTTP_TIMEOUT" },
+      evidence: {
+        requestStarted: true,
+        errorCode: "HTTP_TIMEOUT",
+        executionOutcome: "unknown_after_timeout",
+        executionSideEffectKind: "write",
+        executionRetryAttempt: 0,
+      },
+    });
+  });
+
+  it("creates execution semantics evidence from HTTP results and permissions", () => {
+    const result: HttpExecutionResult = {
+      ok: false,
+      capabilityId: "slack.send_message",
+      method: "POST",
+      url: "https://slack.com/api/chat.postMessage",
+      status: "http_error",
+      statusCode: 429,
+      error: { code: "HTTP_ERROR", message: "Rate limited.", statusCode: 429 },
+    };
+
+    expect(
+      createHttpExecutionEvidence(result, {
+        permissions: [{ resource: "slack.message", action: "send", risk: "external_send", confirmation: "ask" }],
+        requestStartedAt: "2026-05-13T00:00:00.000Z",
+        responseReceivedAt: "2026-05-13T00:00:01.000Z",
+      }),
+    ).toMatchObject({
+      outcome: "failed_after_request",
+      sideEffectKind: "send",
+      requestStarted: true,
+      httpStatus: 429,
+      retryAttempt: 0,
+      requestStartedAt: "2026-05-13T00:00:00.000Z",
+      responseReceivedAt: "2026-05-13T00:00:01.000Z",
     });
   });
 });

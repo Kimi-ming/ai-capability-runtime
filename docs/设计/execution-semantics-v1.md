@@ -130,7 +130,9 @@ V1 不自动重试写操作。V1 可以记录 retry recommendation，但不执�
 
 ## 审计字段
 
-Audit log 应补充：
+Runtime 已在 `@opencap/runtime` public contract 中导出 execution outcome、side-effect kind 和 execution evidence 类型，并提供 `createHttpExecutionEvidence()` 从 HTTP execution result 与 permissions 生成 evidence。HTTP execution audit event、Result Envelope evidence 和 SQLite audit logger 都会保存同一组语义字段。
+
+Audit log 记录的核心字段：
 
 ```ts
 type ExecutionEvidence = {

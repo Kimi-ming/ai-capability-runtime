@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 208 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 211 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -255,7 +255,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/spec/src/auth-lint.ts` 和 `auth-lint.test.ts`，导出 `lintLeastPrivilegeAuth()` 及结构化 finding 类型；lint 覆盖 provider/resource provider mismatch、read-only permission 携带 elevated scope、elevated permission 只声明 read-only scopes、wildcard/admin/full/repo 等明显过宽 scopes。`validateCapabilityAuthoringManifest()` 已在 schema 和 model-visible metadata lint 后执行 least-privilege auth lint，finding 以 `least-privilege-auth-lint:*` issue 阻断 registry validation。`packages/spec/src/authoring.ts` 已把 least-privilege 阶段命令同步为 `pnpm validate` + manual review；spec 测试数从 37 增至 45。
-- [ ] T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
+- [x] T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
+  - 验收标准：
+    - Runtime public contract 导出 execution outcome、side-effect kind 和 execution evidence 类型，覆盖 `success`、`blocked`、`failed_before_request`、`failed_after_request`、`unknown_after_timeout`、`partial`。
+    - Runtime 提供从 HTTP execution result 生成 execution semantics evidence 的 helper，能基于 permission risk 推导 `read` / `write` / `send` / `destructive` / `financial` / `code_execution`，并记录 `requestStarted`、`httpStatus`、`retryAttempt`、`requestStartedAt` / `responseReceivedAt`。
+    - HTTP execution audit event 写入 execution semantics 字段；blocked / pre-request failure 不伪造 request start 时间。
+    - SQLite audit logger 能迁移、持久化并查询恢复 execution semantics 字段。
+    - Result Envelope evidence 暴露同一套 outcome / side-effect summary，方便 Host 和 CLI 使用结构化语义而不是解析错误文本。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- domain.test.ts result-envelope.test.ts index.test.ts -t "execution semantics"`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/domain.ts` 新增 `ExecutionOutcome`、`ExecutionSideEffectKind` 和扩展后的 `ExecutionEvidence` public contract；`packages/runtime/src/index.ts` 新增 `createHttpExecutionEvidence()`，可从 HTTP result 与 permissions 推导 outcome、side-effect kind、requestStarted、httpStatus、retryAttempt 和 request/response timestamps。HTTP execution audit event、Result Envelope evidence 和 SQLite audit logger 均已写入/恢复 execution semantics 字段。新增测试覆盖 domain contract、Result Envelope evidence、执行审计事件字段和 SQLite 持久化；Runtime 测试数从 208 增至 211。
 - [ ] T168 P1：实现 unknown outcome audit tests。
 - [ ] T170 P2：实现 retry policy tests。
 - [ ] T196 P1：Score cannot override policy tests。
@@ -454,16 +470,15 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T167：execution semantics TypeScript 类型和 audit 字段
-2. M2 / T168：unknown outcome audit tests
-3. M3 / T134：CLI command snapshot tests
-4. M3 / T137：错误模型和 exit code tests
-5. M4 / T151：Capability Package lint
-6. M4 / T158：Trust Card generation rules
-7. M4 / T185：Trust level transition tests
-8. M4 / T191：Lifecycle status schema
-9. M4 / T192：Install/list/invoke lifecycle warnings
-10. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M2 / T168：unknown outcome audit tests
+2. M3 / T134：CLI command snapshot tests
+3. M3 / T137：错误模型和 exit code tests
+4. M4 / T151：Capability Package lint
+5. M4 / T158：Trust Card generation rules
+6. M4 / T185：Trust level transition tests
+7. M4 / T191：Lifecycle status schema
+8. M4 / T192：Install/list/invoke lifecycle warnings
+9. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

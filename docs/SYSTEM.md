@@ -298,7 +298,7 @@ Governance Surface
 | 凭据生命周期 | 清晰 | T162/T165 补操作验证和指南 |
 | 最小权限评审 | 清晰 | T161 已接入 spec authoring lint；review 继续保留 |
 | 远程 OAuth 边界 | 清晰 | T163 走 RFC，不进 V1 主路径 |
-| 执行语义 | 清晰 | T167 落入类型和 audit 字段 |
+| 执行语义 | 清晰 | T167 已落入类型、Result Envelope evidence 和 audit 字段 |
 | 重试与幂等 | 清晰 | T169 走 manifest RFC |
 | 失败恢复 | 清晰 | T172 增加 reconcile hint |
 | 执行证据 | 清晰 | T173 接入 conformance record |

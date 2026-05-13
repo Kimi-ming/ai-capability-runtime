@@ -293,13 +293,38 @@ export interface RuntimeErrorV1 {
   details?: Record<string, unknown>;
 }
 
+export type ExecutionOutcome =
+  | "success"
+  | "blocked"
+  | "failed_before_request"
+  | "failed_after_request"
+  | "unknown_after_timeout"
+  | "partial";
+
+export type ExecutionSideEffectKind =
+  | "read"
+  | "write"
+  | "send"
+  | "destructive"
+  | "financial"
+  | "code_execution";
+
 export interface ExecutionEvidence {
   type: "http";
   method?: string;
   targetOrigin?: string;
   statusCode?: number;
+  httpStatus?: number;
   durationMs?: number;
   requestStarted?: boolean;
+  outcome?: ExecutionOutcome;
+  sideEffectKind?: ExecutionSideEffectKind;
+  requestStartedAt?: string;
+  responseReceivedAt?: string;
+  providerRequestId?: string;
+  retryAttempt?: number;
+  idempotencyKeyHash?: string;
+  reconcileHint?: string;
 }
 
 export interface ResultProvenance {

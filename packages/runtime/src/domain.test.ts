@@ -11,6 +11,8 @@ import {
   type InvocationRequestV1,
   type RuntimeContext,
   type RuntimeErrorV1,
+  type ExecutionOutcome,
+  type ExecutionSideEffectKind,
   type RuntimeKernel,
   type RuntimeResultEnvelope,
 } from "./domain.js";
@@ -160,6 +162,29 @@ describe("Runtime domain public contract", () => {
     } satisfies RuntimeErrorV1;
 
     expect(error.category).toBe("audit");
+  });
+
+  it("models execution semantics evidence for audit and result contracts", () => {
+    const outcome: ExecutionOutcome = "unknown_after_timeout";
+    const sideEffectKind: ExecutionSideEffectKind = "write";
+    const evidence = {
+      type: "http",
+      method: "POST",
+      targetOrigin: "https://api.github.com",
+      requestStarted: true,
+      outcome,
+      sideEffectKind,
+      requestStartedAt: "2026-05-13T00:00:00.000Z",
+      responseReceivedAt: undefined,
+      retryAttempt: 0,
+      reconcileHint: "Check provider state before retrying.",
+    } satisfies import("./domain.js").ExecutionEvidence;
+
+    expect(evidence).toMatchObject({
+      outcome: "unknown_after_timeout",
+      sideEffectKind: "write",
+      retryAttempt: 0,
+    });
   });
 
   it("describes the RuntimeKernel adapter boundary", () => {
