@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 219 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 221 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -306,7 +306,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/retry-policy.ts` 和 `retry-policy.test.ts`，导出 `defaultHttpRetryPolicy()` 与 `evaluateHttpRetryPolicy()` 纯 decision helper。测试覆盖 V1 默认不自动 retry、POST 写操作无 idempotency 不 retry、unknown write timeout 要求 reconcile、401/403 不 retry、显式 read-only GET retry decision、provider idempotency key 只记录 `sha256:<prefix>` hash。HTTP executor 未引入自动 retry loop；Runtime 测试数从 213 增至 219。
-- [ ] T196 P1：Score cannot override policy tests。
+- [x] T196 P1：Score cannot override policy tests。
+  - 验收标准：
+    - Runtime policy evaluation 可接收 quality score 作为 trace/evidence fact，但 policy rule matching 不使用 score。
+    - 高 quality score 不能把默认 `ask` 改成 `allow`。
+    - 高 quality score 不能覆盖显式 `deny` rule。
+    - policy decision trace 记录 `quality_score=<value>`，但 `secretResolutionAllowed` / `executionAllowed` 只由实际 policy decision 决定。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- policy-score.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/policy-score.test.ts`，并在 `PolicyEvaluationInput` / policy decision trace 中记录可观测的 `qualityScore`。测试确认高 quality score 只能进入 `quality_score=<value>` trace fact，不能把默认 `ask` 改成 `allow`，也不能覆盖显式 `deny` rule；`secretResolutionAllowed` 和 `executionAllowed` 仍只由最终 policy decision 决定。Runtime 测试数从 219 增至 221。
 - [ ] T199 P1：Quota/budget policy gates。
 - [ ] T200 P1：Provider rate limit handling。
 - [ ] T201 P1：Local abuse throttle。
@@ -502,7 +517,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T196：Score cannot override policy tests
+1. M2 / T199：Quota/budget policy gates
 2. M3 / T134：CLI command snapshot tests
 3. M3 / T137：错误模型和 exit code tests
 4. M4 / T151：Capability Package lint

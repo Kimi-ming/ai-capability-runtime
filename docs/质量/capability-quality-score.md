@@ -41,6 +41,8 @@ Trust level 是离散治理状态。Quality Score 是解释性质量指标。
 - 一个测试充分的社区能力不一定 verified。
 - 一个 revoked 能力即使历史分数高，也必须显示 revoked。
 
+Runtime policy evaluation 可以把 quality score 作为 `quality_score=<value>` decision trace fact 记录，便于解释当时的能力证据；但 policy rule matching 不读取 score，高分不能把默认 `ask` 变成 `allow`，也不能覆盖显式 `deny`。
+
 ## 输出草案
 
 ```yaml

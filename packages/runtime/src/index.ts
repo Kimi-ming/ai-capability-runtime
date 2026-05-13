@@ -1771,6 +1771,7 @@ export interface PolicyEvaluationInput {
   channel?: string;
   host?: string;
   trustLevel?: string;
+  qualityScore?: number;
 }
 
 export interface PolicyPermissionDecision {
@@ -1833,6 +1834,9 @@ function riskPolicyEvaluatedFacts(input: PolicyEvaluationInput, decision: Policy
 
   if (input.trustLevel !== undefined) {
     facts.push(`trust_level=${input.trustLevel}`);
+  }
+  if (input.qualityScore !== undefined) {
+    facts.push(`quality_score=${input.qualityScore}`);
   }
 
   if (decision !== undefined) {
