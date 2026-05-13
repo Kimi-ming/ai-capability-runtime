@@ -216,7 +216,7 @@ HTTP execution audit event 会记录：
 - `executionIdempotencyKeyHash`。
 - `executionReconcileHint`。
 
-这些字段来自 Runtime 生成的 execution semantics evidence。`secret_missing`、`audit_failed`、`outbound_blocked` 等请求前失败或阻断不会伪造 request start timestamp；SQLite logger 会持久化这些字段并在打开既有数据库时补齐缺失列。
+这些字段来自 Runtime 生成的 execution semantics evidence。`secret_missing`、`audit_failed`、`outbound_blocked` 等请求前失败或阻断不会伪造 request start timestamp；请求发出后 timeout 会记录 `executionOutcome=unknown_after_timeout` 和 `executionRequestStartedAt`，但不会设置 `executionResponseReceivedAt`，避免把未知执行结果伪装成已收到响应。SQLite logger 会持久化这些字段并在打开既有数据库时补齐缺失列。
 
 ## 脱敏规则
 

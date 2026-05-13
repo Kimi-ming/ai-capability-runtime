@@ -148,11 +148,13 @@ type ExecutionEvidence = {
 };
 ```
 
+`unknown_after_timeout` 必须保留 `requestStartedAt`，但不能设置 `responseReceivedAt`。这表示 Runtime 确认请求已经离开本地进程，但没有收到 provider response；Host 和 CLI 不能把它展示成“失败且未执行”。
+
 ## 测试要求
 
 - policy deny 不产生 request_started。
 - secret missing 不产生 request_started。
-- HTTP timeout after request 产生 `unknown_after_timeout`。
+- HTTP timeout after request 产生 `unknown_after_timeout`，且不写 `responseReceivedAt`。
 - POST 默认 retryAttempt 为 0。
 - GET 可按显式 retry policy 记录 retryAttempt。
 - provider request id 进入 audit，但不进入 secret 字段。

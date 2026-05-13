@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 211 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 213 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -272,7 +272,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/domain.ts` 新增 `ExecutionOutcome`、`ExecutionSideEffectKind` 和扩展后的 `ExecutionEvidence` public contract；`packages/runtime/src/index.ts` 新增 `createHttpExecutionEvidence()`，可从 HTTP result 与 permissions 推导 outcome、side-effect kind、requestStarted、httpStatus、retryAttempt 和 request/response timestamps。HTTP execution audit event、Result Envelope evidence 和 SQLite audit logger 均已写入/恢复 execution semantics 字段。新增测试覆盖 domain contract、Result Envelope evidence、执行审计事件字段和 SQLite 持久化；Runtime 测试数从 208 增至 211。
-- [ ] T168 P1：实现 unknown outcome audit tests。
+- [x] T168 P1：实现 unknown outcome audit tests。
+  - 验收标准：
+    - HTTP executor 在请求发出后 timeout 时写入 audit event，`requestStarted=true`，`executionOutcome=unknown_after_timeout`。
+    - timeout audit event 必须包含 `executionRequestStartedAt`，但不得设置 `executionResponseReceivedAt`，避免把未知结果伪装成已收到响应。
+    - timeout audit event 的 `executionSideEffectKind` 根据 permissions 推导；写操作为 `write`，`executionRetryAttempt=0`。
+    - Result Envelope 的 unknown timeout evidence 与 audit semantics 保持一致。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts result-envelope.test.ts -t "unknown outcome"`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.test.ts` 新增注入式 HTTP timeout audit 测试，确认请求已进入 fetch 后 timeout 会写入 `executionOutcome=unknown_after_timeout`、`requestStarted=true`、`executionSideEffectKind=write`、`executionRetryAttempt=0` 和 `executionRequestStartedAt`，且不伪造 `executionResponseReceivedAt`。`packages/runtime/src/result-envelope.test.ts` 同步覆盖 `createHttpExecutionEvidence()` 对 unknown timeout 不写 response timestamp；`createHttpExecutionEvidence()` 已修正只在收到 HTTP response 的 success/http_error 状态写 response timestamp。Runtime 测试数从 211 增至 213。
 - [ ] T170 P2：实现 retry policy tests。
 - [ ] T196 P1：Score cannot override policy tests。
 - [ ] T199 P1：Quota/budget policy gates。
@@ -470,7 +485,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T168：unknown outcome audit tests
+1. M2 / T170：retry policy tests
 2. M3 / T134：CLI command snapshot tests
 3. M3 / T137：错误模型和 exit code tests
 4. M4 / T151：Capability Package lint

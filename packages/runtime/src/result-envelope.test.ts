@@ -171,4 +171,30 @@ describe("Result Envelope V1", () => {
       responseReceivedAt: "2026-05-13T00:00:01.000Z",
     });
   });
+
+  it("keeps response timestamps absent for unknown outcome timeouts", () => {
+    const result: HttpExecutionResult = {
+      ok: false,
+      capabilityId: "github.create_issue",
+      method: "POST",
+      url: "https://api.github.com/repos/opencap/runtime/issues",
+      status: "timeout",
+      error: { code: "HTTP_TIMEOUT", message: "HTTP request timed out after 10ms." },
+    };
+
+    expect(
+      createHttpExecutionEvidence(result, {
+        permissions: [{ resource: "github.issue", action: "create", risk: "write", confirmation: "ask" }],
+        requestStartedAt: "2026-05-13T00:00:00.000Z",
+        responseReceivedAt: "2026-05-13T00:00:01.000Z",
+      }),
+    ).toMatchObject({
+      outcome: "unknown_after_timeout",
+      sideEffectKind: "write",
+      requestStarted: true,
+      requestStartedAt: "2026-05-13T00:00:00.000Z",
+      responseReceivedAt: undefined,
+      retryAttempt: 0,
+    });
+  });
 });

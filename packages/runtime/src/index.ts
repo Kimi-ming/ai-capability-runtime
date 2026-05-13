@@ -492,6 +492,7 @@ export function createHttpExecutionEvidence(
   options: CreateHttpExecutionEvidenceOptions = {},
 ): ExecutionEvidence {
   const requestStarted = requestStartedFromHttpResult(result);
+  const responseReceived = result.status === "success" || result.status === "http_error";
 
   return {
     type: "http",
@@ -503,7 +504,7 @@ export function createHttpExecutionEvidence(
     outcome: executionOutcomeFromHttpResult(result),
     sideEffectKind: highestSideEffectKind(options.permissions),
     requestStartedAt: requestStarted ? options.requestStartedAt : undefined,
-    responseReceivedAt: requestStarted ? options.responseReceivedAt : undefined,
+    responseReceivedAt: responseReceived ? options.responseReceivedAt : undefined,
     providerRequestId: options.providerRequestId,
     retryAttempt: options.retryAttempt ?? 0,
     idempotencyKeyHash: options.idempotencyKeyHash,
