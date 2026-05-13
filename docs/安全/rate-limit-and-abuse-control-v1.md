@@ -40,6 +40,16 @@ rate_limits:
       decision: ask
 ```
 
+当前 Runtime 提供 `evaluateAbuseThrottleGate()` 纯 gate helper，用于把本地 usage snapshot 转成统一 `GateDecision`。它不直接读写 audit log 或本地状态；调用方需要传入按 capability/risk/channel/window 聚合后的 count。
+
+实现边界：
+
+- stage 固定为 `pre_secret`，因此超限 `deny` 会阻断 Secret Resolver 和 HTTP execution。
+- `ask` 映射为 confirmation required；`warn` 作为 allow gate 返回但保留 evidence。
+- evidence 记录 rule id、decision、window、limit、current count、remaining 和哈希化 throttle key。
+- evidence 不记录 input/output/secret 原文，也不记录 usage key 原文。
+- `defaultExternalSendAbuseThrottleRule()` 提供 `external_send` 默认低频 ask 基线：3 calls / 1m。
+
 ### Provider rate limit
 
 外部 provider 返回 429 或 RateLimit headers。Runtime 应记录 provider 的 rate limit evidence，并避免自动重试非幂等操作。
