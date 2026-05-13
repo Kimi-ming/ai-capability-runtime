@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 203 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 208 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -205,7 +205,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.test.ts` 新增 3 个 state dir precedence 测试，覆盖相对/绝对 state dir 解析、`OPENCAP_STATE_DIR` 跨 `ensureLocalStateDir()` / `installCapability()` / `listInstalledCapabilities()` / `loadPolicySet()` / `SqliteAuditLogger` / `OpenCapRuntime` 一致性，以及显式 `stateDir` 优先于环境变量且不创建低优先级目录。当前实现已满足契约，本轮用临时 env-first 回归确认新增测试能抓住 precedence 破坏；Runtime index 测试数从 85 增至 88，Runtime 包测试数从 200 增至 203。
-- [ ] T152 P1：把 consent receipt 落入 audit log 字段和测试。
+- [x] T152 P1：把 consent receipt 落入 audit log 字段和测试。
+  - 验收标准：
+    - `AuditEvent` 能表达 Runtime-owned consent receipt evidence：consent id、decision、decidedAt、channel、subject、input hash 和 policy rule id。
+    - `createConfirmationAuditEvent()` 对 `ask` 决策的 approved/rejected/confirmation_required 结果写入 consent receipt；`confirmation_required` 映射为 unavailable，不把 Host 或模型文案当成 receipt。
+    - policy allow/deny 这类不需要用户同意的路径不得伪造 consent receipt 字段。
+    - `SqliteAuditLogger` 能持久化、迁移并查询 consent receipt 字段，`opencap logs --json` 可从 audit event 输出这些字段。
+    - consent receipt 只保存 hash、状态和 Runtime 生成的元数据，不保存 input 原文、secret 或 Authorization 类字段。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts -t "consent receipt"`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.ts` 新增 `AuditConsentReceiptEvidence`、consent receipt audit fields 和 `createConsentReceiptAuditEvidence()`；`createConfirmationAuditEvent()` 对 `ask` 的 approved/rejected/confirmation_required 写入 receipt，其中 MCP 无确认通道映射为 `unavailable`，policy allow/deny 不伪造 receipt。`SqliteAuditLogger` 新增 consent receipt columns、迁移、写入和查询恢复；HTTP execution audit event 可携带 approved consent receipt，CLI invoke approved ask 路径会把 receipt 传入执行审计事件。`packages/runtime/src/index.test.ts` 新增 5 个 consent receipt 测试，Runtime index 测试数从 88 增至 93，Runtime 包测试数从 203 增至 208。
 - [ ] T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 - [ ] T161 P1：实现 least-privilege auth lint。
 - [ ] T167 P1：将 execution semantics 落入 TypeScript 类型和 audit 字段。
@@ -407,13 +423,11 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T152：consent receipt audit log fields
-2. M2 / T160：`auth.scopes` and credential descriptor schema tests
-3. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
-4. M2 / T161：least-privilege auth lint
-5. M2 / T167：execution semantics TypeScript 类型和 audit 字段
-6. M2 / T168：unknown outcome audit tests
-7. M3 / T134：CLI command snapshot tests
+1. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
+2. M2 / T161：least-privilege auth lint
+3. M2 / T167：execution semantics TypeScript 类型和 audit 字段
+4. M2 / T168：unknown outcome audit tests
+5. M3 / T134：CLI command snapshot tests
 8. M3 / T137：错误模型和 exit code tests
 9. M4 / T151：Capability Package lint
 10. M4 / T158：Trust Card generation rules

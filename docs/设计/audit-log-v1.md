@@ -12,7 +12,7 @@
 
 ## 当前最小实现
 
-当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。`AuditLogger` 同时提供 `preflight()` 和 `record()`：非 `read_only` HTTP 执行会在解析 secret 和发起请求前先做 audit preflight，确认审计写路径可用。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录；SQLite preflight 通过事务触达写入路径后 rollback，不留下持久化 invocation 记录。审计事件可保存 `input_hash`、`input_redacted_json`、`request_started`、Data Egress evidence 和 Outbound Policy evidence。当前 Node 对该模块仍会打印 ExperimentalWarning。
+当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。`AuditLogger` 同时提供 `preflight()` 和 `record()`：非 `read_only` HTTP 执行会在解析 secret 和发起请求前先做 audit preflight，确认审计写路径可用。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录；SQLite preflight 通过事务触达写入路径后 rollback，不留下持久化 invocation 记录。审计事件可保存 `input_hash`、`input_redacted_json`、`request_started`、Data Egress evidence、Outbound Policy evidence 和 Runtime-owned consent receipt evidence。当前 Node 对该模块仍会打印 ExperimentalWarning。
 
 当前实现也会保存 Secret Resolver 产生的 credential evidence：只记录 provider/source/env name/placement/resolved/redacted summary，不记录 env var value、Authorization header value 或其他 secret 原文。
 
@@ -44,6 +44,13 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `policy_trace_json` | text | redacted decision trace JSON |
 | `override_id` | text | 本次生效的 override/breakglass id，可为空 |
 | `confirmation_status` | text | not_required/accepted/declined/unavailable |
+| `consent_id` | text | Runtime 生成的 consent receipt id，可为空 |
+| `consent_decision` | text | approved/rejected/unavailable/expired，可为空 |
+| `consent_decided_at` | text | consent decision ISO timestamp，可为空 |
+| `consent_channel` | text | receipt 来源通道，`cli` / `mcp` |
+| `consent_subject` | text | `local_user` / `unknown` |
+| `consent_input_hash` | text | receipt 绑定的 input hash，不保存 input 原文 |
+| `consent_policy_rule_id` | text | 触发 ask 的 policy rule id，可为空 |
 | `status` | text | success/error/denied/confirmation_required/dry_run |
 | `request_started` | integer | 是否已经发起 provider request，egress deny 必须为 `0` |
 | `duration_ms` | integer | 耗时 |
@@ -102,6 +109,13 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `status` | `public_metadata` | 原值 |
 | `policy_decision` | `public_metadata` | 原值 |
 | `confirmation_status` | `public_metadata` | 原值 |
+| `consent_id` | `operational_metadata` | `consent_<uuid>` |
+| `consent_decision` | `public_metadata` | approved/rejected/unavailable/expired |
+| `consent_decided_at` | `operational_metadata` | ISO timestamp |
+| `consent_channel` | `public_metadata` | `cli` / `mcp` |
+| `consent_subject` | `operational_metadata` | `local_user` / `unknown` |
+| `consent_input_hash` | `redacted_user_data` | SHA-256 hash，不含 input 原文 |
+| `consent_policy_rule_id` | `operational_metadata` | 原值 |
 | `request_started` | `operational_metadata` | 原值；egress deny 为 `false` |
 | `matched_rule_id` | `operational_metadata` | 原值 |
 | `resolved_url` | `redacted_user_data` | origin/path 可记录，query 必须脱敏或省略 |

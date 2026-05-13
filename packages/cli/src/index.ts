@@ -14,6 +14,8 @@ import {
   CliConfirmationHandler,
   blockedResultEnvelope,
   buildHttpDryRunPlan,
+  createConfirmationAuditEvent,
+  createConsentReceiptAuditEvidence,
   evaluatePolicy,
   executeHttpCapability,
   exportDecisionLogRecords,
@@ -634,29 +636,17 @@ program
         return;
       }
 
-      const confirmation = await new CliConfirmationHandler({ assumeYes: options.yes }).confirm({
+      const confirmationRequest = {
         capabilityId: capability.id,
         policy,
-        channel: "cli",
+        channel: "cli" as const,
         operationSummary: capability.id,
         input,
-      });
+      };
+      const confirmation = await new CliConfirmationHandler({ assumeYes: options.yes }).confirm(confirmationRequest);
 
       if (confirmation.status !== "approved") {
-        await logger.record({
-          id: randomUUID(),
-          timestamp: new Date().toISOString(),
-          channel: "cli",
-          capabilityId: capability.id,
-          status: confirmation.status === "denied" ? "denied" : "blocked",
-          policyDecision: policy.decision,
-          confirmationStatus: confirmation.status,
-          reason: confirmation.reason,
-          matchedRuleId: policy.matchedRuleId,
-          inputHash: hashInput(input),
-          inputRedactedJson: stableJsonStringify(redactInput(input)),
-          policyTrace: policy.decisionTrace,
-        });
+        await logger.record(createConfirmationAuditEvent(confirmationRequest, confirmation));
         process.exitCode = 1;
         const envelope = blockedResultEnvelope({
           capabilityId: capability.id,
@@ -671,7 +661,12 @@ program
         return;
       }
 
-      const result = await executeHttpCapability(capability.manifest, input, { env: process.env, auditLogger: logger, channel: "cli" });
+      const result = await executeHttpCapability(capability.manifest, input, {
+        env: process.env,
+        auditLogger: logger,
+        channel: "cli",
+        consentReceipt: createConsentReceiptAuditEvidence(confirmationRequest, confirmation),
+      });
       const envelope = resultEnvelopeFromHttpExecutionResult(result, {
         evidence: {
           policyDecision: policy.decision,

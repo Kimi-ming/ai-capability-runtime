@@ -14,6 +14,7 @@ import {
   confirmWithAudit,
   confirmationSummaryFromDataEgress,
   createConfirmationAuditEvent,
+  createConsentReceiptAuditEvidence,
   createDataEgressAuditEvent,
   createInputProvenanceEvidence,
   defaultPolicySet,
@@ -783,6 +784,48 @@ describe("HTTP executor", () => {
     expect(logger.events[0]).toMatchObject({ status: "blocked", resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues" });
   });
 
+  it("carries consent receipt evidence into execution audit events", async () => {
+    const logger = new InMemoryAuditLogger();
+    const policy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+    const confirmationRequest = {
+      capabilityId: "github.create_issue",
+      channel: "cli" as const,
+      policy,
+      input: { owner: "opencap", repo: "runtime", title: "Bug", body: "broken", token: "ghp_secret" },
+    };
+    const consentReceipt = createConsentReceiptAuditEvidence(
+      confirmationRequest,
+      {
+        status: "approved",
+        channel: "cli",
+        policyDecision: "ask",
+        prompted: true,
+        reason: "User approved this invocation once.",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    const result = await executeHttpCapability(
+      dryRunManifest(),
+      { owner: "opencap", repo: "runtime", title: "Bug", body: "broken", token: "ghp_secret" },
+      { env: {}, auditLogger: logger, consentReceipt },
+    );
+
+    expect(result.status).toBe("secret_missing");
+    expect(logger.events[0]).toMatchObject({
+      status: "blocked",
+      consentDecision: "approved",
+      consentDecidedAt: "2026-05-09T00:00:00.000Z",
+      consentChannel: "cli",
+      consentSubject: "local_user",
+      consentInputHash: consentReceipt?.consentInputHash,
+    });
+    expect(JSON.stringify(logger.events[0])).not.toContain("ghp_secret");
+  });
+
   it("records credential audit evidence without leaking the secret value", async () => {
     const logger = new InMemoryAuditLogger();
     const server = createServer((_, response) => {
@@ -1432,6 +1475,88 @@ describe("confirmation audit", () => {
       reason: "Policy allowed without confirmation.",
     });
   });
+
+  it("adds consent receipt evidence for approved ask confirmations", () => {
+    const policy = evaluatePolicy(parsePolicyYml(`default: deny
+rules:
+  - id: ask-write
+    match:
+      capability_id: github.create_issue
+      risk: write
+    decision: ask
+    reason: Human approval is required.
+`), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+    const event = createConfirmationAuditEvent(
+      { capabilityId: "github.create_issue", channel: "cli", policy, input: { title: "Bug", token: "ghp_secret" } },
+      {
+        status: "approved",
+        channel: "cli",
+        policyDecision: "ask",
+        prompted: true,
+        reason: "User approved this invocation once.",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    expect(event).toMatchObject({
+      consentDecision: "approved",
+      consentDecidedAt: "2026-05-09T00:00:00.000Z",
+      consentChannel: "cli",
+      consentSubject: "local_user",
+      consentInputHash: event.inputHash,
+      consentPolicyRuleId: "ask-write",
+    });
+    expect(event.consentId).toMatch(/^consent_[0-9a-f-]{36}$/);
+    expect(JSON.stringify(event)).not.toContain("ghp_secret");
+  });
+
+  it("maps MCP confirmation_required to an unavailable consent receipt", async () => {
+    const logger = new InMemoryAuditLogger();
+    const policy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+
+    await confirmWithAudit(new McpNoElicitationConfirmationHandler(), {
+      capabilityId: "github.create_issue",
+      channel: "mcp",
+      policy,
+      input: { title: "Bug" },
+    }, logger);
+
+    expect(logger.events[0]).toMatchObject({
+      confirmationStatus: "confirmation_required",
+      consentDecision: "unavailable",
+      consentChannel: "mcp",
+      consentSubject: "unknown",
+      consentInputHash: logger.events[0].inputHash,
+    });
+  });
+
+  it("does not create consent receipt evidence when policy did not ask", () => {
+    const policy = evaluatePolicy(parsePolicyYml("default: allow\nrules: []\n"), {
+      capabilityId: "github.search_repo",
+      permissions: [{ resource: "github.repo", action: "search", risk: "read_only" }],
+    });
+    const event = createConfirmationAuditEvent(
+      { capabilityId: "github.search_repo", channel: "cli", policy, input: { query: "opencap" } },
+      {
+        status: "approved",
+        channel: "cli",
+        policyDecision: "allow",
+        prompted: false,
+        reason: "Policy allowed without confirmation.",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    expect(event.consentId).toBeUndefined();
+    expect(event.consentDecision).toBeUndefined();
+    expect(event.consentInputHash).toBeUndefined();
+  });
 });
 
 
@@ -1568,6 +1693,47 @@ describe("SQLite audit logger", () => {
           inputRedactedJson: '{"title":"Bug","token":"[REDACTED]"}',
         },
       ]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("persists consent receipt evidence", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-consent-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+    const policy = evaluatePolicy(defaultPolicySet(), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+    const event = createConfirmationAuditEvent(
+      { capabilityId: "github.create_issue", channel: "mcp", policy, input: { title: "Bug", token: "ghp_secret" } },
+      {
+        status: "confirmation_required",
+        channel: "mcp",
+        policyDecision: "ask",
+        prompted: false,
+        reason: "This capability requires human confirmation, but this MCP channel cannot prompt.",
+      },
+      new Date("2026-05-09T00:00:00.000Z"),
+    );
+
+    try {
+      await logger.record(event);
+
+      const recent = await logger.recent(10);
+      expect(recent).toMatchObject([
+        {
+          capabilityId: "github.create_issue",
+          confirmationStatus: "confirmation_required",
+          consentDecision: "unavailable",
+          consentDecidedAt: "2026-05-09T00:00:00.000Z",
+          consentChannel: "mcp",
+          consentSubject: "unknown",
+          consentInputHash: event.inputHash,
+        },
+      ]);
+      expect(recent[0].consentId).toBe(event.consentId);
+      expect(JSON.stringify(recent)).not.toContain("ghp_secret");
     } finally {
       logger.close();
     }

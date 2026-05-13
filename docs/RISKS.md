@@ -38,7 +38,7 @@
 | R016 | Medium | Mitigating | Host 行为差异导致 MCP demo 在不同 Host 上不一致 | Host compatibility matrix，后续维护测试记录 | T127, T142 |
 | R017 | Medium | Mitigated | 未来 Cloud 边界不清会削弱开源信任 | ADR 0017；open-core boundary 文档 | T120 |
 | R018 | Low | Mitigated | 默认远程遥测会破坏 local-first 预期 | ADR 0016：V1 默认不上传遥测 | T143 |
-| R019 | High | Mitigating | 确认文案如果由模型或 Host 自由生成，用户可能被误导授权 | ADR 0023；Runtime-owned consent summary 和 receipt | T152, T155 |
+| R019 | High | Mitigating | 确认文案如果由模型或 Host 自由生成，用户可能被误导授权 | ADR 0023；Runtime-owned consent receipt audit fields 已实现，Runtime-owned summary 仍需继续收敛 | T152, T155 |
 | R020 | Medium | Mitigating | 泛泛声明兼容 MCP/Host 可能导致用户误判可用性 | ADR 0024；Interoperability profiles 和 evidence records | T153, T154 |
 | R021 | Medium | Mitigating | Registry package 只有 manifest，缺少 README/tests 会降低 review 质量 | ADR 0025；Capability Package V1 目录契约 | T151, T158 |
 | R022 | High | Mitigating | Agentic AI 风险停留在文档层，未转化为测试会造成安全承诺落空 | ADR 0026；Agentic risk mapping 和 conformance negative tests | T128, T155 |
@@ -86,7 +86,7 @@
 
 1. R004：审计日志脱敏实现
 2. R003：任意 URL/outbound policy 实现
-3. R019：确认摘要和 consent receipt 实现
+3. R019：确认摘要剩余收敛和 consent 展示边界
 4. R008：MCP elicitation 兼容性
 5. R023：token passthrough 禁止的实现验证
 6. R024：Secret Resolver 调用顺序验证

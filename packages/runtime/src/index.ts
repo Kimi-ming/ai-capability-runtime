@@ -1128,6 +1128,7 @@ export interface HttpExecutionOptions extends HttpDryRunOptions {
   env?: Record<string, string | undefined>;
   fetch?: typeof fetch;
   outboundPolicy?: OutboundPolicyOptions;
+  consentReceipt?: AuditConsentReceiptEvidence;
 }
 
 function executionAuditEvent(
@@ -1136,6 +1137,7 @@ function executionAuditEvent(
   result: HttpExecutionResult,
   channel: ConfirmationChannel,
   credential?: CredentialAuditEvidence,
+  consentReceipt?: AuditConsentReceiptEvidence,
 ): AuditEvent {
   return {
     id: randomUUID(),
@@ -1156,6 +1158,7 @@ function executionAuditEvent(
     credentialPlacement: credential?.placement,
     credentialResolved: credential?.resolved,
     credentialRedacted: credential?.redacted,
+    ...consentReceipt,
   };
 }
 
@@ -1374,7 +1377,7 @@ export async function executeHttpCapability(
       error: { code: "SECRET_MISSING", message: error.message },
     };
     if (options.auditLogger !== undefined) {
-      await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli", credential));
+      await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli", credential, options.consentReceipt));
     }
     return result;
   }
@@ -1442,7 +1445,7 @@ export async function executeHttpCapability(
   }
 
   if (options.auditLogger !== undefined) {
-    await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli", credential));
+    await options.auditLogger.record(executionAuditEvent(manifest, input, result, options.channel ?? "cli", credential, options.consentReceipt));
   }
 
   return result;
@@ -2095,6 +2098,18 @@ export class McpNoElicitationConfirmationHandler implements ConfirmationHandler 
 }
 
 export type AuditInvocationStatus = "blocked" | "denied" | "executed" | "dry_run";
+export type AuditConsentDecision = "approved" | "rejected" | "unavailable" | "expired";
+export type AuditConsentSubject = "local_user" | "unknown";
+
+export interface AuditConsentReceiptEvidence {
+  consentId: string;
+  consentDecision: AuditConsentDecision;
+  consentDecidedAt: string;
+  consentChannel: ConfirmationChannel;
+  consentSubject: AuditConsentSubject;
+  consentInputHash?: string;
+  consentPolicyRuleId?: string;
+}
 
 export interface AuditEvent {
   id: string;
@@ -2124,6 +2139,13 @@ export interface AuditEvent {
   outboundDecision?: OutboundPolicyDecision;
   outboundTargetType?: OutboundTargetType;
   outboundReasonCode?: string;
+  consentId?: string;
+  consentDecision?: AuditConsentDecision;
+  consentDecidedAt?: string;
+  consentChannel?: ConfirmationChannel;
+  consentSubject?: AuditConsentSubject;
+  consentInputHash?: string;
+  consentPolicyRuleId?: string;
   inputProvenance?: InputProvenanceEvidence;
   policyTrace?: PolicyDecisionTraceV1;
 }
@@ -2186,11 +2208,60 @@ function auditStatusFromConfirmation(status: ConfirmationStatus): AuditInvocatio
   return "blocked";
 }
 
+function consentDecisionFromConfirmation(status: ConfirmationStatus): AuditConsentDecision | undefined {
+  if (status === "approved") {
+    return "approved";
+  }
+
+  if (status === "rejected") {
+    return "rejected";
+  }
+
+  if (status === "confirmation_required") {
+    return "unavailable";
+  }
+
+  return undefined;
+}
+
+function consentSubjectFromChannel(channel: ConfirmationChannel): AuditConsentSubject {
+  return channel === "cli" ? "local_user" : "unknown";
+}
+
+export function createConsentReceiptAuditEvidence(
+  request: ConfirmationRequest,
+  confirmation: ConfirmationResult,
+  timestamp = new Date(),
+  inputHash = request.input === undefined ? undefined : hashInput(request.input),
+): AuditConsentReceiptEvidence | undefined {
+  if (request.policy.decision !== "ask") {
+    return undefined;
+  }
+
+  const consentDecision = consentDecisionFromConfirmation(confirmation.status);
+  if (consentDecision === undefined) {
+    return undefined;
+  }
+
+  return {
+    consentId: `consent_${randomUUID()}`,
+    consentDecision,
+    consentDecidedAt: timestamp.toISOString(),
+    consentChannel: confirmation.channel,
+    consentSubject: consentSubjectFromChannel(confirmation.channel),
+    consentInputHash: inputHash,
+    consentPolicyRuleId: request.policy.matchedRuleId,
+  };
+}
+
 export function createConfirmationAuditEvent(
   request: ConfirmationRequest,
   confirmation: ConfirmationResult,
   timestamp = new Date(),
 ): AuditEvent {
+  const inputHash = request.input === undefined ? undefined : hashInput(request.input);
+  const consentReceipt = createConsentReceiptAuditEvidence(request, confirmation, timestamp, inputHash);
+
   return {
     id: randomUUID(),
     timestamp: timestamp.toISOString(),
@@ -2201,8 +2272,9 @@ export function createConfirmationAuditEvent(
     confirmationStatus: confirmation.status,
     reason: confirmation.reason,
     matchedRuleId: request.policy.matchedRuleId,
-    inputHash: request.input === undefined ? undefined : hashInput(request.input),
+    inputHash,
     inputRedactedJson: request.input === undefined ? undefined : stableJsonStringify(redactInput(request.input)),
+    ...consentReceipt,
     policyTrace: request.policy.decisionTrace,
   };
 }
@@ -2327,6 +2399,13 @@ interface AuditEventRow {
   outbound_decision: OutboundPolicyDecision | null;
   outbound_target_type: OutboundTargetType | null;
   outbound_reason_code: string | null;
+  consent_id: string | null;
+  consent_decision: AuditConsentDecision | null;
+  consent_decided_at: string | null;
+  consent_channel: ConfirmationChannel | null;
+  consent_subject: AuditConsentSubject | null;
+  consent_input_hash: string | null;
+  consent_policy_rule_id: string | null;
   input_provenance_json: string | null;
   policy_trace_json: string | null;
 }
@@ -2369,6 +2448,13 @@ CREATE TABLE IF NOT EXISTS invocations (
   outbound_decision TEXT,
   outbound_target_type TEXT,
   outbound_reason_code TEXT,
+  consent_id TEXT,
+  consent_decision TEXT,
+  consent_decided_at TEXT,
+  consent_channel TEXT,
+  consent_subject TEXT,
+  consent_input_hash TEXT,
+  consent_policy_rule_id TEXT,
   input_provenance_json TEXT,
   policy_trace_json TEXT
 ) STRICT;
@@ -2399,6 +2485,13 @@ function ensureAuditSchema(database: DatabaseSync): void {
     ["outbound_decision", "TEXT"],
     ["outbound_target_type", "TEXT"],
     ["outbound_reason_code", "TEXT"],
+    ["consent_id", "TEXT"],
+    ["consent_decision", "TEXT"],
+    ["consent_decided_at", "TEXT"],
+    ["consent_channel", "TEXT"],
+    ["consent_subject", "TEXT"],
+    ["consent_input_hash", "TEXT"],
+    ["consent_policy_rule_id", "TEXT"],
     ["input_provenance_json", "TEXT"],
     ["policy_trace_json", "TEXT"],
   ];
@@ -2512,6 +2605,13 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     outboundDecision: row.outbound_decision ?? undefined,
     outboundTargetType: row.outbound_target_type ?? undefined,
     outboundReasonCode: row.outbound_reason_code ?? undefined,
+    consentId: row.consent_id ?? undefined,
+    consentDecision: row.consent_decision ?? undefined,
+    consentDecidedAt: row.consent_decided_at ?? undefined,
+    consentChannel: row.consent_channel ?? undefined,
+    consentSubject: row.consent_subject ?? undefined,
+    consentInputHash: row.consent_input_hash ?? undefined,
+    consentPolicyRuleId: row.consent_policy_rule_id ?? undefined,
     inputProvenance: parseInputProvenance(row.input_provenance_json),
     policyTrace: parsePolicyTrace(row.policy_trace_json),
   };
@@ -2537,8 +2637,9 @@ export class SqliteAuditLogger implements AuditLogger {
           input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
           credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
           egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
-          outbound_reason_code, input_provenance_json, policy_trace_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          outbound_reason_code, consent_id, consent_decision, consent_decided_at, consent_channel, consent_subject,
+          consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -2568,6 +2669,13 @@ export class SqliteAuditLogger implements AuditLogger {
         event.outboundDecision ?? null,
         event.outboundTargetType ?? null,
         event.outboundReasonCode ?? null,
+        event.consentId ?? null,
+        event.consentDecision ?? null,
+        event.consentDecidedAt ?? null,
+        event.consentChannel ?? null,
+        event.consentSubject ?? null,
+        event.consentInputHash ?? null,
+        event.consentPolicyRuleId ?? null,
         event.inputProvenance === undefined ? null : stableJsonStringify(event.inputProvenance),
         event.policyTrace === undefined ? null : stableJsonStringify(event.policyTrace),
       );
@@ -2628,7 +2736,9 @@ export class SqliteAuditLogger implements AuditLogger {
         `SELECT id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
                 input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
                 credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
-                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json, policy_trace_json
+                egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
+                outbound_reason_code, consent_id, consent_decision, consent_decided_at, consent_channel, consent_subject,
+                consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json
          FROM invocations
          ${whereSql}
          ORDER BY timestamp DESC, id DESC

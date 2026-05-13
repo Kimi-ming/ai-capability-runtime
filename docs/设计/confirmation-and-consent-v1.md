@@ -105,6 +105,8 @@ type ConsentReceipt = {
 当前 Runtime 最小实现提供两个 handler：`CliConfirmationHandler` 用于 CLI 通道并支持注入 prompt，`McpNoElicitationConfirmationHandler` 用于 MCP STDIO 无确认能力场景并返回 `confirmation_required`。
 `CliConfirmationHandler` 还支持 `assumeYes` 选项，对应未来 CLI `--yes`；该选项不适用于 MCP，且不会自动批准 destructive 或 financial ask。
 
+当前 AuditEvent 已落入 consent receipt evidence 字段：`consentId`、`consentDecision`、`consentDecidedAt`、`consentChannel`、`consentSubject`、`consentInputHash` 和 `consentPolicyRuleId`。Runtime 只对 policy `ask` 生成 receipt；policy `allow` / `deny` 不伪造用户同意。MCP STDIO 无确认通道会把 receipt decision 记录为 `unavailable`，同时保留 `confirmation_required` 结果。
+
 ## MCP `confirmation_required` 结果
 
 MCP Host 无确认通道时，Runtime 返回结构化结果：
