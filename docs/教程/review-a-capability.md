@@ -57,6 +57,7 @@ pnpm validate
 CI 中同样会运行 `pnpm validate`。它必须覆盖：
 
 - Capability manifest schema。
+- model-visible metadata lint。
 - registry test schema。
 - 示例 `tests/basic.yml` 的基础结构。
 
@@ -64,6 +65,7 @@ CI 中同样会运行 `pnpm validate`。它必须覆盖：
 
 - `pnpm validate` 失败。
 - schema 错误被提交者用绕过字段、删除测试或放宽 schema 的方式规避。
+- model-visible metadata lint 被提交者通过混淆、零宽字符或字段迁移绕过。
 - test fixture 包含真实 token、cookie、私有 URL 或用户数据。
 
 可以作为 follow-up：
@@ -190,7 +192,8 @@ auth:
 - `name`
 - `description`
 - input/output schema description
-- README 中可能被投影给 Host 的摘要
+
+README 在 V1 不进入 Runtime tool projection，但仍要人工审查，避免 Registry 文案误导用户或 reviewer。
 
 必须阻止合并：
 
@@ -319,3 +322,16 @@ pnpm validate
 ```
 
 并检查 PR 是否只修改了相关 Capability、文档或测试文件。若 PR 同时修改 Runtime、schema、policy 或 CI，应拆分或要求额外技术评审。
+
+合并前的完整 authoring loop 顺序应保持为：
+
+```text
+manifest schema
+  -> package shape
+  -> model-visible metadata lint
+  -> least-privilege/risk review
+  -> secret hygiene
+  -> registry tests
+  -> dry-run
+  -> review-ready
+```

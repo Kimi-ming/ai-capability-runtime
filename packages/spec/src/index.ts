@@ -1,9 +1,23 @@
 export { lintModelVisibleMetadata } from "./metadata-lint.js";
 export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
+export {
+  CAPABILITY_AUTHORING_LOOP_VERSION,
+  evaluateCapabilityAuthoringProgress,
+  getCapabilityAuthoringLintOrder,
+  getCapabilityAuthoringStage,
+  isCapabilityAuthoringStageId,
+} from "./authoring.js";
+export type {
+  CapabilityAuthoringBlockTarget,
+  CapabilityAuthoringProgress,
+  CapabilityAuthoringStage,
+  CapabilityAuthoringStageId,
+} from "./authoring.js";
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import YAML from "yaml";
+import { lintModelVisibleMetadata, type ModelVisibleMetadataFinding } from "./metadata-lint.js";
 
 export type RiskLevel =
   | "read_only"
@@ -200,6 +214,70 @@ export async function validateManifestFile(filePath: string): Promise<ManifestVa
 export async function validateManifestPath(targetPath: string): Promise<ManifestPathValidationResult> {
   const manifests = await findManifestFiles(targetPath);
   const results = await Promise.all(manifests.map((manifestPath) => validateManifestFile(manifestPath)));
+
+  return {
+    targetPath,
+    manifests,
+    valid: results.filter((result): result is ManifestValidationSuccess => result.ok),
+    invalid: results.filter((result): result is ManifestValidationFailure => !result.ok),
+  };
+}
+
+function issuesFromMetadataFindings(filePath: string, findings: ModelVisibleMetadataFinding[]): ManifestValidationIssue[] {
+  return findings.map((finding) => ({
+    filePath,
+    fieldPath: finding.path,
+    message: finding.message,
+    keyword: `model-visible-metadata-lint:${finding.rule}`,
+  }));
+}
+
+export async function validateCapabilityAuthoringManifest(
+  manifest: unknown,
+  filePath = "<memory>",
+): Promise<ManifestValidationResult> {
+  const schemaResult = await validateManifest(manifest, filePath);
+
+  if (!schemaResult.ok) {
+    return schemaResult;
+  }
+
+  const metadataFindings = lintModelVisibleMetadata(schemaResult.manifest);
+
+  if (metadataFindings.length === 0) {
+    return schemaResult;
+  }
+
+  return {
+    ok: false,
+    filePath,
+    issues: issuesFromMetadataFindings(filePath, metadataFindings),
+  };
+}
+
+export async function validateCapabilityAuthoringManifestFile(filePath: string): Promise<ManifestValidationResult> {
+  try {
+    const manifest = await loadManifest(filePath);
+    return validateCapabilityAuthoringManifest(manifest, filePath);
+  } catch (error) {
+    return {
+      ok: false,
+      filePath,
+      issues: [
+        {
+          filePath,
+          fieldPath: "/",
+          message: error instanceof Error ? error.message : "failed to read manifest",
+          keyword: "parse",
+        },
+      ],
+    };
+  }
+}
+
+export async function validateCapabilityAuthoringManifestPath(targetPath: string): Promise<ManifestPathValidationResult> {
+  const manifests = await findManifestFiles(targetPath);
+  const results = await Promise.all(manifests.map((manifestPath) => validateCapabilityAuthoringManifestFile(manifestPath)));
 
   return {
     targetPath,

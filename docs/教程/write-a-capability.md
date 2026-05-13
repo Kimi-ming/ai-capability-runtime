@@ -81,7 +81,24 @@ metadata:
 - `execution` 必须说明 HTTP 方法、URL 和 timeout。
 - `metadata.trust_level` 新条目通常从 `experimental` 开始。
 
-## 3. 编写 README
+## 3. 按作者门禁顺序自查
+
+Capability 从草稿到可评审必须按同一条 authoring loop 推进：
+
+```text
+manifest schema
+  -> package shape
+  -> model-visible metadata lint
+  -> least-privilege/risk review
+  -> secret hygiene
+  -> registry tests
+  -> dry-run
+  -> review-ready
+```
+
+其中 `pnpm validate` 会执行 manifest schema、model-visible metadata lint 和 registry tests 的机器校验。least-privilege/risk、secret hygiene 和 dry-run 仍需要作者和 reviewer 明确检查。
+
+## 4. 编写 README
 
 创建 `registry/developer-tools/demo.get_status/README.md`：
 
@@ -107,7 +124,7 @@ No credential is required.
 
 README 的目标是让评审者和用户快速知道这个能力会做什么、需要什么权限、是否需要凭据。
 
-## 4. 编写测试样例
+## 5. 编写测试样例
 
 创建 `registry/developer-tools/demo.get_status/tests/basic.yml`：
 
@@ -129,7 +146,7 @@ expect:
 
 测试样例用于 Registry 校验和后续 mock/dry-run 测试。它不应该包含真实 token、个人数据或不可公开的 URL。
 
-## 5. 校验单个 Capability
+## 6. 校验单个 Capability
 
 运行：
 
@@ -150,7 +167,7 @@ Invalid manifest: /path/to/manifest.yml
   /permissions/0/risk must be equal to one of the allowed values
 ```
 
-## 6. 校验整个 Registry
+## 7. 校验整个 Registry
 
 运行：
 
@@ -161,6 +178,7 @@ pnpm validate
 该命令会同时校验：
 
 - `registry/**/manifest.yml`
+- manifest `name`、`description` 和 schema description 的 model-visible metadata lint
 - `registry/**/tests/basic.yml`
 
 如果你只是在本地练习，提交前可以删除 `registry/developer-tools/demo.get_status/`。如果你要贡献这个 Capability，请保留目录并按 Registry 指南提交 PR。

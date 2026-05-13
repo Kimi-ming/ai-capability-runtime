@@ -97,12 +97,17 @@ projection_hash = sha256(canonical_json(tool_projection_without_hash))
 ```text
 manifest.yml
   -> schema validation
+  -> package shape validation
   -> model-visible metadata lint
+  -> least-privilege/risk and secret hygiene review
+  -> registry tests and dry-run
   -> tool projection builder
   -> MCP tools/list
   -> Host/model selection
   -> Runtime tools/call validation/policy/consent/audit
 ```
+
+Authoring loop contract 由 `@opencap/spec` 导出，版本为 `opencap.capability_authoring_loop.v1`。Tool projection 只能读取已通过 schema validation 和 model-visible metadata lint 的 manifest 输入；README、远程文档和 reviewer 评论不进入 V1 model-visible projection。
 
 ## 非目标
 
@@ -115,5 +120,6 @@ manifest.yml
 
 - T209：tool projection builder。
 - T210：model-visible metadata lint。
+- T275：Capability authoring loop 和 lint 顺序。
 - T212：tool projection hash/evidence。
 - T213：MCP tool description runtime-generated risk summary。

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import {
   formatManifestValidationIssue,
-  validateManifestPath,
+  validateCapabilityAuthoringManifestPath,
   validateRegistryTestPath,
 } from "./index.js";
 
@@ -9,7 +9,7 @@ const targetPath = process.argv[2] ?? "../../registry";
 let hasFailure = false;
 
 try {
-  const manifestResult = await validateManifestPath(targetPath);
+  const manifestResult = await validateCapabilityAuthoringManifestPath(targetPath);
 
   if (manifestResult.manifests.length === 0) {
     console.error(`No manifests found under ${targetPath}`);

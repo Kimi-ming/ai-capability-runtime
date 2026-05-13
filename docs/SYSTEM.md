@@ -111,9 +111,11 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 
 ```text
 Capability author
-  -> writes manifest.yml
-  -> opencap validate
-  -> registry review and tests
+  -> writes manifest.yml/package
+  -> manifest schema and model-visible metadata lint
+  -> least-privilege/secret review
+  -> registry tests and dry-run
+  -> review-ready package
   -> user installs capability
   -> runtime exposes MCP tool
   -> host calls tool

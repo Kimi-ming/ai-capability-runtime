@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 188 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 188 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -106,7 +106,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/identity.ts` 和 `packages/runtime/src/identity.test.ts`，导出 `CAPABILITY_IDENTITY_VERSION`、`createCapabilityIdentity()`、`createCapabilityIdentityRef()`、`capabilityIdentityKey()`、`validateCapabilityIdentity()` 和 `capabilityLifecycleSemantics()`；`packages/runtime/src/index.ts` 已从 public root entrypoint 导出 identity helper 和类型。Contract 测试覆盖 manifest version -> identity、`id@version#manifestDigest` audit key、路径无关 identity digest、lifecycle 不改变 identity digest、SemVer/digest validation、packageDigest 不能替代 manifestDigest、revoked/yanked/deprecated 默认语义和 root export。Runtime 测试数从 183 增至 188。
-- [ ] T275 P1：补齐 Capability authoring loop 和 lint 顺序。
+- [x] T275 P1：补齐 Capability authoring loop 和 lint 顺序。
+  - 验收标准：
+    - `@opencap/spec` 导出 Capability authoring loop contract，固定作者从草稿到 review-ready 的阶段顺序和阻断语义。
+    - lint 顺序必须明确为 manifest schema -> package shape -> model-visible metadata -> least-privilege/risk -> secret hygiene -> registry tests -> dry-run -> review-ready。
+    - model-visible metadata lint 必须早于 tool projection / Host model-visible exposure；package shape 和 registry tests 必须早于 registry publish/review-ready。
+    - contract 为每个阶段给出目的、是否必需、阻断目标、建议命令和对应文档，供 CLI、Registry CI、教程和 reviewer 复用。
+    - 作者教程、评审教程和 tool projection 文档同步该顺序，避免人工流程与机器 lint 顺序分叉。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- authoring.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/spec/src/authoring.ts` 和 `packages/spec/src/authoring.test.ts`，导出 `CAPABILITY_AUTHORING_LOOP_VERSION`、`getCapabilityAuthoringLintOrder()`、`getCapabilityAuthoringStage()`、`evaluateCapabilityAuthoringProgress()`、`validateCapabilityAuthoringManifest()` 和 `validateCapabilityAuthoringManifestPath()`；`pnpm validate` 的 registry validation 已改用 authoring manifest validation，因此 manifest schema 通过后会执行 model-visible metadata lint，再校验 registry tests。作者教程、评审教程、tool projection 文档和测试策略已同步 lint 顺序。Spec 测试数从 25 增至 32。
 - [ ] T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
 
 ### 模块 M2：执行安全、审计和可靠性
