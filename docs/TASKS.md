@@ -19,12 +19,12 @@
 
 ## 当前完成度快照
 
-截至 2026-05-12，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 173 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 177 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
 - 完整 `opencap serve --mcp` server 仍被 T070 阻塞。
-- V1 需要把 Ledger、Card 和 identity/digest 等设计对象继续落到类型与测试里。
+- V1 需要把 Card、identity/digest、lifecycle 和具体 ledger writer/迁移策略继续落到类型、测试和实现里。
 - CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
 - Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
@@ -54,7 +54,22 @@
 - [x] T124 P1：将领域模型落入 TypeScript 类型和 Runtime 接口。
 - [x] T145 P1：定义 package public exports。
 - [x] T268 P1：定义统一 Runtime Gate 接口和 GateDecision 语义。
-- [ ] T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
+- [x] T269 P1：定义 Capability/Policy/Invocation/Compatibility Ledger 存储接口。
+  - 验收标准：
+    - `@opencap/runtime` 导出四类 ledger record V1 类型和 append-only 存储接口：Capability、Policy、Invocation、Compatibility。
+    - 每类 record 都有明确的 record kind、record id、recordedAt、版本字段和最小查询键，能映射到本地 JSON/SQLite/YAML 实现。
+    - ledger contract 只保存 digest、摘要、证据引用和脱敏 metadata，不要求保存 manifest/policy/input/output/secret 原文。
+    - public root entrypoint 能导出 ledger helper 和类型，后续 Card/Profile/identity 任务可复用。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- ledger.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/ledger.ts` 和 `packages/runtime/src/ledger.test.ts`，导出 `LEDGER_RECORD_VERSION`、`createLedgerRecordId()`、四类 ledger record V1 类型、查询类型和 `RuntimeLedgerStore` append-only 接口；`packages/runtime/src/index.ts` 已从 public root entrypoint 导出 ledger helper 和类型。Contract 测试覆盖 record id 前缀、四类 record 最小字段、禁止原文/secret 进入 ledger contract、adapter-neutral append/query 接口和 root export。Runtime 测试数从 173 增至 177。
 - [ ] T270 P1：定义 Capability/Trust/Consent/Compatibility Card schema 和生成规则。
 - [ ] T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
 - [ ] T275 P1：补齐 Capability authoring loop 和 lint 顺序。
@@ -274,20 +289,19 @@ git diff --check
 4. M3 / T134：CLI command snapshot tests
 5. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
 6. M1 / T268：Runtime Gate 接口和 GateDecision 语义
-7. M1 / T269：Ledger 存储接口
-8. M1 / T270：Card schema 和生成规则
-9. M1 / T273：Capability identity/digest/version/lifecycle
-10. M1 / T275：Capability authoring loop 和 lint 顺序
-11. M1 / T276：v0.1-v1.0 release maturity gate matrix
-12. M2 / T133：outbound policy 私网阻断测试
-13. M2 / T135：state dir precedence tests
-14. M3 / T137：错误模型和 exit code tests
-15. M4 / T151：Capability Package lint
-16. M4 / T158：Trust Card generation rules
-17. M4 / T185：Trust level transition tests
-18. M4 / T191：Lifecycle status schema
-19. M4 / T192：Install/list/invoke lifecycle warnings
-20. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+7. M1 / T270：Card schema 和生成规则
+8. M1 / T273：Capability identity/digest/version/lifecycle
+9. M1 / T275：Capability authoring loop 和 lint 顺序
+10. M1 / T276：v0.1-v1.0 release maturity gate matrix
+11. M2 / T133：outbound policy 私网阻断测试
+12. M2 / T135：state dir precedence tests
+13. M3 / T137：错误模型和 exit code tests
+14. M4 / T151：Capability Package lint
+15. M4 / T158：Trust Card generation rules
+16. M4 / T185：Trust level transition tests
+17. M4 / T191：Lifecycle status schema
+18. M4 / T192：Install/list/invoke lifecycle warnings
+19. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

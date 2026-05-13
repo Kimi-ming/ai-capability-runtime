@@ -27,6 +27,7 @@ Runtime Core
  | Policy Engine
  | Policy Decision Trace Builder
  | Policy Change Ledger
+ | Runtime Ledger Storage Contract
  | Confirmation Handler
  | Secret Resolver
  | HTTP Executor

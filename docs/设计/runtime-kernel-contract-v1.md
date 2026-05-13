@@ -289,6 +289,49 @@ export interface RuntimeGate<Input = unknown, Evidence = unknown> {
 - `createGateDecision()` 对 `block` 默认设置 `hardBoundary=true`，其他决策默认 `false`，但调用方可以显式声明更严格的 hard boundary。
 - `gateDecisionSemantics()` 是公共语义 helper，adapter、future gate registry 和 conformance tests 应以它为准，不在各模块重复解释 decision。
 
+## Ledger 存储接口
+
+T269 固定四类账本的 public contract。Ledger 是可查询的本地证据边界，不是原文归档；V1 可以用 JSONL、SQLite 或 YAML evidence record 实现，但外部模块应依赖 `@opencap/runtime` 导出的接口。
+
+```ts
+export type LedgerRecordKind =
+  | "capability"
+  | "policy"
+  | "invocation"
+  | "compatibility";
+
+export interface LedgerRecordBase<Kind extends LedgerRecordKind> {
+  ledgerVersion: "opencap.ledger_record.v1";
+  recordKind: Kind;
+  recordId: string;
+  recordedAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface RuntimeLedgerStore
+  extends CapabilityLedgerStore,
+    PolicyLedgerStore,
+    InvocationLedgerStore,
+    CompatibilityLedgerStore {}
+```
+
+### 账本职责
+
+| 账本 | 记录对象 | 最小查询 |
+| --- | --- | --- |
+| Capability Ledger | installed/updated/lifecycle/advisory/trust 事件 | 按 capability id 查询最新记录 |
+| Policy Ledger | activation/rollback/failed activation/override 事件 | 按 policy set 查询 active 记录 |
+| Invocation Ledger | request、capability、channel、status、gate decisions、policy trace、audit id | 按 request id 查询调用记录 |
+| Compatibility Ledger | Host、profile、OpenCap commit、capability、checks、evidence ref | 按 host/profile 查询最新记录 |
+
+### 规则
+
+- Ledger record 必须是 append-only 语义；更新状态时追加新记录，不删除历史。
+- `recordId` 由 Runtime helper 生成，使用 `ledger_cap_`、`ledger_pol_`、`ledger_inv_`、`ledger_compat_` 前缀。
+- 账本只保存 digest、hash、摘要、状态、证据引用和已脱敏 metadata。
+- 不保存 manifest 原文、policy 原文、input 原文、provider raw output、secret value 或 Authorization header value。
+- 具体存储实现可以分散在已安装能力 metadata、policy JSONL、SQLite audit log 和 compatibility YAML/JSON record 中，但查询接口必须维持同一语义。
+
 ## ConsentRequest 和 ConsentReceipt
 
 ```ts
