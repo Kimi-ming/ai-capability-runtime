@@ -70,10 +70,10 @@ const CAPABILITY_AUTHORING_LINT_ORDER: readonly CapabilityAuthoringStage[] = [
     id: "least_privilege_risk",
     order: 4,
     title: "Least-privilege risk review",
-    summary: "Check that permissions, risk levels, confirmation modes, and execution behavior match the real action.",
+    summary: "Lint machine-checkable auth scope risks, then review permissions, risk levels, confirmation modes, and execution behavior.",
     required: true,
     blocks: ["runtime_execution", "registry_publish", "review_ready"],
-    commands: ["manual review: docs/教程/review-a-capability.md"],
+    commands: ["pnpm validate", "manual review: docs/教程/review-a-capability.md"],
     docs: ["docs/安全/least-privilege-review.md", "docs/教程/review-a-capability.md"],
   },
   {

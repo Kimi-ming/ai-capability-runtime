@@ -1,5 +1,7 @@
 export { lintModelVisibleMetadata } from "./metadata-lint.js";
 export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
+export { lintLeastPrivilegeAuth } from "./auth-lint.js";
+export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export {
   CAPABILITY_AUTHORING_LOOP_VERSION,
   evaluateCapabilityAuthoringProgress,
@@ -17,6 +19,7 @@ import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.
 import { readFile, readdir, stat } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import YAML from "yaml";
+import { lintLeastPrivilegeAuth, type LeastPrivilegeAuthFinding } from "./auth-lint.js";
 import { lintModelVisibleMetadata, type ModelVisibleMetadataFinding } from "./metadata-lint.js";
 
 export type RiskLevel =
@@ -232,6 +235,15 @@ function issuesFromMetadataFindings(filePath: string, findings: ModelVisibleMeta
   }));
 }
 
+function issuesFromLeastPrivilegeAuthFindings(filePath: string, findings: LeastPrivilegeAuthFinding[]): ManifestValidationIssue[] {
+  return findings.map((finding) => ({
+    filePath,
+    fieldPath: finding.path,
+    message: finding.message,
+    keyword: `least-privilege-auth-lint:${finding.rule}`,
+  }));
+}
+
 export async function validateCapabilityAuthoringManifest(
   manifest: unknown,
   filePath = "<memory>",
@@ -244,15 +256,25 @@ export async function validateCapabilityAuthoringManifest(
 
   const metadataFindings = lintModelVisibleMetadata(schemaResult.manifest);
 
-  if (metadataFindings.length === 0) {
-    return schemaResult;
+  if (metadataFindings.length > 0) {
+    return {
+      ok: false,
+      filePath,
+      issues: issuesFromMetadataFindings(filePath, metadataFindings),
+    };
   }
 
-  return {
-    ok: false,
-    filePath,
-    issues: issuesFromMetadataFindings(filePath, metadataFindings),
-  };
+  const leastPrivilegeFindings = lintLeastPrivilegeAuth(schemaResult.manifest);
+
+  if (leastPrivilegeFindings.length > 0) {
+    return {
+      ok: false,
+      filePath,
+      issues: issuesFromLeastPrivilegeAuthFindings(filePath, leastPrivilegeFindings),
+    };
+  }
+
+  return schemaResult;
 }
 
 export async function validateCapabilityAuthoringManifestFile(filePath: string): Promise<ManifestValidationResult> {

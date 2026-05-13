@@ -53,7 +53,9 @@ Review 建议：
 
 GitHub REST 文档提供 fine-grained PAT 权限到 endpoint 的映射，reviewer 应用它核对 token 权限。
 
-Manifest schema 会先做最小 credential descriptor 校验：`api_key` 必须声明非空唯一 `scopes`、安全 `env` reference、provider slug 和安全 credential placement。该 schema 只证明 descriptor 形状正确；scope 是否最小仍由本文件的 review 规则和后续 T161 lint 继续检查。
+Manifest schema 会先做最小 credential descriptor 校验：`api_key` 必须声明非空唯一 `scopes`、安全 `env` reference、provider slug 和安全 credential placement。`pnpm validate` 随后会执行 least-privilege auth lint，自动拒绝 provider/resource 前缀不一致、read-only permission 携带 write/admin/delete/manage/send 等 elevated scope、写入或更高风险 permission 只声明 read-only scope，以及 wildcard/admin/full/repo 等明显过宽 scope。
+
+该 lint 只覆盖 V1 可机器判定的高信号风险；它不证明 scope 一定最小。Reviewer 仍必须对照 provider 官方权限文档确认 endpoint、token 类型和 repository/channel/project 级限制。
 
 ## 风险升级规则
 
@@ -96,10 +98,9 @@ least_privilege:
 
 ## 后续自动化
 
-未来可以实现 `opencap registry lint`：
+后续可以继续扩展 `opencap registry lint`：
 
-- 比较 permissions 与 risk。
-- 检查 forbidden scopes。
+- 增加 provider-specific endpoint-to-scope mapping。
 - 检查 query token。
 - 检查 README 是否有凭据说明。
 - 检查 tests/examples 是否有 secret-like 字符串。

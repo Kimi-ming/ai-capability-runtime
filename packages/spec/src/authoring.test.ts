@@ -123,6 +123,13 @@ describe("Capability authoring loop", () => {
     expect(progress.unknownStageIds).toEqual(["not_a_stage"]);
   });
 
+  it("exposes least-privilege auth lint as part of authoring validation", () => {
+    const leastPrivilege = getCapabilityAuthoringStage("least_privilege_risk");
+
+    expect(leastPrivilege?.commands).toEqual(expect.arrayContaining(["pnpm validate"]));
+    expect(leastPrivilege?.docs).toContain("docs/安全/least-privilege-review.md");
+  });
+
   it("marks the authoring loop review-ready only after all required stages complete", () => {
     const progress = evaluateCapabilityAuthoringProgress([
       "manifest_schema",
@@ -157,6 +164,31 @@ describe("Capability authoring loop", () => {
         filePath: "manifest.yml",
         fieldPath: "/description",
         keyword: "model-visible-metadata-lint:instruction_override",
+      }),
+    ]);
+  });
+
+  it("treats least-privilege auth findings as authoring validation errors", async () => {
+    const manifest = authoringManifest();
+    manifest.permissions[0] = {
+      resource: "github.issue",
+      action: "read",
+      risk: "read_only",
+      confirmation: "allow",
+    };
+
+    const result = await validateCapabilityAuthoringManifest(manifest, "manifest.yml");
+
+    expect(result.ok).toBe(false);
+    if (result.ok) {
+      return;
+    }
+
+    expect(result.issues).toEqual([
+      expect.objectContaining({
+        filePath: "manifest.yml",
+        fieldPath: "/auth/scopes/0",
+        keyword: "least-privilege-auth-lint:read_only_permission_with_write_scope",
       }),
     ]);
   });

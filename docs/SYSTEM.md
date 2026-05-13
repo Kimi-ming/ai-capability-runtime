@@ -62,7 +62,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | 身份授权 | 明确代表谁调用 | `docs/安全/identity-and-auth-model.md` | identity/auth boundary |
 | Secret Resolver | 安全解析凭据 | `docs/设计/secret-resolver-v1.md` | env provider 契约 |
 | 凭据生命周期 | 凭据创建/轮换/撤销 | `docs/运营/credential-lifecycle.md` | runbook |
-| 最小权限评审 | 防止过宽 scopes | `docs/安全/least-privilege-review.md` | review checklist |
+| 最小权限评审 | 防止过宽 scopes | `docs/安全/least-privilege-review.md` | spec lint + review checklist |
 | 远程 OAuth 边界 | 防止未来授权混乱 | `docs/生态/oauth-and-remote-runtime-boundary.md` | future auth profile 边界 |
 | 执行语义 | 表达副作用和结果状态 | `docs/设计/execution-semantics-v1.md` | outcome/state model |
 | 重试与幂等 | 防止重复副作用 | `docs/设计/retry-and-idempotency-v1.md` | retry/idempotency rules |
@@ -296,7 +296,7 @@ Governance Surface
 | 身份授权 | 部分实现 | T159 已实现 env provider；T163 仍按 RFC 处理远程 OAuth |
 | Secret Resolver | 已实现 V1 env provider | T164 继续补 resolver ordering 和 audit evidence 集成测试 |
 | 凭据生命周期 | 清晰 | T162/T165 补操作验证和指南 |
-| 最小权限评审 | 清晰 | T161 接入 Registry lint/review |
+| 最小权限评审 | 清晰 | T161 已接入 spec authoring lint；review 继续保留 |
 | 远程 OAuth 边界 | 清晰 | T163 走 RFC，不进 V1 主路径 |
 | 执行语义 | 清晰 | T167 落入类型和 audit 字段 |
 | 重试与幂等 | 清晰 | T169 走 manifest RFC |

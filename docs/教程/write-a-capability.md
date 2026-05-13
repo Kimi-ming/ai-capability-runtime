@@ -96,7 +96,7 @@ manifest schema
   -> review-ready
 ```
 
-其中 `pnpm validate` 会执行 manifest schema、model-visible metadata lint 和 registry tests 的机器校验。least-privilege/risk、secret hygiene 和 dry-run 仍需要作者和 reviewer 明确检查。
+其中 `pnpm validate` 会执行 manifest schema、model-visible metadata lint、least-privilege auth lint 和 registry tests 的机器校验。least-privilege/risk 仍需要作者和 reviewer 核对 provider 官方权限文档；secret hygiene 和 dry-run 也需要明确检查。
 
 ## 4. 编写 README
 
