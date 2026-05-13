@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 200 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 203 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -36,8 +36,8 @@
 | 模块 | 名称 | 目标 | 当前判断 |
 | --- | --- | --- | --- |
 | M0 | 阻塞和外部依赖 | 跟踪需要用户确认、网络、凭据或外部 SDK 的任务 | T070 仍阻塞 |
-| M1 | 核心契约和 Runtime Kernel | 把设计对象落成 public types、接口和稳定包导出 | 下一步优先 |
-| M2 | 执行安全、审计和可靠性 | 补齐调用前门禁、审计失败保护、状态路径、重试和限流 | P1 主体 |
+| M1 | 核心契约和 Runtime Kernel | 把设计对象落成 public types、接口和稳定包导出 | 基础契约已完成 |
+| M2 | 执行安全、审计和可靠性 | 补齐调用前门禁、审计失败保护、状态路径、重试和限流 | 下一步优先 |
 | M3 | CLI、MCP 和 Host 互操作 | 补齐 CLI 细粒度测试、MCP 映射、Host evidence 和 profile | 等 T070 解阻后加速 |
 | M4 | Registry、Trust、Lifecycle 和供应链 | 建立能力包、信任卡、生命周期、安全公告和供应链闭环 | V1 生态根基 |
 | M5 | Conformance、Abuse Cases、隐私和运维 | 把设计风险转为一致性测试、smoke、runbook 和文档门禁 | 质量增强 |
@@ -189,7 +189,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.ts` 新增 `classifyOutboundTarget()`、`evaluateOutboundPolicy()`、`OutboundPolicyResult` 和 HTTP executor outbound gate。真实执行会在 audit preflight、Secret Resolver 和 fetch 前阻断 localhost/loopback、RFC1918 private IP、link-local、metadata service、non-HTTPS 和 arbitrary URL，返回 `outbound_blocked` / `OUTBOUND_BLOCKED`；block audit event 写入 `outboundDecision`、`outboundTargetType`、`outboundReasonCode`、`resolvedUrl` 和 `requestStarted=false`。`packages/runtime/src/index.test.ts` 新增 9 个 outbound policy 测试，Runtime 测试数从 191 增至 200。现有本地 HTTP executor 测试通过显式 `outboundPolicy.allowLocalhost` 运行。
-- [ ] T135 P1：按本地状态契约实现 state dir precedence tests。
+- [x] T135 P1：按本地状态契约实现 state dir precedence tests。
+  - 验收标准：
+    - Runtime 测试覆盖 state dir precedence：显式 `stateDir` / CLI `--state-dir` 等价入口优先于 `OPENCAP_STATE_DIR`，`OPENCAP_STATE_DIR` 优先于 `<cwd>/opencap.local` 默认路径。
+    - 相对显式路径和相对环境变量路径必须基于 `cwd` 解析；绝对路径必须保持为绝对路径。
+    - `ensureLocalStateDir()`、`installCapability()`、`listInstalledCapabilities()`、`loadPolicySet()`、`SqliteAuditLogger` 和 `OpenCapRuntime` 必须使用同一个已解析 state dir，且不会创建被低优先级配置指向的 state dir。
+    - 测试必须覆盖 env state dir 和 explicit state dir 的跨入口一致性，避免 CLI/SDK/Runtime helper 使用不同本地状态。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts -t "state dir"`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.test.ts` 新增 3 个 state dir precedence 测试，覆盖相对/绝对 state dir 解析、`OPENCAP_STATE_DIR` 跨 `ensureLocalStateDir()` / `installCapability()` / `listInstalledCapabilities()` / `loadPolicySet()` / `SqliteAuditLogger` / `OpenCapRuntime` 一致性，以及显式 `stateDir` 优先于环境变量且不创建低优先级目录。当前实现已满足契约，本轮用临时 env-first 回归确认新增测试能抓住 precedence 破坏；Runtime index 测试数从 85 增至 88，Runtime 包测试数从 200 增至 203。
 - [ ] T152 P1：把 consent receipt 落入 audit log 字段和测试。
 - [ ] T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 - [ ] T161 P1：实现 least-privilege auth lint。
@@ -392,8 +407,8 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T135：state dir precedence tests
-2. M2 / T152：consent receipt audit log fields
+1. M2 / T152：consent receipt audit log fields
+2. M2 / T160：`auth.scopes` and credential descriptor schema tests
 3. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
 4. M2 / T161：least-privilege auth lint
 5. M2 / T167：execution semantics TypeScript 类型和 audit 字段

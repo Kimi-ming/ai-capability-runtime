@@ -846,6 +846,84 @@ describe("state dir helpers", () => {
     ).toBe(resolve(cwd, "flag-state"));
   });
 
+  it("resolves relative state dirs from cwd and preserves absolute state dirs", () => {
+    const cwd = "/tmp/opencap-project";
+    const absoluteStateDir = "/tmp/opencap-state";
+
+    expect(resolveStateDir({ cwd, stateDir: "flag-state", env: {} })).toBe(resolve(cwd, "flag-state"));
+    expect(resolveStateDir({ cwd, stateDir: absoluteStateDir, env: {} })).toBe(absoluteStateDir);
+    expect(resolveStateDir({ cwd, env: { [OPENCAP_STATE_DIR_ENV]: "env-state" } })).toBe(
+      resolve(cwd, "env-state"),
+    );
+    expect(resolveStateDir({ cwd, env: { [OPENCAP_STATE_DIR_ENV]: absoluteStateDir } })).toBe(absoluteStateDir);
+  });
+
+  it("uses OPENCAP_STATE_DIR consistently across runtime state helpers", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-state-env-"));
+    const env = { [OPENCAP_STATE_DIR_ENV]: "env-state" };
+    const expectedRoot = resolve(cwd, "env-state");
+
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    const paths = await ensureLocalStateDir({ cwd, env });
+    await writeFile(paths.policiesFile, "default: deny\nrules: []\n");
+
+    const installed = await installCapability({ cwd, id: "github.create_issue", env });
+    const logger = new SqliteAuditLogger({ cwd, env });
+    const runtime = new OpenCapRuntime({ cwd, env });
+
+    try {
+      const listed = await listInstalledCapabilities({ cwd, env });
+      const policy = await loadPolicySet({ cwd, env });
+
+      expect(paths.root).toBe(expectedRoot);
+      expect(installed.destinationDir).toBe(resolve(expectedRoot, "installed", "github.create_issue"));
+      expect(listed).toMatchObject([{ id: "github.create_issue", status: "enabled" }]);
+      expect(policy).toMatchObject({ default: "deny", sourcePath: resolve(expectedRoot, "policies.yml") });
+      expect(logger.databaseFile).toBe(resolve(expectedRoot, "logs.sqlite"));
+      expect(runtime.stateDir).toBe(expectedRoot);
+      expect(runtime.statePaths.policiesFile).toBe(resolve(expectedRoot, "policies.yml"));
+      expect(await exists(resolve(expectedRoot, "logs.sqlite"))).toBe(true);
+      expect(await exists(resolve(cwd, DEFAULT_STATE_DIR_NAME))).toBe(false);
+    } finally {
+      logger.close();
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
+  it("uses explicit stateDir across runtime state helpers before OPENCAP_STATE_DIR", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-state-explicit-"));
+    const env = { [OPENCAP_STATE_DIR_ENV]: "env-state" };
+    const stateDir = "flag-state";
+    const expectedRoot = resolve(cwd, stateDir);
+
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+    const paths = await ensureLocalStateDir({ cwd, stateDir, env });
+    await writeFile(paths.policiesFile, "default: deny\nrules: []\n");
+
+    const installed = await installCapability({ cwd, stateDir, id: "github.create_issue", env });
+    const logger = new SqliteAuditLogger({ cwd, stateDir, env });
+    const runtime = new OpenCapRuntime({ cwd, stateDir, env });
+
+    try {
+      const listed = await listInstalledCapabilities({ cwd, stateDir, env });
+      const policy = await loadPolicySet({ cwd, stateDir, env });
+
+      expect(paths.root).toBe(expectedRoot);
+      expect(installed.destinationDir).toBe(resolve(expectedRoot, "installed", "github.create_issue"));
+      expect(listed).toMatchObject([{ id: "github.create_issue", status: "enabled" }]);
+      expect(policy).toMatchObject({ default: "deny", sourcePath: resolve(expectedRoot, "policies.yml") });
+      expect(logger.databaseFile).toBe(resolve(expectedRoot, "logs.sqlite"));
+      expect(runtime.stateDir).toBe(expectedRoot);
+      expect(runtime.statePaths.installedDir).toBe(resolve(expectedRoot, "installed"));
+      expect(await exists(resolve(expectedRoot, "logs.sqlite"))).toBe(true);
+      expect(await exists(resolve(cwd, "env-state"))).toBe(false);
+      expect(await exists(resolve(cwd, DEFAULT_STATE_DIR_NAME))).toBe(false);
+    } finally {
+      logger.close();
+      await rm(cwd, { recursive: true, force: true });
+    }
+  });
+
   it("returns stable local state paths", () => {
     const root = "/tmp/opencap-project/opencap.local";
     const paths = getLocalStatePaths(root);

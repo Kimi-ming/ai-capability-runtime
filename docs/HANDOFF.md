@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight 和 T133 outbound policy 私网阻断均已落入代码或文档并验证。当前唯一明确阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断和 T135 state dir precedence tests 均已落入代码或文档并验证。当前唯一明确阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -20,7 +20,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `execution.body.fields` required/optional 渲染边界测试与实现
 - audit failure preflight：非 `read_only` HTTP 执行在审计写路径失败时阻断 secret resolution 和 request start
 - outbound policy 私网阻断：真实 HTTP 执行默认阻断 localhost/loopback/private/link-local/metadata/non-HTTPS/arbitrary URL
-- Runtime state dir helper、install、list、doctor、Installed Capability Loader
+- Runtime state dir helper、state dir precedence tests、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
 - Policy parser、`loadPolicySet`、Policy Engine、Confirmation Handler、CLI `--yes` 边界、内存/SQLite Audit Logger、redaction/input hash、`opencap logs`、日志筛选、URL 模板渲染、HTTP dry-run plan、HTTP executor、Secret Resolver V1 env provider、credential audit evidence、`auth.placement` schema 约束和 executor 映射测试、`execution.body.fields` schema、output normalization、arbitrary URL 风险检测、outbound policy 私网阻断、Runtime domain public contract、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract、workspace package public exports、MCP tools/list、MCP tools/call 路由、稳定的 MCP confirmation_required 结果格式、MCP Host 手动测试指南、Registry manifest CI、Capability PR 评审指南、Registry README、GitHub Issue/PR templates 和 slack.send_message 示例 Capability 和 token passthrough 禁止测试和最小 outbound policy 设计和审计日志隐私分级和威胁模型矩阵和 pnpm workspace 全量验证和单元测试基础设施文档化和临时目录测试工具和 CLI 端到端 smoke test 和 README 真实命令快速开始和第一次贡献教程和 V1 Runtime 主路径架构图和 alpha release checklist 和 CHANGELOG 缺口校准和版本兼容策略补强、MCP Tool Projection builder、model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate、egress decision audit fields 和 confirmation egress summary 和 input provenance audit evidence 和 field-level egress map 和 derived input evidence chain 和 input minimization 和 redacted egress preview 和 dry-run egress preview 和 internal URL/source/config egress negative tests 和 Manifest Data Class Hint RFC 和 Organization Data Policy RFC 和 Policy Decision Trace runtime 和 Policy Explain CLI 和 Policy Change Ledger、Policy Validate Lint、Policy Simulation/Diff、Broad Allow Safety Checks 和 Policy Override/Breakglass Controls、Policy Simulation Fixtures 和 Policy Incident Runbook 和 Decision Log Export 和 Policy Governance Conformance Tests
@@ -31,7 +31,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API、Capability authoring loop contract、registry test 校验、schema JSON public subpath export、`api_key` auth placement 约束测试、model-visible metadata lint、authoring manifest validation 和 prompt-surface negative fixtures。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；package public surface 保持 bin-only；`serve` 仍是骨架。
-- `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract 和 GateDecision 语义 helper、本地 state dir 初始化、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、Secret Resolver V1 env provider、credential audit evidence、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor 和 package export map 测试。
+- `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract 和 GateDecision 语义 helper、本地 state dir 初始化和 precedence tests、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、Secret Resolver V1 env provider、credential audit evidence、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor 和 package export map 测试。
 - `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现；model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate 已实现。
 - `@opencap/sdk` 暂缓实现。
 
@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T133 已完成；下一项预计进入 M2 / T135：按本地状态契约实现 state dir precedence tests。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T135 已完成；下一项预计进入 M2 / T152：把 consent receipt 落入 audit log 字段和测试。
 
-下一步推荐：先在 M2 模块内补齐 T135 的验收标准和任务级验证，再按 TDD 进入实现。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先在 M2 模块内补齐 T152 的验收标准和任务级验证，再按 TDD 进入实现。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M2 / T135 P1：按本地状态契约实现 state dir precedence tests
+M2 / T152 P1：把 consent receipt 落入 audit log 字段和测试
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T130/T131/T132/T133/T145/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T130/T131/T132/T133/T135/T145/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T133 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T135。
+- 当前状态：T135 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T152。
 
 ## 最近验证
 
@@ -70,6 +70,7 @@ M2 / T135 P1：按本地状态契约实现 state dir precedence tests
 - `pnpm --filter @opencap/spec test`
 - `pnpm --filter @opencap/runtime test -- index.test.ts -t "audit preflight"`
 - `pnpm --filter @opencap/runtime test -- index.test.ts -t "outbound policy"`
+- `pnpm --filter @opencap/runtime test -- index.test.ts -t "state dir"`
 - `pnpm --filter @opencap/runtime test -- index.test.ts`
 - `pnpm --filter @opencap/runtime test -- package-exports.test.ts`
 - `pnpm --filter @opencap/runtime test`
@@ -83,7 +84,7 @@ M2 / T135 P1：按本地状态契约实现 state dir precedence tests
 - `check_docs.py`
 - `next_task.py`
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 32 个、runtime 200 个、mcp 18 个、cli smoke 1 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。Runtime HTTP executor 测试需要绑定 `127.0.0.1`；在 Codex 沙箱内会因 `listen EPERM` 失败，本轮已脱离沙箱重跑通过。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 32 个、runtime 203 个、mcp 18 个、cli smoke 1 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。Runtime HTTP executor 测试需要绑定 `127.0.0.1`；在 Codex 沙箱内会因 `listen EPERM` 失败，本轮已脱离沙箱重跑通过。
 
 ## 本轮文档和后续收敛
 
@@ -101,6 +102,7 @@ M2 / T135 P1：按本地状态契约实现 state dir precedence tests
 - T131 已完成：`packages/runtime/src/index.test.ts` 新增 `execution.body.fields` required/optional 渲染测试；`packages/runtime/src/index.ts` 会基于 manifest `input.required` 区分必填和可选 full-template body 字段。Runtime 测试数从 188 增至 189。
 - T132 已完成：`AuditLogger` 新增 `preflight()` 契约，HTTP executor 对非 `read_only` capability 在解析 secret 和发起请求前执行 audit preflight；失败时返回 `audit_failed` / `AUDIT_PREFLIGHT_FAILED`，Result Envelope 映射为 blocked/audit_failed。`SqliteAuditLogger.preflight()` 会通过事务写入并 rollback 验证写路径，不持久化 invocation 记录。Runtime 测试数从 189 增至 191。
 - T133 已完成：`packages/runtime/src/index.ts` 新增 outbound target classification/evaluation 和 HTTP executor outbound gate。真实执行会在 audit preflight、Secret Resolver 和 fetch 前阻断 localhost/loopback、RFC1918 private IP、link-local、metadata service、non-HTTPS 和 arbitrary URL；block 结果为 `outbound_blocked` / `OUTBOUND_BLOCKED`，blocked audit event 记录 outbound decision/target type/reason code/resolved URL 和 `requestStarted=false`。Runtime 测试数从 191 增至 200。
+- T135 已完成：`packages/runtime/src/index.test.ts` 新增 state dir precedence tests，覆盖相对/绝对路径解析、`OPENCAP_STATE_DIR` 跨 state helper 一致性、显式 `stateDir` 优先于环境变量，以及低优先级 state dir 不被创建。当前实现已满足契约，本轮用临时 env-first 回归验证新增测试会失败；Runtime index 测试数从 85 增至 88，Runtime 包测试数从 200 增至 203。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -108,11 +110,10 @@ M2 / T135 P1：按本地状态契约实现 state dir precedence tests
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T135 P1：按本地状态契约实现 state dir precedence tests。
 - T152 P1：把 consent receipt 落入 audit log 字段和测试。
 - T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T135 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T152 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
 
 ## Secret Resolver V1 env provider 已实现
 
