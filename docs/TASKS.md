@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 213 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 219 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -288,7 +288,24 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.test.ts` 新增注入式 HTTP timeout audit 测试，确认请求已进入 fetch 后 timeout 会写入 `executionOutcome=unknown_after_timeout`、`requestStarted=true`、`executionSideEffectKind=write`、`executionRetryAttempt=0` 和 `executionRequestStartedAt`，且不伪造 `executionResponseReceivedAt`。`packages/runtime/src/result-envelope.test.ts` 同步覆盖 `createHttpExecutionEvidence()` 对 unknown timeout 不写 response timestamp；`createHttpExecutionEvidence()` 已修正只在收到 HTTP response 的 success/http_error 状态写 response timestamp。Runtime 测试数从 211 增至 213。
-- [ ] T170 P2：实现 retry policy tests。
+- [x] T170 P2：实现 retry policy tests。
+  - 验收标准：
+    - Runtime 提供纯 retry policy decision helper，不在 HTTP executor 中引入自动 retry loop。
+    - POST/PATCH 写操作在无 idempotency 声明时，即使遇到 408/429/5xx 也不自动 retry，并给出结构化 reason。
+    - 请求发出后的 `unknown_after_timeout` 对写操作必须要求 reconcile，不自动 retry。
+    - 401/403 等认证/权限错误不可 retry。
+    - GET/read-only 在显式 `automatic=true` 且 `maxAttempts > attempt + 1` 的 retry policy 下，可以对 408/429/5xx 生成 retry decision，并记录下一次 `retryAttempt`。
+    - provider idempotency key 只以 hash 形式进入 decision evidence，不暴露明文 key。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- retry-policy.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/retry-policy.ts` 和 `retry-policy.test.ts`，导出 `defaultHttpRetryPolicy()` 与 `evaluateHttpRetryPolicy()` 纯 decision helper。测试覆盖 V1 默认不自动 retry、POST 写操作无 idempotency 不 retry、unknown write timeout 要求 reconcile、401/403 不 retry、显式 read-only GET retry decision、provider idempotency key 只记录 `sha256:<prefix>` hash。HTTP executor 未引入自动 retry loop；Runtime 测试数从 213 增至 219。
 - [ ] T196 P1：Score cannot override policy tests。
 - [ ] T199 P1：Quota/budget policy gates。
 - [ ] T200 P1：Provider rate limit handling。
@@ -485,7 +502,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T170：retry policy tests
+1. M2 / T196：Score cannot override policy tests
 2. M3 / T134：CLI command snapshot tests
 3. M3 / T137：错误模型和 exit code tests
 4. M4 / T151：Capability Package lint

@@ -16,6 +16,7 @@ export { simulatePolicyDiff } from "./policy-simulation.js";
 export { applyPolicyOverrides, consumePolicyOverride, createPolicyOverrideAuditEvent, validatePolicyOverrideRecord } from "./policy-override.js";
 export { exportDecisionLogRecords } from "./decision-log.js";
 export { credentialAuditEvidence, resolveEnvCredential } from "./secret-resolver.js";
+export { defaultHttpRetryPolicy, evaluateHttpRetryPolicy } from "./retry-policy.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
@@ -30,6 +31,7 @@ export type { PolicySimulationDiffCategory, PolicySimulationFinding, PolicySimul
 export type { ConsumedPolicyOverrideResult, PolicyOverrideCapabilityStatus, PolicyOverrideContext, PolicyOverrideCreatedBy, PolicyOverrideDataEgressDecision, PolicyOverrideRecordV1, PolicyOverrideResult, PolicyOverrideSafetyGates, PolicyOverrideType, PolicyOverrideValidationCode, PolicyOverrideValidationFinding } from "./policy-override.js";
 export type { DecisionLogRecord } from "./decision-log.js";
 export type { CredentialAuditEvidence, ResolvedCredential, ResolvedCredentialType, SecretCredentialApplyMode, SecretCredentialSource, SecretExecutionTarget, SecretResolveMode, SecretResolveRequest, SecretResolverAuth } from "./secret-resolver.js";
+export type { HttpRetryIdempotencyMode, HttpRetryPolicyDecision, HttpRetryPolicyInput, HttpRetryPolicyV1, HttpRetryReasonCode } from "./retry-policy.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
