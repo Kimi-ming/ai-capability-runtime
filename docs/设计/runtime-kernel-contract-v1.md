@@ -361,6 +361,49 @@ export interface ConsentReceipt {
 - `approved` 只对本次 request 有效，除非后续 policy change 明确记录。
 - MCP 无确认通道时必须返回 `unavailable`，并生成 `confirmation_required` ResultEnvelope。
 
+## Card schema 和生成规则
+
+T270 固定四类 Card 的 public schema 和纯生成 helper。Card 是面向用户、维护者、Host 和集成者的展示文档，不是新的授权入口；CLI、Registry Web、Console 和 future Cloud 应复用同一组 Runtime helper。
+
+```ts
+export type CardKind =
+  | "capability"
+  | "trust"
+  | "consent"
+  | "compatibility";
+
+export interface CardDocumentBase<Kind extends CardKind> {
+  schemaVersion: "opencap.card.v1";
+  cardKind: Kind;
+  cardId: string;
+  generatedAt: string;
+  generatedBy: "opencap.runtime";
+}
+
+export type CardDocumentV1 =
+  | CapabilityCardDocumentV1
+  | TrustCardDocumentV1
+  | ConsentCardDocumentV1
+  | CompatibilityCardDocumentV1;
+```
+
+### 生成来源
+
+| Card | Runtime helper | 输入来源 | 必须包含 |
+| --- | --- | --- | --- |
+| Capability Card | `createCapabilityCard()` | `InstalledCapabilityRecord` | id、version、summary、risk、permissions、auth、lifecycle、install、trust |
+| Trust Card | `createTrustCard()` | capability identity、trust/test/review/advisory/provenance/quality evidence | trust level、tests、review、advisories、maintainer、quality、provenance、disclaimer |
+| Consent Card | `createConsentCard()` | `ConsentRequest` | action、target origin、data classes、fields sent、risk、policy reason、expiry |
+| Compatibility Card | `createCompatibilityCard()` | `CompatibilityLedgerRecordV1` | host、profile、checks、known gaps、result、evidence ref |
+
+### 规则
+
+- `cardId` 由 Runtime helper 生成，使用 `card_cap_`、`card_trust_`、`card_consent_`、`card_compat_` 前缀。
+- Capability Card 可以展示 credential descriptor，例如 provider、env name、placement 和 scopes，但不得展示 credential value。
+- Trust Card 必须声明它只是 evidence summary，不是安全保证，也不是授权决策。
+- Consent Card 必须由 Runtime 从结构化 `ConsentRequest` 生成；不得使用模型自由生成的授权文案。
+- Compatibility Card 必须列出已知 gaps，不得宣称泛泛兼容所有 Host。
+
 ## SecretHandle
 
 ```ts
