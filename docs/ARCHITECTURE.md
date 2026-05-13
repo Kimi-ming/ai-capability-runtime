@@ -29,6 +29,7 @@ Runtime Core
  | Policy Change Ledger
  | Runtime Ledger Storage Contract
  | Runtime Card Generation Contract
+ | Capability Identity Contract
  | Confirmation Handler
  | Secret Resolver
  | HTTP Executor

@@ -138,9 +138,23 @@ export interface CapabilitySelector {
 
 ### 规则
 
-- `id + version + manifestDigest` 是一次调用审计里的能力身份。
-- `packagePath` 是本地路径证据，不是 trust 证据。
-- `revoked` 能力必须可寻址，但默认不能执行。
+- T273 固定 Capability identity、digest、version 和 lifecycle 的关系。
+- `id + version + manifestDigest` 是一次调用审计里的能力身份，Runtime helper 生成的 audit key 形如 `id@version#sha256:...`。
+- Capability `version` 必须来自 manifest `version`，使用 SemVer 形态；Runtime package version 和 manifest schema version 不能替代 Capability version。
+- `manifestDigest` 是行为定义 digest；`packageDigest`、`registryCommit` 是 provenance，不能替代 `manifestDigest`。
+- `packagePath` 和 `manifestPath` 是本地路径证据，不参与 identity digest；同一能力复制到不同路径不应改变 identity digest。
+- `lifecycle` 是附着在 identity 上的可变治理状态，不改变 `id/version/manifestDigest` identity key。
+- `revoked`、`yanked`、`deprecated` 记录必须保留可寻址。
+
+### Lifecycle 默认语义
+
+| Lifecycle | 默认安装 | 默认执行 | 警告 | Hard block |
+| --- | --- | --- | --- | --- |
+| `draft` | 不允许 | 不允许 | 是 | 否 |
+| `listed` / `tested` / `audited` | 允许 | 允许 | 否 | 否 |
+| `deprecated` | 允许 | 允许 | 是 | 否 |
+| `yanked` | 不允许新装 | 已安装可执行 | 是 | 否 |
+| `revoked` | 不允许 | 不允许静默执行 | 是 | 是 |
 
 ## InstalledCapability
 

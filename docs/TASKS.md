@@ -19,12 +19,12 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 183 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 25 个、runtime 188 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
 - 完整 `opencap serve --mcp` server 仍被 T070 阻塞。
-- V1 需要把 identity/digest、lifecycle、Card 输出命令和具体 ledger writer/迁移策略继续落到类型、测试和实现里。
+- V1 需要把 lifecycle warnings、Card 输出命令和具体 ledger writer/迁移策略继续落到类型、测试和实现里。
 - CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
 - Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
@@ -88,7 +88,24 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/card.ts` 和 `packages/runtime/src/card.test.ts`，导出 `CARD_SCHEMA_VERSION`、`createCardId()`、四类 Card document V1 类型和 `createCapabilityCard()`、`createTrustCard()`、`createConsentCard()`、`createCompatibilityCard()` 纯生成 helper；`packages/runtime/src/index.ts` 已从 public root entrypoint 导出 card helper 和类型。Contract 测试覆盖 card id 前缀、Capability/Trust/Consent/Compatibility Card 生成规则、Trust Card disclaimer、Consent runtime-generated boundary、Compatibility known gaps 和 root export。Runtime 测试数从 177 增至 183。
-- [ ] T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
+- [x] T273 P1：固定 Capability identity、digest、version 和 lifecycle 关系。
+  - 验收标准：
+    - `@opencap/runtime` 导出 Capability identity public helper 和类型，明确 `id + version + manifestDigest` 是调用审计身份。
+    - Capability version 必须来自 manifest `version`，使用 SemVer 形态；package/runtime 版本不能替代 Capability version。
+    - `manifestDigest` 是行为定义 digest，`packageDigest` 和 `registryCommit` 是 provenance，不替代 `manifestDigest`。
+    - `lifecycle` 是能力身份上的可变治理状态，不改变 `id/version/manifestDigest` identity key；revoked/yanked/deprecated 保持可寻址。
+    - lifecycle 语义 helper 明确默认安装/执行/警告/hard block 行为，revoked 默认不可静默执行。
+    - public root entrypoint 能导出 identity helper 和类型，后续 lifecycle warning、Card、Ledger 和 audit 可复用。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- identity.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/identity.ts` 和 `packages/runtime/src/identity.test.ts`，导出 `CAPABILITY_IDENTITY_VERSION`、`createCapabilityIdentity()`、`createCapabilityIdentityRef()`、`capabilityIdentityKey()`、`validateCapabilityIdentity()` 和 `capabilityLifecycleSemantics()`；`packages/runtime/src/index.ts` 已从 public root entrypoint 导出 identity helper 和类型。Contract 测试覆盖 manifest version -> identity、`id@version#manifestDigest` audit key、路径无关 identity digest、lifecycle 不改变 identity digest、SemVer/digest validation、packageDigest 不能替代 manifestDigest、revoked/yanked/deprecated 默认语义和 root export。Runtime 测试数从 183 增至 188。
 - [ ] T275 P1：补齐 Capability authoring loop 和 lint 顺序。
 - [ ] T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
 
@@ -306,18 +323,17 @@ git diff --check
 4. M3 / T134：CLI command snapshot tests
 5. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
 6. M1 / T268：Runtime Gate 接口和 GateDecision 语义
-7. M1 / T273：Capability identity/digest/version/lifecycle
-8. M1 / T275：Capability authoring loop 和 lint 顺序
-9. M1 / T276：v0.1-v1.0 release maturity gate matrix
-10. M2 / T133：outbound policy 私网阻断测试
-11. M2 / T135：state dir precedence tests
-12. M3 / T137：错误模型和 exit code tests
-13. M4 / T151：Capability Package lint
-14. M4 / T158：Trust Card generation rules
-15. M4 / T185：Trust level transition tests
-16. M4 / T191：Lifecycle status schema
-17. M4 / T192：Install/list/invoke lifecycle warnings
-18. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+7. M1 / T275：Capability authoring loop 和 lint 顺序
+8. M1 / T276：v0.1-v1.0 release maturity gate matrix
+9. M2 / T133：outbound policy 私网阻断测试
+10. M2 / T135：state dir precedence tests
+11. M3 / T137：错误模型和 exit code tests
+12. M4 / T151：Capability Package lint
+13. M4 / T158：Trust Card generation rules
+14. M4 / T185：Trust level transition tests
+15. M4 / T191：Lifecycle status schema
+16. M4 / T192：Install/list/invoke lifecycle warnings
+17. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 
