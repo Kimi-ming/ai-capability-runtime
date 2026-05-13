@@ -137,6 +137,13 @@ Registry breaking change 必须提供迁移窗口，并在 alpha/beta 阶段至�
 
 Alpha 不能把未完成能力当作兼容承诺。例如完整 MCP server、Console、Cloud、OAuth、signed registry 都不能被写成已支持。
 
+发布阶段还必须满足 `docs/运营/release-readiness.md` 的 maturity gate matrix：
+
+- v0.1 Local Runtime 可以处于 `0.x` breaking-change 阶段，但 README、HANDOFF 和 release notes 必须明确未稳定的公共契约。
+- v0.2 Evidence Registry 和 v0.3 Interop Profiles 仍可有 breaking change，但 Registry/Host 兼容变化必须进入 CHANGELOG 或迁移说明。
+- v0.4 Adapter Layer 和 v0.5 Policy Operations 如果改变授权、审计、policy 或 adapter 输出边界，必须新增 ADR/RFC。
+- v1.0 Capability Network 之后，公共契约 breaking change 只能进入下一个 major，并按 deprecation 流程执行。
+
 ## 兼容性等级
 
 | 等级 | 含义 | 示例 |

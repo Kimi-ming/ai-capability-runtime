@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 188 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 188 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -123,7 +123,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/spec/src/authoring.ts` 和 `packages/spec/src/authoring.test.ts`，导出 `CAPABILITY_AUTHORING_LOOP_VERSION`、`getCapabilityAuthoringLintOrder()`、`getCapabilityAuthoringStage()`、`evaluateCapabilityAuthoringProgress()`、`validateCapabilityAuthoringManifest()` 和 `validateCapabilityAuthoringManifestPath()`；`pnpm validate` 的 registry validation 已改用 authoring manifest validation，因此 manifest schema 通过后会执行 model-visible metadata lint，再校验 registry tests。作者教程、评审教程、tool projection 文档和测试策略已同步 lint 顺序。Spec 测试数从 25 增至 32。
-- [ ] T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
+- [x] T276 P1：定义 v0.1-v1.0 release maturity gate matrix。
+  - 验收标准：
+    - `docs/运营/release-readiness.md` 定义 v0.1、v0.2、v0.3、v0.4、v0.5、v1.0 的 release maturity gate matrix。
+    - 每个阶段必须列出发布承诺、硬门禁、证据来源、允许缺口和不得宣称的能力，避免把路线图当成已完成能力。
+    - matrix 必须覆盖 Runtime、Registry/Trust、Interop、Policy/Ops、Docs/Release hygiene 五类门禁，并明确哪些 gate 是 hard blocker。
+    - Alpha checklist 和版本兼容策略必须引用该 matrix，保持 `0.x` breaking-change 口径和 release gate 口径一致。
+    - 文档入口和 handoff 必须指向下一步任务，且 T276 完成后 `next_task.py` 能推进到下一个 ready 任务。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `pnpm validate`
+    - `git diff --check`
+    - JSON parser 校验 package/schema `package.json`
+    - Ruby YAML parser 校验 `.github/**/*.yml` / `.yaml`
+  - 完成记录：`docs/运营/release-readiness.md` 已新增 v0.1 Local Runtime、v0.2 Evidence Registry、v0.3 Interop Profiles、v0.4 Adapter Layer、v0.5 Policy Operations、v1.0 Capability Network 的 maturity gate matrix；每个阶段列出发布承诺、hard gates、证据、允许缺口和不得宣称项。`docs/releases/alpha-checklist.md`、`docs/规范/versioning-and-compatibility.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步 release maturity 入口和口径。
 
 ### 模块 M2：执行安全、审计和可靠性
 

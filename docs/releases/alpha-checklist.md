@@ -2,6 +2,8 @@
 
 本文是 OpenCap alpha 发布前的中文门禁清单。它用于判断当前仓库是否可以发布一个可试用的本地优先版本，而不是宣称 V1 全部完成。
 
+Alpha 对应 [发布成熟度门禁](../运营/release-readiness.md) 中的 v0.1 Local Runtime。若本清单和 maturity gate matrix 冲突，以 matrix 的 hard gate 为准，并同步修正本清单。
+
 ## 发布口径
 
 Alpha 可以承诺：
