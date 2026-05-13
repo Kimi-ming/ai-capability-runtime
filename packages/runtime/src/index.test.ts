@@ -42,6 +42,8 @@ import {
   redactInput,
   resolveStateDir,
   stableJsonStringify,
+  type AuditEvent,
+  type AuditLogger,
 } from "./index.js";
 
 
@@ -52,6 +54,20 @@ async function readRequestBody(request: IncomingMessage): Promise<string> {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   return Buffer.concat(chunks).toString("utf8");
+}
+
+class FailingAuditPreflightLogger implements AuditLogger {
+  readonly events: AuditEvent[] = [];
+  readonly preflightChecks: Array<{ capabilityId?: string; resolvedUrl?: string; requestStarted?: boolean }> = [];
+
+  async preflight(check: { capabilityId?: string; resolvedUrl?: string; requestStarted?: boolean }): Promise<void> {
+    this.preflightChecks.push(check);
+    throw new Error("audit store unavailable");
+  }
+
+  async record(event: AuditEvent): Promise<void> {
+    this.events.push(event);
+  }
 }
 
 async function writeCapability(root: string, category: string, id: string, manifestId = id): Promise<string> {
@@ -412,6 +428,48 @@ describe("HTTP output normalization", () => {
 });
 
 describe("HTTP executor", () => {
+  it("blocks non-read-only execution when audit preflight fails before secrets or request start", async () => {
+    const logger = new FailingAuditPreflightLogger();
+    let fetchCalls = 0;
+    let secretReads = 0;
+    const env: Record<string, string | undefined> = {};
+    Object.defineProperty(env, "GITHUB_TOKEN", {
+      enumerable: true,
+      get() {
+        secretReads += 1;
+        throw new Error("secret should not be read after audit preflight failure");
+      },
+    });
+    const fetchImpl = (async () => {
+      fetchCalls += 1;
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+
+    const result = await executeHttpCapability(
+      dryRunManifest(),
+      { owner: "opencap", repo: "runtime", title: "Bug", body: "broken" },
+      { env, auditLogger: logger, fetch: fetchImpl },
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: "audit_failed",
+      error: { code: "AUDIT_PREFLIGHT_FAILED" },
+    });
+    expect(result.error?.message).toContain("Audit preflight failed");
+    expect(secretReads).toBe(0);
+    expect(fetchCalls).toBe(0);
+    expect(logger.events).toEqual([]);
+    expect(logger.preflightChecks).toHaveLength(1);
+    expect(logger.preflightChecks[0]).toMatchObject({
+      capabilityId: "github.create_issue",
+      resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+      requestStarted: false,
+    });
+    expect(JSON.stringify(result)).not.toContain("provider-secret");
+    expect(JSON.stringify(logger.preflightChecks[0])).not.toContain("provider-secret");
+  });
+
   it("executes a POST JSON request with bearer auth and writes an audit event without leaking the secret", async () => {
     const logger = new InMemoryAuditLogger();
     const requests: Array<{ method?: string; url?: string; authorization?: string; body: string }> = [];
@@ -1352,6 +1410,29 @@ describe("SQLite audit logger", () => {
           inputRedactedJson: '{"title":"Bug","token":"[REDACTED]"}',
         },
       ]);
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("audit preflight touches the SQLite write path without persisting an invocation", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-preflight-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+
+    try {
+      await logger.preflight({
+        id: "audit-preflight-check",
+        timestamp: "2026-05-13T00:00:00.000Z",
+        channel: "cli",
+        capabilityId: "github.create_issue",
+        reason: "Audit preflight before external request.",
+        inputHash: "sha256:preflight",
+        inputRedactedJson: '{"title":"Bug"}',
+        resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+        requestStarted: false,
+      });
+
+      await expect(logger.recent(10)).resolves.toEqual([]);
     } finally {
       logger.close();
     }

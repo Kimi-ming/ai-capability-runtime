@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 189 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 191 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -158,7 +158,21 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.test.ts` 新增 `execution.body.fields` required/optional 渲染回归测试，覆盖 full-template JSON 类型保留、静态 JSON value 保留、未引用 input 不外发、必填字段缺失结构化失败和可选字段缺失省略。`packages/runtime/src/index.ts` 现在根据 manifest `input.required` 判断 body full-template 缺失字段，必填字段缺失或为 `null` 会抛出 `URL_TEMPLATE_FIELD_MISSING`，可选字段仍可省略。Runtime 测试数从 188 增至 189。
-- [ ] T132 P1：实现 audit failure preflight 测试。
+- [x] T132 P1：实现 audit failure preflight 测试。
+  - 验收标准：
+    - Runtime 测试覆盖非 `read_only` HTTP Capability 在 audit preflight 失败时返回结构化 `audit_failed` 结果。
+    - audit preflight 失败时不得解析 secret、不得发起 HTTP 请求，结果和 preflight evidence 不包含 provider secret 原文。
+    - `AuditLogger` 必须提供可写性 preflight 契约；SQLite logger 的 preflight 必须真实触达写入路径且不留下持久化 invocation 记录。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts -t "audit preflight"`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.ts` 新增 `AuditLogger.preflight()` 契约、`AuditPreflightCheck`、非 `read_only` HTTP executor audit preflight gate 和结构化 `audit_failed` 结果；audit preflight 失败时在 secret resolution 和 fetch 前返回，Result Envelope 映射为 blocked/audit_failed。`SqliteAuditLogger.preflight()` 使用事务写入并 rollback，验证写路径但不留下 invocation 记录。`packages/runtime/src/index.test.ts` 新增 2 个 audit preflight 测试，Runtime 测试数从 189 增至 191。
 - [ ] T133 P1：实现 outbound policy 私网阻断测试。
 - [ ] T135 P1：按本地状态契约实现 state dir precedence tests。
 - [ ] T152 P1：把 consent receipt 落入 audit log 字段和测试。
@@ -363,17 +377,15 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M1 / T124：领域模型 TypeScript 类型和 Runtime 接口
-2. M1 / T145：package public exports
-3. M2 / T132：audit failure preflight 测试
-4. M3 / T134：CLI command snapshot tests
+1. M2 / T133：outbound policy 私网阻断测试
+2. M3 / T134：CLI command snapshot tests
+3. M2 / T135：state dir precedence tests
+4. M2 / T152：consent receipt audit log fields
 5. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
-6. M1 / T268：Runtime Gate 接口和 GateDecision 语义
-7. M1 / T275：Capability authoring loop 和 lint 顺序
-8. M1 / T276：v0.1-v1.0 release maturity gate matrix
-9. M2 / T133：outbound policy 私网阻断测试
-10. M2 / T135：state dir precedence tests
-11. M3 / T137：错误模型和 exit code tests
+6. M2 / T161：least-privilege auth lint
+7. M2 / T167：execution semantics TypeScript 类型和 audit 字段
+8. M2 / T168：unknown outcome audit tests
+9. M3 / T137：错误模型和 exit code tests
 12. M4 / T151：Capability Package lint
 13. M4 / T158：Trust Card generation rules
 14. M4 / T185：Trust level transition tests

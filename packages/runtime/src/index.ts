@@ -373,7 +373,7 @@ export async function buildHttpDryRunPlan(
   return plan;
 }
 
-export type HttpExecutionStatus = "success" | "http_error" | "timeout" | "network_error" | "secret_missing";
+export type HttpExecutionStatus = "success" | "http_error" | "timeout" | "network_error" | "secret_missing" | "audit_failed";
 
 export type HttpBodyKind = "json" | "text" | "empty";
 
@@ -811,6 +811,10 @@ function envelopeStatusFromHttpResult(result: HttpExecutionResult): ResultEnvelo
     return "blocked";
   }
 
+  if (result.status === "audit_failed") {
+    return "blocked";
+  }
+
   return "failed";
 }
 
@@ -823,11 +827,15 @@ function outcomeFromHttpResult(result: HttpExecutionResult): string {
     return "blocked_before_request";
   }
 
+  if (result.status === "audit_failed") {
+    return "audit_failed";
+  }
+
   return result.status;
 }
 
 function requestStartedFromHttpResult(result: HttpExecutionResult): boolean {
-  return result.status !== "secret_missing";
+  return result.status !== "secret_missing" && result.status !== "audit_failed";
 }
 
 function structuredContentFromHttpResult(result: HttpExecutionResult, sanitizedValue: unknown): unknown {
@@ -933,13 +941,14 @@ function executionAuditEvent(
     timestamp: new Date().toISOString(),
     channel,
     capabilityId: manifest.id,
-    status: result.status === "secret_missing" ? "blocked" : "executed",
+    status: result.status === "secret_missing" || result.status === "audit_failed" ? "blocked" : "executed",
     policyDecision: "allow",
     confirmationStatus: "approved",
     reason: result.ok ? "HTTP execution succeeded." : result.error?.message ?? "HTTP execution failed.",
     inputHash: hashInput(input),
     inputRedactedJson: stableJsonStringify(redactInput(input)),
     resolvedUrl: result.url,
+    requestStarted: requestStartedFromHttpResult(result),
     credentialProvider: credential?.provider,
     credentialSource: credential?.source,
     credentialEnvName: credential?.envName,
@@ -999,12 +1008,72 @@ function timeoutErrorResult(plan: HttpDryRunPlan): HttpExecutionResult {
   };
 }
 
+function auditPreflightFailedResult(plan: HttpDryRunPlan): HttpExecutionResult {
+  return {
+    ok: false,
+    capabilityId: plan.capabilityId,
+    method: plan.method,
+    url: plan.url,
+    status: "audit_failed",
+    error: {
+      code: "AUDIT_PREFLIGHT_FAILED",
+      message: "Audit preflight failed before external request; request was not started.",
+    },
+  };
+}
+
+function manifestRequiresAuditPreflight(manifest: CapabilityManifest): boolean {
+  return buildCapabilityRiskSummary(manifest).risks.some((risk) => risk !== "read_only");
+}
+
+function createAuditPreflightCheck(
+  manifest: CapabilityManifest,
+  input: unknown,
+  plan: HttpDryRunPlan,
+  channel: ConfirmationChannel,
+): AuditPreflightCheck {
+  return {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    channel,
+    capabilityId: manifest.id,
+    reason: "Audit preflight before external request.",
+    inputHash: hashInput(input),
+    inputRedactedJson: stableJsonStringify(redactInput(input)),
+    resolvedUrl: plan.url,
+    requestStarted: false,
+  };
+}
+
+async function runAuditPreflight(
+  manifest: CapabilityManifest,
+  input: unknown,
+  plan: HttpDryRunPlan,
+  options: HttpExecutionOptions,
+): Promise<HttpExecutionResult | undefined> {
+  if (options.auditLogger === undefined || !manifestRequiresAuditPreflight(manifest)) {
+    return undefined;
+  }
+
+  try {
+    await options.auditLogger.preflight(createAuditPreflightCheck(manifest, input, plan, options.channel ?? "cli"));
+    return undefined;
+  } catch {
+    return auditPreflightFailedResult(plan);
+  }
+}
+
 export async function executeHttpCapability(
   manifest: CapabilityManifest,
   input: unknown,
   options: HttpExecutionOptions = {},
 ): Promise<HttpExecutionResult> {
   const plan = await buildHttpDryRunPlan(manifest, input);
+  const auditFailure = await runAuditPreflight(manifest, input, plan, options);
+  if (auditFailure !== undefined) {
+    return auditFailure;
+  }
+
   const env = options.env ?? process.env;
   const headers: Record<string, string> = {};
   let credential: CredentialAuditEvidence | undefined;
@@ -1789,16 +1858,50 @@ export interface AuditEvent {
   policyTrace?: PolicyDecisionTraceV1;
 }
 
+export interface AuditPreflightCheck {
+  id: string;
+  timestamp: string;
+  channel: ConfirmationChannel;
+  capabilityId: string;
+  reason: string;
+  inputHash?: string;
+  inputRedactedJson?: string;
+  resolvedUrl?: string;
+  requestStarted: false;
+}
+
 export interface AuditLogger {
+  preflight(check: AuditPreflightCheck): Promise<void>;
   record(event: AuditEvent): Promise<void>;
 }
 
 export class InMemoryAuditLogger implements AuditLogger {
   readonly events: AuditEvent[] = [];
 
+  async preflight(_check: AuditPreflightCheck): Promise<void> {
+    return undefined;
+  }
+
   async record(event: AuditEvent): Promise<void> {
     this.events.push(event);
   }
+}
+
+function auditEventFromPreflightCheck(check: AuditPreflightCheck): AuditEvent {
+  return {
+    id: check.id,
+    timestamp: check.timestamp,
+    channel: check.channel,
+    capabilityId: check.capabilityId,
+    status: "blocked",
+    policyDecision: "allow",
+    confirmationStatus: "approved",
+    reason: check.reason,
+    inputHash: check.inputHash,
+    inputRedactedJson: check.inputRedactedJson,
+    resolvedUrl: check.resolvedUrl,
+    requestStarted: check.requestStarted,
+  };
 }
 
 function auditStatusFromConfirmation(status: ConfirmationStatus): AuditInvocationStatus {
@@ -2144,7 +2247,7 @@ export class SqliteAuditLogger implements AuditLogger {
     ensureAuditSchema(this.database);
   }
 
-  async record(event: AuditEvent): Promise<void> {
+  private insertEvent(event: AuditEvent): void {
     this.database
       .prepare(
         `INSERT INTO invocations (
@@ -2182,6 +2285,25 @@ export class SqliteAuditLogger implements AuditLogger {
         event.inputProvenance === undefined ? null : stableJsonStringify(event.inputProvenance),
         event.policyTrace === undefined ? null : stableJsonStringify(event.policyTrace),
       );
+  }
+
+  async preflight(check: AuditPreflightCheck): Promise<void> {
+    this.database.exec("BEGIN IMMEDIATE");
+    try {
+      this.insertEvent(auditEventFromPreflightCheck(check));
+      this.database.exec("ROLLBACK");
+    } catch (error) {
+      try {
+        this.database.exec("ROLLBACK");
+      } catch {
+        // Preserve the original audit preflight failure.
+      }
+      throw error;
+    }
+  }
+
+  async record(event: AuditEvent): Promise<void> {
+    this.insertEvent(event);
   }
 
   async recent(limit = 20, query: AuditLogQuery = {}): Promise<AuditEvent[]> {
