@@ -44,6 +44,15 @@ rate_limits:
 
 外部 provider 返回 429 或 RateLimit headers。Runtime 应记录 provider 的 rate limit evidence，并避免自动重试非幂等操作。
 
+当前 Runtime HTTP executor 会在 provider 返回 429 时把 `providerRateLimit` 放入结构化 `HTTP_ERROR`：
+
+- `providerStatus=429`
+- `Retry-After` 秒数或 HTTP date 派生出的 retry recommendation。
+- `RateLimit-Reset` 派生出的 reset timestamp。
+- 白名单 header 名称：`retry-after`、`ratelimit-reset`。
+
+Rate limit evidence 不记录 provider header 原文，不保存 secret-like header 名称或值。429 仍是 request 已发出后的 HTTP execution result，不被建模为 policy deny；是否 retry 继续由 retry policy / idempotency 语义决定。
+
 ## 429 处理
 
 - 记录 status 429。

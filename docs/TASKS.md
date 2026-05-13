@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 225 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 227 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -339,7 +339,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/quota-budget-gate.ts` 和 `quota-budget-gate.test.ts`，导出 `evaluateQuotaBudgetGate()` 纯 gate helper。helper 输出统一 `GateDecision`，stage 固定为 `pre_secret`；测试覆盖 count-based quota deny 阻断 secret/execution、quota ask 映射 confirmation_required、budget deny 不被 trust/quality 绕过，以及 quota/budget evidence 不携带 input/output/secret 原文。Runtime 测试数从 221 增至 225。
-- [ ] T200 P1：Provider rate limit handling。
+- [x] T200 P1：Provider rate limit handling。
+  - 验收标准：
+    - HTTP executor 对 provider 429 返回结构化 rate limit evidence，而不是只给普通 HTTP error 文本。
+    - `Retry-After` 秒数和 HTTP date 可解析为 retry recommendation；`RateLimit-Reset` 可解析为 reset timestamp。
+    - Rate limit evidence 只保留允许的 header 名称和值派生结果，不记录 secret-like provider header 原文。
+    - provider 429 不被当作 policy deny，仍是 request 已发出的 HTTP execution result。
+    - 非幂等写操作遇到 provider 429 不自动 retry。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- provider-rate-limit.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：HTTP executor 的 429 `http_error` 结果现在携带 `providerRateLimit` 结构化 evidence，解析 `Retry-After` 秒数/HTTP date 和 `RateLimit-Reset` timestamp，只记录白名单 header 名称与派生时间，不保存 secret-like provider header 原文。新增 `provider-rate-limit.test.ts`，覆盖 429 evidence redaction 和 POST 写操作遇到 429 仍不自动 retry；Runtime 测试数从 225 增至 227。
 - [ ] T201 P1：Local abuse throttle。
 - [ ] T204 P1：Financial consent/spend cap tests。
 
@@ -533,7 +549,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T200：Provider rate limit handling
+1. M2 / T201：Local abuse throttle
 2. M3 / T134：CLI command snapshot tests
 3. M3 / T137：错误模型和 exit code tests
 4. M4 / T151：Capability Package lint

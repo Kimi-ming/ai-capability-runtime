@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests 和 T199 quota/budget policy gates 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates 和 T200 provider rate limit handling 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -31,7 +31,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API、Capability authoring loop contract、registry test 校验、schema JSON public subpath export、`api_key` auth placement 和 credential descriptor 约束测试、model-visible metadata lint、least-privilege auth lint、authoring manifest validation 和 prompt-surface negative fixtures。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；package public surface 保持 bin-only；`serve` 仍是骨架。
-- `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract、execution semantics evidence 类型/helper、unknown timeout audit evidence、retry policy decision helper、quality score policy trace boundary、quota/budget pre-secret gate helper 和 GateDecision 语义 helper、本地 state dir 初始化和 precedence tests、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、consent receipt audit fields、Secret Resolver V1 env provider、credential audit evidence、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor 和 package export map 测试。
+- `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract、execution semantics evidence 类型/helper、unknown timeout audit evidence、retry policy decision helper、provider rate limit evidence、quality score policy trace boundary、quota/budget pre-secret gate helper 和 GateDecision 语义 helper、本地 state dir 初始化和 precedence tests、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、consent receipt audit fields、Secret Resolver V1 env provider、credential audit evidence、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor 和 package export map 测试。
 - `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现；model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate 已实现。
 - `@opencap/sdk` 暂缓实现。
 
@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T199 已完成；下一项 ready task 预计是 T200 P1：Provider rate limit handling。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T200 已完成；下一项 ready task 预计是 T201 P1：Local abuse throttle。
 
-下一步推荐：先用 `next_task.py` 重新确认 T200，再补齐验收标准和任务级验证。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T201，再补齐验收标准和任务级验证。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M2 / T200 P1：Provider rate limit handling
+M2 / T201 P1：Local abuse throttle
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T130/T131/T132/T133/T135/T145/T152/T159/T160/T161/T164/T167/T168/T170/T196/T199/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T130/T131/T132/T133/T135/T145/T152/T159/T160/T161/T164/T167/T168/T170/T196/T199/T200/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T199 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T200。
+- 当前状态：T200 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T201。
 
 ## 最近验证
 
@@ -81,6 +81,7 @@ M2 / T200 P1：Provider rate limit handling
 - `pnpm --filter @opencap/runtime test -- retry-policy.test.ts`
 - `pnpm --filter @opencap/runtime test -- policy-score.test.ts`
 - `pnpm --filter @opencap/runtime test -- quota-budget-gate.test.ts`
+- `pnpm --filter @opencap/runtime test -- provider-rate-limit.test.ts`
 - `pnpm --filter @opencap/runtime test`
 - `pnpm validate`
 - `pnpm lint`
@@ -92,7 +93,7 @@ M2 / T200 P1：Provider rate limit handling
 - `check_docs.py`
 - `next_task.py`
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 45 个、runtime 225 个、mcp 18 个、cli smoke 1 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 45 个、runtime 227 个、mcp 18 个、cli smoke 1 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
 
 ## 本轮文档和后续收敛
 
@@ -119,6 +120,7 @@ M2 / T200 P1：Provider rate limit handling
 - T170 已完成：`packages/runtime/src/retry-policy.ts` 新增 `defaultHttpRetryPolicy()` 和 `evaluateHttpRetryPolicy()` 纯 decision helper，覆盖默认不自动 retry、非幂等写操作不 retry、unknown write timeout 要求 reconcile、401/403 不 retry、显式 read-only retry 和 idempotency key hash evidence。Runtime 测试数从 213 增至 219。
 - T196 已完成：`PolicyEvaluationInput` 支持 `qualityScore` trace fact；新增 `policy-score.test.ts`，确认高分只能进入 `quality_score=<value>` evidence，不能把默认 ask 改为 allow，也不能覆盖显式 deny。Runtime 测试数从 219 增至 221。
 - T199 已完成：新增 `packages/runtime/src/quota-budget-gate.ts` 和 `quota-budget-gate.test.ts`，导出 `evaluateQuotaBudgetGate()` 纯 pre-secret gate helper。测试覆盖 quota deny、quota ask、budget deny 不被 trust/quality 绕过和 evidence redaction。Runtime 测试数从 221 增至 225。
+- T200 已完成：HTTP executor 429 `http_error` 结果新增 `providerRateLimit` evidence，解析 `Retry-After` 和 `RateLimit-Reset`，只记录白名单 header 名称和派生时间；新增 `provider-rate-limit.test.ts` 覆盖 header redaction 和非幂等写操作不自动 retry。Runtime 测试数从 225 增至 227。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -126,9 +128,9 @@ M2 / T200 P1：Provider rate limit handling
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T200 P1：Provider rate limit handling。
+- T201 P1：Local abuse throttle。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T200 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T201 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
 
 ## Secret Resolver V1 env provider 已实现
 

@@ -419,6 +419,15 @@ export interface NormalizedHttpResponse {
   contentType?: string;
   bodyKind: HttpBodyKind;
   output?: unknown;
+  providerRateLimit?: ProviderRateLimitEvidence;
+}
+
+export interface ProviderRateLimitEvidence {
+  providerStatus: 429;
+  retryAfterMs?: number;
+  retryAfterAt?: string;
+  rateLimitResetAt?: string;
+  headerNames: string[];
 }
 
 export interface HttpExecutionResult {
@@ -436,6 +445,7 @@ export interface HttpExecutionResult {
     message: string;
     statusCode?: number;
     response?: unknown;
+    providerRateLimit?: ProviderRateLimitEvidence;
   };
 }
 
@@ -1141,6 +1151,7 @@ function structuredContentFromHttpResult(result: HttpExecutionResult, sanitizedV
       message: error.message,
       statusCode: error.statusCode,
       response: sanitizedValue,
+      providerRateLimit: error.providerRateLimit,
     },
   };
 }
@@ -1240,6 +1251,65 @@ export interface HttpExecutionOptions extends HttpDryRunOptions {
   consentReceipt?: AuditConsentReceiptEvidence;
 }
 
+function parseRetryAfter(value: string | null, now = new Date()): Pick<ProviderRateLimitEvidence, "retryAfterMs" | "retryAfterAt"> {
+  if (value === null) {
+    return {};
+  }
+
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    const retryAfterMs = Number(trimmed) * 1000;
+    return {
+      retryAfterMs,
+      retryAfterAt: new Date(now.getTime() + retryAfterMs).toISOString(),
+    };
+  }
+
+  const timestamp = Date.parse(trimmed);
+  if (Number.isNaN(timestamp)) {
+    return {};
+  }
+
+  return {
+    retryAfterMs: Math.max(0, timestamp - now.getTime()),
+    retryAfterAt: new Date(timestamp).toISOString(),
+  };
+}
+
+function parseRateLimitReset(value: string | null): string | undefined {
+  if (value === null) {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    return new Date(Number(trimmed) * 1000).toISOString();
+  }
+
+  const timestamp = Date.parse(trimmed);
+  return Number.isNaN(timestamp) ? undefined : new Date(timestamp).toISOString();
+}
+
+function providerRateLimitEvidenceFromResponse(response: Response): ProviderRateLimitEvidence | undefined {
+  if (response.status !== 429) {
+    return undefined;
+  }
+
+  const retryAfter = response.headers.get("retry-after");
+  const rateLimitReset = response.headers.get("ratelimit-reset");
+  const headerNames = [
+    retryAfter === null ? undefined : "retry-after",
+    rateLimitReset === null ? undefined : "ratelimit-reset",
+  ].filter((header): header is string => header !== undefined);
+
+  return {
+    providerStatus: 429,
+    ...parseRetryAfter(retryAfter),
+    rateLimitResetAt: parseRateLimitReset(rateLimitReset),
+    headerNames,
+  };
+}
+
 function executionAuditEvent(
   manifest: CapabilityManifest,
   input: unknown,
@@ -1291,6 +1361,7 @@ function executionAuditEvent(
 export async function normalizeHttpResponse(response: Response): Promise<NormalizedHttpResponse> {
   const contentType = response.headers.get("content-type") ?? undefined;
   const text = await response.text();
+  const providerRateLimit = providerRateLimitEvidenceFromResponse(response);
 
   if (text.length === 0) {
     return {
@@ -1298,6 +1369,7 @@ export async function normalizeHttpResponse(response: Response): Promise<Normali
       contentType,
       bodyKind: "empty",
       output: undefined,
+      providerRateLimit,
     };
   }
 
@@ -1308,6 +1380,7 @@ export async function normalizeHttpResponse(response: Response): Promise<Normali
         contentType,
         bodyKind: "json",
         output: JSON.parse(text),
+        providerRateLimit,
       };
     } catch {
       return {
@@ -1315,6 +1388,7 @@ export async function normalizeHttpResponse(response: Response): Promise<Normali
         contentType,
         bodyKind: "text",
         output: text,
+        providerRateLimit,
       };
     }
   }
@@ -1324,6 +1398,7 @@ export async function normalizeHttpResponse(response: Response): Promise<Normali
     contentType,
     bodyKind: "text",
     output: text,
+    providerRateLimit,
   };
 }
 
@@ -1550,6 +1625,7 @@ export async function executeHttpCapability(
           message: `HTTP request failed with status ${normalized.statusCode}.`,
           statusCode: normalized.statusCode,
           response: redactInput(normalized.output),
+          providerRateLimit: normalized.providerRateLimit,
         },
       };
     }
