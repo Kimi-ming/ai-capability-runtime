@@ -237,6 +237,13 @@ export interface HttpDryRunOptions {
 const FULL_TEMPLATE_PATTERN = /^{{\s*([A-Za-z0-9_-]+)\s*}}$/;
 const TEMPLATE_PATTERN = /{{\s*([A-Za-z0-9_-]+)\s*}}/g;
 
+function templateContainsReference(value: string): boolean {
+  TEMPLATE_PATTERN.lastIndex = 0;
+  const containsReference = TEMPLATE_PATTERN.test(value);
+  TEMPLATE_PATTERN.lastIndex = 0;
+  return containsReference;
+}
+
 function readTemplateField(input: Record<string, unknown>, fieldName: string): unknown {
   const value = input[fieldName];
   if (value === undefined || value === null) {
@@ -373,7 +380,32 @@ export async function buildHttpDryRunPlan(
   return plan;
 }
 
-export type HttpExecutionStatus = "success" | "http_error" | "timeout" | "network_error" | "secret_missing" | "audit_failed";
+export type HttpExecutionStatus = "success" | "http_error" | "timeout" | "network_error" | "secret_missing" | "audit_failed" | "outbound_blocked";
+
+export type OutboundPolicyDecision = "allow" | "block";
+
+export type OutboundTargetType =
+  | "fixed_https_origin"
+  | "templated_path_or_query"
+  | "arbitrary_url"
+  | "localhost_or_loopback"
+  | "private_network"
+  | "metadata_service"
+  | "non_https"
+  | "invalid_url";
+
+export interface OutboundPolicyOptions {
+  allowLocalhost?: boolean;
+}
+
+export interface OutboundPolicyResult {
+  decision: OutboundPolicyDecision;
+  targetType: OutboundTargetType;
+  reasonCode: string;
+  summary: string;
+  resolvedUrl: string;
+  requestStarted: false;
+}
 
 export type HttpBodyKind = "json" | "text" | "empty";
 
@@ -655,6 +687,170 @@ function targetOrigin(url: string): string | undefined {
   }
 }
 
+function normalizeHostname(hostname: string): string {
+  return hostname.toLowerCase().replace(/^\[(.*)\]$/, "$1");
+}
+
+function parseIpv4(hostname: string): [number, number, number, number] | undefined {
+  const parts = hostname.split(".");
+  if (parts.length !== 4) {
+    return undefined;
+  }
+
+  const octets = parts.map((part) => {
+    if (!/^\d{1,3}$/.test(part)) {
+      return undefined;
+    }
+    const value = Number(part);
+    return value >= 0 && value <= 255 ? value : undefined;
+  });
+
+  return octets.every((octet): octet is number => octet !== undefined)
+    ? [octets[0], octets[1], octets[2], octets[3]]
+    : undefined;
+}
+
+function isLoopbackHost(hostname: string): boolean {
+  const host = normalizeHostname(hostname);
+  const ipv4 = parseIpv4(host);
+
+  return host === "localhost" || host.endsWith(".localhost") || host === "::1" || host === "0.0.0.0" || ipv4?.[0] === 127;
+}
+
+function isMetadataServiceHost(hostname: string): boolean {
+  const host = normalizeHostname(hostname);
+  return host === "169.254.169.254" || host === "metadata.google.internal";
+}
+
+function isPrivateNetworkHost(hostname: string): boolean {
+  const host = normalizeHostname(hostname);
+  const ipv4 = parseIpv4(host);
+  if (ipv4 !== undefined) {
+    const [a, b] = ipv4;
+    return a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+  }
+
+  return host.endsWith(".local") || host.endsWith(".internal") || host.startsWith("fc") || host.startsWith("fd") || /^fe[89ab]/.test(host);
+}
+
+function urlTemplateHasTemplatedHost(template: string): boolean {
+  const schemeIndex = template.indexOf("://");
+  if (schemeIndex < 0) {
+    return FULL_TEMPLATE_PATTERN.test(template.trim());
+  }
+
+  const authorityStart = schemeIndex + 3;
+  const authorityEndCandidates = ["/", "?", "#"]
+    .map((marker) => template.indexOf(marker, authorityStart))
+    .filter((index) => index >= 0);
+  const authorityEnd = authorityEndCandidates.length === 0 ? template.length : Math.min(...authorityEndCandidates);
+  const authority = template.slice(authorityStart, authorityEnd);
+  return templateContainsReference(authority);
+}
+
+function outboundTargetTypeSummary(type: OutboundTargetType): string {
+  switch (type) {
+    case "fixed_https_origin":
+      return "fixed public HTTPS origin is allowed.";
+    case "templated_path_or_query":
+      return "templated path or query with fixed public HTTPS origin is allowed.";
+    case "arbitrary_url":
+      return "arbitrary user-provided URL is blocked by outbound policy.";
+    case "localhost_or_loopback":
+      return "localhost or loopback target is blocked by outbound policy.";
+    case "private_network":
+      return "private network target is blocked by outbound policy.";
+    case "metadata_service":
+      return "cloud metadata service target is blocked by outbound policy.";
+    case "non_https":
+      return "non-HTTPS target is blocked by outbound policy.";
+    case "invalid_url":
+      return "invalid outbound URL is blocked by outbound policy.";
+  }
+}
+
+function outboundReasonCode(type: OutboundTargetType, decision: OutboundPolicyDecision): string {
+  if (decision === "allow") {
+    return "OUTBOUND_ALLOWED";
+  }
+
+  switch (type) {
+    case "arbitrary_url":
+      return "OUTBOUND_ARBITRARY_URL_BLOCKED";
+    case "localhost_or_loopback":
+      return "OUTBOUND_LOCALHOST_BLOCKED";
+    case "private_network":
+      return "OUTBOUND_PRIVATE_NETWORK_BLOCKED";
+    case "metadata_service":
+      return "OUTBOUND_METADATA_SERVICE_BLOCKED";
+    case "non_https":
+      return "OUTBOUND_NON_HTTPS_BLOCKED";
+    case "invalid_url":
+      return "OUTBOUND_URL_INVALID";
+    case "fixed_https_origin":
+    case "templated_path_or_query":
+      return "OUTBOUND_BLOCKED";
+  }
+}
+
+export function classifyOutboundTarget(resolvedUrl: string, manifest: CapabilityManifest): OutboundTargetType {
+  let parsed: URL;
+  try {
+    parsed = new URL(resolvedUrl);
+  } catch {
+    return "invalid_url";
+  }
+
+  if (isMetadataServiceHost(parsed.hostname)) {
+    return "metadata_service";
+  }
+
+  if (isLoopbackHost(parsed.hostname)) {
+    return "localhost_or_loopback";
+  }
+
+  if (isPrivateNetworkHost(parsed.hostname)) {
+    return "private_network";
+  }
+
+  if (parsed.protocol !== "https:") {
+    return "non_https";
+  }
+
+  const execution = manifest.execution as { url?: unknown };
+  const template = typeof execution.url === "string" ? execution.url : "";
+  if (detectArbitraryUrlCapability(manifest) || urlTemplateHasTemplatedHost(template)) {
+    return "arbitrary_url";
+  }
+
+  return templateContainsReference(template) ? "templated_path_or_query" : "fixed_https_origin";
+}
+
+export function evaluateOutboundPolicy(
+  resolvedUrl: string,
+  manifest: CapabilityManifest,
+  options: OutboundPolicyOptions = {},
+): OutboundPolicyResult {
+  const targetType = classifyOutboundTarget(resolvedUrl, manifest);
+  const blocked =
+    (targetType === "localhost_or_loopback" && options.allowLocalhost !== true) ||
+    targetType === "arbitrary_url" ||
+    targetType === "private_network" ||
+    targetType === "metadata_service" ||
+    targetType === "non_https" ||
+    targetType === "invalid_url";
+  const decision: OutboundPolicyDecision = blocked ? "block" : "allow";
+
+  return {
+    decision,
+    targetType,
+    reasonCode: outboundReasonCode(targetType, decision),
+    summary: outboundTargetTypeSummary(targetType),
+    resolvedUrl,
+    requestStarted: false,
+  };
+}
+
 function warningFromCode(code: string): ResultWarningV1 {
   return {
     code: code.toUpperCase(),
@@ -807,7 +1003,7 @@ function envelopeStatusFromHttpResult(result: HttpExecutionResult): ResultEnvelo
     return "unknown";
   }
 
-  if (result.status === "secret_missing") {
+  if (result.status === "secret_missing" || result.status === "outbound_blocked") {
     return "blocked";
   }
 
@@ -827,6 +1023,10 @@ function outcomeFromHttpResult(result: HttpExecutionResult): string {
     return "blocked_before_request";
   }
 
+  if (result.status === "outbound_blocked") {
+    return "outbound_blocked";
+  }
+
   if (result.status === "audit_failed") {
     return "audit_failed";
   }
@@ -835,7 +1035,7 @@ function outcomeFromHttpResult(result: HttpExecutionResult): string {
 }
 
 function requestStartedFromHttpResult(result: HttpExecutionResult): boolean {
-  return result.status !== "secret_missing" && result.status !== "audit_failed";
+  return result.status !== "secret_missing" && result.status !== "audit_failed" && result.status !== "outbound_blocked";
 }
 
 function structuredContentFromHttpResult(result: HttpExecutionResult, sanitizedValue: unknown): unknown {
@@ -927,6 +1127,7 @@ export function resultEnvelopeFromHttpExecutionResult(result: HttpExecutionResul
 export interface HttpExecutionOptions extends HttpDryRunOptions {
   env?: Record<string, string | undefined>;
   fetch?: typeof fetch;
+  outboundPolicy?: OutboundPolicyOptions;
 }
 
 function executionAuditEvent(
@@ -941,7 +1142,7 @@ function executionAuditEvent(
     timestamp: new Date().toISOString(),
     channel,
     capabilityId: manifest.id,
-    status: result.status === "secret_missing" || result.status === "audit_failed" ? "blocked" : "executed",
+    status: result.status === "secret_missing" || result.status === "audit_failed" || result.status === "outbound_blocked" ? "blocked" : "executed",
     policyDecision: "allow",
     confirmationStatus: "approved",
     reason: result.ok ? "HTTP execution succeeded." : result.error?.message ?? "HTTP execution failed.",
@@ -1022,6 +1223,67 @@ function auditPreflightFailedResult(plan: HttpDryRunPlan): HttpExecutionResult {
   };
 }
 
+function outboundBlockedResult(plan: HttpDryRunPlan, outbound: OutboundPolicyResult): HttpExecutionResult {
+  return {
+    ok: false,
+    capabilityId: plan.capabilityId,
+    method: plan.method,
+    url: plan.url,
+    status: "outbound_blocked",
+    error: {
+      code: "OUTBOUND_BLOCKED",
+      message: outbound.summary,
+      response: {
+        reasonCode: outbound.reasonCode,
+        targetType: outbound.targetType,
+      },
+    },
+  };
+}
+
+function outboundBlockedAuditEvent(
+  manifest: CapabilityManifest,
+  input: unknown,
+  outbound: OutboundPolicyResult,
+  channel: ConfirmationChannel,
+): AuditEvent {
+  return {
+    id: randomUUID(),
+    timestamp: new Date().toISOString(),
+    channel,
+    capabilityId: manifest.id,
+    status: "blocked",
+    policyDecision: "deny",
+    confirmationStatus: "denied",
+    reason: outbound.summary,
+    inputHash: hashInput(input),
+    inputRedactedJson: stableJsonStringify(redactInput(input)),
+    resolvedUrl: outbound.resolvedUrl,
+    requestStarted: false,
+    outboundDecision: outbound.decision,
+    outboundTargetType: outbound.targetType,
+    outboundReasonCode: outbound.reasonCode,
+  };
+}
+
+async function runOutboundPolicy(
+  manifest: CapabilityManifest,
+  input: unknown,
+  plan: HttpDryRunPlan,
+  options: HttpExecutionOptions,
+): Promise<HttpExecutionResult | undefined> {
+  const outbound = evaluateOutboundPolicy(plan.url, manifest, options.outboundPolicy);
+  if (outbound.decision === "allow") {
+    return undefined;
+  }
+
+  if (options.auditLogger !== undefined) {
+    await options.auditLogger.record(outboundBlockedAuditEvent(manifest, input, outbound, options.channel ?? "cli"));
+  }
+
+  return outboundBlockedResult(plan, outbound);
+}
+
 function manifestRequiresAuditPreflight(manifest: CapabilityManifest): boolean {
   return buildCapabilityRiskSummary(manifest).risks.some((risk) => risk !== "read_only");
 }
@@ -1069,6 +1331,11 @@ export async function executeHttpCapability(
   options: HttpExecutionOptions = {},
 ): Promise<HttpExecutionResult> {
   const plan = await buildHttpDryRunPlan(manifest, input);
+  const outboundFailure = await runOutboundPolicy(manifest, input, plan, options);
+  if (outboundFailure !== undefined) {
+    return outboundFailure;
+  }
+
   const auditFailure = await runAuditPreflight(manifest, input, plan, options);
   if (auditFailure !== undefined) {
     return auditFailure;
@@ -1854,6 +2121,9 @@ export interface AuditEvent {
   egressTargetOrigin?: string;
   egressMatchedRuleId?: string;
   egressRedactedPreviewJson?: string;
+  outboundDecision?: OutboundPolicyDecision;
+  outboundTargetType?: OutboundTargetType;
+  outboundReasonCode?: string;
   inputProvenance?: InputProvenanceEvidence;
   policyTrace?: PolicyDecisionTraceV1;
 }
@@ -2054,6 +2324,9 @@ interface AuditEventRow {
   egress_target_origin: string | null;
   egress_matched_rule_id: string | null;
   egress_redacted_preview_json: string | null;
+  outbound_decision: OutboundPolicyDecision | null;
+  outbound_target_type: OutboundTargetType | null;
+  outbound_reason_code: string | null;
   input_provenance_json: string | null;
   policy_trace_json: string | null;
 }
@@ -2093,6 +2366,9 @@ CREATE TABLE IF NOT EXISTS invocations (
   egress_target_origin TEXT,
   egress_matched_rule_id TEXT,
   egress_redacted_preview_json TEXT,
+  outbound_decision TEXT,
+  outbound_target_type TEXT,
+  outbound_reason_code TEXT,
   input_provenance_json TEXT,
   policy_trace_json TEXT
 ) STRICT;
@@ -2120,6 +2396,9 @@ function ensureAuditSchema(database: DatabaseSync): void {
     ["egress_target_origin", "TEXT"],
     ["egress_matched_rule_id", "TEXT"],
     ["egress_redacted_preview_json", "TEXT"],
+    ["outbound_decision", "TEXT"],
+    ["outbound_target_type", "TEXT"],
+    ["outbound_reason_code", "TEXT"],
     ["input_provenance_json", "TEXT"],
     ["policy_trace_json", "TEXT"],
   ];
@@ -2230,6 +2509,9 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     egressTargetOrigin: row.egress_target_origin ?? undefined,
     egressMatchedRuleId: row.egress_matched_rule_id ?? undefined,
     egressRedactedPreviewJson: row.egress_redacted_preview_json ?? undefined,
+    outboundDecision: row.outbound_decision ?? undefined,
+    outboundTargetType: row.outbound_target_type ?? undefined,
+    outboundReasonCode: row.outbound_reason_code ?? undefined,
     inputProvenance: parseInputProvenance(row.input_provenance_json),
     policyTrace: parsePolicyTrace(row.policy_trace_json),
   };
@@ -2254,8 +2536,9 @@ export class SqliteAuditLogger implements AuditLogger {
           id, timestamp, channel, capability_id, status, policy_decision, confirmation_status, reason, matched_rule_id,
           input_hash, input_redacted_json, resolved_url, credential_provider, credential_source, credential_env_name,
           credential_placement, credential_resolved, credential_redacted, request_started, egress_decision, egress_data_classes_json,
-          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, input_provenance_json, policy_trace_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
+          outbound_reason_code, input_provenance_json, policy_trace_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -2282,6 +2565,9 @@ export class SqliteAuditLogger implements AuditLogger {
         event.egressTargetOrigin ?? null,
         event.egressMatchedRuleId ?? null,
         event.egressRedactedPreviewJson ?? null,
+        event.outboundDecision ?? null,
+        event.outboundTargetType ?? null,
+        event.outboundReasonCode ?? null,
         event.inputProvenance === undefined ? null : stableJsonStringify(event.inputProvenance),
         event.policyTrace === undefined ? null : stableJsonStringify(event.policyTrace),
       );

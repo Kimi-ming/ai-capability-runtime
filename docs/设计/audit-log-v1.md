@@ -12,7 +12,7 @@
 
 ## 当前最小实现
 
-当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。`AuditLogger` 同时提供 `preflight()` 和 `record()`：非 `read_only` HTTP 执行会在解析 secret 和发起请求前先做 audit preflight，确认审计写路径可用。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录；SQLite preflight 通过事务触达写入路径后 rollback，不留下持久化 invocation 记录。审计事件可保存 `input_hash`、`input_redacted_json`、`request_started` 和 Data Egress evidence。当前 Node 对该模块仍会打印 ExperimentalWarning。
+当前 Runtime 已有 `AuditLogger` 接口、`InMemoryAuditLogger` 和 `SqliteAuditLogger`。`AuditLogger` 同时提供 `preflight()` 和 `record()`：非 `read_only` HTTP 执行会在解析 secret 和发起请求前先做 audit preflight，确认审计写路径可用。SQLite 实现使用 Node 内置 `node:sqlite`，会自动创建最小 `invocations` 表，并支持写入事件与查询最近记录；SQLite preflight 通过事务触达写入路径后 rollback，不留下持久化 invocation 记录。审计事件可保存 `input_hash`、`input_redacted_json`、`request_started`、Data Egress evidence 和 Outbound Policy evidence。当前 Node 对该模块仍会打印 ExperimentalWarning。
 
 当前实现也会保存 Secret Resolver 产生的 credential evidence：只记录 provider/source/env name/placement/resolved/redacted summary，不记录 env var value、Authorization header value 或其他 secret 原文。
 
@@ -62,6 +62,9 @@ ADR：`docs/决策/0006-sqlite-audit-log-v1.md`。
 | `egress_target_origin` | text | 外发目标 origin |
 | `egress_matched_rule_id` | text | 命中的 data egress policy rule id |
 | `egress_redacted_preview_json` | text | 外发预览的脱敏 JSON |
+| `outbound_decision` | text | allow/block |
+| `outbound_target_type` | text | fixed_https_origin、localhost_or_loopback、private_network、metadata_service 等 |
+| `outbound_reason_code` | text | outbound policy 决策 reason code |
 | `output_redacted_json` | text | 脱敏输出 |
 | `resolved_url` | text | 脱敏 URL |
 | `tool_projection_version` | text | MCP tool projection 版本，例如 `opencap.mcp.tool-projection.v1` |

@@ -470,6 +470,86 @@ describe("HTTP executor", () => {
     expect(JSON.stringify(logger.preflightChecks[0])).not.toContain("provider-secret");
   });
 
+  it.each([
+    ["localhost", "http://localhost:8080/health", "localhost_or_loopback", "OUTBOUND_LOCALHOST_BLOCKED"],
+    ["loopback IPv4", "http://127.0.0.1:8080/health", "localhost_or_loopback", "OUTBOUND_LOCALHOST_BLOCKED"],
+    ["private 10/8 IPv4", "http://10.0.0.1/admin", "private_network", "OUTBOUND_PRIVATE_NETWORK_BLOCKED"],
+    ["private 172.16/12 IPv4", "http://172.16.0.1/admin", "private_network", "OUTBOUND_PRIVATE_NETWORK_BLOCKED"],
+    ["private 192.168/16 IPv4", "http://192.168.0.1/admin", "private_network", "OUTBOUND_PRIVATE_NETWORK_BLOCKED"],
+    ["metadata service", "http://169.254.169.254/latest/meta-data/", "metadata_service", "OUTBOUND_METADATA_SERVICE_BLOCKED"],
+    ["non-HTTPS public URL", "http://example.com/data", "non_https", "OUTBOUND_NON_HTTPS_BLOCKED"],
+    ["arbitrary public URL", "https://example.com/data", "arbitrary_url", "OUTBOUND_ARBITRARY_URL_BLOCKED"],
+  ])("outbound policy blocks %s before secrets or request start", async (_label, url, targetType, reasonCode) => {
+    const logger = new InMemoryAuditLogger();
+    let fetchCalls = 0;
+    let secretReads = 0;
+    const env: Record<string, string | undefined> = {};
+    Object.defineProperty(env, "GITHUB_TOKEN", {
+      enumerable: true,
+      get() {
+        secretReads += 1;
+        throw new Error("secret should not be read after outbound block");
+      },
+    });
+    const fetchImpl = (async () => {
+      fetchCalls += 1;
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const manifest = {
+      ...dryRunManifest(),
+      execution: { ...dryRunManifest().execution, method: "GET" as const, url: "{{url}}", body: undefined },
+    };
+
+    const result = await executeHttpCapability(
+      manifest,
+      { url },
+      { env, auditLogger: logger, fetch: fetchImpl },
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: "outbound_blocked",
+      error: { code: "OUTBOUND_BLOCKED" },
+    });
+    expect(secretReads).toBe(0);
+    expect(fetchCalls).toBe(0);
+    expect(logger.events).toHaveLength(1);
+    expect(logger.events[0]).toMatchObject({
+      capabilityId: "github.create_issue",
+      status: "blocked",
+      policyDecision: "deny",
+      confirmationStatus: "denied",
+      resolvedUrl: url,
+      requestStarted: false,
+      outboundDecision: "block",
+      outboundTargetType: targetType,
+      outboundReasonCode: reasonCode,
+    });
+    expect(JSON.stringify(result)).not.toContain("provider-secret");
+    expect(JSON.stringify(logger.events[0])).not.toContain("provider-secret");
+  });
+
+  it("outbound policy allows fixed public HTTPS origins to execute", async () => {
+    const logger = new InMemoryAuditLogger();
+    let fetchCalls = 0;
+    const fetchImpl = (async (url) => {
+      fetchCalls += 1;
+      expect(url).toBe("https://api.example.com/health");
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { "content-type": "application/json" } });
+    }) as typeof fetch;
+    const manifest = {
+      ...dryRunManifest(),
+      auth: { type: "none" as const },
+      permissions: [{ resource: "example.health", action: "read", risk: "read_only" as const, confirmation: "allow" as const }],
+      execution: { ...dryRunManifest().execution, method: "GET" as const, url: "https://api.example.com/health", body: undefined },
+    };
+
+    const result = await executeHttpCapability(manifest, {}, { auditLogger: logger, fetch: fetchImpl });
+
+    expect(result).toMatchObject({ ok: true, status: "success", output: { ok: true } });
+    expect(fetchCalls).toBe(1);
+  });
+
   it("executes a POST JSON request with bearer auth and writes an audit event without leaking the secret", async () => {
     const logger = new InMemoryAuditLogger();
     const requests: Array<{ method?: string; url?: string; authorization?: string; body: string }> = [];
@@ -503,7 +583,7 @@ describe("HTTP executor", () => {
       const result = await executeHttpCapability(
         manifest,
         { owner: "opencap", repo: "runtime", title: "Bug", body: "broken", labels: ["bug"], token: "input-secret" },
-        { env: { GITHUB_TOKEN: "provider-secret" }, auditLogger: logger, channel: "cli" },
+        { env: { GITHUB_TOKEN: "provider-secret" }, auditLogger: logger, channel: "cli", outboundPolicy: { allowLocalhost: true } },
       );
 
       expect(result).toMatchObject({
@@ -562,7 +642,7 @@ describe("HTTP executor", () => {
       const result = await executeHttpCapability(
         manifest,
         { repo: "runtime" },
-        { env: { DEMO_TOKEN: "header-secret" }, auditLogger: logger },
+        { env: { DEMO_TOKEN: "header-secret" }, auditLogger: logger, outboundPolicy: { allowLocalhost: true } },
       );
 
       expect(result).toMatchObject({ ok: true, status: "success", output: "ok" });
@@ -605,7 +685,7 @@ describe("HTTP executor", () => {
       const result = await executeHttpCapability(
         manifest,
         { repo: "runtime", token: "input-token", api_key: "input-api-key", Authorization: "Bearer input-auth" },
-        { env: {}, auditLogger: logger },
+        { env: {}, auditLogger: logger, outboundPolicy: { allowLocalhost: true } },
       );
 
       expect(result).toMatchObject({
@@ -645,13 +725,13 @@ describe("HTTP executor", () => {
         execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/missing`, body: undefined },
       };
 
-      await expect(executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" } })).resolves.toMatchObject({
+      await expect(executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" }, outboundPolicy: { allowLocalhost: true } })).resolves.toMatchObject({
         ok: false,
         status: "http_error",
         statusCode: 404,
         error: { code: "HTTP_ERROR", statusCode: 404, response: { message: "not found", token: "[REDACTED]" } },
       });
-      const result = await executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" } });
+      const result = await executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" }, outboundPolicy: { allowLocalhost: true } });
       expect(JSON.stringify(result)).not.toContain("provider-secret");
     } finally {
       await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
@@ -678,7 +758,7 @@ describe("HTTP executor", () => {
         execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/slow`, body: undefined, timeout_ms: 10 },
       };
 
-      await expect(executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" } })).resolves.toMatchObject({
+      await expect(executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" }, outboundPolicy: { allowLocalhost: true } })).resolves.toMatchObject({
         ok: false,
         status: "timeout",
         error: { code: "HTTP_TIMEOUT" },
@@ -722,7 +802,7 @@ describe("HTTP executor", () => {
         execution: { ...dryRunManifest().execution, method: "GET" as const, url: `http://127.0.0.1:${address.port}/ok`, body: undefined },
       };
 
-      await executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" }, auditLogger: logger });
+      await executeHttpCapability(manifest, {}, { env: { GITHUB_TOKEN: "provider-secret" }, auditLogger: logger, outboundPolicy: { allowLocalhost: true } });
 
       expect(logger.events[0]).toMatchObject({
         credentialResolved: true,

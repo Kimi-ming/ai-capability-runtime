@@ -137,6 +137,8 @@ Dry-run：
 5. audit log 增加 outbound decision 和 blocked reason 字段。
 6. registry test 增加 private IP、localhost、metadata service 和 arbitrary URL 场景。
 
+当前实现状态（2026-05-13 / T133）：Runtime 已实现 `classifyOutboundTarget()`、`evaluateOutboundPolicy()` 和 HTTP executor pre-secret outbound gate。真实执行默认阻断 localhost/loopback、RFC1918 private IP、link-local、metadata service、non-HTTPS 和 arbitrary URL；block 结果为结构化 `outbound_blocked`，并写入包含 outbound decision、target type、reason code、resolved URL 和 `requestStarted=false` 的 audit event。Redirect 后 final URL 重检、完整 outbound 配置和 registry outbound fixtures 仍是后续增强。
+
 ## 测试计划
 
 必须覆盖：

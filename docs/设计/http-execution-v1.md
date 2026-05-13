@@ -172,12 +172,13 @@ resolved_url -> outbound policy -> allow/deny
 - dry-run 会渲染 method、resolved URL、JSON body、auth mode、风险摘要和 redacted egress preview。
 - dry-run 输出 target origin、fields sent 和 data classes，并在 Result Envelope `structuredContent.egressPreview` 中提供结构化预览。
 - dry-run 不读取 secret 原值，不发送外部网络请求，审计 evidence 明确 `requestStarted=false`。
-- executor 支持 JSON body、Secret Resolver env provider、`auth.placement: bearer`、`auth.placement: header`、timeout、缺凭据、网络错误和 HTTP 非 2xx 结构化结果。
+- executor 支持 JSON body、outbound policy pre-secret gate、Secret Resolver env provider、`auth.placement: bearer`、`auth.placement: header`、timeout、缺凭据、网络错误和 HTTP 非 2xx 结构化结果。
+- outbound gate 默认阻断 localhost/loopback、RFC1918 private IP、link-local、metadata service、non-HTTPS 和 arbitrary URL；block 返回 `outbound_blocked`，且不解析 secret、不发请求。
 - Manifest schema 已要求 `api_key` 显式声明 `provider`、`env` 和 `placement`；`header` placement 必须声明 `name`，query/body secret placement 会在 schema 层被拒绝。
 - HTTP 响应会通过 `normalizeHttpResponse` 归一化为 JSON、text 或 empty，并保留 status code、content type 和 body kind。
 - dry-run 和真实执行都可以写 audit log；真实执行会持久化 `resolvedUrl` evidence。
 
-完整 outbound policy 和更细粒度 policy trace 仍在后续任务中实现。Secret Resolver V1 env provider 已完成，后续 T164 继续补齐 resolver ordering 和 audit evidence 的集成测试。
+更完整的 outbound 配置、redirect 后 final URL 重检和更细粒度 policy trace 仍在后续任务中实现。Secret Resolver V1 env provider 和 credential audit evidence 已完成。
 
 ## 与任务对应
 

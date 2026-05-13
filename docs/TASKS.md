@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 191 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 200 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -173,7 +173,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.ts` 新增 `AuditLogger.preflight()` 契约、`AuditPreflightCheck`、非 `read_only` HTTP executor audit preflight gate 和结构化 `audit_failed` 结果；audit preflight 失败时在 secret resolution 和 fetch 前返回，Result Envelope 映射为 blocked/audit_failed。`SqliteAuditLogger.preflight()` 使用事务写入并 rollback，验证写路径但不留下 invocation 记录。`packages/runtime/src/index.test.ts` 新增 2 个 audit preflight 测试，Runtime 测试数从 189 增至 191。
-- [ ] T133 P1：实现 outbound policy 私网阻断测试。
+- [x] T133 P1：实现 outbound policy 私网阻断测试。
+  - 验收标准：
+    - Runtime 测试覆盖真实 HTTP 执行在 outbound policy 阻断 localhost/loopback、RFC1918 private IP、link-local 和 metadata service 目标时返回结构化 `outbound_blocked` 结果。
+    - outbound block 必须发生在 Secret Resolver 和 HTTP request 之前：不读取 env secret、不调用 fetch，并写入 `requestStarted=false` 的 blocked audit event。
+    - blocked audit event 必须记录 outbound decision、target type、reason code 和 resolved URL，且不包含 provider secret 原文。
+    - 固定公开 `https` origin 仍可进入后续执行路径；现有本地 HTTP executor 测试必须通过显式测试开关允许 loopback。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts -t "outbound policy"`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.ts` 新增 `classifyOutboundTarget()`、`evaluateOutboundPolicy()`、`OutboundPolicyResult` 和 HTTP executor outbound gate。真实执行会在 audit preflight、Secret Resolver 和 fetch 前阻断 localhost/loopback、RFC1918 private IP、link-local、metadata service、non-HTTPS 和 arbitrary URL，返回 `outbound_blocked` / `OUTBOUND_BLOCKED`；block audit event 写入 `outboundDecision`、`outboundTargetType`、`outboundReasonCode`、`resolvedUrl` 和 `requestStarted=false`。`packages/runtime/src/index.test.ts` 新增 9 个 outbound policy 测试，Runtime 测试数从 191 增至 200。现有本地 HTTP executor 测试通过显式 `outboundPolicy.allowLocalhost` 运行。
 - [ ] T135 P1：按本地状态契约实现 state dir precedence tests。
 - [ ] T152 P1：把 consent receipt 落入 audit log 字段和测试。
 - [ ] T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
@@ -377,21 +392,20 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M2 / T133：outbound policy 私网阻断测试
-2. M3 / T134：CLI command snapshot tests
-3. M2 / T135：state dir precedence tests
-4. M2 / T152：consent receipt audit log fields
-5. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
-6. M2 / T161：least-privilege auth lint
-7. M2 / T167：execution semantics TypeScript 类型和 audit 字段
-8. M2 / T168：unknown outcome audit tests
-9. M3 / T137：错误模型和 exit code tests
-12. M4 / T151：Capability Package lint
-13. M4 / T158：Trust Card generation rules
-14. M4 / T185：Trust level transition tests
-15. M4 / T191：Lifecycle status schema
-16. M4 / T192：Install/list/invoke lifecycle warnings
-17. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M2 / T135：state dir precedence tests
+2. M2 / T152：consent receipt audit log fields
+3. M2 / T160：`auth.scopes` 和 credential descriptor schema 测试
+4. M2 / T161：least-privilege auth lint
+5. M2 / T167：execution semantics TypeScript 类型和 audit 字段
+6. M2 / T168：unknown outcome audit tests
+7. M3 / T134：CLI command snapshot tests
+8. M3 / T137：错误模型和 exit code tests
+9. M4 / T151：Capability Package lint
+10. M4 / T158：Trust Card generation rules
+11. M4 / T185：Trust level transition tests
+12. M4 / T191：Lifecycle status schema
+13. M4 / T192：Install/list/invoke lifecycle warnings
+14. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

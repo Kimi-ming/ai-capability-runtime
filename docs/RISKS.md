@@ -22,7 +22,7 @@
 | --- | --- | --- | --- | --- | --- |
 | R001 | High | Mitigating | MCP STDIO 下 `ask` 如果用终端 prompt 会破坏协议 | ADR 0004；MCP 无 elicitation 时返回 `confirmation_required` | T032, T073 |
 | R002 | High | Mitigated | HTTP request body 未设计，`github.create_issue` 无法真实发送正确 body | ADR 0008；`execution.body.fields` 已写入设计和示例 manifest | T053 |
-| R003 | High | Mitigating | `http.request_demo` 接受任意 URL，可能变成 SSRF/内网探测工具 | ADR 0011；新增 outbound policy 文档，待实现阻断 | T055, T091 |
+| R003 | High | Mitigating | `http.request_demo` 接受任意 URL，可能变成 SSRF/内网探测工具 | ADR 0011；Runtime 已默认阻断直接访问 localhost/private/link-local/metadata/non-HTTPS/arbitrary URL，redirect 后 final URL 重检仍待补 | T055, T091, T133 |
 | R004 | High | Mitigating | 审计日志可能记录敏感输入或 token | 新增 Audit Log V1 设计，待实现 redaction/hash 测试 | T041, T092 |
 | R005 | Medium | Mitigated | schema 曾半支持 mcp/local，与 V1 实现范围不一致 | ADR 0005；schema 已收敛 HTTP-only | T003 |
 | R006 | Medium | Mitigated | 依赖未安装，pnpm workspace 可能首次 build/test 暴露问题 | 已创建 conda 环境、安装依赖并提交 lockfile；`pnpm build` 和 `pnpm test` 通过，`pnpm validate` 的 AJV 问题归入 T001 | T100, T001 |
