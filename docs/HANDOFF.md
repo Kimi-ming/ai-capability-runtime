@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop 和 T276 release maturity gate matrix 均已落入代码或文档并验证。当前唯一明确阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix 和 T131 `execution.body.fields` 渲染边界均已落入代码或文档并验证。当前唯一明确阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -17,6 +17,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - registry test case schema 与 `pnpm validate` 集成
 - Capability authoring loop/lint 顺序 contract，且 `pnpm validate` 已把 model-visible metadata lint 纳入 registry validation
 - v0.1-v1.0 release maturity gate matrix 和 hard blocker rules
+- `execution.body.fields` required/optional 渲染边界测试与实现
 - Runtime state dir helper、install、list、doctor、Installed Capability Loader
 - MCP Capability id 到 tool name 的稳定映射和冲突检测
 - 本地状态初始化和默认 `policies.yml`
@@ -36,21 +37,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T276 已完成；下一项预计进入 M2 / T131：实现 `execution.body.fields` 渲染测试。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T131 已完成；下一项预计进入 M2 / T132：实现 audit failure preflight 测试。
 
-下一步推荐：先在 M2 模块内补齐 T131 的验收标准和任务级验证，再按 TDD 进入实现。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先在 M2 模块内补齐 T132 的验收标准和任务级验证，再按 TDD 进入实现。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M2 / T131 P1：实现 `execution.body.fields` 渲染测试
+M2 / T132 P1：实现 audit failure preflight 测试
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T130/T145/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T130/T131/T145/T159/T164/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T276 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T131。
+- 当前状态：T131 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T132。
 
 ## 最近验证
 
@@ -77,7 +78,7 @@ M2 / T131 P1：实现 `execution.body.fields` 渲染测试
 - `check_docs.py`
 - `next_task.py`
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 32 个、runtime 188 个、mcp 18 个、cli smoke 1 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。Runtime HTTP executor 测试需要绑定 `127.0.0.1`；在 Codex 沙箱内会因 `listen EPERM` 失败，本轮已脱离沙箱重跑通过。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 32 个、runtime 189 个、mcp 18 个、cli smoke 1 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。Runtime HTTP executor 测试需要绑定 `127.0.0.1`；在 Codex 沙箱内会因 `listen EPERM` 失败，本轮已脱离沙箱重跑通过。
 
 ## 本轮文档和后续收敛
 
@@ -92,6 +93,7 @@ M2 / T131 P1：实现 `execution.body.fields` 渲染测试
 - T273 已完成：Capability identity contract 已在 `packages/runtime/src/identity.ts` 导出，`identity.test.ts` 覆盖 5 个 contract 测试。
 - T275 已完成：Capability authoring loop/lint 顺序已在 `packages/spec/src/authoring.ts` 导出，`authoring.test.ts` 覆盖 7 个 contract 测试；`pnpm validate` 的 registry validation 已纳入 model-visible metadata lint。
 - T276 已完成：`docs/运营/release-readiness.md` 已定义 v0.1-v1.0 maturity gate matrix，覆盖 Runtime、Registry/Trust、Interop、Policy/Ops、Docs/Release hygiene 五类门禁；alpha checklist、versioning、README/INDEX 和 SYSTEM 已同步入口与口径。
+- T131 已完成：`packages/runtime/src/index.test.ts` 新增 `execution.body.fields` required/optional 渲染测试；`packages/runtime/src/index.ts` 会基于 manifest `input.required` 区分必填和可选 full-template body 字段。Runtime 测试数从 188 增至 189。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -99,12 +101,11 @@ M2 / T131 P1：实现 `execution.body.fields` 渲染测试
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T131 P1：实现 `execution.body.fields` 渲染测试。
 - T132 P1：实现 audit failure preflight 测试。
 - T134 P1：按 CLI 契约补齐命令 snapshot tests。
 - T160 P1：补齐 `auth.scopes` 和 credential descriptor schema 测试。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T131 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T132 展开为带验收标准和验证命令的任务块，再按 TDD 实现。
 
 ## Secret Resolver V1 env provider 已实现
 
@@ -149,6 +150,10 @@ T275 已完成。新增 `packages/spec/src/authoring.ts` 和 `authoring.test.ts`
 ## Release maturity gate matrix 已定义
 
 T276 已完成。`docs/运营/release-readiness.md` 现在定义 v0.1 Local Runtime、v0.2 Evidence Registry、v0.3 Interop Profiles、v0.4 Adapter Layer、v0.5 Policy Operations 和 v1.0 Capability Network 的 maturity gate matrix。每个阶段都有发布承诺、hard gates、证据来源、允许缺口和不得宣称项；`docs/releases/alpha-checklist.md`、`docs/规范/versioning-and-compatibility.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口和兼容口径。
+
+## execution.body.fields 渲染边界已补齐
+
+T131 已完成。`packages/runtime/src/index.test.ts` 新增 body fields 回归测试，覆盖 full-template JSON 类型保留、静态 JSON value 保留、未引用 input 不外发、必填 body full-template 缺失时抛出 `URL_TEMPLATE_FIELD_MISSING`，以及可选 full-template 缺失时省略字段。`packages/runtime/src/index.ts` 新增 manifest `input.required` 读取逻辑，用于 dry-run 和 executor 共享的 body 渲染；Runtime 测试数从 188 增至 189。
 
 ## Data Egress Policy Gate 已实现
 

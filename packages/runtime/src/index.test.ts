@@ -264,6 +264,62 @@ describe("HTTP dry-run plan", () => {
     expect(JSON.stringify(plan)).not.toContain("GITHUB_TOKEN");
   });
 
+  it("fails required body full-template fields when missing and omits optional missing fields", async () => {
+    const manifest = {
+      ...dryRunManifest(),
+      input: {
+        type: "object",
+        required: ["owner", "repo", "title"],
+        properties: {
+          owner: { type: "string" },
+          repo: { type: "string" },
+          title: { type: "string" },
+          note: { type: "string" },
+          metadata: { type: "object" },
+          pinned: { type: "boolean" },
+          priority: { type: "number" },
+        },
+      },
+      execution: {
+        ...dryRunManifest().execution,
+        body: {
+          type: "json" as const,
+          fields: {
+            title: "{{title}}",
+            note: "{{note}}",
+            metadata: "{{metadata}}",
+            pinned: "{{pinned}}",
+            priority: "{{priority}}",
+            source: "opencap",
+          },
+        },
+      },
+    };
+
+    await expect(buildHttpDryRunPlan(manifest, { owner: "opencap", repo: "runtime" })).rejects.toMatchObject({
+      code: "URL_TEMPLATE_FIELD_MISSING",
+      details: { fieldName: "title" },
+    });
+
+    const plan = await buildHttpDryRunPlan(manifest, {
+      owner: "opencap",
+      repo: "runtime",
+      title: "Bug",
+      metadata: { labels: ["bug"] },
+      pinned: false,
+      priority: 2,
+      unused: "do not send",
+    });
+
+    expect(plan.body).toEqual({
+      title: "Bug",
+      metadata: { labels: ["bug"] },
+      pinned: false,
+      priority: 2,
+      source: "opencap",
+    });
+  });
+
   it("writes a dry-run audit event when an audit logger is provided", async () => {
     const logger = new InMemoryAuditLogger();
     const plan = await buildHttpDryRunPlan(

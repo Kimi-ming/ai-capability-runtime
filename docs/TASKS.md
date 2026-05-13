@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 188 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、install/list、policy、confirmation、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 32 个、runtime 189 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -142,7 +142,22 @@
 
 ### 模块 M2：执行安全、审计和可靠性
 
-- [ ] T131 P1：实现 `execution.body.fields` 渲染测试。
+- [x] T131 P1：实现 `execution.body.fields` 渲染测试。
+  - 验收标准：
+    - Runtime 测试覆盖 `execution.body.fields` 完整变量渲染：数组、对象、数字、布尔值保留 JSON 类型，不被字符串化。
+    - Runtime 测试覆盖静态 JSON body value 保留原值，未被 `execution.body.fields` 引用的 input 不会外发。
+    - Runtime 测试覆盖字符串插值中的变量按字符串渲染，缺失变量返回结构化 `UrlTemplateRenderError`。
+    - 必填 input 字段被 body full-template 引用但缺失或为 `null` 时，dry-run 必须失败；可选 full-template 字段缺失或为 `null` 时才允许省略。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.test.ts` 新增 `execution.body.fields` required/optional 渲染回归测试，覆盖 full-template JSON 类型保留、静态 JSON value 保留、未引用 input 不外发、必填字段缺失结构化失败和可选字段缺失省略。`packages/runtime/src/index.ts` 现在根据 manifest `input.required` 判断 body full-template 缺失字段，必填字段缺失或为 `null` 会抛出 `URL_TEMPLATE_FIELD_MISSING`，可选字段仍可省略。Runtime 测试数从 188 增至 189。
 - [ ] T132 P1：实现 audit failure preflight 测试。
 - [ ] T133 P1：实现 outbound policy 私网阻断测试。
 - [ ] T135 P1：按本地状态契约实现 state dir precedence tests。

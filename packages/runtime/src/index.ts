@@ -245,28 +245,44 @@ function readTemplateField(input: Record<string, unknown>, fieldName: string): u
   return value;
 }
 
-function renderBodyTemplate(value: unknown, input: Record<string, unknown>): unknown {
+function manifestRequiredInputFields(manifest: CapabilityManifest): Set<string> {
+  const inputSchema = manifest.input;
+  if (!isRecord(inputSchema) || !Array.isArray(inputSchema.required)) {
+    return new Set();
+  }
+
+  return new Set(inputSchema.required.filter((field): field is string => typeof field === "string"));
+}
+
+function renderBodyTemplate(value: unknown, input: Record<string, unknown>, requiredFields: Set<string>): unknown {
   if (typeof value !== "string") {
     return value;
   }
 
   const fullMatch = value.match(FULL_TEMPLATE_PATTERN);
   if (fullMatch) {
-    const rendered = input[fullMatch[1]];
-    return rendered === null ? undefined : rendered;
+    const fieldName = fullMatch[1];
+    const rendered = input[fieldName];
+    if (rendered === undefined || rendered === null) {
+      if (requiredFields.has(fieldName)) {
+        throw new UrlTemplateRenderError("URL_TEMPLATE_FIELD_MISSING", `Missing template field: ${fieldName}`, { fieldName });
+      }
+      return undefined;
+    }
+    return rendered;
   }
 
   return value.replace(TEMPLATE_PATTERN, (_match, fieldName: string) => String(readTemplateField(input, fieldName)));
 }
 
-function renderJsonBody(body: JsonBodyExecution | undefined, input: Record<string, unknown>): unknown {
+function renderJsonBody(body: JsonBodyExecution | undefined, input: Record<string, unknown>, requiredFields: Set<string>): unknown {
   if (body === undefined || body.fields === undefined) {
     return undefined;
   }
 
   const rendered: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(body.fields)) {
-    const renderedValue = renderBodyTemplate(value, input);
+    const renderedValue = renderBodyTemplate(value, input, requiredFields);
     if (renderedValue !== undefined) {
       rendered[key] = renderedValue;
     }
@@ -308,6 +324,7 @@ export async function buildHttpDryRunPlan(
   const execution = manifest.execution as HttpExecution;
   const warnings = capabilityRiskWarnings(manifest);
   const renderedUrl = renderUrlTemplate(execution.url, inputRecord);
+  const requiredFields = manifestRequiredInputFields(manifest);
   const inputClassification = classifyInputForRuntime(input);
   const egressMap = buildFieldLevelEgressMapForRuntime(manifest, input, inputClassification);
   const minimizedInput = minimizeInputByEgressMapForRuntime(input, egressMap);
@@ -323,7 +340,7 @@ export async function buildHttpDryRunPlan(
     method: execution.method,
     url: renderedUrl,
     timeoutMs: execution.timeout_ms,
-    body: renderJsonBody(execution.body, inputRecord),
+    body: renderJsonBody(execution.body, inputRecord, requiredFields),
     authMode: authMode(manifest),
     risk: summarizeRisk(manifest),
     egressPreview,
