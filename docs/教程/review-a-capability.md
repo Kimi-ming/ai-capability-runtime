@@ -21,6 +21,8 @@
 
 如果不确定风险等级，默认选择更高风险并要求提交者解释。
 
+进入正式 review 前，先确认 PR template 的 “Capability Registry PR” 区块已完成，并且提交者在“验证”部分写明 `pnpm validate` 结果。若 PR 修改 `registry/**` 但没有完成这些项，应要求补齐后再按下面步骤审查。
+
 ## 第一步：确认目录和身份
 
 检查 Registry 条目结构：

@@ -31,9 +31,11 @@ copy examples/simple-http-capability
   -> add README.md
   -> add tests/basic.yml
   -> run opencap validate
-  -> open PR
-  -> review checklist
+  -> open PR with Capability Registry checklist
+  -> maintainer review checklist
 ```
+
+Capability PR 必须在 `.github/PULL_REQUEST_TEMPLATE.md` 的 “Capability Registry PR” 区块完成自查，并链接或说明 `pnpm validate` 结果。提交前应阅读 [Registry 指南](registry-guidelines.md)、[Registry 供应链 Review 工作流](registry-supply-chain-review.md) 和 [能力评审清单](capability-review-checklist.md)。
 
 ## Runtime 贡献路径
 

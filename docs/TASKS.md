@@ -673,7 +673,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`docs/社区/registry-guidelines.md` 已新增 Capability 分类章节，覆盖当前 V1 分类表、目录/manifest 一致性、新增分类条件、分类不参与授权和分类迁移影响。`registry/README.md`、`docs/社区/capability-review-checklist.md`、`docs/教程/review-a-capability.md`、`docs/教程/write-a-capability.md`、`docs/README.md`、`docs/INDEX.md`、`docs/SYSTEM.md` 和 `docs/规划/traceability-matrix.md` 已同步分类入口和 review 规则。
-- [ ] T141 P1：把 Capability Review Checklist 接入 PR 流程。
+- [x] T141 P1：把 Capability Review Checklist 接入 PR 流程。
+  - 验收标准：
+    - `.github/PULL_REQUEST_TEMPLATE.md` 对修改 `registry/**` 的 PR 提供 Capability Registry 自查区块，并链接/引用 Registry 供应链 Review 工作流和能力评审清单。
+    - 自查区块覆盖目录分类、manifest/README/tests、`type: http`、权限/风险/auth/execution 一致性、secret 禁止和 `pnpm validate` 结果。
+    - Capability submission issue template 引导提交者提前提供分类、权限风险、模型可见文本和 review checklist 自查。
+    - Contributor journey、maintainer guide、Registry README 和 review 教程同步 issue/PR/checklist 流程。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`.github/PULL_REQUEST_TEMPLATE.md` 已新增 “Capability Registry PR” 区块，把 Registry 供应链 Review 工作流、能力评审清单、分类一致性、manifest/README/tests、`type: http`、权限/风险/auth/execution、secret 禁止和 `pnpm validate` 纳入 PR 自查。`.github/ISSUE_TEMPLATE/capability_submission.yml` 已新增分类选择和 review checklist 自查；`docs/社区/contributor-journey.md`、`docs/社区/maintainer-guide.md`、`registry/README.md` 和 `docs/教程/review-a-capability.md` 已同步 issue/PR/checklist 流程。
 - [ ] T144 P2：补充 RFC 模板文件。
 - [ ] T147 P2：Registry index signing RFC 草案。
 - [ ] T148 P1：npm trusted publishing workflow 草案。

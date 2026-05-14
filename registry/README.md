@@ -106,8 +106,9 @@ pnpm validate
 ```
 
 7. 提交 Pull Request。
-8. 等待 GitHub Actions Registry CI 通过。
-9. 维护者按 Capability PR 评审指南人工检查权限、风险、端点、auth/secret、README 和 tests。
+8. 在 PR template 的 “Capability Registry PR” 区块完成自查，并写明 `pnpm validate` 结果。
+9. 等待 GitHub Actions Registry CI 通过。
+10. 维护者按 Capability PR 评审指南人工检查权限、风险、端点、auth/secret、README 和 tests。
 
 ## 安全边界
 

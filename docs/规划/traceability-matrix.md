@@ -74,7 +74,7 @@
 
 | RQ-028 | Capability 分类清晰 | `docs/生态/capability-taxonomy.md`、`docs/社区/registry-guidelines.md` | T140 | registry docs review；checklist review |
 | RQ-029 | Host 兼容性可追踪 | `docs/生态/host-compatibility-matrix.md` | T127, T142 | host test records |
-| RQ-030 | 贡献路径清晰 | `docs/社区/contributor-journey.md` | T141 | PR template/checklist |
+| RQ-030 | 贡献路径清晰 | `docs/社区/contributor-journey.md`、`.github/PULL_REQUEST_TEMPLATE.md` | T141 | PR template/checklist；issue template YAML check |
 | RQ-031 | RFC 治理清晰 | `docs/社区/rfc-process.md` | T144 | RFC template |
 | RQ-032 | 可观测性边界清晰 | `docs/运营/observability-metrics-v1.md` | T143 | audit-derived metrics |
 | RQ-033 | OSS/Cloud 边界清晰 | `docs/生态/open-core-boundary.md` | T120 | ADR 0017 |

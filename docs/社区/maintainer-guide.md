@@ -20,7 +20,7 @@
 
 ## Capability PR
 
-使用 `docs/社区/capability-review-checklist.md`。
+Capability PR 必须先确认 `.github/PULL_REQUEST_TEMPLATE.md` 的 “Capability Registry PR” 区块已完成。维护者随后按 `docs/社区/registry-supply-chain-review.md` 做供应链 review，再使用 `docs/社区/capability-review-checklist.md` 做逐项内容检查。
 
 维护者不应只看 schema 是否通过，还要判断：
 
@@ -29,6 +29,8 @@
 - endpoint 是否可信。
 - README 是否误导用户。
 - tests 是否避免真实 secret。
+
+如果 PR 修改 `registry/**` 但没有勾选 Capability Registry PR 区块、没有说明 `pnpm validate` 结果，或没有补齐 manifest/README/tests，应要求提交者补齐后再进入正式 review。
 
 ## Design PR
 
