@@ -103,8 +103,9 @@
 
 1. [编写一个 Capability](教程/write-a-capability.md)
 2. [评审一个 Capability PR](教程/review-a-capability.md)
-3. [注册表指南](社区/registry-guidelines.md)
-4. [能力评审清单](社区/capability-review-checklist.md)
+3. [Registry 供应链 Review 工作流](社区/registry-supply-chain-review.md)
+4. [注册表指南](社区/registry-guidelines.md)
+5. [能力评审清单](社区/capability-review-checklist.md)
 
 ## 维护规则
 

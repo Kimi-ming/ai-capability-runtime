@@ -119,13 +119,14 @@ Registry 不接收以下内容：
 - registry tests 是否覆盖最小 dry-run 或 validation 场景。
 - unsafe-by-default 标记是否用于任意 URL 或代理类能力。
 
-详细流程见 [评审一个 Capability PR](../docs/教程/review-a-capability.md)。
+完整供应链 review 流程见 [Registry 供应链 Review 工作流](../docs/社区/registry-supply-chain-review.md)；逐项 Capability 内容检查见 [能力评审清单](../docs/社区/capability-review-checklist.md)。
 
 ## 相关文档
 
 - [编写一个 Capability](../docs/教程/write-a-capability.md)
 - [评审一个 Capability PR](../docs/教程/review-a-capability.md)
 - [注册表指南](../docs/社区/registry-guidelines.md)
+- [Registry 供应链 Review 工作流](../docs/社区/registry-supply-chain-review.md)
 - [能力评审清单](../docs/社区/capability-review-checklist.md)
 - [能力清单](../docs/规范/capability-manifest.md)
 - [权限模型](../docs/安全/permission-model.md)

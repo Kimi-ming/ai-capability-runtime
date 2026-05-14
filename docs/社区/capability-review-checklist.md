@@ -2,6 +2,8 @@
 
 本文是 Registry Capability PR 的人工评审清单。
 
+使用方式：先按 [Registry 供应链 Review 工作流](registry-supply-chain-review.md) 判断 PR 来源、范围、供应链风险和 merge evidence，再用本清单逐项检查 Capability 内容。
+
 ## 基础结构
 
 - [ ] 目录位于 `registry/<category>/<capability_id>/`。

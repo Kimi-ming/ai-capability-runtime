@@ -273,7 +273,7 @@ Governance Surface
 | Policy | 设计收敛 | T030/T031 实现 parser/engine |
 | Audit | 设计收敛 | T040/T041/T042 实现 SQLite 和脱敏 |
 | MCP | 边界清晰 | T070/T073 做 SDK spike |
-| Registry | 规则清晰 | T080/T081/T129 实现 CI/review |
+| Registry | 规则清晰 | T080/T081 已实现 CI；T129 已补供应链 review 工作流 |
 | 发布治理 | 清晰 | release readiness matrix 和可执行 release checklist 已定义 |
 | CLI 契约 | 清晰 | T001/T013 按契约实现 |
 | 本地状态 | 清晰 | T010/T014 实现 helper |

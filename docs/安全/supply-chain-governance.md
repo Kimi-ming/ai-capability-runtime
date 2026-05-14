@@ -16,7 +16,7 @@
 
 ### Registry PR Review
 
-每个 Capability 条目必须检查：
+Registry Capability PR 的完整供应链审查流程见 `docs/社区/registry-supply-chain-review.md`。每个 Capability 条目必须检查：
 
 - manifest schema。
 - README。
@@ -25,6 +25,7 @@
 - endpoint 是否与描述一致。
 - auth placement 是否安全。
 - 是否存在任意 URL、private network、query token。
+- merge evidence 是否记录 review decision 且不保存 secret、provider raw response 或 input/output 原文。
 
 ### CI
 

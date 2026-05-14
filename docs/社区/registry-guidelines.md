@@ -28,7 +28,9 @@ registry/
 
 ## 评审清单
 
-评审者应检查：
+评审者应先按 [Registry 供应链 Review 工作流](registry-supply-chain-review.md) 走完整 PR 来源、包结构、manifest、模型可见文本、权限、外发、测试和 trust/lifecycle 审查，再使用 [能力评审清单](capability-review-checklist.md) 逐项打勾。
+
+最小检查：
 
 - manifest 是否合法
 - 描述是否匹配真实执行行为

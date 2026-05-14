@@ -623,7 +623,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `docs/releases/release-checklist.md`，把发布流程整理为确认阶段、检查工作区、运行验证命令、核对通用 hard gates、核对阶段 hard gates、写 release evidence、发布或阻断七步。清单覆盖 v0.1 Local Runtime 到 v1.0 Capability Network，并提供 release evidence YAML 模板和 secret/raw data 禁止规则。`docs/运营/release-readiness.md`、`docs/releases/alpha-checklist.md`、`docs/README.md`、`docs/INDEX.md`、`docs/SYSTEM.md` 和 `docs/规划/traceability-matrix.md` 已同步入口与关系。
-- [ ] T129 P2：补充 Registry 供应链 review 工作流。
+- [x] T129 P2：补充 Registry 供应链 review 工作流。
+  - 验收标准：
+    - 新增 Registry 供应链 review 工作流，覆盖 PR source、package shape、manifest/schema、model-visible metadata、permission/risk/auth、endpoint/data egress、tests/evidence、trust/lifecycle/advisory、merge evidence 和合并后检查。
+    - 工作流明确 secret、token passthrough、隐藏外发、权限低估、伪装 trust level、任意 URL 未标风险等阻断条件。
+    - Registry 指南、Capability review checklist、供应链治理文档、registry README 和文档入口链接到供应链 review 工作流。
+    - 工作流提供可复制的 review evidence YAML，且明确不得保存 token、provider raw response、私有日志或 input/output 原文。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `docs/社区/registry-supply-chain-review.md`，定义 Registry Capability PR 的供应链 review 工作流和 merge evidence 模板。`docs/社区/registry-guidelines.md`、`docs/社区/capability-review-checklist.md`、`docs/安全/supply-chain-governance.md`、`registry/README.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口。
 - [ ] T139 P1：CI 安全基线 workflow。
 - [ ] T140 P1：把 Capability 分类落入 Registry 指南。
 - [ ] T141 P1：把 Capability Review Checklist 接入 PR 流程。
@@ -795,12 +810,11 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M4 / T129：补充 Registry 供应链 review 工作流
-2. M4 / T139：CI 安全基线 workflow
-3. M4 / T140：把 Capability 分类落入 Registry 指南
-4. M4 / T141：把 Capability Review Checklist 接入 PR 流程
-5. M4 / T158：Trust Card generation rules
-6. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M4 / T139：CI 安全基线 workflow
+2. M4 / T140：把 Capability 分类落入 Registry 指南
+3. M4 / T141：把 Capability Review Checklist 接入 PR 流程
+4. M4 / T158：Trust Card generation rules
+5. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 
