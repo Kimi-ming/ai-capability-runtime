@@ -308,7 +308,7 @@ Governance Surface
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |
 | Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185 已补 transition helper/tests；T195 继续补 quality |
-| Capability Advisory | 清晰 | T187 已补 advisory schema；T189 进入 runtime 检查 |
+| Capability Advisory | 清晰 | T187 已补 advisory schema；T188 已补 registry revocation metadata；T189 已补 installed advisory check |
 | Deprecation/Revocation | 清晰 | T186 已补 revoked invoke gate；T188 已补 registry revocation metadata；T191/T192 落到 schema/install/list/invoke |
 | Quality Score | 清晰 | T194/T196 防止覆盖 policy |
 | 用量计量 | 清晰 | T198/T205 从 audit 派生 usage event |

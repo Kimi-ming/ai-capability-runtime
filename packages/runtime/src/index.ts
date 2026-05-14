@@ -52,7 +52,14 @@ import { stdin as processStdin, stdout as processStdout } from "node:process";
 import { createInterface } from "node:readline/promises";
 import type { DatabaseSync } from "node:sqlite";
 import { dirname, join, resolve } from "node:path";
-import { validateManifestFile, type CapabilityManifest, type CapabilityPermission } from "@opencap/spec";
+import {
+  validateCapabilityAdvisoryPath,
+  validateManifestFile,
+  type CapabilityAdvisory,
+  type CapabilityAdvisoryValidationFailure,
+  type CapabilityManifest,
+  type CapabilityPermission,
+} from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
 import { buildFieldLevelEgressMap as buildFieldLevelEgressMapForRuntime } from "./egress-map.js";
 import { buildRedactedEgressPreview as buildRedactedEgressPreviewForRuntime, type RedactedEgressPreview } from "./egress-preview.js";
@@ -125,6 +132,27 @@ export interface InstalledCapabilityLoadIssue {
 export interface InstalledCapabilityLoadResult {
   capabilities: InstalledCapability[];
   invalid: InstalledCapabilityLoadIssue[];
+}
+
+export interface InstalledCapabilityAdvisoryMatch {
+  capabilityId: string;
+  installedVersion: string;
+  advisoryId: string;
+  severity: CapabilityAdvisory["severity"];
+  status: CapabilityAdvisory["status"];
+  affected: true;
+  affectedVersions: string[];
+  registryAction: CapabilityAdvisory["actions"]["registry"];
+  runtimeDefault: CapabilityAdvisory["actions"]["runtime_default"];
+  fixedVersion?: string | null;
+  summary: string;
+  modifiedAt: string;
+}
+
+export interface InstalledCapabilityAdvisoryCheckResult {
+  checkedInstalledCapabilities: string[];
+  matches: InstalledCapabilityAdvisoryMatch[];
+  invalidAdvisories: CapabilityAdvisoryValidationFailure[];
 }
 
 export interface InstalledCapabilitySummary {
@@ -3248,6 +3276,108 @@ export async function loadInstalledCapabilities(options: ResolveStateDirOptions 
   }
 
   return { capabilities, invalid };
+}
+
+function parseSemver(version: string): [number, number, number] | undefined {
+  const match = version.match(/^([0-9]+)\.([0-9]+)\.([0-9]+)$/);
+  if (match === null) {
+    return undefined;
+  }
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function compareSemver(left: string, right: string): number | undefined {
+  const leftParts = parseSemver(left);
+  const rightParts = parseSemver(right);
+  if (leftParts === undefined || rightParts === undefined) {
+    return undefined;
+  }
+
+  for (let index = 0; index < leftParts.length; index += 1) {
+    if (leftParts[index] < rightParts[index]) {
+      return -1;
+    }
+    if (leftParts[index] > rightParts[index]) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+function versionMatchesAdvisoryRange(version: string, range: string): boolean {
+  const trimmed = range.trim();
+  if (trimmed === "*" || trimmed === version) {
+    return true;
+  }
+
+  for (const operator of ["<=", ">=", "<", ">", "="] as const) {
+    if (!trimmed.startsWith(operator)) {
+      continue;
+    }
+    const target = trimmed.slice(operator.length).trim();
+    const comparison = compareSemver(version, target);
+    if (comparison === undefined) {
+      return false;
+    }
+    if (operator === "<=") {
+      return comparison <= 0;
+    }
+    if (operator === ">=") {
+      return comparison >= 0;
+    }
+    if (operator === "<") {
+      return comparison < 0;
+    }
+    if (operator === ">") {
+      return comparison > 0;
+    }
+    return comparison === 0;
+  }
+
+  return false;
+}
+
+function advisoryAffectsInstalledCapability(advisory: CapabilityAdvisory, capability: InstalledCapability): boolean {
+  return advisory.capability === capability.id && advisory.affected_versions.some((range) => versionMatchesAdvisoryRange(capability.version, range));
+}
+
+export async function checkInstalledCapabilityAdvisories(
+  options: ResolveStateDirOptions & ResolveRegistryDirOptions = {},
+): Promise<InstalledCapabilityAdvisoryCheckResult> {
+  const cwd = options.cwd ?? process.cwd();
+  const env = options.env ?? process.env;
+  const registryDir = resolveRegistryDir({ cwd, env, registryDir: options.registryDir });
+  const installed = await loadInstalledCapabilities({ cwd, env, stateDir: options.stateDir });
+  const advisoryResult = await validateCapabilityAdvisoryPath(registryDir);
+  const matches: InstalledCapabilityAdvisoryMatch[] = [];
+
+  for (const capability of installed.capabilities) {
+    for (const advisory of advisoryResult.valid.map((valid) => valid.advisory)) {
+      if (!advisoryAffectsInstalledCapability(advisory, capability)) {
+        continue;
+      }
+      matches.push({
+        capabilityId: capability.id,
+        installedVersion: capability.version,
+        advisoryId: advisory.id,
+        severity: advisory.severity,
+        status: advisory.status,
+        affected: true,
+        affectedVersions: [...advisory.affected_versions],
+        registryAction: advisory.actions.registry,
+        runtimeDefault: advisory.actions.runtime_default,
+        fixedVersion: advisory.actions.fixed_version,
+        summary: advisory.summary,
+        modifiedAt: advisory.modified_at,
+      });
+    }
+  }
+
+  return {
+    checkedInstalledCapabilities: installed.capabilities.map((capability) => capability.id).sort(),
+    matches: matches.sort((left, right) => `${left.capabilityId}:${left.advisoryId}`.localeCompare(`${right.capabilityId}:${right.advisoryId}`)),
+    invalidAdvisories: advisoryResult.invalid,
+  };
 }
 
 export interface CapabilityRiskSummary {

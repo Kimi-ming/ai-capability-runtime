@@ -76,6 +76,8 @@ V1 本地 Runtime 不依赖远程 advisory 服务。但当本地 registry metada
 - `opencap invoke` 对 revoked capability 警告或阻断。
 - `opencap doctor` 未来可以检查已安装能力是否受影响。
 
+当前 Runtime 已提供 `checkInstalledCapabilityAdvisories()` 作为本地检查 helper。它读取已安装能力和本地 Registry advisory metadata，按 capability id 和 affected version 匹配，返回 advisory id、severity、status、registry action、runtime default 和 summary；结果不包含 input/output 原文、secret 或 provider response。
+
 ## 关联任务
 
 - T187：Capability advisory YAML schema。
