@@ -1,0 +1,18 @@
+schema_version: opencap.capability_advisory.v1
+id: OCAP-2026-0001
+capability: http.request_demo
+affected_versions:
+  - <=0.1.0
+type: unsafe_execution
+severity: critical
+status: revoked
+summary: Demo arbitrary URL request capability is unsafe for default registry installation.
+published_at: null
+modified_at: 2026-05-14T00:00:00Z
+actions:
+  registry: revoke
+  runtime_default: deny
+  fixed_version: null
+references:
+  - docs/决策/0011-outbound-policy-v1.md
+  - docs/生态/capability-deprecation-and-revocation.md

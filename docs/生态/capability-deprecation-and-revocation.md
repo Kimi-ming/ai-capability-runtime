@@ -48,6 +48,8 @@ Yanked 不等于恶意。它主要阻止新安装。
 
 Revoked 需要 advisory 或 revocation record。
 
+当前 Registry revocation metadata 放在 `registry/advisories/`。`OCAP-2026-0001` 已记录 `http.request_demo` 的 revoked 状态：该示例能力接受任意用户 URL，只保留为测试和审查样例，不应作为默认可信安装能力。
+
 ## Metadata 草案
 
 ```yaml
@@ -83,6 +85,7 @@ V1 规则：
 - yanked 不进入默认搜索结果。
 - revoked 保留记录，不能直接删除历史。
 - replacement 需要独立 review。
+- `pnpm validate` 会校验已有 advisory/revocation metadata 的 schema。
 
 ## 关联任务
 

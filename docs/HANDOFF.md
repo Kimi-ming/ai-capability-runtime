@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T187 已完成；下一项 ready task 预计是 T188 P1：Revocation metadata in registry。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T188 已完成；下一项 ready task 预计是 T189 P1：Installed capability advisory check。
 
-下一步推荐：先用 `next_task.py` 重新确认 T188，再补齐 Revocation metadata in registry。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T189，再补齐 Installed capability advisory check。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M4 / T188 P1：Revocation metadata in registry
+M4 / T189 P1：Installed capability advisory check
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T154/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T154/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T188/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T187 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T188。
+- 当前状态：T188 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T189。
 
 ## 最近验证
 
@@ -110,7 +110,7 @@ M4 / T188 P1：Revocation metadata in registry
 - `audit_docs.py`
 - `next_task.py`
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 54 个、runtime 244 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 55 个、runtime 244 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
 
 ## 本轮文档和后续收敛
 
@@ -165,6 +165,7 @@ M4 / T188 P1：Revocation metadata in registry
 - T185 已完成：新增 `packages/runtime/src/trust-transition.ts` 和 `trust-transition.test.ts`，导出 `evaluateTrustLevelTransition()`，覆盖逐级升级、跳级升级拒绝、High advisory/failing tests 冻结、downgrade/revoke 不授予 policy 权限；`docs/生态/trust-model-v1.md` 已补齐 transition helper 规则。Runtime 测试数从 236 增至 240。
 - T186 已完成：新增 `packages/runtime/src/lifecycle-gate.ts` 和 `lifecycle-gate.test.ts`，导出 `evaluateRevokedCapabilityInvokeGate()`，覆盖 revoked 写/高风险 pre-secret deny、revoked read-only ask、read-only explicit override allow、非 revoked 不改变 policy 权限；`docs/生态/capability-deprecation-and-revocation.md` 已补齐 Runtime 行为。Runtime 测试数从 240 增至 244。
 - T187 已完成：新增 `packages/spec/schema/capability-advisory.schema.json` 和 `advisory.test.ts`，导出 `validateCapabilityAdvisory()`、file/path helper 和类型；`pnpm validate` 会校验 registry 中已有 advisory 文件，`packages/spec/package.json` 已暴露 advisory schema 公共子路径。Spec 测试数从 50 增至 54。
+- T188 已完成：新增 `registry/advisories/OCAP-2026-0001.yml`，将 `http.request_demo` 记录为 revoked metadata；`advisory.test.ts` 已校验 Registry revocation record，`registry/README.md` 和 `docs/生态/capability-deprecation-and-revocation.md` 已同步 metadata 路径和保留规则。Spec 测试数从 54 增至 55。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -172,9 +173,9 @@ M4 / T188 P1：Revocation metadata in registry
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T188 P1：Revocation metadata in registry。
+- T189 P1：Installed capability advisory check。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T188 展开为带验收标准和验证命令，再补齐 Revocation metadata in registry。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T189 展开为带验收标准和验证命令，再补齐 Installed capability advisory check。
 
 ## Secret Resolver V1 env provider 已实现
 

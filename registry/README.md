@@ -92,6 +92,14 @@ metadata:
 
 不得在没有维护者确认的情况下把第三方条目标成 `verified` 或 `official`。
 
+## Advisory 和 Revocation Metadata
+
+Registry 的安全公告记录放在 `registry/advisories/`，使用 `opencap.capability_advisory.v1` schema。文件名推荐使用 advisory id，例如 `OCAP-2026-0001.yml`。
+
+V1 当前包含 `OCAP-2026-0001`，用于把 `http.request_demo` 标记为 revoked metadata：该示例能力接受任意用户 URL，只保留为测试和审查样例，不应作为默认可信安装能力。
+
+Revoked capability 的目录和历史记录必须保留，不能通过删除目录来隐藏影响范围。后续 Runtime/CLI 会在安装、列表和调用路径读取这些 advisory/revocation metadata。
+
 ## 提交流程
 
 1. 选择合适分类，例如 `developer-tools`。

@@ -105,7 +105,7 @@
 | RQ-057 | 组合失败恢复可操作 | `docs/运营/composition-failure-runbook.md` | T182, T183 | recovery smoke tests |
 | RQ-058 | Trust level 可解释且不覆盖 policy | `docs/生态/trust-model-v1.md` | T158, T185, T196 | trust card generation + trust transition + trust/policy negative tests |
 | RQ-059 | Capability advisory 可追踪 | `docs/安全/capability-advisory-process.md` | T187, T189, T190 | advisory schema + installed advisory checks |
-| RQ-060 | Deprecated/yanked/revoked 生命周期清晰 | `docs/生态/capability-deprecation-and-revocation.md` | T186, T188, T191, T192, T193 | revoked invoke gate + lifecycle warnings/search tests |
+| RQ-060 | Deprecated/yanked/revoked 生命周期清晰 | `docs/生态/capability-deprecation-and-revocation.md` | T186, T188, T191, T192, T193 | revoked invoke gate + registry revocation metadata + lifecycle warnings/search tests |
 | RQ-061 | Quality Score 不被误用为安全认证 | `docs/质量/capability-quality-score.md` | T194, T195, T196 | score/policy tests |
 | RQ-062 | Usage event 非账单语义清晰 | `docs/运营/usage-metering-v1.md` | T198, T205 | usage event/export tests |
 | RQ-063 | 配额预算在执行前阻断 | `docs/设计/quota-and-budget-policy-v1.md` | T199, T204 | quota/budget gate tests |

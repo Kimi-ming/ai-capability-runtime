@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { validateCapabilityAdvisory, type CapabilityAdvisoryValidationFailure } from "./index.js";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  validateCapabilityAdvisory,
+  validateCapabilityAdvisoryPath,
+  type CapabilityAdvisoryValidationFailure,
+} from "./index.js";
+
+const testFile = fileURLToPath(import.meta.url);
+const repoRoot = resolve(dirname(testFile), "../../..");
 
 function baseAdvisory() {
   return {
@@ -83,5 +92,24 @@ describe("validateCapabilityAdvisory", () => {
 
       expect(result.ok).toBe(true);
     }
+  });
+
+  it("validates the registry revocation metadata record", async () => {
+    const result = await validateCapabilityAdvisoryPath(resolve(repoRoot, "registry"));
+
+    expect(result.invalid).toEqual([]);
+    expect(result.valid).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        advisory: expect.objectContaining({
+          id: "OCAP-2026-0001",
+          capability: "http.request_demo",
+          status: "revoked",
+          actions: expect.objectContaining({
+            registry: "revoke",
+            runtime_default: "deny",
+          }),
+        }),
+      }),
+    ]));
   });
 });

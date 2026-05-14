@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 54 个、runtime 244 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 55 个、runtime 244 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -841,7 +841,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/spec/schema/capability-advisory.schema.json`、`packages/spec/src/advisory.test.ts`，并在 `packages/spec/src/index.ts` 导出 advisory validator/path helper/types；`validate-registry.ts` 已在存在 advisory 文件时校验。`packages/spec/package.json` 暴露 advisory schema 公共子路径，`package-exports.test.ts` 已锁定。Spec 测试数从 50 增至 54。
-- [ ] T188 P1：Revocation metadata in registry。
+- [x] T188 P1：Revocation metadata in registry。
+  - 验收标准：
+    - Registry 包含至少一条通过 `opencap.capability_advisory.v1` schema 校验的 revoked metadata record。
+    - Revocation metadata 指向具体 capability 和 affected version，并包含 `status: revoked`、`actions.registry: revoke`、`actions.runtime_default: deny`。
+    - Revoked capability 的目录和历史记录保留，不通过删除目录隐藏影响范围。
+    - `pnpm validate` 能校验该 revocation metadata。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- advisory.test.ts`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `registry/advisories/OCAP-2026-0001.yml`，将 `http.request_demo` 标记为 revoked metadata，保留 capability 目录作为历史和测试样例。`packages/spec/src/advisory.test.ts` 新增 registry revocation metadata 校验，`registry/README.md` 与 `docs/生态/capability-deprecation-and-revocation.md` 已说明 advisory/revocation metadata 路径和保留规则。Spec 测试数从 54 增至 55。
 - [ ] T189 P1：Installed capability advisory check。
 - [ ] T191 P1：Lifecycle status schema for deprecated/yanked/revoked。
 - [ ] T192 P1：Install/list/invoke lifecycle warnings。
