@@ -79,6 +79,8 @@ V1 规则：
 - revoked `write`、`external_send`、`destructive`、`financial`、`code_execution`、`secret_access` 或 `unknown` 风险默认 `deny`，且 `requestStarted: false`。
 - revoked `read_only` 在没有显式本地 override 时返回 `ask`，要求用户或 host 明确确认。
 - revoked `read_only` 只有在显式 override 存在时才返回 `allow`，并继续保留 warning/advisory evidence。
+
+当前 Runtime 也提供 `createCapabilityLifecycleWarning()`，供 install、list 和 invoke 准备阶段生成同一结构化 warning。`installCapability()` 会返回 warnings，`listInstalledCapabilities()` 会暴露 manifest lifecycle status 和 `lifecycleWarning`；CLI 的非 JSON install/list/invoke 输出会把 warning 写到 stderr。Warning 的 `policyEffect` 固定为 `none`，不能改变 policy、confirmation 或 audit 结果。
 - gate evidence 不包含 input/output 原文、secret 或 provider response。
 
 ## Registry 行为

@@ -14,6 +14,7 @@ import {
   CliConfirmationHandler,
   blockedResultEnvelope,
   buildHttpDryRunPlan,
+  createCapabilityLifecycleWarning,
   createConfirmationAuditEvent,
   createConsentReceiptAuditEvidence,
   evaluatePolicy,
@@ -32,6 +33,7 @@ import {
   stableJsonStringify,
   simulatePolicyDiff,
   validatePolicyYml,
+  type CapabilityLifecycleWarning,
   type PolicyDecision,
   type PolicySimulationScenario,
   type ResultEnvelopeV1,
@@ -460,6 +462,13 @@ function formatPolicyFinding(finding: { severity: string; code: string; filePath
   return `${finding.severity} ${finding.code} ${finding.filePath}${finding.fieldPath}${rule}: ${finding.message}`;
 }
 
+function printLifecycleWarning(warning: CapabilityLifecycleWarning | undefined): void {
+  if (warning === undefined) {
+    return;
+  }
+  console.error(`Warning: ${warning.summary}`);
+}
+
 program
   .command("install")
   .argument("<id>", "Capability id")
@@ -479,6 +488,9 @@ program
     });
 
     console.log(`Installed ${result.id} to ${result.destinationDir}`);
+    for (const warning of result.warnings) {
+      printLifecycleWarning(warning);
+    }
   }, `Failed to install ${id}`));
 
 program
@@ -505,6 +517,7 @@ program
       console.log(
         `${capability.id} ${capability.version ?? "-"} ${capability.type ?? "-"} ${capability.risk} ${capability.lifecycle} ${capability.trustLevel ?? "-"} ${capability.maintainer ?? "-"} ${capability.license ?? "-"} ${capability.status}`,
       );
+      printLifecycleWarning(capability.lifecycleWarning);
     }
   }, "Failed to list installed capabilities"));
 
@@ -613,6 +626,10 @@ program
 
     if (capability === undefined) {
       throw new CliUserInputError(`Installed capability not found: ${id}`);
+    }
+
+    if (!options.json) {
+      printLifecycleWarning(createCapabilityLifecycleWarning(capability.manifest, "invoke"));
     }
 
     const policySet = await loadPolicySet({ cwd, env: process.env, stateDir: options.stateDir });

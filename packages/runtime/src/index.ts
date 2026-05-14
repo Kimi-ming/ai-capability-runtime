@@ -58,6 +58,7 @@ import {
   type CapabilityAdvisory,
   type CapabilityAdvisoryValidationFailure,
   type CapabilityManifest,
+  type CapabilityManifestLifecycleStatus,
   type CapabilityPermission,
 } from "@opencap/spec";
 import { parse as parseYaml } from "yaml";
@@ -112,6 +113,7 @@ export interface InstallCapabilityResult {
   sourceDir: string;
   destinationDir: string;
   manifest: CapabilityManifest;
+  warnings: CapabilityLifecycleWarning[];
 }
 
 export interface InstalledCapability {
@@ -161,12 +163,29 @@ export interface InstalledCapabilitySummary {
   version?: string;
   type?: string;
   risk: string;
-  lifecycle: "installed" | "invalid";
+  lifecycle: "installed" | "invalid" | CapabilityManifestLifecycleStatus;
+  lifecycleWarning?: CapabilityLifecycleWarning;
   trustLevel?: string;
   maintainer?: string;
   license?: string;
   status: "enabled" | "invalid";
   error?: string;
+}
+
+export type CapabilityLifecycleWarningPhase = "install" | "list" | "invoke";
+
+export interface CapabilityLifecycleWarning {
+  phase: CapabilityLifecycleWarningPhase;
+  capabilityId: string;
+  lifecycle: CapabilityManifestLifecycleStatus;
+  reason: string;
+  since: string;
+  advisory?: string;
+  replacement?: string;
+  message?: string;
+  summary: string;
+  warningRequired: true;
+  policyEffect: "none";
 }
 
 export type InstallCapabilityErrorCode =
@@ -3223,6 +3242,9 @@ export async function installCapability(options: InstallCapabilityOptions): Prom
     sourceDir,
     destinationDir,
     manifest: validation.manifest,
+    warnings: [createCapabilityLifecycleWarning(validation.manifest, "install")].filter(
+      (warning): warning is CapabilityLifecycleWarning => warning !== undefined,
+    ),
   };
 }
 
@@ -3450,19 +3472,50 @@ function metadataString(manifest: CapabilityManifest, key: string): string | und
   return typeof value === "string" ? value : undefined;
 }
 
+function lifecycleWarningSummary(manifest: CapabilityManifest, lifecycle: CapabilityManifest["lifecycle"], phase: CapabilityLifecycleWarningPhase): string {
+  const phaseText = phase === "install" ? "Installing" : phase === "list" ? "Installed capability" : "Invoking";
+  const message = lifecycle?.message === undefined ? "" : ` ${lifecycle.message}`;
+  return `${phaseText} ${manifest.id} is ${lifecycle?.status} since ${lifecycle?.since}: ${lifecycle?.reason}.${message}`;
+}
+
+export function createCapabilityLifecycleWarning(
+  manifest: CapabilityManifest,
+  phase: CapabilityLifecycleWarningPhase,
+): CapabilityLifecycleWarning | undefined {
+  if (manifest.lifecycle === undefined) {
+    return undefined;
+  }
+
+  return {
+    phase,
+    capabilityId: manifest.id,
+    lifecycle: manifest.lifecycle.status,
+    reason: manifest.lifecycle.reason,
+    since: manifest.lifecycle.since,
+    advisory: manifest.lifecycle.advisory,
+    replacement: manifest.lifecycle.replacement,
+    message: manifest.lifecycle.message,
+    summary: lifecycleWarningSummary(manifest, manifest.lifecycle, phase),
+    warningRequired: true,
+    policyEffect: "none",
+  };
+}
+
 export async function listInstalledCapabilities(options: ResolveStateDirOptions = {}): Promise<InstalledCapabilitySummary[]> {
   const paths = await ensureLocalStateDir(options);
   const loaded = await loadInstalledCapabilities(paths.root);
   const summaries: InstalledCapabilitySummary[] = [];
 
   for (const capability of loaded.capabilities) {
+    const lifecycleWarning = createCapabilityLifecycleWarning(capability.manifest, "list");
     summaries.push({
       id: capability.id,
       installPath: capability.installPath,
       version: capability.manifest.version,
       type: capability.manifest.type,
       risk: summarizeRisk(capability.manifest),
-      lifecycle: "installed",
+      lifecycle: capability.manifest.lifecycle?.status ?? "installed",
+      lifecycleWarning,
       trustLevel: metadataString(capability.manifest, "trust_level"),
       maintainer: metadataString(capability.manifest, "maintainer"),
       license: metadataString(capability.manifest, "license"),

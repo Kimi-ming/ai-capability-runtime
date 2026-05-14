@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 57 个、runtime 246 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 57 个、runtime 247 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -901,7 +901,28 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/spec/schema/manifest.schema.json` 新增 `lifecycle` schema，`packages/spec/src/index.ts` 导出 `CapabilityManifestLifecycleStatus` 和 `CapabilityManifestLifecycle`，`packages/spec/src/index.test.ts` 覆盖 deprecated/yanked/revoked 合法状态、未知状态、未知字段和 revoked 缺少 advisory。Spec 测试数从 55 增至 57。
-- [ ] T192 P1：Install/list/invoke lifecycle warnings。
+- [x] T192 P1：Install/list/invoke lifecycle warnings。
+  - 验收标准：
+    - Runtime 提供统一 `createCapabilityLifecycleWarning()`，install/list/invoke 共用同一 warning shape。
+    - `installCapability()` 对 deprecated/yanked/revoked manifest 返回结构化 warnings，且不改变安装授权语义。
+    - `listInstalledCapabilities()` 暴露 manifest lifecycle status 和 `lifecycleWarning`，无 lifecycle 的能力仍显示 `installed`。
+    - CLI install/list/invoke 在非 JSON 输出中打印 lifecycle warning；JSON 输出保持结构化且不混入额外文本。
+    - Warning 明确 `policyEffect: none`，不能覆盖 Runtime policy、confirmation 或 audit。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts -t "capability lifecycle warnings"`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/cli lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/index.ts` 新增 `CapabilityLifecycleWarning`、`createCapabilityLifecycleWarning()`，install 返回 warnings，list 摘要暴露 lifecycle status 和 warning；`packages/cli/src/index.ts` 在 install/list/invoke 非 JSON 输出中打印 warning。`packages/runtime/src/index.test.ts` 覆盖 install、list 和 invoke preparation warning；Runtime 测试数从 246 增至 247。
 - [ ] T193 P2：Registry search excludes yanked/revoked by default。
 - [ ] T194 P2：Quality score rubric implementation draft。
 - [ ] T195 P2：Trust Card includes quality score。

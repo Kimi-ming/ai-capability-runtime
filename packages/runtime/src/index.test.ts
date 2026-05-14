@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildHttpDryRunPlan,
+  createCapabilityLifecycleWarning,
   capabilityRiskWarnings,
   detectArbitraryUrlCapability,
   executeHttpCapability,
@@ -60,7 +61,7 @@ class FailingAuditPreflightLogger implements AuditLogger {
   }
 }
 
-async function writeCapability(root: string, category: string, id: string, manifestId = id): Promise<string> {
+async function writeCapability(root: string, category: string, id: string, manifestId = id, lifecycle = ""): Promise<string> {
   const dir = join(root, "registry", category, id);
   await mkdir(join(dir, "tests"), { recursive: true });
   await writeFile(
@@ -70,6 +71,7 @@ name: Test Capability
 description: Test Capability.
 version: 0.1.0
 type: http
+${lifecycle}
 input:
   type: object
 output:
@@ -171,6 +173,69 @@ describe("temporary OpenCap test project", () => {
       expect(installed.destinationDir).toBe(resolve(project.stateDir, "installed", "github.create_issue"));
       expect(await exists(resolve(project.stateDir, "logs.sqlite"))).toBe(true);
       expect(await exists(project.defaultStateDir)).toBe(false);
+    } finally {
+      await project.cleanup();
+    }
+  });
+});
+
+describe("capability lifecycle warnings", () => {
+  it("surfaces lifecycle warnings during install, list, and invoke preparation", async () => {
+    const project = await createTempOpenCapTestProject("opencap-lifecycle-warning-");
+
+    try {
+      await writeCapability(
+        project.cwd,
+        "developer-tools",
+        "github.create_issue",
+        "github.create_issue",
+        `lifecycle:
+  status: deprecated
+  reason: superseded
+  since: 2026-05-14
+  advisory: OCAP-2026-0001
+  replacement: github.search_repo
+  message: Use the replacement capability.
+`,
+      );
+
+      const installed = await installCapability({
+        cwd: project.cwd,
+        stateDir: project.stateDir,
+        id: "github.create_issue",
+        env: {},
+      });
+
+      expect(installed.warnings).toEqual([
+        expect.objectContaining({
+          phase: "install",
+          capabilityId: "github.create_issue",
+          lifecycle: "deprecated",
+          reason: "superseded",
+          advisory: "OCAP-2026-0001",
+          replacement: "github.search_repo",
+        }),
+      ]);
+
+      await expect(listInstalledCapabilities({ cwd: project.cwd, stateDir: project.stateDir, env: {} })).resolves.toMatchObject([
+        {
+          id: "github.create_issue",
+          lifecycle: "deprecated",
+          lifecycleWarning: {
+            phase: "list",
+            lifecycle: "deprecated",
+            warningRequired: true,
+            policyEffect: "none",
+          },
+        },
+      ]);
+
+      expect(createCapabilityLifecycleWarning(installed.manifest, "invoke")).toMatchObject({
+        phase: "invoke",
+        lifecycle: "deprecated",
+        warningRequired: true,
+        policyEffect: "none",
+      });
     } finally {
       await project.cleanup();
     }
