@@ -425,7 +425,27 @@
     - `git diff --check`
     - `pnpm validate`
   - 完成记录：`docs/生态/host-compatibility-matrix.md` 新增 2026-05-14 维护状态、profile 覆盖矩阵和维护规则，明确自定义 MCP client 有自动化 helper tests 证据，Claude Desktop/Cursor 仍需真实 Host smoke；`docs/生态/interoperability-profiles.md` 已同步矩阵入口和证据边界。
-- [ ] T134 P1：按 CLI 契约补齐命令 snapshot tests。
+- [x] T134 P1：按 CLI 契约补齐命令 snapshot tests。
+  - 验收标准：
+    - CLI snapshot tests 覆盖 `validate` 成功输出、空状态 `list`、空状态 `logs`、空状态 `decision-log export`。
+    - CLI snapshot tests 覆盖已安装 capability 的 `list` 人类表格和 `--json` 输出。
+    - CLI snapshot tests 覆盖 `policy validate` 用户错误输出和 exit code `1`。
+    - 快照必须归一化仓库路径、临时 state dir 和 Node warning pid，不能依赖开发者本机绝对路径。
+    - 测试必须使用临时 `--state-dir`，不能写入仓库根目录或真实 `opencap.local/`。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- command-snapshot.test.ts`
+    - `pnpm --filter @opencap/cli test`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm --filter @opencap/cli lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/cli/src/command-snapshot.test.ts`，按 TDD 先确认快照占位失败，再固化 CLI 契约输出。测试覆盖 validate/list/logs/decision-log/policy validate 的 stdout、stderr 和 exit code，并归一化 `<repo>`、`<state>` 与 Node SQLite warning pid。
 - [ ] T136 P1：按 MCP 接口契约增加 tool mapping tests。
 - [ ] T137 P1：实现错误模型和 exit code tests。
 - [ ] T142 P2：维护 Host compatibility test records。
@@ -611,7 +631,7 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T134：CLI command snapshot tests
+1. M3 / T136：MCP tool mapping tests
 2. M3 / T137：错误模型和 exit code tests
 3. M3 / T142：维护 Host compatibility test records
 4. M3 / T143：从 audit log 派生本地指标命令草案

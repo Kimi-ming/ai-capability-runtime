@@ -96,6 +96,7 @@ id version type risk lifecycle trust maintainer license status
 [
   {
     "id": "github.create_issue",
+    "installPath": "opencap.local/installed/github.create_issue",
     "version": "0.1.0",
     "type": "http",
     "risk": "write",
