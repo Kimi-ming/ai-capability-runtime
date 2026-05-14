@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test 和 CLI command snapshot tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 21 个、cli 3 个。
 
 当前主要缺口：
 
@@ -446,7 +446,27 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/cli/src/command-snapshot.test.ts`，按 TDD 先确认快照占位失败，再固化 CLI 契约输出。测试覆盖 validate/list/logs/decision-log/policy validate 的 stdout、stderr 和 exit code，并归一化 `<repo>`、`<state>` 与 Node SQLite warning pid。
-- [ ] T136 P1：按 MCP 接口契约增加 tool mapping tests。
+- [x] T136 P1：按 MCP 接口契约增加 tool mapping tests。
+  - 验收标准：
+    - 测试覆盖多段 capability id、数字/下划线 id 和确定性 tool name 映射。
+    - 测试覆盖映射冲突的 fail-fast error name、toolName、capabilityIds 和 message。
+    - 测试覆盖 `tools/list` 投影中映射后的 `name`、原始 `metadata.capabilityId`、`inputSchema`、`outputSchema` 和 projection metadata。
+    - 测试覆盖 `tools/call` 只能通过映射后的 tool name 路由；原始 capability id 作为 tool name 时返回 `TOOL_NOT_FOUND` 且不执行。
+    - 测试不得依赖真实 MCP Host、外部网络或真实 state dir。
+  - 验证方式：
+    - `pnpm --filter @opencap/mcp test -- tool-mapping-contract.test.ts`
+    - `pnpm --filter @opencap/mcp test`
+    - `pnpm --filter @opencap/mcp build`
+    - `pnpm --filter @opencap/mcp lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/mcp/src/tool-mapping-contract.test.ts`，按 TDD 先确认三个占位快照失败，再固化 MCP mapping contract。测试覆盖 deterministic id->tool name mapping、collision diagnostics、tools/list projection mapping 和 tools/call reverse lookup 边界；MCP 包测试数从 18 增至 21。
 - [ ] T137 P1：实现错误模型和 exit code tests。
 - [ ] T142 P2：维护 Host compatibility test records。
 - [ ] T143 P2：从 audit log 派生本地指标命令草案。
@@ -631,10 +651,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T136：MCP tool mapping tests
-2. M3 / T137：错误模型和 exit code tests
-3. M3 / T142：维护 Host compatibility test records
-4. M3 / T143：从 audit log 派生本地指标命令草案
+1. M3 / T137：错误模型和 exit code tests
+2. M3 / T142：维护 Host compatibility test records
+3. M3 / T143：从 audit log 派生本地指标命令草案
+4. M3 / T154：维护 Host compatibility evidence records
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema
