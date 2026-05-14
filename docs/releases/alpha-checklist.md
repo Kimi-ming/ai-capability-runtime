@@ -4,6 +4,8 @@
 
 Alpha 对应 [发布成熟度门禁](../运营/release-readiness.md) 中的 v0.1 Local Runtime。若本清单和 maturity gate matrix 冲突，以 matrix 的 hard gate 为准，并同步修正本清单。
 
+通用发布前执行顺序和 release evidence 模板见 [Release Checklist](release-checklist.md)。本文只保留 alpha 阶段特有口径和阻断项。
+
 ## 发布口径
 
 Alpha 可以承诺：

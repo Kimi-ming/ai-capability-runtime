@@ -607,7 +607,22 @@
 
 ### 模块 M4：Registry、Trust、Lifecycle 和供应链
 
-- [ ] T126 P1：把发布门禁整理成可执行 release checklist。
+- [x] T126 P1：把发布门禁整理成可执行 release checklist。
+  - 验收标准：
+    - 新增通用 release checklist，能按阶段逐项执行发布前验证、hard gate 核对、evidence 记录和发布/阻断决策。
+    - checklist 覆盖 v0.1-v1.0 阶段、通用 hard gates、阶段 hard gates、基础验证命令和 release evidence 模板。
+    - `docs/运营/release-readiness.md` 和 `docs/releases/alpha-checklist.md` 明确 release checklist 与 maturity gate matrix/alpha gate 的关系。
+    - README、INDEX、SYSTEM 和 traceability matrix 同步新入口。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `docs/releases/release-checklist.md`，把发布流程整理为确认阶段、检查工作区、运行验证命令、核对通用 hard gates、核对阶段 hard gates、写 release evidence、发布或阻断七步。清单覆盖 v0.1 Local Runtime 到 v1.0 Capability Network，并提供 release evidence YAML 模板和 secret/raw data 禁止规则。`docs/运营/release-readiness.md`、`docs/releases/alpha-checklist.md`、`docs/README.md`、`docs/INDEX.md`、`docs/SYSTEM.md` 和 `docs/规划/traceability-matrix.md` 已同步入口与关系。
 - [ ] T129 P2：补充 Registry 供应链 review 工作流。
 - [ ] T139 P1：CI 安全基线 workflow。
 - [ ] T140 P1：把 Capability 分类落入 Registry 指南。
@@ -780,13 +795,12 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M4 / T126：把发布门禁整理成可执行 release checklist
-2. M4 / T129：补充 Registry 供应链 review 工作流
-3. M4 / T139：CI 安全基线 workflow
-4. M4 / T140：把 Capability 分类落入 Registry 指南
-5. M4 / T141：把 Capability Review Checklist 接入 PR 流程
-6. M4 / T158：Trust Card generation rules
-7. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M4 / T129：补充 Registry 供应链 review 工作流
+2. M4 / T139：CI 安全基线 workflow
+3. M4 / T140：把 Capability 分类落入 Registry 指南
+4. M4 / T141：把 Capability Review Checklist 接入 PR 流程
+5. M4 / T158：Trust Card generation rules
+6. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

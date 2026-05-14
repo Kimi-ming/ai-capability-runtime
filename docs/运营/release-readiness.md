@@ -2,6 +2,8 @@
 
 本文定义 OpenCap 从开发骨架到 alpha、beta、V1 的发布门禁。发布不能只看功能数量，要看可信闭环是否成立。
 
+可执行发布清单见 `docs/releases/release-checklist.md`。本文定义阶段和 hard gates；release checklist 定义发布前逐项操作和 evidence 记录格式。
+
 ## 使用方式
 
 每次准备发布或打 milestone tag 前，维护者必须先判断当前目标属于哪一个成熟度阶段，再逐项核对对应 hard gate。未满足 hard gate 时不能发布；允许缺口只能写入 release notes、`docs/HANDOFF.md`、`docs/TASKS.md` 或 `docs/RISKS.md`，不能写成已支持能力。
@@ -98,6 +100,8 @@ V1 目标：可信本地 Runtime 成立。
 - Release notes 宣称了 matrix 中“不得宣称”的能力。
 
 ## 发布前检查清单
+
+通用发布前操作以 `docs/releases/release-checklist.md` 为准。本节保留最小命令摘要：
 
 ```bash
 git status --short --branch

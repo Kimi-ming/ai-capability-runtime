@@ -57,7 +57,7 @@
 | RQ-013 | 协议边界清晰 | `docs/协议/protocol-positioning.md` | T117, T127 | 文档审查，后续 Host matrix |
 | RQ-014 | Runtime 契约清晰 | `docs/设计/runtime-contracts.md` | T117, T124 | 类型和单元测试 |
 | RQ-015 | 安全威胁可追踪 | `docs/安全/threat-model.md` | T093, T128 | abuse-case smoke tests |
-| RQ-016 | 发布质量可门禁 | `docs/运营/release-readiness.md` | T117, T126 | release checklist |
+| RQ-016 | 发布质量可门禁 | `docs/运营/release-readiness.md`、`docs/releases/release-checklist.md` | T117, T126 | release checklist |
 
 | RQ-017 | HTTP body/auth 可执行 | `docs/设计/http-execution-v1.md` | T053, T130, T131 | schema + executor tests |
 | RQ-018 | Policy DSL 格式稳定 | `docs/设计/policy-dsl-v1.md` | T030, T031 | parser/engine tests |

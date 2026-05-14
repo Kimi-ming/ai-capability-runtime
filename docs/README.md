@@ -35,6 +35,7 @@
 - [V1 实施计划](规划/v1-implementation-plan.md)
 - [验证策略](TESTING.md)
 - [发布成熟度门禁](运营/release-readiness.md)
+- [Release Checklist](releases/release-checklist.md)
 - [Alpha Release Checklist](releases/alpha-checklist.md)
 
 ### 我要审查架构
