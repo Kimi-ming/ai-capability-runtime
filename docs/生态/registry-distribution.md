@@ -48,6 +48,8 @@ registry/<category>/<capability_id>/manifest.yml
 
 索引只加速发现，不替代 manifest 原文。
 
+索引签名边界见 `rfcs/0013-registry-index-signing-v1.md`。该 RFC 草案明确：签名只证明索引来源和完整性，不证明 Capability 安全、不提升 trust level，也不能绕过 manifest validation、本地 policy、confirmation、outbound policy 或 audit。
+
 ## Mirror 和 Pinning
 
 未来 install 可以支持：

@@ -51,6 +51,8 @@ registry commit -> generated index -> signed index -> client verifies signature/
 
 但本地 policy 仍然优先于签名。签名证明来源，不证明安全。
 
+Registry index signing 草案见 `rfcs/0013-registry-index-signing-v1.md`。该 RFC 预留 signed index envelope、manifest digest、index digest、signature metadata 和 verification evidence，但不把 signed index 放入 V1 本地 install 主路径。
+
 ## 风险
 
 - 签名被误解为安全认证。

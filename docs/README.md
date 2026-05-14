@@ -67,6 +67,7 @@
 - [MCP Elicitation Profile V1 RFC](../rfcs/0010-mcp-elicitation-profile-v1.md)
 - [A2A Agent Card Mapping Profile V1 RFC](../rfcs/0011-a2a-agent-card-mapping-v1.md)
 - [Remote Runtime OAuth Profile V1 RFC](../rfcs/0012-remote-runtime-oauth-profile-v1.md)
+- [Registry Index Signing V1 RFC](../rfcs/0013-registry-index-signing-v1.md)
 
 ### 我要处理安全和治理
 

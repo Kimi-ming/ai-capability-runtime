@@ -707,7 +707,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `rfcs/TEMPLATE.md`，提供 RFC 状态、元数据、设计、安全隐私、兼容迁移、验证计划、发布运维和决策结果模板，并明确示例不得包含 secret/raw data。`docs/社区/rfc-process.md` 已改为要求复制模板；`.github/ISSUE_TEMPLATE/design_rfc.yml`、`docs/README.md` 和 `docs/INDEX.md` 已同步模板入口。
-- [ ] T147 P2：Registry index signing RFC 草案。
+- [x] T147 P2：Registry index signing RFC 草案。
+  - 验收标准：
+    - 新增 Registry index signing RFC 草案，定义 signed index profile、index envelope、capability entry digest、signature metadata 和 verification evidence。
+    - RFC 明确 signed index 只证明来源和完整性，不证明 Capability 安全、不提升 trust level、不绕过 review、manifest validation、policy、confirmation、outbound policy 或 audit。
+    - RFC 保持 V1 Git-based local registry/install 主路径，不要求实现 remote install、mirror sync、Sigstore/cosign 或 OCI artifact。
+    - Registry distribution、signing/provenance roadmap 和文档入口链接到该 RFC。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `rfcs/0013-registry-index-signing-v1.md`，定义 `opencap.registry.index_signing.v1` 草案、index envelope、manifest/index digest、signature metadata、verification evidence、failure semantics、compatibility/migration 和 future implementation tests。`docs/生态/registry-distribution.md`、`docs/安全/signing-and-provenance-roadmap.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口和边界。
 - [ ] T148 P1：npm trusted publishing workflow 草案。
 - [ ] T151 P1：实现 Capability Package lint。
 - [ ] T158 P1：Trust Card generation rules。
