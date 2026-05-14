@@ -8,6 +8,7 @@ import {
   createCompatibilityCard,
   createConsentCard,
   createTrustCard,
+  createTrustCardFromInstalledCapability,
   type InstalledCapabilityRecord,
 } from "./index.js";
 
@@ -155,6 +156,52 @@ describe("Runtime Card public contract", () => {
     expect(JSON.stringify(card)).not.toContain("absolutely safe");
   });
 
+  it("generates trust cards from installed capability records with derived evidence rules", () => {
+    const card = createTrustCardFromInstalledCapability({
+      capability: installedCapability,
+      tests: { status: "passing", lastRun: "2026-05-14", evidenceRef: "registry/developer-tools/github.create_issue/tests/basic.yml" },
+      generatedAt: "2026-05-14T00:00:00.000Z",
+      cardId: "card_trust_generated",
+    });
+
+    expect(card).toMatchObject({
+      cardKind: "trust",
+      cardId: "card_trust_generated",
+      trustLevel: "tested",
+      lifecycle: "tested",
+      capability: {
+        id: "github.create_issue",
+        version: "0.1.0",
+        manifestDigest: "sha256:manifest",
+        packageDigest: "sha256:package",
+      },
+      tests: {
+        status: "passing",
+        evidenceRef: "registry/developer-tools/github.create_issue/tests/basic.yml",
+      },
+      review: {
+        reviewDigest: "sha256:review",
+      },
+      advisories: {
+        open: 1,
+        latest: "GHSA-demo",
+        refs: ["GHSA-demo"],
+      },
+      maintainer: {
+        status: "community",
+        name: "opencap",
+      },
+      provenance: {
+        manifestDigest: "sha256:manifest",
+        packageDigest: "sha256:package",
+      },
+    });
+    expect(card.limitations).toContain("Trust level does not override local policy, consent, outbound policy, or audit.");
+    expect(card.disclaimer).toContain("not an authorization decision");
+    expect(JSON.stringify(card)).not.toContain("GITHUB_TOKEN");
+    expect(JSON.stringify(card)).not.toContain("ghp_secret_value");
+  });
+
   it("generates consent cards from Runtime consent requests", () => {
     const card = createConsentCard({
       consent: {
@@ -233,5 +280,6 @@ describe("Runtime Card public contract", () => {
 
     expect(runtime.CARD_SCHEMA_VERSION).toBe(CARD_SCHEMA_VERSION);
     expect(runtime.createCardId("trust")).toMatch(/^card_trust_[0-9a-f-]{36}$/);
+    expect(typeof runtime.createTrustCardFromInstalledCapability).toBe("function");
   });
 });

@@ -106,6 +106,24 @@ maintainer:
 
 当前 `opencap list` 已输出 Trust Card 的最小可见化子集：trust level、lifecycle、maintainer、license 和 status。这些字段只用于展示和审查，不改变本地 policy、consent 或 execution gate。
 
+## Trust Card 生成规则
+
+Runtime 的 Trust Card helper 必须只从已安装 Capability record、manifest metadata、trust summary、review/test evidence 和 provenance digest 派生字段，不读取 secret、不读取 provider 原始响应，也不保存 input/output 原文。
+
+规则：
+
+- `trust_level` 来自 installed capability 的 trust summary；缺失时只能降级为 `unverified`，不能猜测升级。
+- `lifecycle` 来自 capability identity；生命周期状态不改变 capability id/version/manifest digest。
+- `tests.status` 默认 `unknown`，只有 registry test、conformance 或 CI evidence 明确存在时才写 `passing`。
+- `review.reviewDigest` 来自 review evidence digest；least-privilege 结论必须由 review 或 lint evidence 明确提供。
+- `advisories.open/latest/refs` 从 trust/advisory refs 派生；不能因为没有本地缓存就宣称没有 advisory。
+- `maintainer.status` 由 trust level 派生：`official` -> `official`，`maintainer_verified` -> `verified`，`listed/tested` -> `community`，缺失 -> `unknown`。
+- `provenance` 只保存 `manifestDigest`、`packageDigest`、`registryCommit` 等摘要或引用，不保存 manifest 原文。
+- `limitations` 必须包含 trust level 不覆盖本地 policy、consent、outbound policy 或 audit 的提示。
+- `disclaimer` 必须说明 Trust Card 是 evidence summary，不是安全保证，也不是授权决策。
+
+当前实现入口是 `createTrustCardFromInstalledCapability()`；低层 `createTrustCard()` 仍可用于测试、迁移或未来 Registry Web/Console 自定义 evidence 输入。
+
 ## 非目标
 
 - Trust level 不等于安全认证。

@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 235 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 236 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -760,7 +760,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/spec/src/package-lint.ts` 和 `package-lint.test.ts`，导出 `validateCapabilityPackage()`、`validateCapabilityPackagePath()`、`findCapabilityPackageDirs()` 及 package lint result/issue 类型。Lint 覆盖 manifest/README/tests、id/category path 一致性、`.env`、`opencap.local/` 和 SQLite/DB 禁止项；`packages/spec/src/validate-registry.ts` 已在 `pnpm validate` 中输出并阻断 Capability package lint 结果。Spec 测试数从 45 增至 50。
-- [ ] T158 P1：Trust Card generation rules。
+- [x] T158 P1：Trust Card generation rules。
+  - 验收标准：
+    - Runtime 导出 `createTrustCardFromInstalledCapability()`，能从 `InstalledCapabilityRecord` 生成 Trust Card。
+    - 生成规则从 installed capability identity、manifest metadata、trust summary、review/test evidence 和 provenance digest 派生 trust level、lifecycle、advisories、maintainer、provenance、limitations 和 disclaimer。
+    - Trust Card 默认不读取 secret、不保存 provider raw response、不保存 input/output 原文，并明确 trust level 不覆盖 local policy、consent、outbound policy 或 audit。
+    - 文档说明 Trust Card 字段生成规则和非授权边界。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- card.test.ts`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/runtime/src/card.ts` 新增 `createTrustCardFromInstalledCapability()` 和生成规则类型，从 installed capability 派生 trust/advisory/maintainer/provenance/limitations，并保留 Trust Card disclaimer。`packages/runtime/src/card.test.ts` 新增 installed capability Trust Card 生成规则测试和 root export 断言；`docs/生态/trust-model-v1.md` 已补齐 Trust Card 生成规则和边界。Runtime 测试数从 235 增至 236。
 - [ ] T185 P1：Trust level transition tests。
 - [ ] T186 P1：Revoked capability invoke warning/deny behavior。
 - [ ] T187 P1：Capability advisory YAML schema。

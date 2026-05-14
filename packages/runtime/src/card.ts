@@ -172,6 +172,14 @@ export interface CreateTrustCardInput extends CreateCardOptions {
   limitations?: string[];
 }
 
+export interface CreateTrustCardFromInstalledCapabilityInput extends CreateCardOptions {
+  capability: InstalledCapabilityRecord;
+  tests?: TrustCardTestSummary;
+  review?: TrustCardReviewSummary;
+  quality?: TrustCardQualitySummary;
+  limitations?: string[];
+}
+
 export interface CreateConsentCardInput extends CreateCardOptions {
   consent: ConsentRequest;
 }
@@ -270,6 +278,27 @@ function defaultAdvisories(trust: TrustSummary | undefined): TrustCardAdvisorySu
   };
 }
 
+function maintainerStatusFromTrust(trust: TrustSummary | undefined): TrustCardMaintainerStatus {
+  if (trust?.level === "official") {
+    return "official";
+  }
+  if (trust?.level === "maintainer_verified") {
+    return "verified";
+  }
+  if (trust?.level === "listed" || trust?.level === "tested") {
+    return "community";
+  }
+  return "unknown";
+}
+
+function defaultTrustCardLimitations(limitations: string[] | undefined): string[] {
+  return [
+    ...(limitations ?? []),
+    "Trust level does not override local policy, consent, outbound policy, or audit.",
+    "Trust Card is generated from available evidence and may lag behind provider or registry changes.",
+  ];
+}
+
 function compatibilityKnownGaps(checks: CompatibilityLedgerCheck[]): string[] {
   return checks
     .filter((check) => check.result !== "pass" && check.result !== "supported")
@@ -329,6 +358,33 @@ export function createTrustCard(input: CreateTrustCardInput): TrustCardDocumentV
     limitations: input.limitations ?? [],
     disclaimer: TRUST_CARD_DISCLAIMER,
   };
+}
+
+export function createTrustCardFromInstalledCapability(input: CreateTrustCardFromInstalledCapabilityInput): TrustCardDocumentV1 {
+  const capability = input.capability;
+  const maintainerName = stringField(capability.manifest?.metadata, "maintainer");
+  const review = input.review ?? (capability.trust?.reviewDigest ? { reviewDigest: capability.trust.reviewDigest } : undefined);
+
+  return createTrustCard({
+    cardId: input.cardId,
+    generatedAt: input.generatedAt,
+    capability: capability.identity,
+    trust: capability.trust,
+    tests: input.tests ?? { status: "unknown" },
+    review,
+    advisories: defaultAdvisories(capability.trust),
+    maintainer: {
+      status: maintainerStatusFromTrust(capability.trust),
+      name: maintainerName,
+    },
+    quality: input.quality,
+    provenance: {
+      manifestDigest: capability.identity.manifestDigest,
+      packageDigest: capability.identity.packageDigest,
+      registryCommit: capability.identity.registryCommit,
+    },
+    limitations: defaultTrustCardLimitations(input.limitations),
+  });
 }
 
 export function createConsentCard(input: CreateConsentCardInput): ConsentCardDocumentV1 {
