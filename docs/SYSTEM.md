@@ -293,11 +293,11 @@ Governance Surface
 | 互操作 Profile | 清晰 | T154 维护 evidence records；T156/T157 已起草 MCP elicitation 和 A2A Agent Card profile RFC |
 | 一致性测试 | 清晰 | T153 建立 suite skeleton |
 | Agentic 风险 | 清晰 | T155 转成 abuse-case smoke tests |
-| 身份授权 | 部分实现 | T159 已实现 env provider；T163 仍按 RFC 处理远程 OAuth |
+| 身份授权 | 部分实现 | T159 已实现 env provider；T163 已起草 Remote Runtime OAuth profile RFC |
 | Secret Resolver | 已实现 V1 env provider | T164 继续补 resolver ordering 和 audit evidence 集成测试 |
 | 凭据生命周期 | 清晰 | T162/T165 补操作验证和指南 |
 | 最小权限评审 | 清晰 | T161 已接入 spec authoring lint；review 继续保留 |
-| 远程 OAuth 边界 | 清晰 | T163 走 RFC，不进 V1 主路径 |
+| 远程 OAuth 边界 | 清晰 | T163 已形成 RFC 草案，不进 V1 主路径 |
 | 执行语义 | 清晰 | T167 已落入类型、Result Envelope evidence 和 audit 字段 |
 | 重试与幂等 | 清晰 | T169 走 manifest RFC |
 | 失败恢复 | 清晰 | T172 增加 reconcile hint |

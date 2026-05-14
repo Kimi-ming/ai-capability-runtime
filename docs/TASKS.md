@@ -570,7 +570,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `rfcs/0011-a2a-agent-card-mapping-v1.md`，定义 `opencap.a2a.agent_card_mapping.v1` 草案，覆盖 A2A Agent Card/AgentSkill 映射、OpenCap extension、调用边界、Result Envelope 到 A2A task/artifact 的映射、安全不变量、evidence 和测试计划。RFC 参考 A2A v0.3.0 官方规范，并明确 V1 不实现 A2A server、不把 Capability 伪装成 Agent。`docs/协议/protocol-positioning.md`、`docs/设计/整体系统设计-v1.md`、`docs/生态/interoperability-profiles.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步引用。
-- [ ] T163 P2：Remote Runtime OAuth profile RFC。
+- [x] T163 P2：Remote Runtime OAuth profile RFC。
+  - 验收标准：
+    - 新增 RFC 明确 `opencap.remote_runtime.oauth.v1` 是 future profile 草案，不把 remote runtime 或 OAuth server 写成当前 V1 已实现能力。
+    - RFC 区分 Host/client 到 OpenCap Remote Runtime、OpenCap 到 downstream provider、Registry/Admin Plane 三段授权边界。
+    - RFC 明确 resource indicators、protected resource metadata、scope 模型、header-only bearer token、401/403 challenge 和 token validation evidence。
+    - RFC 明确 inbound token 不能透传为 downstream provider token，scope 不能替代 Runtime policy/consent/audit。
+    - 现有 remote OAuth boundary、ADR、文档入口和 SYSTEM 状态同步链接到 RFC。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `rfcs/0012-remote-runtime-oauth-profile-v1.md`，定义 `opencap.remote_runtime.oauth.v1` 草案，覆盖三段授权边界、RFC 8707 resource indicators、RFC 9728 protected resource metadata、scope 模型、downstream provider credential separation、token validation evidence、401/403 challenge、adapter profile 关系、安全不变量和测试计划。`docs/生态/oauth-and-remote-runtime-boundary.md`、`docs/决策/0029-remote-runtime-oauth-requires-new-profile.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步引用。RFC 明确 V1 仍是 local runtime/env provider，不实现 remote OAuth。
 - [ ] T271 P1：定义 Interoperability Profile evidence record schema。
 
 ### 模块 M4：Registry、Trust、Lifecycle 和供应链
@@ -748,13 +764,12 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T163：Remote Runtime OAuth profile RFC
-2. M3 / T271：定义 Interoperability Profile evidence record schema
-3. M4 / T158：Trust Card generation rules
-4. M4 / T185：Trust level transition tests
-5. M4 / T191：Lifecycle status schema
-6. M4 / T192：Install/list/invoke lifecycle warnings
-7. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M3 / T271：定义 Interoperability Profile evidence record schema
+2. M4 / T158：Trust Card generation rules
+3. M4 / T185：Trust level transition tests
+4. M4 / T191：Lifecycle status schema
+5. M4 / T192：Install/list/invoke lifecycle warnings
+6. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

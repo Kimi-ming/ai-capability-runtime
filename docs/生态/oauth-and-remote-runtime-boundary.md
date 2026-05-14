@@ -2,6 +2,8 @@
 
 本文定义 OpenCap 未来从本地 Runtime 走向远程 Runtime、Cloud 或多 Host 接入时，OAuth 和授权边界必须如何重新设计。
 
+草案 profile 见 `../../rfcs/0012-remote-runtime-oauth-profile-v1.md`。该 RFC 把本文的三段边界收敛为 `opencap.remote_runtime.oauth.v1`，但 OpenCap V1 仍只实现本地 Runtime 和 env-based downstream credentials。
+
 ## V1 与 Future 的区别
 
 V1：
@@ -97,7 +99,7 @@ V1 对应行为：
 
 ## 进入实现前必须有的 RFC
 
-- Remote Runtime OAuth profile。
+- Remote Runtime OAuth profile：草案见 `../../rfcs/0012-remote-runtime-oauth-profile-v1.md`。
 - Token storage and refresh lifecycle。
 - User/session/org identity model。
 - Provider consent and revocation model。

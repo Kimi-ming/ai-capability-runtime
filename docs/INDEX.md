@@ -90,10 +90,11 @@
 7. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
 8. [MCP Elicitation Profile V1 RFC](../rfcs/0010-mcp-elicitation-profile-v1.md)
 9. [A2A Agent Card Mapping Profile V1 RFC](../rfcs/0011-a2a-agent-card-mapping-v1.md)
-10. [开发工作流](WORKFLOW.md)
-11. [Alpha Release Checklist](releases/alpha-checklist.md)
-12. [发布成熟度门禁](运营/release-readiness.md)
-13. [版本和兼容性策略](规范/versioning-and-compatibility.md)
+10. [Remote Runtime OAuth Profile V1 RFC](../rfcs/0012-remote-runtime-oauth-profile-v1.md)
+11. [开发工作流](WORKFLOW.md)
+12. [Alpha Release Checklist](releases/alpha-checklist.md)
+13. [发布成熟度门禁](运营/release-readiness.md)
+14. [版本和兼容性策略](规范/versioning-and-compatibility.md)
 
 ### Capability 贡献评审路径
 

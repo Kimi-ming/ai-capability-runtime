@@ -17,3 +17,4 @@
 - V1 文档中保留 future boundary，但不实现 remote OAuth。
 - Apps SDK、A2A、HTTP MCP 进入 OpenCap 时必须说明 auth profile。
 - 管理面身份和执行身份必须分离。
+- T163 已起草 `rfcs/0012-remote-runtime-oauth-profile-v1.md`，作为未来实现前的 profile 草案；接受该草案不代表 V1 已实现 remote runtime。
