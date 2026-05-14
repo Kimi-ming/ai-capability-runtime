@@ -488,7 +488,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/cli/src/error-exit-code.test.ts`，按 TDD 确认 missing capability、invalid `--input-json` 和 invalid `--limit` 原先返回 exit `2`。`packages/cli/src/index.ts` 新增 `CliUserInputError`，将用户输入错误、无效 option 和未安装 capability 映射为 exit `1`，stderr 不打印 stack；CLI 包测试数从 3 增至 5。
-- [ ] T142 P2：维护 Host compatibility test records。
+- [x] T142 P2：维护 Host compatibility test records。
+  - 验收标准：
+    - `docs/生态/host-compatibility-matrix.md` 维护 `opencap.host.record.v1` 风格的 Host compatibility test records。
+    - 自定义 MCP client 记录必须绑定 OpenCap commit、test date、profile、capability、checks、evidence 和 known gaps。
+    - Claude Desktop 和 Cursor 在未完成真实 Host smoke 前必须保持 `pending-smoke` / `not-run`，不能写成 `pass`。
+    - 记录必须区分自动化 adapter evidence 与第三方 Host UI smoke evidence。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`docs/生态/host-compatibility-matrix.md` 新增 Host Compatibility Test Records，记录 custom MCP client 的 `opencap.mcp.tools.v1` 与 `opencap.mcp.result.v1` 自动化 pass 证据，并新增 Claude Desktop/Cursor `pending-smoke` 记录。所有记录都绑定 2026-05-14、OpenCap commit `0f819cb`、profile、capability、checks、evidence 和 known gaps，且明确自动化 helper tests 不等同真实 Host UI smoke。
 - [ ] T143 P2：从 audit log 派生本地指标命令草案。
 - [ ] T154 P2：维护 Host compatibility evidence records。
 - [ ] T156 P2：MCP elicitation profile RFC。
@@ -671,10 +686,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T142：维护 Host compatibility test records
-2. M3 / T143：从 audit log 派生本地指标命令草案
-3. M3 / T154：维护 Host compatibility evidence records
-4. M3 / T156：MCP elicitation profile RFC
+1. M3 / T143：从 audit log 派生本地指标命令草案
+2. M3 / T154：维护 Host compatibility evidence records
+3. M3 / T156：MCP elicitation profile RFC
+4. M3 / T157：A2A Agent Card mapping RFC
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema

@@ -42,6 +42,128 @@
 - 自动化 helper tests 只能证明 OpenCap adapter 输出，不证明第三方 Host UI 展示。
 - Host 忽略 metadata、outputSchema 或 structuredContent 时，不能降低 Runtime validation、policy、consent、secret resolver 或 audit 要求。
 
+## Host Compatibility Test Records
+
+记录口径：本节维护 `opencap.host.record.v1` 风格的可追踪测试记录。`custom-mcp-client` 记录来自 OpenCap 自动化 helper tests，只证明 OpenCap MCP adapter/result adapter 输出；Claude Desktop 和 Cursor 在未完成真实 Host smoke 前只记录为 `pending-smoke` 或 `not-run`。
+
+### `hostrec-2026-05-14-custom-mcp-client-tools-v1`
+
+```yaml
+host: custom-mcp-client
+host_version: opencap-helper-tests-0.1.0-dev
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+profile: opencap.mcp.tools.v1
+capability: github.create_issue
+test_date: 2026-05-14
+result: pass
+tool_metadata:
+  title: supported
+  description: supported
+  output_schema: supported
+  annotations: not-implemented
+  meta: not-implemented
+checks:
+  tools_list: pass
+  tools_call_allow: pass
+  tools_call_deny: pass
+  tools_call_confirmation_required: pass
+  mapped_tool_name_reverse_lookup: pass
+evidence:
+  - packages/mcp/src/index.test.ts
+  - packages/mcp/src/tool-projection.test.ts
+  - packages/mcp/src/tool-mapping-contract.test.ts
+known_gaps:
+  - Not a third-party Host UI smoke.
+  - Does not prove Claude Desktop or Cursor display behavior.
+notes: Adapter-level contract for tools/list, tools/call, deterministic tool names, original capabilityId metadata, projection hash, and no-elicitation confirmation_required behavior.
+```
+
+### `hostrec-2026-05-14-custom-mcp-client-result-v1`
+
+```yaml
+host: custom-mcp-client
+host_version: opencap-helper-tests-0.1.0-dev
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+profile: opencap.mcp.result.v1
+capability: github.create_issue
+test_date: 2026-05-14
+result: pass
+tool_result:
+  structured_content: supported
+  content_text: supported-runtime-summary-only
+  is_error: supported
+  output_schema_result_behavior: runtime-owned
+checks:
+  success_structured_content: pass
+  failed_is_error: pass
+  blocked_result: pass
+  confirmation_required_result: pass
+  provider_raw_body_not_used_as_text: pass
+evidence:
+  - packages/mcp/src/result-adapter.test.ts
+  - packages/runtime/src/result-envelope.test.ts
+  - packages/runtime/src/result-sanitizer.test.ts
+  - packages/runtime/src/result-limits.test.ts
+known_gaps:
+  - Not a third-party Host UI smoke.
+  - Host display or retention of structuredContent remains pending-smoke for Claude Desktop and Cursor.
+notes: Result safety remains Runtime-owned; this record does not grant Host-level trust.
+```
+
+### `hostrec-2026-05-14-claude-desktop-tools-v1`
+
+```yaml
+host: claude-desktop
+host_version: 1.3561.0
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+profile: opencap.mcp.tools.v1
+capability: github.create_issue
+test_date: 2026-05-14
+result: pending-smoke
+tool_metadata:
+  title: pending-smoke
+  description: pending-smoke
+  output_schema: pending-smoke
+  annotations: pending-smoke
+  meta: pending-smoke
+checks:
+  tools_list: not-run
+  tools_call_dry_run: not-run
+  confirmation_required: not-run
+known_gaps:
+  - Complete `docs/教程/connect-mcp-host.md` manual smoke after real MCP server wiring is available.
+notes: Host app version is known, but no real Host invocation evidence is recorded.
+```
+
+### `hostrec-2026-05-14-cursor-tools-v1`
+
+```yaml
+host: cursor
+host_version: 3.3.16
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+profile: opencap.mcp.tools.v1
+capability: github.create_issue
+test_date: 2026-05-14
+result: pending-smoke
+tool_metadata:
+  title: pending-smoke
+  description: pending-smoke
+  output_schema: pending-smoke
+  annotations: pending-smoke
+  meta: pending-smoke
+checks:
+  tools_list: not-run
+  tools_call_dry_run: not-run
+  confirmation_required: not-run
+known_gaps:
+  - Complete `docs/教程/connect-mcp-host.md` manual smoke after real MCP server wiring is available.
+notes: Host app version is known, but no real Host invocation evidence is recorded.
+```
+
 ## Tool Metadata 字段兼容性记录
 
 记录口径：`supported` 表示已有测试证据；`pending-smoke` 表示本机识别到 Host 版本但尚未完成手动 smoke；`not-implemented` 表示 OpenCap V1 当前不输出该字段或不把它作为安全边界。
