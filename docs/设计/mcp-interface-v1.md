@@ -90,6 +90,7 @@ V1 默认：
 ```
 
 未来支持 elicitation 时，只能请求确认，不得请求 token、password、API key。
+MCP elicitation 的 profile 草案见 `../../rfcs/0010-mcp-elicitation-profile-v1.md`；在 adapter 和 Host evidence 完成前，V1 仍以 `confirmation_required` 作为安全默认行为。
 
 ## STDIO 输出规则
 

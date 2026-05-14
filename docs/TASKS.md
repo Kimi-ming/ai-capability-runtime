@@ -536,7 +536,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`docs/生态/interoperability-profiles.md` 新增 `opencap.host.evidence.v1`，定义 Host compatibility evidence record 的 profile、host_record、Host/version、OpenCap commit、observed_at、evidence_kind、source、privacy 和 limitations 字段。`docs/生态/host-compatibility-matrix.md` 新增 4 条 evidence records：custom MCP client tools/result 自动化 pass 证据，以及 Claude Desktop/Cursor version-detection + pending-smoke 证据。所有记录都明确不保存 raw input/output/secret，且自动化测试不等同第三方 Host UI smoke。
-- [ ] T156 P2：MCP elicitation profile RFC。
+- [x] T156 P2：MCP elicitation profile RFC。
+  - 验收标准：
+    - 新增 RFC 明确 `opencap.mcp.elicitation.v1` 是未来 profile 草案，不把 MCP elicitation 写成当前已实现能力。
+    - RFC 覆盖 capability negotiation、Runtime `ConsentRequest` 到 MCP `elicitation/create` form mode 的映射、Host response 到 consent receipt 的映射。
+    - RFC 明确 form mode 只能用于确认，不能采集 password、API key、access token、payment credential 或下游 OAuth code。
+    - RFC 保持 OpenCap 安全不变量：policy/gates、egress、secret resolution、execution、audit 顺序不变；Host 支持 elicitation 不能把 `ask` 改成 `allow`。
+    - 现有 MCP interface、consent 和 interoperability profile 文档链接到 RFC，并保留无 elicitation Host 的 `confirmation_required` 默认行为。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `rfcs/0010-mcp-elicitation-profile-v1.md`，定义 `opencap.mcp.elicitation.v1` 草案，覆盖 Host capability negotiation、form-mode confirmation mapping、consent decision mapping、URL mode 边界、安全不变量、result/evidence 和未来测试计划。`docs/设计/mcp-interface-v1.md`、`docs/设计/confirmation-and-consent-v1.md`、`docs/生态/interoperability-profiles.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步引用。RFC 参考 MCP 2025-11-25 elicitation 规格，并明确当前 V1 仍默认 `confirmation_required`。
 - [ ] T157 P2：A2A Agent Card mapping RFC。
 - [ ] T163 P2：Remote Runtime OAuth profile RFC。
 - [ ] T271 P1：定义 Interoperability Profile evidence record schema。
@@ -716,15 +732,14 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T156：MCP elicitation profile RFC
-2. M3 / T157：A2A Agent Card mapping RFC
-3. M3 / T163：Remote Runtime OAuth profile RFC
-4. M3 / T271：定义 Interoperability Profile evidence record schema
-5. M4 / T158：Trust Card generation rules
-6. M4 / T185：Trust level transition tests
-7. M4 / T191：Lifecycle status schema
-8. M4 / T192：Install/list/invoke lifecycle warnings
-9. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M3 / T157：A2A Agent Card mapping RFC
+2. M3 / T163：Remote Runtime OAuth profile RFC
+3. M3 / T271：定义 Interoperability Profile evidence record schema
+4. M4 / T158：Trust Card generation rules
+5. M4 / T185：Trust level transition tests
+6. M4 / T191：Lifecycle status schema
+7. M4 / T192：Install/list/invoke lifecycle warnings
+8. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

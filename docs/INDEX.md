@@ -88,10 +88,11 @@
 5. [整体系统设计 V1](设计/整体系统设计-v1.md) 中对应平面和链路
 6. [验证策略](TESTING.md)
 7. [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
-8. [开发工作流](WORKFLOW.md)
-9. [Alpha Release Checklist](releases/alpha-checklist.md)
-10. [发布成熟度门禁](运营/release-readiness.md)
-11. [版本和兼容性策略](规范/versioning-and-compatibility.md)
+8. [MCP Elicitation Profile V1 RFC](../rfcs/0010-mcp-elicitation-profile-v1.md)
+9. [开发工作流](WORKFLOW.md)
+10. [Alpha Release Checklist](releases/alpha-checklist.md)
+11. [发布成熟度门禁](运营/release-readiness.md)
+12. [版本和兼容性策略](规范/versioning-and-compatibility.md)
 
 ### Capability 贡献评审路径
 

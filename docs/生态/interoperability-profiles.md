@@ -146,6 +146,8 @@ MCP 2025-11-25 已经把 elicitation 作为客户端能力之一。OpenCap 后�
 - OAuth、密钥、外部登录必须使用 URL 或 Host 专门机制。
 - elicitation 结果仍要进入 Runtime policy 和 audit，不得绕过。
 
+草案 profile 见 `rfcs/0010-mcp-elicitation-profile-v1.md`。该 RFC 把当前 future profile 收敛为 `opencap.mcp.elicitation.v1`，但在 MCP adapter 真正实现、Host smoke evidence 通过前，OpenCap 仍保持 `confirmation_required` 安全默认行为。
+
 ### `opencap.a2a.discovery.future`
 
 A2A 面向 Agent 间发现、任务和协作。OpenCap 后续可以把 Capability package 映射成 Agent Card/Skill 风格的发现信息，但 V1 不实现 A2A runtime。

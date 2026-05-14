@@ -125,7 +125,7 @@ MCP Host 无确认通道时，Runtime 返回结构化结果：
 
 ## Future: MCP Elicitation
 
-MCP 2025-11-25 提供 elicitation 能力后，OpenCap 可以把 Consent Request 映射为 Host 原生确认表单。边界仍然不变：
+MCP 2025-11-25 提供 elicitation 能力后，OpenCap 可以把 Consent Request 映射为 Host 原生确认表单。草案见 `../../rfcs/0010-mcp-elicitation-profile-v1.md`。边界仍然不变：
 
 - elicitation 返回后仍需 Runtime 校验。
 - 不通过表单采集密钥或 OAuth 凭据。
