@@ -36,6 +36,8 @@ registry/<category>/<capability_id>/
 必须阻止合并：
 
 - Capability 目录名和 `manifest.yml` 的 `id` 不一致。
+- 目录分类和 `manifest.yml` 的 `metadata.category` 不一致。
+- 分类不在当前 [能力分类体系](../生态/capability-taxonomy.md) 中，且 PR 没有说明新增分类理由。
 - 缺少 `manifest.yml`。
 - 缺少 `README.md`。
 - 缺少 registry test。
@@ -87,6 +89,7 @@ CI 中同样会运行 `pnpm validate`。它必须覆盖：
 
 必须阻止合并：
 
+- `metadata.category` 被 README 或描述写成授权、信任等级或安全保证。
 - `description` 描述的是读操作，但 `execution.method` 是 POST、PUT、PATCH 或 DELETE。
 - `input` schema 没有限定关键字段，导致模型可以传入过宽参数。
 - `execution.url` 指向未声明的服务、代理或跳转端点。

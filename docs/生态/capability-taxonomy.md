@@ -2,6 +2,8 @@
 
 本文定义 OpenCap Registry 中 Capability 的分类、粒度和命名规则。生态项目必须避免两种极端：能力太粗变成 Agent，能力太细变成 API 噪声。
 
+Registry 提交和评审流程必须同时参考本文、[注册表指南](../社区/registry-guidelines.md) 和 [能力评审清单](../社区/capability-review-checklist.md)。本文定义分类语义；Registry 指南定义目录、manifest 和 PR 规则；评审清单把规则变成合并前检查项。
+
 ## 分类目标
 
 - 让用户理解一个 Capability 大概能做什么。

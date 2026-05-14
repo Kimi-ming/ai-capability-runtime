@@ -16,13 +16,30 @@ registry/
         basic.yml
 ```
 
-当前 V1 已有分类：
+当前 V1 分类：
 
-| 分类 | 用途 |
-| --- | --- |
-| `developer-tools` | GitHub、Vercel、数据库、部署、协作和工程工作流能力。 |
+| 分类 | 用途 | 示例 |
+| --- | --- | --- |
+| `developer-tools` | 开发、部署、代码、Issue、监控和工程协作能力。 | GitHub、Vercel、Sentry |
+| `productivity` | 文档、日程、知识库和任务管理能力。 | Notion、Linear、Google Calendar |
+| `communication` | 消息发送、通知、邮件和聊天能力。 | Slack、Gmail、Teams |
+| `data` | 查询、导出、转换和数据库读取能力。 | Postgres、BigQuery、CSV |
+| `commerce` | 订单、支付、订阅和报价能力。 | Stripe、Shopify |
+| `operations` | IT、工单、资产和运维流程能力。 | ServiceNow、PagerDuty |
+| `content` | 内容生成、发布和媒体处理能力。 | CMS、image/video service |
+| `internal` | 企业内部系统或自托管 API 能力。 | internal CRM、自建工单系统 |
 
-后续新增分类前，应先确认它代表稳定的用户场景，而不是某个单独厂商或临时实验。
+V1 默认优先收敛 `developer-tools`。其他分类可以进入 Registry，但 PR 必须说明稳定用户场景、权限边界和与既有分类的差异。
+
+分类规则：
+
+- 目录必须使用 `registry/<category>/<capability_id>/`。
+- `manifest.yml` 的 `metadata.category` 必须和目录分类一致。
+- `capability_id` 使用 `provider.action_object`，不要把分类写进 id。
+- 分类只用于发现、展示、review 和未来 Trust Card/Host 分组，不参与执行授权。
+- 新增分类前，应先确认它代表稳定的用户场景，而不是某个单独厂商或临时实验。
+
+完整分类说明见 [能力分类体系](../docs/生态/capability-taxonomy.md) 和 [Registry 指南](../docs/社区/registry-guidelines.md)。
 
 ## Capability 条目要求
 
@@ -40,6 +57,7 @@ registry/
 - `auth`
 - `permissions`
 - `execution`
+- `metadata.category`
 - `metadata.trust_level`
 
 `README.md` 必须说明：
@@ -111,6 +129,8 @@ Registry 不接收以下内容：
 
 - manifest schema 是否通过。
 - Capability id 是否稳定且与目录名一致。
+- 目录分类是否和 `metadata.category` 一致。
+- 分类是否来自当前分类表，或新增分类理由是否充分。
 - 描述是否匹配真实 `execution` 行为。
 - 权限是否最小化，风险等级是否诚实。
 - 外部端点是否固定且清楚声明。

@@ -87,6 +87,7 @@
 - [Registry 供应链 Review 工作流](社区/registry-supply-chain-review.md)
 - [Registry 指南](社区/registry-guidelines.md)
 - [Registry 根目录说明](../registry/README.md)
+- [能力分类体系](生态/capability-taxonomy.md)
 - [能力包结构](设计/capability-package-v1.md)
 - [能力评审清单](社区/capability-review-checklist.md)
 - [贡献者路径](社区/contributor-journey.md)

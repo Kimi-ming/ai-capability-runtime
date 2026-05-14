@@ -79,7 +79,10 @@ metadata:
 - `auth.type: none` 表示不需要凭据。
 - `permissions` 必须说明资源、动作、风险和确认策略。
 - `execution` 必须说明 HTTP 方法、URL 和 timeout。
+- `metadata.category` 必须和 Registry 目录第一层分类一致，例如 `registry/developer-tools/demo.get_status/` 对应 `developer-tools`。
 - `metadata.trust_level` 新条目通常从 `experimental` 开始。
+
+分类应来自 [能力分类体系](../生态/capability-taxonomy.md)。分类只帮助 Registry 展示、review 和未来 Host 分组；它不参与授权，也不能降低 permissions、risk、confirmation 或 outbound policy 要求。
 
 ## 3. 按作者门禁顺序自查
 

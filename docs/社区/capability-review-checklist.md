@@ -7,10 +7,12 @@
 ## 基础结构
 
 - [ ] 目录位于 `registry/<category>/<capability_id>/`。
+- [ ] `<category>` 来自当前 [能力分类体系](../生态/capability-taxonomy.md)，或 PR 已说明新增分类理由。
 - [ ] `manifest.yml` 存在。
 - [ ] `README.md` 存在。
 - [ ] `tests/basic.yml` 或等价测试存在。
 - [ ] Capability id 与目录名一致。
+- [ ] `metadata.category` 与目录分类一致。
 
 ## Manifest
 
@@ -20,6 +22,7 @@
 - [ ] `execution.method` 和 `execution.url` 与描述一致。
 - [ ] POST/PUT/PATCH 写操作声明了 `execution.body`。
 - [ ] `timeout_ms` 合理。
+- [ ] `metadata.category` 只用于发现、展示和 review，不被描述为授权或 trust signal。
 
 ## 权限和风险
 

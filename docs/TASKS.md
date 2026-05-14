@@ -657,7 +657,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `.github/workflows/security-baseline.yml`，包含 repository hygiene、workflow permissions audit 和 dependency-review 三个 job，默认 `contents: read`，PR dependency review 使用 `actions/dependency-review-action@v4` 并在 high severity 阻断。`docs/运营/ci-security-baseline.md` 记录已实现基线和 CodeQL/Scorecard 后续缺口；`docs/releases/release-checklist.md` 已把 Security Baseline workflow 加入发布前检查项。
-- [ ] T140 P1：把 Capability 分类落入 Registry 指南。
+- [x] T140 P1：把 Capability 分类落入 Registry 指南。
+  - 验收标准：
+    - `docs/社区/registry-guidelines.md` 明确 Registry 目录分类规则、当前 V1 分类表、`metadata.category` 与目录一致性要求，以及分类不参与授权的边界。
+    - `registry/README.md` 同步分类表和提交流程，外部贡献者能从根目录说明选择分类并知道新增分类条件。
+    - Capability review checklist 和 review 教程把分类检查纳入 PR 合并前人工 review。
+    - 文档入口和追踪矩阵能从 Capability 贡献路径指向分类体系。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`docs/社区/registry-guidelines.md` 已新增 Capability 分类章节，覆盖当前 V1 分类表、目录/manifest 一致性、新增分类条件、分类不参与授权和分类迁移影响。`registry/README.md`、`docs/社区/capability-review-checklist.md`、`docs/教程/review-a-capability.md`、`docs/教程/write-a-capability.md`、`docs/README.md`、`docs/INDEX.md`、`docs/SYSTEM.md` 和 `docs/规划/traceability-matrix.md` 已同步分类入口和 review 规则。
 - [ ] T141 P1：把 Capability Review Checklist 接入 PR 流程。
 - [ ] T144 P2：补充 RFC 模板文件。
 - [ ] T147 P2：Registry index signing RFC 草案。
