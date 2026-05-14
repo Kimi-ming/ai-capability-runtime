@@ -164,6 +164,145 @@ known_gaps:
 notes: Host app version is known, but no real Host invocation evidence is recorded.
 ```
 
+## Host Compatibility Evidence Records
+
+记录口径：本节维护 `opencap.host.evidence.v1` 风格的证据条目。Evidence record 不重复 Host record 的完整结论，只记录结论背后的证据来源、证据类型、隐私边界和限制。`automated-test` 记录可以支撑 adapter/runtime contract；第三方 Host 仍需要 `manual-smoke` 记录后才能从 `pending-smoke` 升级。
+
+### `evidence-2026-05-14-custom-mcp-client-tools-tests`
+
+```yaml
+id: evidence-2026-05-14-custom-mcp-client-tools-tests
+profile: opencap.mcp.tools.v1
+host_record: hostrec-2026-05-14-custom-mcp-client-tools-v1
+host: custom-mcp-client
+host_version: opencap-helper-tests-0.1.0-dev
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+observed_at: 2026-05-14
+evidence_kind: automated-test
+result: pass
+source:
+  command: pnpm --filter @opencap/mcp test
+  paths:
+    - packages/mcp/src/index.test.ts
+    - packages/mcp/src/tool-projection.test.ts
+    - packages/mcp/src/tool-mapping-contract.test.ts
+checks:
+  tools_list: pass
+  tools_call_allow: pass
+  tools_call_deny: pass
+  tools_call_confirmation_required: pass
+  mapped_tool_name_reverse_lookup: pass
+privacy:
+  stores_raw_input: false
+  stores_raw_output: false
+  stores_secret: false
+limitations:
+  - Not a third-party Host UI smoke.
+  - Does not prove Claude Desktop or Cursor display behavior.
+notes: Supports the custom MCP client tools Host record only.
+```
+
+### `evidence-2026-05-14-custom-mcp-client-result-tests`
+
+```yaml
+id: evidence-2026-05-14-custom-mcp-client-result-tests
+profile: opencap.mcp.result.v1
+host_record: hostrec-2026-05-14-custom-mcp-client-result-v1
+host: custom-mcp-client
+host_version: opencap-helper-tests-0.1.0-dev
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+observed_at: 2026-05-14
+evidence_kind: automated-test
+result: pass
+source:
+  command: pnpm --filter @opencap/mcp test
+  paths:
+    - packages/mcp/src/result-adapter.test.ts
+    - packages/runtime/src/result-envelope.test.ts
+    - packages/runtime/src/result-sanitizer.test.ts
+    - packages/runtime/src/result-limits.test.ts
+checks:
+  success_structured_content: pass
+  failed_is_error: pass
+  blocked_result: pass
+  confirmation_required_result: pass
+  provider_raw_body_not_used_as_text: pass
+privacy:
+  stores_raw_input: false
+  stores_raw_output: false
+  stores_secret: false
+limitations:
+  - Not a third-party Host UI smoke.
+  - Host display or retention of structuredContent remains pending-smoke for Claude Desktop and Cursor.
+notes: Supports the custom MCP client result Host record only.
+```
+
+### `evidence-2026-05-14-claude-desktop-version-detection`
+
+```yaml
+id: evidence-2026-05-14-claude-desktop-version-detection
+profile: opencap.mcp.tools.v1
+host_record: hostrec-2026-05-14-claude-desktop-tools-v1
+host: claude-desktop
+host_version: 1.3561.0
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+observed_at: 2026-05-14
+evidence_kind: version-detection
+result: pending-smoke
+source:
+  command: /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/Claude.app/Contents/Info.plist
+  paths:
+    - docs/生态/host-compatibility-matrix.md
+checks:
+  host_version_detected: pass
+  tools_list: not-run
+  tools_call_dry_run: not-run
+  confirmation_required: not-run
+privacy:
+  stores_raw_input: false
+  stores_raw_output: false
+  stores_secret: false
+limitations:
+  - Version detection is not a Host compatibility pass.
+  - Manual smoke through `docs/教程/connect-mcp-host.md` is still required.
+notes: Keeps Claude Desktop in the validation queue without claiming compatibility.
+```
+
+### `evidence-2026-05-14-cursor-version-detection`
+
+```yaml
+id: evidence-2026-05-14-cursor-version-detection
+profile: opencap.mcp.tools.v1
+host_record: hostrec-2026-05-14-cursor-tools-v1
+host: cursor
+host_version: 3.3.16
+opencap_version: 0.1.0-dev
+opencap_commit: 0f819cb
+observed_at: 2026-05-14
+evidence_kind: version-detection
+result: pending-smoke
+source:
+  command: /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/Cursor.app/Contents/Info.plist
+  paths:
+    - docs/生态/host-compatibility-matrix.md
+checks:
+  host_version_detected: pass
+  tools_list: not-run
+  tools_call_dry_run: not-run
+  confirmation_required: not-run
+privacy:
+  stores_raw_input: false
+  stores_raw_output: false
+  stores_secret: false
+limitations:
+  - Version detection is not a Host compatibility pass.
+  - Manual smoke through `docs/教程/connect-mcp-host.md` is still required.
+notes: Keeps Cursor in the validation queue without claiming compatibility.
+```
+
 ## Tool Metadata 字段兼容性记录
 
 记录口径：`supported` 表示已有测试证据；`pending-smoke` 表示本机识别到 Host 版本但尚未完成手动 smoke；`not-implemented` 表示 OpenCap V1 当前不输出该字段或不把它作为安全边界。

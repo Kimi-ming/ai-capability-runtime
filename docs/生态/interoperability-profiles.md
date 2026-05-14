@@ -97,6 +97,43 @@ notes: MCP Host does not provide native confirmation in this test.
 
 当前 Host 矩阵维护在 `docs/生态/host-compatibility-matrix.md`。矩阵区分自动化 adapter 证据和真实 Host smoke 证据；Claude Desktop/Cursor 在完成手动 smoke 前保持 `pending-smoke`，自定义 MCP client 由 OpenCap helper tests 作为自动化证据。
 
+### `opencap.host.evidence.v1`
+
+目标：把 compatibility record 的结论拆成可复核的证据条目。Host record 回答“这个 Host/profile 当前结论是什么”；evidence record 回答“这个结论基于哪类证据、从哪里来、有什么限制”。
+
+记录字段：
+
+```yaml
+id: evidence-2026-05-14-custom-mcp-client-tools-tests
+profile: opencap.mcp.tools.v1
+host_record: hostrec-2026-05-14-custom-mcp-client-tools-v1
+host: custom-mcp-client
+host_version: opencap-helper-tests-0.1.0-dev
+opencap_version: 0.1.0-dev
+opencap_commit: <git-sha>
+observed_at: 2026-05-14
+evidence_kind: automated-test | manual-smoke | version-detection | runtime-contract | known-gap
+result: pass | fail | pending-smoke | not-run
+source:
+  command: pnpm --filter @opencap/mcp test
+  paths:
+    - packages/mcp/src/index.test.ts
+privacy:
+  stores_raw_input: false
+  stores_raw_output: false
+  stores_secret: false
+limitations:
+  - Not a third-party Host UI smoke.
+```
+
+记录要求：
+
+- 每条 evidence record 必须绑定 profile、Host record、Host version、OpenCap commit、观察日期和证据类型。
+- `automated-test` 只能证明 OpenCap adapter/runtime contract，不能替代真实第三方 Host UI smoke。
+- `version-detection` 只能证明本机识别到 Host version，不能证明 `tools/list`、`tools/call` 或 result 展示通过。
+- 证据路径可以指向测试文件、命令、手工 smoke 记录或 release artifact；不得保存 input/output 原文、secret、provider raw body。
+- T271 会把本节收敛成跨 profile 的统一 evidence record schema；在此之前，Host 兼容性先使用本节字段作为最小口径。
+
 ## Future Profile
 
 ### `opencap.mcp.elicitation.future`
@@ -139,3 +176,4 @@ OpenAI Apps SDK 面向 ChatGPT 内应用分发，并使用 MCP server 作为工�
 - T154：Host 兼容性 evidence records。
 - T156：MCP elicitation RFC。
 - T157：A2A Agent Card mapping RFC。
+- T271：统一 Interoperability Profile evidence record schema。

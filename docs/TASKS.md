@@ -520,7 +520,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`docs/运营/observability-metrics-v1.md` 新增本地指标命令草案，定义未来 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security` 的参数、输出示例、JSON shape、字段来源与隐私边界。文档明确当前已实现入口仍是 `opencap logs` 和 `opencap decision-log export`，metrics 命令尚未实现。
-- [ ] T154 P2：维护 Host compatibility evidence records。
+- [x] T154 P2：维护 Host compatibility evidence records。
+  - 验收标准：
+    - `docs/生态/interoperability-profiles.md` 定义 `opencap.host.evidence.v1` 的最小记录字段和使用边界。
+    - `docs/生态/host-compatibility-matrix.md` 为已有 custom MCP client pass 记录补充自动化 evidence records。
+    - Claude Desktop 和 Cursor 只补充 version-detection/pending-smoke evidence records，不把版本识别误写成 Host 兼容通过。
+    - evidence records 明确证据类型、来源命令/路径、隐私边界、限制，并说明自动化 adapter 证据不能替代第三方 Host UI smoke。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`docs/生态/interoperability-profiles.md` 新增 `opencap.host.evidence.v1`，定义 Host compatibility evidence record 的 profile、host_record、Host/version、OpenCap commit、observed_at、evidence_kind、source、privacy 和 limitations 字段。`docs/生态/host-compatibility-matrix.md` 新增 4 条 evidence records：custom MCP client tools/result 自动化 pass 证据，以及 Claude Desktop/Cursor version-detection + pending-smoke 证据。所有记录都明确不保存 raw input/output/secret，且自动化测试不等同第三方 Host UI smoke。
 - [ ] T156 P2：MCP elicitation profile RFC。
 - [ ] T157 P2：A2A Agent Card mapping RFC。
 - [ ] T163 P2：Remote Runtime OAuth profile RFC。
@@ -701,10 +716,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T154：维护 Host compatibility evidence records
-2. M3 / T156：MCP elicitation profile RFC
-3. M3 / T157：A2A Agent Card mapping RFC
-4. M3 / T163：Remote Runtime OAuth profile RFC
+1. M3 / T156：MCP elicitation profile RFC
+2. M3 / T157：A2A Agent Card mapping RFC
+3. M3 / T163：Remote Runtime OAuth profile RFC
+4. M3 / T271：定义 Interoperability Profile evidence record schema
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema
