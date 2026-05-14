@@ -290,7 +290,7 @@ Governance Surface
 | 发布供应链 | 清晰 | T123 制定 npm trusted publishing workflow |
 | Capability 包 | 清晰 | T151 做 package lint |
 | 确认与同意 | 清晰 | T152 落入 audit 字段和测试 |
-| 互操作 Profile | 清晰 | T154 维护 evidence records；T156 已起草 MCP elicitation profile RFC |
+| 互操作 Profile | 清晰 | T154 维护 evidence records；T156/T157 已起草 MCP elicitation 和 A2A Agent Card profile RFC |
 | 一致性测试 | 清晰 | T153 建立 suite skeleton |
 | Agentic 风险 | 清晰 | T155 转成 abuse-case smoke tests |
 | 身份授权 | 部分实现 | T159 已实现 env provider；T163 仍按 RFC 处理远程 OAuth |

@@ -91,7 +91,9 @@ A2A Agent
 
 OpenCap V1 不实现 A2A server，但应保持对象命名和审计模型足够清晰，便于未来对接 AgentCard、Task、Message、Artifact 等概念。
 
-参考：A2A specification：https://a2a-protocol.org/latest/specification/
+草案 profile：`../../rfcs/0011-a2a-agent-card-mapping-v1.md`
+
+参考：A2A specification：https://a2a-protocol.org/v0.3.0/specification/
 
 ## OpenAPI 对 OpenCap 的影响
 

@@ -62,6 +62,7 @@
 - [MCP 接口 V1](设计/mcp-interface-v1.md)
 - [连接 MCP Host 手动测试指南](教程/connect-mcp-host.md)
 - [MCP Elicitation Profile V1 RFC](../rfcs/0010-mcp-elicitation-profile-v1.md)
+- [A2A Agent Card Mapping Profile V1 RFC](../rfcs/0011-a2a-agent-card-mapping-v1.md)
 
 ### 我要处理安全和治理
 

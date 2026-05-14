@@ -158,6 +158,8 @@ A2A 面向 Agent 间发现、任务和协作。OpenCap 后续可以把 Capabilit
 - A2A adapter 只能暴露能力元数据和调用入口。
 - 远程 Agent 身份和授权必须另走 RFC。
 
+草案 profile 见 `rfcs/0011-a2a-agent-card-mapping-v1.md`。该 RFC 定义 `opencap.a2a.agent_card_mapping.v1`，把一个 OpenCap Runtime deployment 映射为 A2A Agent Card，并把已安装 Capability 映射为 Agent Skill；在 A2A adapter、远程授权和真实 client smoke 完成前，OpenCap 仍不宣称实现 A2A server。
+
 ### `opencap.apps-sdk.future`
 
 OpenAI Apps SDK 面向 ChatGPT 内应用分发，并使用 MCP server 作为工具表面。OpenCap 后续可作为应用背后的 Capability Runtime，但 V1 不绑定 ChatGPT 入口。
