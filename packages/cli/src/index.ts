@@ -476,10 +476,10 @@ program
       return;
     }
 
-    console.log("id version type risk trust status");
+    console.log("id version type risk lifecycle trust maintainer license status");
     for (const capability of installed) {
       console.log(
-        `${capability.id} ${capability.version ?? "-"} ${capability.type ?? "-"} ${capability.risk} ${capability.trustLevel ?? "-"} ${capability.status}`,
+        `${capability.id} ${capability.version ?? "-"} ${capability.type ?? "-"} ${capability.risk} ${capability.lifecycle} ${capability.trustLevel ?? "-"} ${capability.maintainer ?? "-"} ${capability.license ?? "-"} ${capability.status}`,
       );
     }
   }, "Failed to list installed capabilities"));

@@ -96,7 +96,7 @@ Maintainer: opencap
 Audit required: yes
 ```
 
-V1 可以先在 `opencap list` 和 README 中暴露基础字段，后续再做完整命令。
+当前 `opencap list` 已在 JSON 和人类表格中暴露基础字段：lifecycle、trust level、maintainer、license 和 status。后续再做完整 Trust Card 命令。
 
 ## 生命周期和命令映射
 

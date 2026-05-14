@@ -104,6 +104,8 @@ maintainer:
   status: community
 ```
 
+当前 `opencap list` 已输出 Trust Card 的最小可见化子集：trust level、lifecycle、maintainer、license 和 status。这些字段只用于展示和审查，不改变本地 policy、consent 或 execution gate。
+
 ## 非目标
 
 - Trust level 不等于安全认证。

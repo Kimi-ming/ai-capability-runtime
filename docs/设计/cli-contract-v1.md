@@ -87,7 +87,7 @@ Exit code：
 默认表格字段：
 
 ```text
-id version type risk trust status
+id version type risk lifecycle trust maintainer license status
 ```
 
 `--json` 输出数组：
@@ -99,7 +99,10 @@ id version type risk trust status
     "version": "0.1.0",
     "type": "http",
     "risk": "write",
-    "trust_level": "experimental",
+    "lifecycle": "installed",
+    "trustLevel": "experimental",
+    "maintainer": "opencap",
+    "license": "MIT",
     "status": "enabled"
   }
 ]

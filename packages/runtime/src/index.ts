@@ -129,7 +129,10 @@ export interface InstalledCapabilitySummary {
   version?: string;
   type?: string;
   risk: string;
+  lifecycle: "installed" | "invalid";
   trustLevel?: string;
+  maintainer?: string;
+  license?: string;
   status: "enabled" | "invalid";
   error?: string;
 }
@@ -3325,7 +3328,10 @@ export async function listInstalledCapabilities(options: ResolveStateDirOptions 
       version: capability.manifest.version,
       type: capability.manifest.type,
       risk: summarizeRisk(capability.manifest),
+      lifecycle: "installed",
       trustLevel: metadataString(capability.manifest, "trust_level"),
+      maintainer: metadataString(capability.manifest, "maintainer"),
+      license: metadataString(capability.manifest, "license"),
       status: "enabled",
     });
   }
@@ -3335,6 +3341,7 @@ export async function listInstalledCapabilities(options: ResolveStateDirOptions 
       id: invalid.id,
       installPath: invalid.installPath,
       risk: "unknown",
+      lifecycle: "invalid",
       status: "invalid",
       error: invalid.error,
     });

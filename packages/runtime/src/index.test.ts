@@ -2117,7 +2117,10 @@ describe("listInstalledCapabilities", () => {
         version: "0.1.0",
         type: "http",
         risk: "read_only",
+        lifecycle: "installed",
         trustLevel: "experimental",
+        maintainer: "opencap",
+        license: "MIT",
         status: "enabled",
       },
     ]);
@@ -2138,6 +2141,7 @@ describe("listInstalledCapabilities", () => {
     expect(result.find((item) => item.id === "github.create_issue")?.status).toBe("enabled");
     expect(result.find((item) => item.id === "bad.capability")).toMatchObject({
       status: "invalid",
+      lifecycle: "invalid",
       risk: "unknown",
     });
   });

@@ -120,8 +120,19 @@ rules:
 
       const list = await runOpenCapSmokeStage("list", ["list", "--state-dir", stateDir, "--json"]);
       expect(JSON.parse(list.stdout)).toMatchObject([
-        { id: "github.create_issue", status: "enabled", type: "http" },
+        {
+          id: "github.create_issue",
+          lifecycle: "installed",
+          trustLevel: "experimental",
+          maintainer: "opencap",
+          license: "MIT",
+          status: "enabled",
+          type: "http",
+        },
       ]);
+      const humanList = await runOpenCapSmokeStage("list human", ["list", "--state-dir", stateDir]);
+      expect(humanList.stdout).toContain("id version type risk lifecycle trust maintainer license status");
+      expect(humanList.stdout).toContain("github.create_issue 0.1.0 http write installed experimental opencap MIT enabled");
 
       const dryRun = await runOpenCapSmokeStage("invoke dry-run", [
         "invoke",

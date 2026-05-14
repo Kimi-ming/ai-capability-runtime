@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 18 个、cli smoke 1 个。
+截至 2026-05-13，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper 和 CLI smoke test。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 18 个、cli smoke 1 个。
 
 当前主要缺口：
 
@@ -393,7 +393,24 @@
 
 ### 模块 M3：CLI、MCP 和 Host 互操作
 
-- [ ] T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
+- [x] T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
+  - 验收标准：
+    - Runtime installed capability summary 包含 lifecycle、trust level、maintainer 和 license 基础字段。
+    - 有效 installed capability 的 lifecycle 至少标记为 `installed`；损坏条目标记为 `invalid`，且不阻断其他条目。
+    - `opencap list --json` 输出上述字段，字段值来自 manifest metadata 或 Runtime 派生状态。
+    - `opencap list` 人类表格展示 lifecycle/trust/maintainer/license/status。
+    - 不把 trust/lifecycle 作为授权依据；它们只作为可见化 evidence。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- index.test.ts -t "listInstalledCapabilities"`
+    - `pnpm --filter @opencap/cli test -- smoke.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`InstalledCapabilitySummary` 新增 `lifecycle`、`maintainer`、`license` 字段，有效 installed capability 标记为 `installed`，损坏条目标记为 `invalid`。`opencap list --json` 和人类表格都会输出 lifecycle/trust/maintainer/license/status 基础字段；CLI smoke 覆盖 JSON 与人类表格输出。字段只用于可见化 evidence，不参与授权。
 - [ ] T127 P2：维护 MCP Host 兼容性矩阵。
 - [ ] T134 P1：按 CLI 契约补齐命令 snapshot tests。
 - [ ] T136 P1：按 MCP 接口契约增加 tool mapping tests。
@@ -581,10 +598,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T125：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段
-2. M3 / T127：维护 MCP Host 兼容性矩阵
-3. M3 / T134：CLI command snapshot tests
-4. M3 / T137：错误模型和 exit code tests
+1. M3 / T127：维护 MCP Host 兼容性矩阵
+2. M3 / T134：CLI command snapshot tests
+3. M3 / T137：错误模型和 exit code tests
+4. M3 / T142：维护 Host compatibility test records
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema
