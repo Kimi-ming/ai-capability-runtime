@@ -95,6 +95,8 @@ notes: MCP Host does not provide native confirmation in this test.
 - 字段支持情况必须逐项记录，不能用“兼容 MCP”一笔带过。
 - `annotations` 和 `_meta` 只能作为 Host hint 或未来兼容性信息，不能降低 Runtime policy、confirmation 或 audit 要求。
 
+当前 Host 矩阵维护在 `docs/生态/host-compatibility-matrix.md`。矩阵区分自动化 adapter 证据和真实 Host smoke 证据；Claude Desktop/Cursor 在完成手动 smoke 前保持 `pending-smoke`，自定义 MCP client 由 OpenCap helper tests 作为自动化证据。
+
 ## Future Profile
 
 ### `opencap.mcp.elicitation.future`

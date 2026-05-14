@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate 和 T125 `opencap list` lifecycle/trust fields 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields 和 T127 Host compatibility matrix 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T125 已完成；下一项 ready task 预计是 T127 P2：维护 MCP Host 兼容性矩阵。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T127 已完成；下一项 ready task 预计是 T134 P1：按 CLI 契约补齐命令 snapshot tests。
 
-下一步推荐：先用 `next_task.py` 重新确认 T127，再补齐验收标准和任务级验证。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T134，再补齐验收标准和任务级验证。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M3 / T127 P2：维护 MCP Host 兼容性矩阵
+M3 / T134 P1：CLI command snapshot tests
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T130/T131/T132/T133/T135/T145/T152/T159/T160/T161/T164/T167/T168/T170/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T127/T130/T131/T132/T133/T135/T145/T152/T159/T160/T161/T164/T167/T168/T170/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T125 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T127。
+- 当前状态：T127 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T134。
 
 ## 最近验证
 
@@ -128,6 +128,7 @@ M3 / T127 P2：维护 MCP Host 兼容性矩阵
 - T201 已完成：新增 `packages/runtime/src/abuse-throttle.ts` 和 `abuse-throttle.test.ts`，导出 `evaluateAbuseThrottleGate()` 和 `defaultExternalSendAbuseThrottleRule()` 纯 pre-secret gate helper。测试覆盖本地循环调用 deny 阻断 secret/execution、ask 映射 confirmation_required、warn 作为 allow evidence，以及 `external_send` 默认低频 ask 基线。Runtime 测试数从 227 增至 231。
 - T204 已完成：新增 `packages/runtime/src/financial-consent-spend-gate.ts` 和 `financial-consent-spend-gate.test.ts`，导出 `evaluateFinancialConsentSpendGate()` 纯 pre-secret gate helper。测试覆盖 financial risk 必须 explicit approved consent、approved consent 后仍检查 spend cap、evidence redaction 和非 financial 不触发 consent gate；`evaluateQuotaBudgetGate()` 同步补齐 budget warn evidence。Runtime 测试数从 231 增至 235。
 - T125 已完成：`InstalledCapabilitySummary` 和 `opencap list` 新增 lifecycle、trust level、maintainer、license、status 基础字段。有效 installed capability 标记 `installed`，损坏条目标记 `invalid`；CLI smoke 覆盖 JSON 与人类表格输出。字段只作为 Trust Card 可见化 evidence，不参与授权。
+- T127 已完成：`docs/生态/host-compatibility-matrix.md` 新增 2026-05-14 维护状态、profile 覆盖矩阵和维护规则，区分自动化 adapter tests 与真实 Host smoke；Claude Desktop/Cursor 保持 `pending-smoke`，自定义 MCP client 绑定 helper tests 证据。`docs/生态/interoperability-profiles.md` 已同步矩阵入口。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -135,9 +136,9 @@ M3 / T127 P2：维护 MCP Host 兼容性矩阵
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T127 P2：维护 MCP Host 兼容性矩阵。
+- T134 P1：CLI command snapshot tests。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T127 展开为带验收标准和验证命令，再优先做文档矩阵或轻量验证记录。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T134 展开为带验收标准和验证命令，再按 TDD 补齐 CLI command snapshot tests。
 
 ## Secret Resolver V1 env provider 已实现
 

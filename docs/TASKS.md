@@ -411,7 +411,20 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`InstalledCapabilitySummary` 新增 `lifecycle`、`maintainer`、`license` 字段，有效 installed capability 标记为 `installed`，损坏条目标记为 `invalid`。`opencap list --json` 和人类表格都会输出 lifecycle/trust/maintainer/license/status 基础字段；CLI smoke 覆盖 JSON 与人类表格输出。字段只用于可见化 evidence，不参与授权。
-- [ ] T127 P2：维护 MCP Host 兼容性矩阵。
+- [x] T127 P2：维护 MCP Host 兼容性矩阵。
+  - 验收标准：
+    - `docs/生态/host-compatibility-matrix.md` 明确目标 Host、profile 覆盖、自动化证据和真实 Host smoke 状态。
+    - 矩阵区分 `supported`、`pending-smoke`、`pending-record`、`runtime-owned` 等状态，不能把自动化 adapter tests 误写成真实 Host 兼容通过。
+    - Claude Desktop 和 Cursor 在未完成手动 smoke 前保持 `pending-smoke`。
+    - 自定义 MCP client 绑定 OpenCap helper tests 作为自动化证据。
+    - `docs/生态/interoperability-profiles.md` 指向矩阵维护入口。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+  - 完成记录：`docs/生态/host-compatibility-matrix.md` 新增 2026-05-14 维护状态、profile 覆盖矩阵和维护规则，明确自定义 MCP client 有自动化 helper tests 证据，Claude Desktop/Cursor 仍需真实 Host smoke；`docs/生态/interoperability-profiles.md` 已同步矩阵入口和证据边界。
 - [ ] T134 P1：按 CLI 契约补齐命令 snapshot tests。
 - [ ] T136 P1：按 MCP 接口契约增加 tool mapping tests。
 - [ ] T137 P1：实现错误模型和 exit code tests。
@@ -598,10 +611,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T127：维护 MCP Host 兼容性矩阵
-2. M3 / T134：CLI command snapshot tests
-3. M3 / T137：错误模型和 exit code tests
-4. M3 / T142：维护 Host compatibility test records
+1. M3 / T134：CLI command snapshot tests
+2. M3 / T137：错误模型和 exit code tests
+3. M3 / T142：维护 Host compatibility test records
+4. M3 / T143：从 audit log 派生本地指标命令草案
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema

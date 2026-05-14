@@ -2,6 +2,8 @@
 
 本文定义 OpenCap 如何跟踪 MCP Host 兼容性。不同 Host 对 MCP tools、output schema、elicitation、STDIO 行为的支持可能不同，不能靠假设推进。
 
+维护状态：2026-05-14 已重新校准。当前矩阵只声明已有证据：自定义 MCP client 由自动化测试覆盖；Claude Desktop 和 Cursor 仍是已识别目标 Host，但真实 Host smoke 结果保持 `pending-smoke`。在完成手动 smoke 前，OpenCap 不能宣称兼容所有 MCP Host。
+
 ## 目标 Host
 
 | Host | V1 目标 | 备注 |
@@ -23,6 +25,22 @@
 | elicitation | spike | 不作为初始依赖 |
 | tool annotations | no | 不作为安全边界 |
 | stderr 日志 | yes | 不影响协议 |
+
+## Profile 覆盖矩阵
+
+| Profile | 范围 | 自动化证据 | Claude Desktop | Cursor | 当前结论 |
+| --- | --- | --- | --- | --- | --- |
+| `opencap.mcp.tools.v1` | tools/list、tools/call、tool name、input schema、confirmation_required | `packages/mcp/src/index.test.ts`、`tool-projection.test.ts` | pending-smoke | pending-smoke | Runtime/MCP adapter 行为已测；真实 Host 展示和调用仍需手动记录。 |
+| `opencap.mcp.consent.v1` | ask 无确认通道时返回 confirmation_required，不 prompt，不解析 secret | `packages/mcp/src/index.test.ts`、`packages/runtime/src/index.test.ts` consent receipt tests | pending-smoke | pending-smoke | 安全边界由 Runtime 保证；Host 原生确认能力不作为 V1 依赖。 |
+| `opencap.mcp.result.v1` | structuredContent、content text、isError、outputSchema result behavior | `packages/mcp/src/result-adapter.test.ts`、Runtime Result Envelope tests | pending-smoke | pending-smoke | 结果 envelope 和 sanitizer 已测；Host 展示行为仍需 smoke。 |
+| `opencap.host.record.v1` | Host version、OpenCap commit、test date、checks、known gaps | `packages/runtime/src/ledger.test.ts`、`card.test.ts` compatibility record/card tests | pending-record | pending-record | record/card schema 已测；真实 Host record 待补。 |
+
+维护规则：
+
+- 每次 Host 版本、OpenCap MCP adapter 或 Result Envelope 语义变化后，都要更新本矩阵或新增 compatibility record。
+- `pending-smoke` 不是失败，也不是兼容通过；它只表示目标 Host 已进入验证队列。
+- 自动化 helper tests 只能证明 OpenCap adapter 输出，不证明第三方 Host UI 展示。
+- Host 忽略 metadata、outputSchema 或 structuredContent 时，不能降低 Runtime validation、policy、consent、secret resolver 或 audit 要求。
 
 ## Tool Metadata 字段兼容性记录
 
