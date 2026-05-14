@@ -151,3 +151,19 @@ metadata:
   license: MIT
   trust_level: experimental
 ```
+
+## 生命周期元数据
+
+当 Capability 已被弃用、下架或撤销时，可以在 manifest 顶层声明 `lifecycle`：
+
+```yaml
+lifecycle:
+  status: revoked
+  reason: unsafe_execution
+  since: 2026-05-14
+  advisory: OCAP-2026-0001
+  replacement: github.create_issue
+  message: Do not install this capability by default.
+```
+
+`status` 只支持 `deprecated`、`yanked`、`revoked`。`status`、`reason` 和 `since` 必填；`revoked` 必须携带 advisory id。Lifecycle metadata 是治理和用户提示信号，不是授权来源，不能覆盖 Runtime policy、confirmation 或 audit。

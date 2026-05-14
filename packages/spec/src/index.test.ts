@@ -84,6 +84,53 @@ describe("validateManifest", () => {
     await expectInvalidField(manifest, "/type");
   });
 
+  it("accepts lifecycle status metadata for deprecated, yanked, and revoked capabilities", async () => {
+    for (const status of ["deprecated", "yanked", "revoked"] as const) {
+      const manifest = baseManifest() as Record<string, unknown>;
+      manifest.lifecycle = {
+        status,
+        reason: status === "deprecated" ? "superseded" : "unsafe_execution",
+        since: "2026-05-14",
+        advisory: "OCAP-2026-0001",
+        replacement: "github.create_issue",
+        message: "Use the replacement capability.",
+      };
+
+      const result = await validateManifest(manifest, "fixture.yml");
+
+      expect(result.ok).toBe(true);
+    }
+  });
+
+  it("rejects invalid lifecycle status metadata", async () => {
+    const invalidStatus = baseManifest() as Record<string, unknown>;
+    invalidStatus.lifecycle = {
+      status: "deleted",
+      reason: "unsafe_execution",
+      since: "2026-05-14",
+      advisory: "OCAP-2026-0001",
+    };
+    await expectInvalidField(invalidStatus, "/lifecycle/status");
+
+    const extraField = baseManifest() as Record<string, unknown>;
+    extraField.lifecycle = {
+      status: "yanked",
+      reason: "unsafe_execution",
+      since: "2026-05-14",
+      advisory: "OCAP-2026-0001",
+      hidden: true,
+    };
+    await expectInvalidField(extraField, "/lifecycle/hidden");
+
+    const revokedWithoutAdvisory = baseManifest() as Record<string, unknown>;
+    revokedWithoutAdvisory.lifecycle = {
+      status: "revoked",
+      reason: "unsafe_execution",
+      since: "2026-05-14",
+    };
+    await expectInvalidField(revokedWithoutAdvisory, "/lifecycle");
+  });
+
   it("rejects manifests without permissions", async () => {
     const manifest = baseManifest() as Record<string, unknown>;
     delete manifest.permissions;

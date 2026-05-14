@@ -41,6 +41,17 @@ export type RiskLevel =
 
 export type CapabilityType = "http";
 
+export type CapabilityManifestLifecycleStatus = "deprecated" | "yanked" | "revoked";
+
+export interface CapabilityManifestLifecycle {
+  status: CapabilityManifestLifecycleStatus;
+  reason: string;
+  since: string;
+  advisory?: string;
+  replacement?: string;
+  message?: string;
+}
+
 export interface CapabilityPermission {
   resource: string;
   action: string;
@@ -54,6 +65,7 @@ export interface CapabilityManifest {
   description: string;
   version: string;
   type: CapabilityType;
+  lifecycle?: CapabilityManifestLifecycle;
   input: Record<string, unknown>;
   output: Record<string, unknown>;
   auth: Record<string, unknown>;

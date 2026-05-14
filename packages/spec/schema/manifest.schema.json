@@ -41,6 +41,64 @@
         "http"
       ]
     },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reason",
+        "since"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "deprecated",
+            "yanked",
+            "revoked"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "since": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "advisory": {
+          "type": "string",
+          "pattern": "^OCAP-[0-9]{4}-[0-9]{4,}$"
+        },
+        "replacement": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "revoked"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "advisory"
+            ]
+          }
+        }
+      ]
+    },
     "input": {
       "$ref": "#/$defs/jsonSchema"
     },

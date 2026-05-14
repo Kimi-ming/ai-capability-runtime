@@ -50,7 +50,7 @@ Revoked 需要 advisory 或 revocation record。
 
 当前 Registry revocation metadata 放在 `registry/advisories/`。`OCAP-2026-0001` 已记录 `http.request_demo` 的 revoked 状态：该示例能力接受任意用户 URL，只保留为测试和审查样例，不应作为默认可信安装能力。
 
-## Metadata 草案
+## Manifest Lifecycle Metadata
 
 ```yaml
 lifecycle:
@@ -61,6 +61,8 @@ lifecycle:
   replacement: github.create_issue.v2
   message: Do not run this capability. Rotate affected credentials.
 ```
+
+当前 manifest schema 已支持可选顶层 `lifecycle` 对象，用于声明 deprecated、yanked 或 revoked 的治理状态。`status`、`reason` 和 `since` 为必填字段；`revoked` 必须携带 `advisory`，指向 `OCAP-YYYY-NNNN` 形状的安全公告或撤销记录。`replacement` 只能指向稳定 Capability id，`message` 只能作为用户可见说明，不能改变 Runtime policy。
 
 ## Runtime 行为
 

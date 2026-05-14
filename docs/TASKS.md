@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 55 个、runtime 246 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 57 个、runtime 246 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -881,7 +881,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/advisory-check.test.ts`，并在 Runtime root API 中导出 `checkInstalledCapabilityAdvisories()` 及结果类型。Helper 读取本地 installed capability 与 registry advisory metadata，匹配 `http.request_demo@0.1.0` -> `OCAP-2026-0001` revoked advisory，并确认无关能力不报告 advisory。Runtime 测试数从 244 增至 246。
-- [ ] T191 P1：Lifecycle status schema for deprecated/yanked/revoked。
+- [x] T191 P1：Lifecycle status schema for deprecated/yanked/revoked。
+  - 验收标准：
+    - Manifest schema 支持可选顶层 `lifecycle` 对象，状态枚举为 `deprecated`、`yanked`、`revoked`。
+    - `lifecycle` 必须包含 `status`、`reason` 和 `since`；`revoked` 必须携带 advisory id。
+    - `lifecycle` 拒绝未知状态、未知字段和不合法 advisory/replacement/date 形状。
+    - `@opencap/spec` 导出 lifecycle metadata 类型，供 Runtime/CLI 后续安装、列表和调用警告复用。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- index.test.ts -t lifecycle`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/spec/schema/manifest.schema.json` 新增 `lifecycle` schema，`packages/spec/src/index.ts` 导出 `CapabilityManifestLifecycleStatus` 和 `CapabilityManifestLifecycle`，`packages/spec/src/index.test.ts` 覆盖 deprecated/yanked/revoked 合法状态、未知状态、未知字段和 revoked 缺少 advisory。Spec 测试数从 55 增至 57。
 - [ ] T192 P1：Install/list/invoke lifecycle warnings。
 - [ ] T193 P2：Registry search excludes yanked/revoked by default。
 - [ ] T194 P2：Quality score rubric implementation draft。
