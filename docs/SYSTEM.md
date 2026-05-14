@@ -53,7 +53,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | Manifest 演进 | Schema 可迁移 | `docs/规范/manifest-evolution.md` | schema 演进规则 |
 | Registry 分发 | 可验证安装来源 | `docs/生态/registry-distribution.md` | Git-based V1 registry |
 | SDK/Adapter 边界 | 防止范围膨胀 | `docs/设计/sdk-and-adapter-boundary.md` | V1 非阻塞边界 |
-| 发布供应链 | 可验证发布 | `docs/运营/package-publishing-v1.md` | npm/provenance 预案 |
+| 发布供应链 | 可验证发布 | `docs/运营/package-publishing-v1.md`, `docs/运营/npm-trusted-publishing-workflow.md` | npm/provenance 预案 |
 | Capability 包 | 稳定 Registry 单元 | `docs/设计/capability-package-v1.md` | package 目录契约 |
 | 确认与同意 | 可审计授权语义 | `docs/设计/confirmation-and-consent-v1.md` | consent request/receipt |
 | 互操作 Profile | 兼容性证据化 | `docs/生态/interoperability-profiles.md` | MCP/Registry profile |
@@ -287,7 +287,7 @@ Governance Surface
 | Manifest 演进 | 清晰 | T001/T003 后继续收紧 schema |
 | Registry 分发 | 清晰 | V1 保持 Git-based；T147 已起草 signed index future RFC |
 | SDK/Adapter | 边界清晰 | V1 不阻塞主路径 |
-| 发布供应链 | 清晰 | T123 制定 npm trusted publishing workflow |
+| 发布供应链 | 清晰 | T123 制定发布策略；T148 已补 npm trusted publishing workflow 草案 |
 | Capability 包 | 清晰 | T151 做 package lint |
 | 确认与同意 | 清晰 | T152 落入 audit 字段和测试 |
 | 互操作 Profile | 清晰 | T154/T271 维护 evidence records/schema；T156/T157 已起草 MCP elicitation 和 A2A Agent Card profile RFC |

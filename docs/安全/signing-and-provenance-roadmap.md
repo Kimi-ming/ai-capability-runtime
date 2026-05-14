@@ -25,6 +25,8 @@ OpenCap 的 Registry 和 npm packages 都会成为 AI 能力供应链的一部�
 - OpenSSF Scorecard baseline。
 - branch protection。
 
+npm trusted publishing workflow 草案见 `docs/运营/npm-trusted-publishing-workflow.md`。草案要求 GitHub Actions OIDC、`npm-production` environment、无长期 npm token、发布前 tarball 内容审查和 release evidence。
+
 ## V1 后
 
 考虑：

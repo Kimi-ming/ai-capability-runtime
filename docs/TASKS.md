@@ -723,7 +723,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `rfcs/0013-registry-index-signing-v1.md`，定义 `opencap.registry.index_signing.v1` 草案、index envelope、manifest/index digest、signature metadata、verification evidence、failure semantics、compatibility/migration 和 future implementation tests。`docs/生态/registry-distribution.md`、`docs/安全/signing-and-provenance-roadmap.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口和边界。
-- [ ] T148 P1：npm trusted publishing workflow 草案。
+- [x] T148 P1：npm trusted publishing workflow 草案。
+  - 验收标准：
+    - 新增 npm trusted publishing workflow 草案文档，覆盖 npm 侧 trusted publisher 配置、GitHub environment、draft workflow、hard gates、provenance evidence、回滚/事故处理和后续实现任务。
+    - 草案明确不使用长期 `NPM_TOKEN` / `NODE_AUTH_TOKEN` 发布，不在未配置 npm trusted publisher 和 `npm-production` environment 前启用真实 workflow。
+    - 草案基于当前 npm 官方文档说明 OIDC provider、Node/npm 最低要求、automatic provenance 条件和 token access 限制建议。
+    - Package publishing strategy、signing/provenance roadmap、release checklist 和文档入口链接到草案。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `docs/运营/npm-trusted-publishing-workflow.md`，定义 OpenCap npm trusted publishing 草案，覆盖 GitHub Actions OIDC、`npm-production` environment、manual dispatch + dry-run workflow、package tarball review、provenance evidence、长期 token 禁止和 rollback/incident 流程。`docs/运营/package-publishing-v1.md`、`docs/安全/signing-and-provenance-roadmap.md`、`docs/releases/release-checklist.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口。
 - [ ] T151 P1：实现 Capability Package lint。
 - [ ] T158 P1：Trust Card generation rules。
 - [ ] T185 P1：Trust level transition tests。

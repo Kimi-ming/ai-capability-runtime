@@ -39,6 +39,8 @@ OpenCap 策略：
 - public package 从 public repo 发布时启用 provenance。
 - 发布 workflow 使用最小权限。
 
+具体 workflow 草案见 [npm Trusted Publishing Workflow 草案](npm-trusted-publishing-workflow.md)。该草案保留为发布前审查材料，不应在未配置 npm trusted publisher、`npm-production` environment 和 package scope 权限前直接启用。
+
 ## 版本策略
 
 - `0.1.0-alpha.x`：早期可试用。

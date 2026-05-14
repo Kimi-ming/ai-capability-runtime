@@ -37,6 +37,7 @@
 - [发布成熟度门禁](运营/release-readiness.md)
 - [Release Checklist](releases/release-checklist.md)
 - [Alpha Release Checklist](releases/alpha-checklist.md)
+- [npm Trusted Publishing Workflow 草案](运营/npm-trusted-publishing-workflow.md)
 
 ### 我要审查架构
 

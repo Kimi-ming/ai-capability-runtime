@@ -140,7 +140,7 @@ pnpm test
 - [ ] README、SPEC、ARCHITECTURE、TESTING、HANDOFF、TASKS 同步。
 - [ ] GitHub required checks 通过。
 - [ ] `Security Baseline` workflow 通过，或 release notes 说明非阻断原因。
-- [ ] npm package 发布范围和 provenance 策略已确认。
+- [ ] npm package 发布范围、trusted publishing workflow 和 provenance 策略已确认，且没有使用长期 npm token。
 
 ## 6. Release Evidence
 
