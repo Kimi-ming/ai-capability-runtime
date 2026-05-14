@@ -34,6 +34,7 @@
 | [Alpha Release Checklist](releases/alpha-checklist.md) | Alpha 发布前门禁 | 发布范围、阻断项或发布流程变化时 |
 | [包发布策略 V1](运营/package-publishing-v1.md) | npm package 发布范围、顺序、provenance 和不发布条件 | 包范围、发布顺序或 trusted publishing 策略变化时 |
 | [决策索引](DECISIONS.md) | 已接受 ADR 总览 | 新增或调整 ADR 时 |
+| [RFC 模板](../rfcs/TEMPLATE.md) | 新 RFC 的复制模板 | RFC 章节、评审要求或证据格式变化时 |
 | [风险登记](RISKS.md) | High/Medium/Low 风险 | 发现、缓解或关闭风险时 |
 
 ## 目录职责

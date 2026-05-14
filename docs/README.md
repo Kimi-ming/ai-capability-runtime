@@ -48,6 +48,7 @@
 - [Interoperability Profile Evidence Record Schema](生态/interoperability-evidence-record-schema.md)
 - [领域模型](设计/domain-model.md)
 - [架构决策索引](DECISIONS.md)
+- [RFC 模板](../rfcs/TEMPLATE.md)
 - [风险登记](RISKS.md)
 - [需求-任务-测试追踪矩阵](规划/traceability-matrix.md)
 

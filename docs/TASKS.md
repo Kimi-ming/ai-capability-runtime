@@ -690,7 +690,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`.github/PULL_REQUEST_TEMPLATE.md` 已新增 “Capability Registry PR” 区块，把 Registry 供应链 Review 工作流、能力评审清单、分类一致性、manifest/README/tests、`type: http`、权限/风险/auth/execution、secret 禁止和 `pnpm validate` 纳入 PR 自查。`.github/ISSUE_TEMPLATE/capability_submission.yml` 已新增分类选择和 review checklist 自查；`docs/社区/contributor-journey.md`、`docs/社区/maintainer-guide.md`、`registry/README.md` 和 `docs/教程/review-a-capability.md` 已同步 issue/PR/checklist 流程。
-- [ ] T144 P2：补充 RFC 模板文件。
+- [x] T144 P2：补充 RFC 模板文件。
+  - 验收标准：
+    - 新增可复制的 RFC 模板文件，覆盖状态、元数据、摘要、背景、目标、非目标、术语、设计、示例、安全隐私、兼容迁移、验证计划、发布运维、替代方案、开放问题和决策结果。
+    - 模板明确禁止真实 token、私有 URL、用户数据、生产日志和 provider raw response 进入 RFC 示例。
+    - RFC 流程文档指向模板文件，不再只保留短代码块。
+    - design/RFC issue template 和文档入口能引导贡献者找到模板。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `rfcs/TEMPLATE.md`，提供 RFC 状态、元数据、设计、安全隐私、兼容迁移、验证计划、发布运维和决策结果模板，并明确示例不得包含 secret/raw data。`docs/社区/rfc-process.md` 已改为要求复制模板；`.github/ISSUE_TEMPLATE/design_rfc.yml`、`docs/README.md` 和 `docs/INDEX.md` 已同步模板入口。
 - [ ] T147 P2：Registry index signing RFC 草案。
 - [ ] T148 P1：npm trusted publishing workflow 草案。
 - [ ] T151 P1：实现 Capability Package lint。

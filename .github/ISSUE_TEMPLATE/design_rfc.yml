@@ -14,9 +14,17 @@ body:
     id: proposal
     attributes:
       label: 提案
-      description: 请概述设计、兼容性和 rollout 方式。
+      description: 请概述设计、兼容性和 rollout 方式。若进入 RFC，请复制 rfcs/TEMPLATE.md 并提交 rfcs/NNNN-title.md。
     validations:
       required: true
+  - type: checkboxes
+    id: rfc_template
+    attributes:
+      label: RFC 模板确认
+      description: 如果该提案需要 RFC，请在 PR 中使用 rfcs/TEMPLATE.md。
+      options:
+        - label: 我已确认需要 RFC 时会覆盖目标/非目标、安全隐私、兼容迁移、验证计划、发布运维和开放问题。
+          required: false
   - type: textarea
     id: risks
     attributes:
