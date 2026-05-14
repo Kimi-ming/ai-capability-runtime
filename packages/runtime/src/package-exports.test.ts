@@ -46,6 +46,7 @@ describe("package public exports", () => {
 
     expect(packageJson.exports?.["./schema/manifest.schema.json"]).toBe("./schema/manifest.schema.json");
     expect(packageJson.exports?.["./schema/registry-test.schema.json"]).toBe("./schema/registry-test.schema.json");
+    expect(packageJson.exports?.["./schema/capability-advisory.schema.json"]).toBe("./schema/capability-advisory.schema.json");
     expectNoInternalSubpaths(packageJson);
   });
 

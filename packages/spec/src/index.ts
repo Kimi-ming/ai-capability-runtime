@@ -92,6 +92,7 @@ export interface ManifestPathValidationResult {
 
 let compiledManifestValidator: ValidateFunction | undefined;
 let compiledRegistryTestValidator: ValidateFunction | undefined;
+let compiledCapabilityAdvisoryValidator: ValidateFunction | undefined;
 
 async function compileSchema(schemaFileName: string): Promise<ValidateFunction> {
   const schemaPath = new URL(`../schema/${schemaFileName}`, import.meta.url);
@@ -114,6 +115,14 @@ async function getRegistryTestValidator() {
   }
 
   return compiledRegistryTestValidator;
+}
+
+async function getCapabilityAdvisoryValidator() {
+  if (!compiledCapabilityAdvisoryValidator) {
+    compiledCapabilityAdvisoryValidator = await compileSchema("capability-advisory.schema.json");
+  }
+
+  return compiledCapabilityAdvisoryValidator;
 }
 
 function isManifestFileName(fileName: string): boolean {
@@ -341,6 +350,62 @@ export interface RegistryTestPathValidationResult {
   invalid: RegistryTestValidationFailure[];
 }
 
+export type CapabilityAdvisoryType =
+  | "malicious"
+  | "overbroad_permissions"
+  | "credential_leak"
+  | "unsafe_execution"
+  | "misleading_metadata"
+  | "provider_changed"
+  | "maintainer_compromise";
+
+export type CapabilityAdvisorySeverity = "low" | "medium" | "high" | "critical";
+export type CapabilityAdvisoryStatus = "reported" | "triaged" | "investigating" | "fixed" | "mitigated" | "revoked" | "not_affected" | "published";
+export type CapabilityAdvisoryRegistryAction = "none" | "freeze" | "yank" | "revoke";
+export type CapabilityAdvisoryRuntimeDefault = "warn" | "ask" | "deny";
+
+export interface CapabilityAdvisory {
+  schema_version: "opencap.capability_advisory.v1";
+  id: string;
+  capability: string;
+  affected_versions: string[];
+  type: CapabilityAdvisoryType;
+  severity: CapabilityAdvisorySeverity;
+  status: CapabilityAdvisoryStatus;
+  summary: string;
+  published_at: string | null;
+  modified_at: string;
+  actions: {
+    registry: CapabilityAdvisoryRegistryAction;
+    runtime_default: CapabilityAdvisoryRuntimeDefault;
+    fixed_version: string | null;
+  };
+  references?: string[];
+}
+
+export interface CapabilityAdvisoryValidationIssue extends ManifestValidationIssue {}
+
+export interface CapabilityAdvisoryValidationSuccess {
+  ok: true;
+  filePath: string;
+  advisory: CapabilityAdvisory;
+}
+
+export interface CapabilityAdvisoryValidationFailure {
+  ok: false;
+  filePath: string;
+  issues: CapabilityAdvisoryValidationIssue[];
+}
+
+export type CapabilityAdvisoryValidationResult = CapabilityAdvisoryValidationSuccess | CapabilityAdvisoryValidationFailure;
+
+export interface CapabilityAdvisoryPathValidationResult {
+  targetPath: string;
+  advisories: string[];
+  valid: CapabilityAdvisoryValidationSuccess[];
+  invalid: CapabilityAdvisoryValidationFailure[];
+}
+
 function isRegistryTestFileName(fileName: string): boolean {
   return ["basic.yml", "basic.yaml", "basic.json"].includes(basename(fileName));
 }
@@ -428,6 +493,96 @@ export async function validateRegistryTestPath(targetPath: string): Promise<Regi
     testCases,
     valid: results.filter((result): result is RegistryTestValidationSuccess => result.ok),
     invalid: results.filter((result): result is RegistryTestValidationFailure => !result.ok),
+  };
+}
+
+function isCapabilityAdvisoryFileName(fileName: string): boolean {
+  return ["advisory.yml", "advisory.yaml", "advisory.json"].includes(basename(fileName)) || /^OCAP-[0-9]{4}-[0-9]{4}\.(ya?ml|json)$/.test(fileName);
+}
+
+async function findCapabilityAdvisoriesInDirectory(dir: string): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const path = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...(await findCapabilityAdvisoriesInDirectory(path)));
+    } else if (entry.isFile() && isCapabilityAdvisoryFileName(entry.name)) {
+      files.push(path);
+    }
+  }
+
+  return files.sort();
+}
+
+export async function findCapabilityAdvisoryFiles(targetPath: string): Promise<string[]> {
+  const info = await stat(targetPath);
+
+  if (info.isFile()) {
+    return isCapabilityAdvisoryFileName(targetPath) ? [targetPath] : [];
+  }
+
+  if (info.isDirectory()) {
+    return findCapabilityAdvisoriesInDirectory(targetPath);
+  }
+
+  return [];
+}
+
+export async function loadCapabilityAdvisory(filePath: string): Promise<unknown> {
+  return loadManifest(filePath);
+}
+
+export async function validateCapabilityAdvisory(advisory: unknown, filePath = "<memory>"): Promise<CapabilityAdvisoryValidationResult> {
+  const validator = await getCapabilityAdvisoryValidator();
+  const valid = validator(advisory);
+
+  if (valid) {
+    return {
+      ok: true,
+      filePath,
+      advisory: advisory as CapabilityAdvisory,
+    };
+  }
+
+  return {
+    ok: false,
+    filePath,
+    issues: issuesFromAjvErrors(filePath, validator.errors),
+  };
+}
+
+export async function validateCapabilityAdvisoryFile(filePath: string): Promise<CapabilityAdvisoryValidationResult> {
+  try {
+    const advisory = await loadCapabilityAdvisory(filePath);
+    return validateCapabilityAdvisory(advisory, filePath);
+  } catch (error) {
+    return {
+      ok: false,
+      filePath,
+      issues: [
+        {
+          filePath,
+          fieldPath: "/",
+          message: error instanceof Error ? error.message : "failed to read capability advisory",
+          keyword: "parse",
+        },
+      ],
+    };
+  }
+}
+
+export async function validateCapabilityAdvisoryPath(targetPath: string): Promise<CapabilityAdvisoryPathValidationResult> {
+  const advisories = await findCapabilityAdvisoryFiles(targetPath);
+  const results = await Promise.all(advisories.map((advisoryPath) => validateCapabilityAdvisoryFile(advisoryPath)));
+
+  return {
+    targetPath,
+    advisories,
+    valid: results.filter((result): result is CapabilityAdvisoryValidationSuccess => result.ok),
+    invalid: results.filter((result): result is CapabilityAdvisoryValidationFailure => !result.ok),
   };
 }
 

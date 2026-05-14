@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {
   formatManifestValidationIssue,
+  validateCapabilityAdvisoryPath,
   validateCapabilityPackagePath,
   validateCapabilityAuthoringManifestPath,
   validateRegistryTestPath,
@@ -62,6 +63,20 @@ try {
   for (const invalid of registryTestResult.invalid) {
     hasFailure = true;
     console.error(`Invalid registry test: ${invalid.filePath}`);
+    for (const issue of invalid.issues) {
+      console.error(`  ${formatManifestValidationIssue(issue)}`);
+    }
+  }
+
+  const advisoryResult = await validateCapabilityAdvisoryPath(targetPath);
+
+  for (const valid of advisoryResult.valid) {
+    console.log(`Valid capability advisory: ${valid.filePath}`);
+  }
+
+  for (const invalid of advisoryResult.invalid) {
+    hasFailure = true;
+    console.error(`Invalid capability advisory: ${invalid.filePath}`);
     for (const issue of invalid.issues) {
       console.error(`  ${formatManifestValidationIssue(issue)}`);
     }

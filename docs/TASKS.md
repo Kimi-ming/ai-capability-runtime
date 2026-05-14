@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 244 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 54 个、runtime 244 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -820,7 +820,27 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/lifecycle-gate.ts` 和 `lifecycle-gate.test.ts`，导出 revoked invoke lifecycle gate helper。测试覆盖 revoked 写/高风险 pre-secret deny、revoked read-only ask、read-only explicit override allow，以及非 revoked 不改变 policy 权限；Runtime 测试数从 240 增至 244。
-- [ ] T187 P1：Capability advisory YAML schema。
+- [x] T187 P1：Capability advisory YAML schema。
+  - 验收标准：
+    - `@opencap/spec` 提供 `packages/spec/schema/capability-advisory.schema.json`，固定 advisory V1 的 id、capability、affected_versions、type、severity、status、timestamps 和 actions 字段。
+    - Spec public API 导出 `validateCapabilityAdvisory()`、`validateCapabilityAdvisoryFile()`、`validateCapabilityAdvisoryPath()` 和相关类型。
+    - Schema 覆盖 `freeze/yank/revoke` registry action 与 `warn/ask/deny` runtime default，支持 revoked/published lifecycle status。
+    - `pnpm validate` 能校验 registry 中已有 advisory 文件，但不要求每个 Capability 都必须有 advisory。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- advisory.test.ts`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `pnpm --filter @opencap/runtime test -- package-exports.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/spec/schema/capability-advisory.schema.json`、`packages/spec/src/advisory.test.ts`，并在 `packages/spec/src/index.ts` 导出 advisory validator/path helper/types；`validate-registry.ts` 已在存在 advisory 文件时校验。`packages/spec/package.json` 暴露 advisory schema 公共子路径，`package-exports.test.ts` 已锁定。Spec 测试数从 50 增至 54。
 - [ ] T188 P1：Revocation metadata in registry。
 - [ ] T189 P1：Installed capability advisory check。
 - [ ] T191 P1：Lifecycle status schema for deprecated/yanked/revoked。

@@ -36,6 +36,7 @@ V1 使用：
 ## Advisory Record 草案
 
 ```yaml
+schema_version: opencap.capability_advisory.v1
 id: OCAP-2026-0001
 capability: github.create_issue
 affected_versions:
@@ -50,6 +51,8 @@ actions:
   runtime_default: warn
   fixed_version: null
 ```
+
+当前 schema 文件：`packages/spec/schema/capability-advisory.schema.json`。Spec 包提供 `validateCapabilityAdvisory()`、`validateCapabilityAdvisoryFile()` 和 `validateCapabilityAdvisoryPath()`；`pnpm validate` 会校验 registry 中已有的 advisory 文件，但不会要求每个 Capability 都必须带 advisory。
 
 ## 生命周期
 

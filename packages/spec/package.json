@@ -13,6 +13,7 @@
     },
     "./schema/manifest.schema.json": "./schema/manifest.schema.json",
     "./schema/registry-test.schema.json": "./schema/registry-test.schema.json",
+    "./schema/capability-advisory.schema.json": "./schema/capability-advisory.schema.json",
     "./package.json": "./package.json"
   },
   "scripts": {
