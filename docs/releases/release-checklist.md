@@ -139,6 +139,7 @@ pnpm test
 - [ ] 公共契约、migration、CHANGELOG、release notes、tag/npm 策略明确。
 - [ ] README、SPEC、ARCHITECTURE、TESTING、HANDOFF、TASKS 同步。
 - [ ] GitHub required checks 通过。
+- [ ] `Security Baseline` workflow 通过，或 release notes 说明非阻断原因。
 - [ ] npm package 发布范围和 provenance 策略已确认。
 
 ## 6. Release Evidence

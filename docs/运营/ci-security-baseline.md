@@ -27,10 +27,15 @@ pnpm build
 
 ### Phase 3：安全基线
 
-建议加入：
+当前 workflow：`.github/workflows/security-baseline.yml`。
 
 - GitHub Actions `permissions: read-all` 默认最小权限。
-- Dependency Review。
+- repository hygiene：`git diff --check`，并阻断 `.env`、`opencap.local/`、SQLite/DB 等本地状态或 secret-shaped 文件。
+- workflow permissions audit：阻断 `pull_request_target`、`permissions: write-all` 和 baseline workflow 中的 `contents: write`。
+- Dependency Review：PR 中 dependency 变化达到 high severity 时阻断。
+
+后续可继续加入：
+
 - CodeQL。
 - OpenSSF Scorecard weekly。
 - secret scanning 依赖 GitHub 平台能力。

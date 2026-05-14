@@ -1,0 +1,80 @@
+name: Security Baseline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  repository-hygiene:
+    name: Repository hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check whitespace
+        run: git diff --check
+
+      - name: Block local state and secret-shaped files
+        run: |
+          set -euo pipefail
+          forbidden="$(find . \
+            -path './.git' -prune -o \
+            -path './node_modules' -prune -o \
+            -path './opencap.local' -print -o \
+            -name '.env' -print -o \
+            -name '.env.*' -print -o \
+            -name '*.sqlite' -print -o \
+            -name '*.sqlite3' -print -o \
+            -name '*.db' -print)"
+          if [ -n "$forbidden" ]; then
+            echo "Forbidden local state or secret-shaped files found:"
+            echo "$forbidden"
+            exit 1
+          fi
+
+  workflow-permissions-audit:
+    name: Workflow permissions audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check workflow safety invariants
+        run: |
+          set -euo pipefail
+          if grep -R "pull_request_target:" .github/workflows; then
+            echo "pull_request_target is blocked until a dedicated security design exists."
+            exit 1
+          fi
+          if grep -R "permissions:[[:space:]]*write-all" .github/workflows; then
+            echo "permissions: write-all is not allowed."
+            exit 1
+          fi
+          if grep -R "contents:[[:space:]]*write" .github/workflows; then
+            echo "contents: write is not allowed in baseline workflows."
+            exit 1
+          fi
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high

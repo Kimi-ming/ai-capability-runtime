@@ -639,7 +639,24 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `docs/社区/registry-supply-chain-review.md`，定义 Registry Capability PR 的供应链 review 工作流和 merge evidence 模板。`docs/社区/registry-guidelines.md`、`docs/社区/capability-review-checklist.md`、`docs/安全/supply-chain-governance.md`、`registry/README.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口。
-- [ ] T139 P1：CI 安全基线 workflow。
+- [x] T139 P1：CI 安全基线 workflow。
+  - 验收标准：
+    - 新增 GitHub Actions 安全基线 workflow，默认只读权限，不使用 `pull_request_target`。
+    - workflow 至少覆盖仓库卫生检查、workflow 权限审计和 PR dependency review。
+    - 仓库卫生检查阻断 `.env`、`opencap.local/`、SQLite/DB 等本地状态或 secret-shaped 文件。
+    - 文档说明当前已实现的安全基线和后续 CodeQL/OpenSSF Scorecard 缺口。
+    - release checklist 引用安全基线 workflow 作为发布前检查项。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `.github/workflows/security-baseline.yml`，包含 repository hygiene、workflow permissions audit 和 dependency-review 三个 job，默认 `contents: read`，PR dependency review 使用 `actions/dependency-review-action@v4` 并在 high severity 阻断。`docs/运营/ci-security-baseline.md` 记录已实现基线和 CodeQL/Scorecard 后续缺口；`docs/releases/release-checklist.md` 已把 Security Baseline workflow 加入发布前检查项。
 - [ ] T140 P1：把 Capability 分类落入 Registry 指南。
 - [ ] T141 P1：把 Capability Review Checklist 接入 PR 流程。
 - [ ] T144 P2：补充 RFC 模板文件。
@@ -810,11 +827,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M4 / T139：CI 安全基线 workflow
-2. M4 / T140：把 Capability 分类落入 Registry 指南
-3. M4 / T141：把 Capability Review Checklist 接入 PR 流程
-4. M4 / T158：Trust Card generation rules
-5. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M4 / T140：把 Capability 分类落入 Registry 指南
+2. M4 / T141：把 Capability Review Checklist 接入 PR 流程
+3. M4 / T158：Trust Card generation rules
+4. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

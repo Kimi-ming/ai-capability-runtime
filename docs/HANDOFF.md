@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist 和 T129 Registry supply chain review workflow 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow 和 T139 CI security baseline workflow 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T129 已完成；下一项 ready task 预计是 T139 P1：CI 安全基线 workflow。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T139 已完成；下一项 ready task 预计是 T140 P1：把 Capability 分类落入 Registry 指南。
 
-下一步推荐：先用 `next_task.py` 重新确认 T139，再补 CI 安全基线 workflow。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T140，再把 Capability 分类落入 Registry 指南。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M4 / T139 P1：CI 安全基线 workflow
+M4 / T140 P1：把 Capability 分类落入 Registry 指南
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T142/T143/T145/T152/T154/T156/T157/T159/T160/T161/T163/T164/T167/T168/T170/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T142/T143/T145/T152/T154/T156/T157/T159/T160/T161/T163/T164/T167/T168/T170/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T129 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T139。
+- 当前状态：T139 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T140。
 
 ## 最近验证
 
@@ -150,6 +150,7 @@ M4 / T139 P1：CI 安全基线 workflow
 - T271 已完成：新增 `docs/生态/interoperability-evidence-record-schema.md`，定义统一 `opencap.interop.evidence.v1` schema，覆盖 record shape、subject/evidence/result/check 枚举、privacy/redaction 规则、profile 等级映射、compatibility record 关系、示例和迁移要求。`opencap.host.evidence.v1` 已标记为 Host 场景早期 alias，T156/T157/T163 RFC 的 evidence 章节已统一引用该 schema。
 - T126 已完成：新增 `docs/releases/release-checklist.md`，把发布前流程整理成确认阶段、检查工作区、运行验证命令、核对通用 hard gates、核对阶段 hard gates、写 release evidence、发布或阻断七步。清单覆盖 v0.1-v1.0，并同步 `release-readiness`、alpha checklist、README、INDEX、SYSTEM 和 traceability。
 - T129 已完成：新增 `docs/社区/registry-supply-chain-review.md`，定义 Registry Capability PR 的供应链 review 工作流，覆盖 PR source、package shape、manifest/schema、model-visible metadata、permission/risk/auth、endpoint/data egress、tests/evidence、trust/lifecycle/advisory、merge evidence 和合并后检查，并同步 Registry 指南、Capability review checklist、供应链治理文档、registry README 和文档入口。
+- T139 已完成：新增 `.github/workflows/security-baseline.yml`，包含 repository hygiene、workflow permissions audit 和 dependency-review 三个 job，默认只读权限，不使用 `pull_request_target`。`docs/运营/ci-security-baseline.md` 记录当前基线和 CodeQL/OpenSSF Scorecard 后续缺口，`docs/releases/release-checklist.md` 已把 Security Baseline workflow 加入发布前检查项。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -157,9 +158,9 @@ M4 / T139 P1：CI 安全基线 workflow
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T139 P1：CI 安全基线 workflow。
+- T140 P1：把 Capability 分类落入 Registry 指南。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T139 展开为带验收标准和验证命令，再补 CI 安全基线 workflow。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T140 展开为带验收标准和验证命令，再把 Capability 分类落入 Registry 指南。
 
 ## Secret Resolver V1 env provider 已实现
 
