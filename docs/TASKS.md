@@ -504,7 +504,22 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`docs/生态/host-compatibility-matrix.md` 新增 Host Compatibility Test Records，记录 custom MCP client 的 `opencap.mcp.tools.v1` 与 `opencap.mcp.result.v1` 自动化 pass 证据，并新增 Claude Desktop/Cursor `pending-smoke` 记录。所有记录都绑定 2026-05-14、OpenCap commit `0f819cb`、profile、capability、checks、evidence 和 known gaps，且明确自动化 helper tests 不等同真实 Host UI smoke。
-- [ ] T143 P2：从 audit log 派生本地指标命令草案。
+- [x] T143 P2：从 audit log 派生本地指标命令草案。
+  - 验收标准：
+    - `docs/运营/observability-metrics-v1.md` 明确 `opencap metrics` 仍是未来命令草案，不把未实现能力写成已完成。
+    - 草案至少覆盖 summary、capabilities、security 三类本地指标视图。
+    - 草案列出参数、示例输出、JSON shape、字段来源和隐私边界。
+    - 指标只能从本地 SQLite audit log 的脱敏 operational metadata 派生，不能输出 input/output/secret/provider raw body。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`docs/运营/observability-metrics-v1.md` 新增本地指标命令草案，定义未来 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security` 的参数、输出示例、JSON shape、字段来源与隐私边界。文档明确当前已实现入口仍是 `opencap logs` 和 `opencap decision-log export`，metrics 命令尚未实现。
 - [ ] T154 P2：维护 Host compatibility evidence records。
 - [ ] T156 P2：MCP elicitation profile RFC。
 - [ ] T157 P2：A2A Agent Card mapping RFC。
@@ -686,10 +701,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T143：从 audit log 派生本地指标命令草案
-2. M3 / T154：维护 Host compatibility evidence records
-3. M3 / T156：MCP elicitation profile RFC
-4. M3 / T157：A2A Agent Card mapping RFC
+1. M3 / T154：维护 Host compatibility evidence records
+2. M3 / T156：MCP elicitation profile RFC
+3. M3 / T157：A2A Agent Card mapping RFC
+4. M3 / T163：Remote Runtime OAuth profile RFC
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema
