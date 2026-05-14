@@ -309,7 +309,7 @@ Governance Surface
 | 组合调研 | 完成 | 后续 RFC 参考 |
 | Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185 已补 transition helper/tests；T195 继续补 quality |
 | Capability Advisory | 清晰 | T187 已补 advisory schema；T188 已补 registry revocation metadata；T189 已补 installed advisory check |
-| Deprecation/Revocation | 清晰 | T186 已补 revoked invoke gate；T188 已补 registry revocation metadata；T191 已补 lifecycle schema；T192 已补 install/list/invoke warnings；T193 落到 search filtering |
+| Deprecation/Revocation | 清晰 | T186 已补 revoked invoke gate；T188 已补 registry revocation metadata；T191 已补 lifecycle schema；T192 已补 install/list/invoke warnings；T193 已补 search filtering |
 | Quality Score | 清晰 | T194/T196 防止覆盖 policy |
 | 用量计量 | 清晰 | T198/T205 从 audit 派生 usage event |
 | 配额预算 | 清晰 | T199/T204 做执行前 gate |

@@ -104,6 +104,8 @@ Registry 可以维护：
 - `revoked` 不得作为普通搜索或推荐结果出现，只能在安全、历史或审计视图中查看。
 - unresolved critical advisory 默认隐藏或强 warning。
 
+当前 `@opencap/spec` 已提供 `searchRegistryCapabilities()` 作为最小 registry search helper。该 helper 基于 manifest validation 返回结果，默认只展示 active/deprecated，隐藏 yanked/revoked，并把被生命周期过滤的条目放入 `excludedByLifecycle` evidence；只有显式 `includeLifecycle` 时才返回 yanked/revoked。Discovery 结果仍不是安装或执行授权来源。
+
 ### 排序原则
 
 V1 不实现搜索排名。未来若实现 discovery/ranking：

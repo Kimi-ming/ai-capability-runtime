@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 57 个、runtime 247 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 58 个、runtime 247 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -923,7 +923,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/index.ts` 新增 `CapabilityLifecycleWarning`、`createCapabilityLifecycleWarning()`，install 返回 warnings，list 摘要暴露 lifecycle status 和 warning；`packages/cli/src/index.ts` 在 install/list/invoke 非 JSON 输出中打印 warning。`packages/runtime/src/index.test.ts` 覆盖 install、list 和 invoke preparation warning；Runtime 测试数从 246 增至 247。
-- [ ] T193 P2：Registry search excludes yanked/revoked by default。
+- [x] T193 P2：Registry search excludes yanked/revoked by default。
+  - 验收标准：
+    - `@opencap/spec` 导出 `searchRegistryCapabilities()`，基于 registry manifest validation 返回可发现能力。
+    - 默认搜索结果排除 `lifecycle.status: yanked` 和 `revoked` 的能力，deprecated 仍可发现。
+    - 显式 `includeLifecycle: ["yanked", "revoked"]` 时可返回被隐藏的能力，并保留 `excludedByLifecycle` evidence。
+    - 搜索结果不改变安装或执行授权，不包含 secret/input/output/provider response。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- registry-search.test.ts`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/spec/src/registry-search.test.ts`，`packages/spec/src/index.ts` 导出 registry search helper 和结果类型。默认搜索会返回 active/deprecated，隐藏 yanked/revoked，并在显式 include 时返回完整结果。Spec 测试数从 57 增至 58。
 - [ ] T194 P2：Quality score rubric implementation draft。
 - [ ] T195 P2：Trust Card includes quality score。
 - [ ] T272 P2：设计 Registry index/cache/sync RFC。

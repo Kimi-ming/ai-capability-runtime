@@ -102,6 +102,29 @@ export interface ManifestPathValidationResult {
   invalid: ManifestValidationFailure[];
 }
 
+export interface RegistryCapabilitySearchResult {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  lifecycle: CapabilityManifestLifecycleStatus | "active";
+  filePath: string;
+  manifest: CapabilityManifest;
+}
+
+export interface RegistryCapabilitySearchOptions {
+  query?: string;
+  includeLifecycle?: CapabilityManifestLifecycleStatus[];
+}
+
+export interface RegistryCapabilitySearchResults {
+  targetPath: string;
+  query?: string;
+  results: RegistryCapabilitySearchResult[];
+  excludedByLifecycle: RegistryCapabilitySearchResult[];
+  invalid: ManifestValidationFailure[];
+}
+
 let compiledManifestValidator: ValidateFunction | undefined;
 let compiledRegistryTestValidator: ValidateFunction | undefined;
 let compiledCapabilityAdvisoryValidator: ValidateFunction | undefined;
@@ -252,6 +275,56 @@ export async function validateManifestPath(targetPath: string): Promise<Manifest
     manifests,
     valid: results.filter((result): result is ManifestValidationSuccess => result.ok),
     invalid: results.filter((result): result is ManifestValidationFailure => !result.ok),
+  };
+}
+
+function registrySearchResult(result: ManifestValidationSuccess): RegistryCapabilitySearchResult {
+  return {
+    id: result.manifest.id,
+    name: result.manifest.name,
+    description: result.manifest.description,
+    version: result.manifest.version,
+    lifecycle: result.manifest.lifecycle?.status ?? "active",
+    filePath: result.filePath,
+    manifest: result.manifest,
+  };
+}
+
+function matchesRegistrySearchQuery(result: RegistryCapabilitySearchResult, query: string | undefined): boolean {
+  if (query === undefined || query.trim().length === 0) {
+    return true;
+  }
+  const normalizedQuery = query.toLowerCase();
+  return [result.id, result.name, result.description].some((value) => value.toLowerCase().includes(normalizedQuery));
+}
+
+export async function searchRegistryCapabilities(
+  targetPath: string,
+  options: RegistryCapabilitySearchOptions = {},
+): Promise<RegistryCapabilitySearchResults> {
+  const validation = await validateManifestPath(targetPath);
+  const includeLifecycle = new Set(options.includeLifecycle ?? []);
+  const results: RegistryCapabilitySearchResult[] = [];
+  const excludedByLifecycle: RegistryCapabilitySearchResult[] = [];
+
+  for (const valid of validation.valid) {
+    const result = registrySearchResult(valid);
+    if (!matchesRegistrySearchQuery(result, options.query)) {
+      continue;
+    }
+    if ((result.lifecycle === "yanked" || result.lifecycle === "revoked") && !includeLifecycle.has(result.lifecycle)) {
+      excludedByLifecycle.push(result);
+      continue;
+    }
+    results.push(result);
+  }
+
+  return {
+    targetPath,
+    query: options.query,
+    results: results.sort((left, right) => left.id.localeCompare(right.id)),
+    excludedByLifecycle: excludedByLifecycle.sort((left, right) => left.id.localeCompare(right.id)),
+    invalid: validation.invalid,
   };
 }
 
