@@ -85,7 +85,7 @@
 | RQ-037 | SDK/Adapter 不污染 V1 主路径 | `docs/设计/sdk-and-adapter-boundary.md` | T145, T146 | RFC/ADR review |
 | RQ-038 | 包发布供应链清晰 | `docs/运营/package-publishing-v1.md`、`docs/运营/npm-trusted-publishing-workflow.md` | T123, T148 | trusted publishing workflow；release checklist |
 | RQ-039 | 质量门禁可执行 | `docs/质量/quality-gates.md` | T126 | release checklist |
-| RQ-040 | Capability package 结构稳定 | `docs/设计/capability-package-v1.md` | T151, T158 | package lint + trust card review |
+| RQ-040 | Capability package 结构稳定 | `docs/设计/capability-package-v1.md` | T151, T158 | package lint tests + trust card review |
 | RQ-041 | 用户确认可审计 | `docs/设计/confirmation-and-consent-v1.md` | T152, T073 | consent receipt + confirmation_required tests |
 | RQ-042 | 互操作声明可证明 | `docs/生态/interoperability-profiles.md`、`docs/生态/interoperability-evidence-record-schema.md` | T154, T156, T157, T163, T271 | profile evidence records |
 | RQ-043 | 一致性测试成体系 | `docs/质量/conformance-suite-v1.md` | T153 | conformance record checks |

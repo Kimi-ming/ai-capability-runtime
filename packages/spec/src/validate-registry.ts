@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import {
   formatManifestValidationIssue,
+  validateCapabilityPackagePath,
   validateCapabilityAuthoringManifestPath,
   validateRegistryTestPath,
 } from "./index.js";
@@ -23,6 +24,25 @@ try {
   for (const invalid of manifestResult.invalid) {
     hasFailure = true;
     console.error(`Invalid manifest: ${invalid.filePath}`);
+    for (const issue of invalid.issues) {
+      console.error(`  ${formatManifestValidationIssue(issue)}`);
+    }
+  }
+
+  const packageResult = await validateCapabilityPackagePath(targetPath);
+
+  if (packageResult.packages.length === 0) {
+    console.error(`No capability packages found under ${targetPath}`);
+    hasFailure = true;
+  }
+
+  for (const valid of packageResult.valid) {
+    console.log(`Valid capability package: ${valid.packageDir}`);
+  }
+
+  for (const invalid of packageResult.invalid) {
+    hasFailure = true;
+    console.error(`Invalid capability package: ${invalid.packageDir}`);
     for (const issue of invalid.issues) {
       console.error(`  ${formatManifestValidationIssue(issue)}`);
     }

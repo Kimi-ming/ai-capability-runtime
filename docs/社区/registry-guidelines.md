@@ -126,3 +126,5 @@ pnpm validate
 ```
 
 该命令会同时校验 manifest 和 registry test case schema。
+
+`pnpm validate` 还会执行 Capability package lint，检查 `manifest.yml`、`README.md`、registry tests、目录 id/category 一致性，以及 `.env`、`opencap.local/`、SQLite/DB 等禁止文件。Package lint 规则见 [能力包结构](../设计/capability-package-v1.md)。

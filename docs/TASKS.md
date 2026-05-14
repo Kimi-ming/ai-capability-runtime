@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 235 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -739,7 +739,27 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `docs/运营/npm-trusted-publishing-workflow.md`，定义 OpenCap npm trusted publishing 草案，覆盖 GitHub Actions OIDC、`npm-production` environment、manual dispatch + dry-run workflow、package tarball review、provenance evidence、长期 token 禁止和 rollback/incident 流程。`docs/运营/package-publishing-v1.md`、`docs/安全/signing-and-provenance-roadmap.md`、`docs/releases/release-checklist.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步入口。
-- [ ] T151 P1：实现 Capability Package lint。
+- [x] T151 P1：实现 Capability Package lint。
+  - 验收标准：
+    - `@opencap/spec` 导出可复用 Capability package lint API，能验证单个 package 和 registry path。
+    - Package lint 检查 `manifest.yml`、`README.md`、`tests/basic.yml` 或等价 registry test 是否存在。
+    - Package lint 检查 manifest `id` 与 package 目录名一致、`metadata.category` 与 Registry 分类目录一致。
+    - Package lint 阻断 `.env`、`.env.*`、`opencap.local/`、SQLite/DB 等本地状态或 secret-shaped 文件进入 Capability package。
+    - `pnpm validate` 在 Registry validation 中执行 package lint，package shape 失败会阻断 registry publish/review-ready。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- package-lint.test.ts`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/spec/src/package-lint.ts` 和 `package-lint.test.ts`，导出 `validateCapabilityPackage()`、`validateCapabilityPackagePath()`、`findCapabilityPackageDirs()` 及 package lint result/issue 类型。Lint 覆盖 manifest/README/tests、id/category path 一致性、`.env`、`opencap.local/` 和 SQLite/DB 禁止项；`packages/spec/src/validate-registry.ts` 已在 `pnpm validate` 中输出并阻断 Capability package lint 结果。Spec 测试数从 45 增至 50。
 - [ ] T158 P1：Trust Card generation rules。
 - [ ] T185 P1：Trust level transition tests。
 - [ ] T186 P1：Revoked capability invoke warning/deny behavior。

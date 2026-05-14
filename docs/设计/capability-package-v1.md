@@ -56,8 +56,20 @@ registry/<category>/<capability-id>/
 - 在 package 中隐藏安装脚本。
 - 在 README 中要求用户把 token 粘到公开文件。
 - 在 tests 或 examples 中包含真实凭据。
+- 在 package 中提交 `.env`、`.env.*`、`opencap.local/`、SQLite 或 DB 文件。
 - 用 README 声明弱化 manifest 中的 risk。
 - 用 Registry trust level 覆盖本地 policy。
+
+## Package Lint
+
+`pnpm validate` 会在 manifest schema 和 registry tests 之外执行 Capability package lint。当前机器检查覆盖：
+
+- package 必须包含 `manifest.yml`、`README.md` 和 `tests/basic.yml` 或等价 registry test。
+- `manifest.yml` 的 `id` 必须等于 package 目录名。
+- `manifest.yml` 的 `metadata.category` 必须等于 Registry 分类目录名。
+- package 内不得包含 `.env`、`.env.*`、`opencap.local/`、`.sqlite`、`.sqlite3` 或 `.db` 文件。
+
+Package lint 只验证目录结构和明显本地状态/secret-shaped 文件；它不替代 manifest schema、model-visible metadata lint、least-privilege auth lint、registry tests 或人工 review。
 
 ## Trust Card V1
 

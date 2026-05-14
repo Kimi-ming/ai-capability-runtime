@@ -288,7 +288,7 @@ Governance Surface
 | Registry 分发 | 清晰 | V1 保持 Git-based；T147 已起草 signed index future RFC |
 | SDK/Adapter | 边界清晰 | V1 不阻塞主路径 |
 | 发布供应链 | 清晰 | T123 制定发布策略；T148 已补 npm trusted publishing workflow 草案 |
-| Capability 包 | 清晰 | T151 做 package lint |
+| Capability 包 | 清晰 | T151 已实现 package lint |
 | 确认与同意 | 清晰 | T152 落入 audit 字段和测试 |
 | 互操作 Profile | 清晰 | T154/T271 维护 evidence records/schema；T156/T157 已起草 MCP elicitation 和 A2A Agent Card profile RFC |
 | 一致性测试 | 清晰 | T153 建立 suite skeleton |

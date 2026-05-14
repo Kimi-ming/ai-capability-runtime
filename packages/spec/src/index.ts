@@ -2,6 +2,14 @@ export { lintModelVisibleMetadata } from "./metadata-lint.js";
 export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
+export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";
+export type {
+  CapabilityPackagePathValidationResult,
+  CapabilityPackageValidationFailure,
+  CapabilityPackageValidationIssue,
+  CapabilityPackageValidationResult,
+  CapabilityPackageValidationSuccess,
+} from "./package-lint.js";
 export {
   CAPABILITY_AUTHORING_LOOP_VERSION,
   evaluateCapabilityAuthoringProgress,
