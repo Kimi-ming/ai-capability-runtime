@@ -69,6 +69,14 @@ V1 规则：
 - revoked：默认 deny 高风险能力；read-only 可提示后由用户显式 override。
 - 本地用户可保留文件，但 OpenCap 不应静默执行 revoked 写操作。
 
+当前 Runtime 已提供 `evaluateRevokedCapabilityInvokeGate()` 作为 revoked invoke 的最小执行边界。它在 `pre_secret` 阶段返回标准 lifecycle `GateDecision`：
+
+- 非 revoked 能力通过 lifecycle gate，但 `policyEffect` 固定为 `none`，不授予额外授权。
+- revoked `write`、`external_send`、`destructive`、`financial`、`code_execution`、`secret_access` 或 `unknown` 风险默认 `deny`，且 `requestStarted: false`。
+- revoked `read_only` 在没有显式本地 override 时返回 `ask`，要求用户或 host 明确确认。
+- revoked `read_only` 只有在显式 override 存在时才返回 `allow`，并继续保留 warning/advisory evidence。
+- gate evidence 不包含 input/output 原文、secret 或 provider response。
+
 ## Registry 行为
 
 - deprecated 仍在列表中展示。

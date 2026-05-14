@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 240 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 244 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -800,7 +800,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/trust-transition.ts` 和 `trust-transition.test.ts`，导出 `evaluateTrustLevelTransition()` 及 transition 类型。测试覆盖逐级升级、跳级升级拒绝、High advisory/failing tests 冻结、downgrade/revoke 不授予 policy 权限；Runtime 测试数从 236 增至 240。
-- [ ] T186 P1：Revoked capability invoke warning/deny behavior。
+- [x] T186 P1：Revoked capability invoke warning/deny behavior。
+  - 验收标准：
+    - Runtime 导出 `evaluateRevokedCapabilityInvokeGate()`，返回标准 `GateDecision`，gateId 为 `lifecycle`，stage 为 `pre_secret`。
+    - revoked 的 `write`、`external_send`、`destructive`、`financial`、`code_execution`、`secret_access` 和 `unknown` 风险默认 `deny`，且 evidence 标记 `requestStarted: false`。
+    - revoked `read_only` 未显式 override 时返回 `ask`；显式 override 后才允许执行，并保留 warning/advisory evidence。
+    - 非 revoked 能力通过 lifecycle gate，但 `policyEffect: "none"`，不授予额外 policy 权限。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- lifecycle-gate.test.ts`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/lifecycle-gate.ts` 和 `lifecycle-gate.test.ts`，导出 revoked invoke lifecycle gate helper。测试覆盖 revoked 写/高风险 pre-secret deny、revoked read-only ask、read-only explicit override allow，以及非 revoked 不改变 policy 权限；Runtime 测试数从 240 增至 244。
 - [ ] T187 P1：Capability advisory YAML schema。
 - [ ] T188 P1：Revocation metadata in registry。
 - [ ] T189 P1：Installed capability advisory check。
