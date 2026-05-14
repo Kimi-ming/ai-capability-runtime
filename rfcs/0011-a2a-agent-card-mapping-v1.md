@@ -205,6 +205,8 @@ Artifact 不能绕过 Result Envelope 的 sanitizer、size limit、resource deli
 
 ## Evidence
 
+Evidence record 必须使用 `opencap.interop.evidence.v1`，字段定义见 `docs/生态/interoperability-evidence-record-schema.md`。本节只列出该 profile 需要的 `checks` 口径。
+
 Compatibility/evidence records 应新增：
 
 ```yaml

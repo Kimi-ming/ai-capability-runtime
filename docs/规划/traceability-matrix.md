@@ -87,7 +87,7 @@
 | RQ-039 | 质量门禁可执行 | `docs/质量/quality-gates.md` | T126 | release checklist |
 | RQ-040 | Capability package 结构稳定 | `docs/设计/capability-package-v1.md` | T151, T158 | package lint + trust card review |
 | RQ-041 | 用户确认可审计 | `docs/设计/confirmation-and-consent-v1.md` | T152, T073 | consent receipt + confirmation_required tests |
-| RQ-042 | 互操作声明可证明 | `docs/生态/interoperability-profiles.md` | T154, T156, T157 | host evidence records |
+| RQ-042 | 互操作声明可证明 | `docs/生态/interoperability-profiles.md`、`docs/生态/interoperability-evidence-record-schema.md` | T154, T156, T157, T163, T271 | profile evidence records |
 | RQ-043 | 一致性测试成体系 | `docs/质量/conformance-suite-v1.md` | T153 | conformance record checks |
 | RQ-044 | Agentic 风险转控制和测试 | `docs/安全/agentic-risk-mapping.md` | T128, T155 | abuse-case smoke tests |
 | RQ-045 | 身份授权边界清晰 | `docs/安全/identity-and-auth-model.md` | T090, T159, T163 | auth boundary negative tests；T159 env provider tests |

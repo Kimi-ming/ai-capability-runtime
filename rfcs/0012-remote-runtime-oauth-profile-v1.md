@@ -263,6 +263,8 @@ Runtime tool-level errors 仍走 Result Envelope；协议/HTTP auth 错误只用
 
 ## Evidence / Compatibility Record
 
+Evidence record 必须使用 `opencap.interop.evidence.v1`，字段定义见 `docs/生态/interoperability-evidence-record-schema.md`。本节只列出该 profile 需要的 `checks` 口径。
+
 建议 evidence：
 
 ```yaml

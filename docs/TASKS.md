@@ -587,7 +587,23 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `rfcs/0012-remote-runtime-oauth-profile-v1.md`，定义 `opencap.remote_runtime.oauth.v1` 草案，覆盖三段授权边界、RFC 8707 resource indicators、RFC 9728 protected resource metadata、scope 模型、downstream provider credential separation、token validation evidence、401/403 challenge、adapter profile 关系、安全不变量和测试计划。`docs/生态/oauth-and-remote-runtime-boundary.md`、`docs/决策/0029-remote-runtime-oauth-requires-new-profile.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步引用。RFC 明确 V1 仍是 local runtime/env provider，不实现 remote OAuth。
-- [ ] T271 P1：定义 Interoperability Profile evidence record schema。
+- [x] T271 P1：定义 Interoperability Profile evidence record schema。
+  - 验收标准：
+    - 新增文档定义统一 `opencap.interop.evidence.v1` schema，覆盖 Host、adapter、runtime、registry、auth、resource 和 RFC evidence。
+    - schema 明确必填字段、枚举、privacy/redaction 规则、profile 等级映射、compatibility record 关系和迁移要求。
+    - 现有 `opencap.host.evidence.v1` 被标记为 Host 场景早期别名，新增记录应使用统一 schema。
+    - T156/T157/T163 RFC 的 evidence 章节引用统一 schema。
+    - README/INDEX/SYSTEM/traceability/HANDOFF 同步入口和任务状态。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `docs/生态/interoperability-evidence-record-schema.md`，定义统一 `opencap.interop.evidence.v1` schema，包含 record shape、字段定义、subject/evidence/result/check 枚举、隐私规则、profile 等级映射、compatibility record 关系、Host 自动化证据示例、RFC 草案证据示例和迁移要求。`docs/生态/interoperability-profiles.md` 和 `docs/生态/host-compatibility-matrix.md` 已把 `opencap.host.evidence.v1` 标记为早期 Host alias；`rfcs/0010/0011/0012` 已改为引用统一 schema；`docs/README.md`、`docs/INDEX.md`、`docs/SYSTEM.md` 和 `docs/规划/traceability-matrix.md` 已同步入口与追踪。
 
 ### 模块 M4：Registry、Trust、Lifecycle 和供应链
 
@@ -764,12 +780,13 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T271：定义 Interoperability Profile evidence record schema
-2. M4 / T158：Trust Card generation rules
-3. M4 / T185：Trust level transition tests
-4. M4 / T191：Lifecycle status schema
-5. M4 / T192：Install/list/invoke lifecycle warnings
-6. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
+1. M4 / T126：把发布门禁整理成可执行 release checklist
+2. M4 / T129：补充 Registry 供应链 review 工作流
+3. M4 / T139：CI 安全基线 workflow
+4. M4 / T140：把 Capability 分类落入 Registry 指南
+5. M4 / T141：把 Capability Review Checklist 接入 PR 流程
+6. M4 / T158：Trust Card generation rules
+7. M0 / T070：MCP TypeScript SDK 接入（解除依赖阻塞后执行）
 
 ## 模块推进策略
 

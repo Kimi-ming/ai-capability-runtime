@@ -44,6 +44,7 @@
 - [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
 - [架构总览](ARCHITECTURE.md)
 - [运行时契约](设计/runtime-contracts.md)
+- [Interoperability Profile Evidence Record Schema](生态/interoperability-evidence-record-schema.md)
 - [领域模型](设计/domain-model.md)
 - [架构决策索引](DECISIONS.md)
 - [风险登记](RISKS.md)

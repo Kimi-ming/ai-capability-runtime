@@ -75,9 +75,10 @@
 3. [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
 4. [架构总览](ARCHITECTURE.md)
 5. [运行时契约](设计/runtime-contracts.md)
-6. [决策索引](DECISIONS.md)
-7. [风险登记](RISKS.md)
-8. [一致性测试体系](质量/conformance-suite-v1.md)
+6. [Interoperability Profile Evidence Record Schema](生态/interoperability-evidence-record-schema.md)
+7. [决策索引](DECISIONS.md)
+8. [风险登记](RISKS.md)
+9. [一致性测试体系](质量/conformance-suite-v1.md)
 
 ### 实现任务路径
 

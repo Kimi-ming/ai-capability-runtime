@@ -166,7 +166,7 @@ notes: Host app version is known, but no real Host invocation evidence is record
 
 ## Host Compatibility Evidence Records
 
-记录口径：本节维护 `opencap.host.evidence.v1` 风格的证据条目。Evidence record 不重复 Host record 的完整结论，只记录结论背后的证据来源、证据类型、隐私边界和限制。`automated-test` 记录可以支撑 adapter/runtime contract；第三方 Host 仍需要 `manual-smoke` 记录后才能从 `pending-smoke` 升级。
+记录口径：本节维护 Host 兼容性证据条目。T154 的早期记录使用 `opencap.host.evidence.v1` 风格；T271 后统一 schema 见 `docs/生态/interoperability-evidence-record-schema.md`，新增记录应使用 `schema_version: opencap.interop.evidence.v1`。Evidence record 不重复 Host record 的完整结论，只记录结论背后的证据来源、证据类型、隐私边界和限制。`automated-test` 记录可以支撑 adapter/runtime contract；第三方 Host 仍需要 `manual-smoke` 记录后才能从 `pending-smoke` 升级。
 
 ### `evidence-2026-05-14-custom-mcp-client-tools-tests`
 

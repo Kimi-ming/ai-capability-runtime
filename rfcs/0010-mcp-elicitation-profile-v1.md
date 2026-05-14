@@ -202,6 +202,8 @@ OpenCap V1 仍不生成 confirmation token。Future adapter 可以用 `consentId
 
 ## Evidence
 
+Evidence record 必须使用 `opencap.interop.evidence.v1`，字段定义见 `docs/生态/interoperability-evidence-record-schema.md`。本节只列出该 profile 需要的 `checks` 口径。
+
 兼容性记录应新增：
 
 ```yaml

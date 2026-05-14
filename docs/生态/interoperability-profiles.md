@@ -101,6 +101,8 @@ notes: MCP Host does not provide native confirmation in this test.
 
 目标：把 compatibility record 的结论拆成可复核的证据条目。Host record 回答“这个 Host/profile 当前结论是什么”；evidence record 回答“这个结论基于哪类证据、从哪里来、有什么限制”。
 
+T271 已把 Host-specific evidence 口径收敛为统一 schema：`docs/生态/interoperability-evidence-record-schema.md`。`opencap.host.evidence.v1` 视为 Host 兼容场景下的早期别名；新增记录应使用 `opencap.interop.evidence.v1`，并在 `subject.kind: host` 中表达 Host 对象。
+
 记录字段：
 
 ```yaml
@@ -132,7 +134,7 @@ limitations:
 - `automated-test` 只能证明 OpenCap adapter/runtime contract，不能替代真实第三方 Host UI smoke。
 - `version-detection` 只能证明本机识别到 Host version，不能证明 `tools/list`、`tools/call` 或 result 展示通过。
 - 证据路径可以指向测试文件、命令、手工 smoke 记录或 release artifact；不得保存 input/output 原文、secret、provider raw body。
-- T271 会把本节收敛成跨 profile 的统一 evidence record schema；在此之前，Host 兼容性先使用本节字段作为最小口径。
+- 新增记录应迁移到 `opencap.interop.evidence.v1`，本节字段继续作为旧 Host evidence 的兼容说明。
 
 ## Future Profile
 
