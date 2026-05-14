@@ -72,6 +72,19 @@ Trust level 可以因为以下原因降级：
 
 冻结表示暂时不能升级或新增安装，但已安装用户可继续按本地 policy 决定是否运行。
 
+Runtime 当前提供 `evaluateTrustLevelTransition()` 作为信任等级变更的纯评估 helper。它只判断 Registry/Review 层面的变更是否具备证据，不安装能力、不修改 policy、不改变 consent 或 execution gate。
+
+评估规则：
+
+- 升级必须逐级发生，不能从 `listed` 直接跳到 `official`。
+- `listed` 需要合法 manifest、合法 package 和 review checklist evidence。
+- `tested` 需要 passing registry tests、conformance evidence，且没有 High open advisory。
+- `maintainer_verified` 需要维护者或服务所有权验证、least-privilege review 和 fresh review。
+- `official` 需要 OpenCap core maintainer ownership 和 release gate evidence。
+- High open advisory 或 failing registry tests 会冻结升级。
+- 降级和撤销允许快速执行，但必须保留 reason、review/advisory/revocation reference，并写审计。
+- 所有 transition decision 的 `policyEffect` 固定为 `none`。
+
 ## Revoked
 
 `revoked` 表示 OpenCap Registry 明确不建议继续安装或运行。原因可能是恶意能力、凭据泄露、严重误导、不可修复的安全风险或维护者身份失效。

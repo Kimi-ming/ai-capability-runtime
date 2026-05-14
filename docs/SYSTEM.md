@@ -307,7 +307,7 @@ Governance Surface
 | 多步执行 | 清晰 | T175/T178 增加 evidence chain |
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |
-| Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185/T195 继续补 transition/quality |
+| Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185 已补 transition helper/tests；T195 继续补 quality |
 | Capability Advisory | 清晰 | T187/T189 进入 registry/runtime 检查 |
 | Deprecation/Revocation | 清晰 | T191/T192 落到 install/list/invoke |
 | Quality Score | 清晰 | T194/T196 防止覆盖 policy |

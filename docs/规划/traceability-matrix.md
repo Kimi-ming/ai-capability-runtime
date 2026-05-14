@@ -103,7 +103,7 @@
 | RQ-055 | 能力图可表达关系和风险 | `docs/生态/capability-graph-v1.md` | T179, T180, T181 | graph metadata/review tests |
 | RQ-056 | 多步执行不掩盖单步证据 | `docs/设计/multi-step-execution-boundary.md` | T175, T178 | evidence chain tests |
 | RQ-057 | 组合失败恢复可操作 | `docs/运营/composition-failure-runbook.md` | T182, T183 | recovery smoke tests |
-| RQ-058 | Trust level 可解释且不覆盖 policy | `docs/生态/trust-model-v1.md` | T158, T185, T196 | trust card generation + trust/policy negative tests |
+| RQ-058 | Trust level 可解释且不覆盖 policy | `docs/生态/trust-model-v1.md` | T158, T185, T196 | trust card generation + trust transition + trust/policy negative tests |
 | RQ-059 | Capability advisory 可追踪 | `docs/安全/capability-advisory-process.md` | T187, T189, T190 | advisory schema/checks |
 | RQ-060 | Deprecated/yanked/revoked 生命周期清晰 | `docs/生态/capability-deprecation-and-revocation.md` | T188, T191, T192, T193 | lifecycle warnings/search tests |
 | RQ-061 | Quality Score 不被误用为安全认证 | `docs/质量/capability-quality-score.md` | T194, T195, T196 | score/policy tests |

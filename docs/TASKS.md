@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 236 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 50 个、runtime 240 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -780,7 +780,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`packages/runtime/src/card.ts` 新增 `createTrustCardFromInstalledCapability()` 和生成规则类型，从 installed capability 派生 trust/advisory/maintainer/provenance/limitations，并保留 Trust Card disclaimer。`packages/runtime/src/card.test.ts` 新增 installed capability Trust Card 生成规则测试和 root export 断言；`docs/生态/trust-model-v1.md` 已补齐 Trust Card 生成规则和边界。Runtime 测试数从 235 增至 236。
-- [ ] T185 P1：Trust level transition tests。
+- [x] T185 P1：Trust level transition tests。
+  - 验收标准：
+    - Runtime 导出 `evaluateTrustLevelTransition()`，能评估 trust level upgrade、downgrade、freeze、revoke 和 noop。
+    - 升级必须逐级发生，并按目标等级检查 manifest/package/review、registry tests/conformance、maintainer verification、least-privilege review、release gate 等 evidence。
+    - High open advisory 或 failing registry tests 会冻结升级；撤销必须提供 revocation/advisory reference。
+    - Transition decision 固定 `policyEffect: "none"`，只表达 registry/review evidence，不覆盖 local policy、consent 或 execution gate。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- trust-transition.test.ts`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/trust-transition.ts` 和 `trust-transition.test.ts`，导出 `evaluateTrustLevelTransition()` 及 transition 类型。测试覆盖逐级升级、跳级升级拒绝、High advisory/failing tests 冻结、downgrade/revoke 不授予 policy 权限；Runtime 测试数从 236 增至 240。
 - [ ] T186 P1：Revoked capability invoke warning/deny behavior。
 - [ ] T187 P1：Capability advisory YAML schema。
 - [ ] T188 P1：Revocation metadata in registry。
