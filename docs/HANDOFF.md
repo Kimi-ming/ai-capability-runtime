@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T193 已完成；下一项 ready task 预计是 T194 P2：Quality score rubric implementation draft。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T194 已完成；下一项 ready task 预计是 T195 P2：Trust Card includes quality score。
 
-下一步推荐：先用 `next_task.py` 重新确认 T194，再补齐 Quality score rubric implementation draft。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T195，再补齐 Trust Card includes quality score。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M4 / T194 P2：Quality score rubric implementation draft
+M4 / T195 P2：Trust Card includes quality score
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T154/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T188/T189/T191/T192/T193/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T273/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T154/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T188/T189/T191/T192/T193/T194/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T273/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T193 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T194。
+- 当前状态：T194 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T195。
 
 ## 最近验证
 
@@ -112,7 +112,7 @@ M4 / T194 P2：Quality score rubric implementation draft
 - `audit_docs.py`
 - `next_task.py`
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 58 个、runtime 247 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 58 个、runtime 249 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
 
 ## 本轮文档和后续收敛
 
@@ -172,6 +172,7 @@ M4 / T194 P2：Quality score rubric implementation draft
 - T191 已完成：`manifest.schema.json` 新增可选顶层 `lifecycle` 对象，支持 `deprecated`、`yanked`、`revoked`，要求 `status`、`reason`、`since`，并要求 `revoked` 携带 advisory id；`packages/spec/src/index.ts` 导出 lifecycle metadata 类型，`index.test.ts` 覆盖合法和非法 lifecycle schema。Spec 测试数从 55 增至 57。
 - T192 已完成：`packages/runtime/src/index.ts` 新增 `CapabilityLifecycleWarning` 和 `createCapabilityLifecycleWarning()`，install/list/invoke preparation 复用同一 warning shape，`installCapability()` 返回 warnings，`listInstalledCapabilities()` 暴露 manifest lifecycle status 和 `lifecycleWarning`；CLI 非 JSON install/list/invoke 输出会把 warning 写到 stderr。Runtime 测试数从 246 增至 247。
 - T193 已完成：`packages/spec/src/index.ts` 新增 `searchRegistryCapabilities()`，默认搜索结果隐藏 yanked/revoked，deprecated 仍可发现，显式 `includeLifecycle` 才返回 yanked/revoked；`registry-search.test.ts` 覆盖默认过滤和显式包含。Spec 测试数从 57 增至 58。
+- T194 已完成：新增 `packages/runtime/src/quality-score.ts` 和 `quality-score.test.ts`，导出 `calculateCapabilityQualityScore()` 和 `opencap.quality_score.v1`，按 manifest/docs/tests/security/maintenance/compatibility/evidence 权重计算 total/band，并固定 `policyEffect: none`。Runtime 测试数从 247 增至 249。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -179,9 +180,9 @@ M4 / T194 P2：Quality score rubric implementation draft
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T194 P2：Quality score rubric implementation draft。
+- T195 P2：Trust Card includes quality score。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T194 展开为带验收标准和验证命令，再补齐 quality score rubric implementation draft。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T195 展开为带验收标准和验证命令，再补齐 Trust Card quality score integration。
 
 ## Secret Resolver V1 env provider 已实现
 

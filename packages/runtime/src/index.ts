@@ -22,6 +22,7 @@ export { credentialAuditEvidence, resolveEnvCredential } from "./secret-resolver
 export { defaultHttpRetryPolicy, evaluateHttpRetryPolicy } from "./retry-policy.js";
 export { evaluateTrustLevelTransition } from "./trust-transition.js";
 export { evaluateRevokedCapabilityInvokeGate } from "./lifecycle-gate.js";
+export { CAPABILITY_QUALITY_SCORE_RUBRIC_VERSION, calculateCapabilityQualityScore } from "./quality-score.js";
 export type { DataEgressContext, DataEgressDecision, DataEgressDecisionEvidence, DataEgressDecisionResult, DataEgressDestination, DataEgressPolicyMatch, DataEgressPolicyRule, DataEgressPolicySet, RenderedEgressField } from "./data-egress-policy.js";
 export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEntry } from "./egress-map.js";
 export type { MinimizedInputResult } from "./input-minimization.js";
@@ -42,6 +43,7 @@ export type { CredentialAuditEvidence, ResolvedCredential, ResolvedCredentialTyp
 export type { HttpRetryIdempotencyMode, HttpRetryPolicyDecision, HttpRetryPolicyInput, HttpRetryPolicyV1, HttpRetryReasonCode } from "./retry-policy.js";
 export type { TrustTransitionDecision, TrustTransitionEvidence, TrustTransitionFinding, TrustTransitionFindingCode, TrustTransitionFindingSeverity, TrustTransitionInput, TrustTransitionKind, TrustTransitionPolicyEffect, TrustTransitionTarget } from "./trust-transition.js";
 export type { RevokedCapabilityInvokeGateDecision, RevokedCapabilityInvokeGateEvidence, RevokedCapabilityInvokeGateInput } from "./lifecycle-gate.js";
+export type { CapabilityQualityScore, CapabilityQualityScoreBand, CapabilityQualityScoreDimensions, CapabilityQualityScoreInput, CapabilityQualityScoreRubricVersion } from "./quality-score.js";
 export { sanitizeToolResult } from "./result-sanitizer.js";
 export type { ResultSanitizerFinding, ResultSanitizerFindingCode, SanitizedToolResult, ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import { cp, mkdir, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";

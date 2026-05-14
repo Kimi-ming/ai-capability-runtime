@@ -60,6 +60,8 @@ quality_score:
   generated_at: 2026-05-08
 ```
 
+当前 Runtime 已提供 `calculateCapabilityQualityScore()` 作为 `opencap.quality_score.v1` 的最小实现。Helper 按上表权重对七个维度求和，限制每个维度不超过权重，输出 total、band、dimensions、generatedAt 和 `policyEffect: none`。Quality Score 只能作为解释性证据进入 Trust Card 或 policy trace，不能参与授权匹配。
+
 ## 非目标
 
 - 不做商业排名。
