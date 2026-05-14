@@ -45,6 +45,13 @@ interface NodeError extends Error {
   code?: string;
 }
 
+class CliUserInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CliUserInputError";
+  }
+}
+
 const USER_ERROR_CODES = new Set(["ENOENT", "ENOTDIR", "EACCES", "EPERM"]);
 
 function setCliError(message: string, exitCode: CliExitCode): void {
@@ -58,6 +65,11 @@ function isNodeError(error: unknown): error is NodeError {
 
 function handleCliError(error: unknown, fallbackMessage: string): void {
   if (error instanceof InstallCapabilityError) {
+    setCliError(error.message, 1);
+    return;
+  }
+
+  if (error instanceof CliUserInputError) {
     setCliError(error.message, 1);
     return;
   }
@@ -107,7 +119,7 @@ function parseLimit(value: string | undefined, fallback: number): number {
 
   const parsed = Number.parseInt(value, 10);
   if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`Invalid --limit value: ${value}`);
+    throw new CliUserInputError(`Invalid --limit value: ${value}`);
   }
 
   return parsed;
@@ -123,7 +135,7 @@ function parsePolicyDecision(value: string | undefined): PolicyDecision | undefi
   }
 
   if (!POLICY_DECISION_VALUES.has(value as PolicyDecision)) {
-    throw new Error(`Invalid --decision value: ${value}`);
+    throw new CliUserInputError(`Invalid --decision value: ${value}`);
   }
 
   return value as PolicyDecision;
@@ -157,7 +169,7 @@ function parseAuditStatus(value: string | undefined): AuditInvocationStatus | un
   }
 
   if (!AUDIT_INVOCATION_STATUSES.has(value as AuditInvocationStatus)) {
-    throw new Error(`Invalid --status value: ${value}`);
+    throw new CliUserInputError(`Invalid --status value: ${value}`);
   }
 
   return value as AuditInvocationStatus;
@@ -170,7 +182,7 @@ function parseSince(value: string | undefined): string | undefined {
 
   const timestamp = new Date(value);
   if (Number.isNaN(timestamp.getTime())) {
-    throw new Error(`Invalid --since value: ${value}`);
+    throw new CliUserInputError(`Invalid --since value: ${value}`);
   }
 
   return timestamp.toISOString();
@@ -215,15 +227,27 @@ function resolveCliPath(path: string): string {
 
 async function parseInvokeInput(options: { input?: string; inputJson?: string }): Promise<unknown> {
   if (options.input !== undefined && options.inputJson !== undefined) {
-    throw new Error("Use either --input or --input-json, not both.");
+    throw new CliUserInputError("Use either --input or --input-json, not both.");
   }
 
   if (options.inputJson !== undefined) {
-    return JSON.parse(options.inputJson);
+    try {
+      return JSON.parse(options.inputJson);
+    } catch {
+      throw new CliUserInputError("Invalid --input-json value: expected valid JSON.");
+    }
   }
 
   if (options.input !== undefined) {
-    return JSON.parse(await readFile(resolveCliPath(options.input), "utf8"));
+    const inputPath = resolveCliPath(options.input);
+    try {
+      return JSON.parse(await readFile(inputPath, "utf8"));
+    } catch (error) {
+      if (isNodeError(error) && error.code && USER_ERROR_CODES.has(error.code)) {
+        throw error;
+      }
+      throw new CliUserInputError(`Invalid --input JSON file: ${options.input}`);
+    }
   }
 
   return {};
@@ -588,7 +612,7 @@ program
     const capability = loaded.capabilities.find((installed) => installed.id === id);
 
     if (capability === undefined) {
-      throw new Error(`Installed capability not found: ${id}`);
+      throw new CliUserInputError(`Installed capability not found: ${id}`);
     }
 
     const policySet = await loadPolicySet({ cwd, env: process.env, stateDir: options.stateDir });

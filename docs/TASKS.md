@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test 和 CLI command snapshot tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 21 个、cli 3 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 45 个、runtime 235 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -467,7 +467,27 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/mcp/src/tool-mapping-contract.test.ts`，按 TDD 先确认三个占位快照失败，再固化 MCP mapping contract。测试覆盖 deterministic id->tool name mapping、collision diagnostics、tools/list projection mapping 和 tools/call reverse lookup 边界；MCP 包测试数从 18 增至 21。
-- [ ] T137 P1：实现错误模型和 exit code tests。
+- [x] T137 P1：实现错误模型和 exit code tests。
+  - 验收标准：
+    - CLI 测试覆盖用户可修正错误 exit code `1`，并确认不会被归类为内部错误 exit `2`。
+    - `invoke` 未安装 capability 返回 exit `1`，stderr 可读，stdout 为空，不输出 stack trace。
+    - `invoke --input-json` 非法 JSON 返回 exit `1`，stderr 不泄露 `SyntaxError` stack。
+    - `logs --limit` 非法值返回 exit `1`，stderr 不输出 stack trace。
+    - 修复不能改变 Result Envelope `isError` 输出仍走 stdout 的契约。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- error-exit-code.test.ts`
+    - `pnpm --filter @opencap/cli test`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm --filter @opencap/cli lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/cli/src/error-exit-code.test.ts`，按 TDD 确认 missing capability、invalid `--input-json` 和 invalid `--limit` 原先返回 exit `2`。`packages/cli/src/index.ts` 新增 `CliUserInputError`，将用户输入错误、无效 option 和未安装 capability 映射为 exit `1`，stderr 不打印 stack；CLI 包测试数从 3 增至 5。
 - [ ] T142 P2：维护 Host compatibility test records。
 - [ ] T143 P2：从 audit log 派生本地指标命令草案。
 - [ ] T154 P2：维护 Host compatibility evidence records。
@@ -651,10 +671,10 @@ git diff --check
 
 ## 当前推荐顺序
 
-1. M3 / T137：错误模型和 exit code tests
-2. M3 / T142：维护 Host compatibility test records
-3. M3 / T143：从 audit log 派生本地指标命令草案
-4. M3 / T154：维护 Host compatibility evidence records
+1. M3 / T142：维护 Host compatibility test records
+2. M3 / T143：从 audit log 派生本地指标命令草案
+3. M3 / T154：维护 Host compatibility evidence records
+4. M3 / T156：MCP elicitation profile RFC
 5. M4 / T158：Trust Card generation rules
 6. M4 / T185：Trust level transition tests
 7. M4 / T191：Lifecycle status schema
