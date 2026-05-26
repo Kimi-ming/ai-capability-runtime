@@ -1162,7 +1162,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `docs/教程/github-fine-grained-token-setup.md`、`packages/spec/src/github-token-guide-doc-lint.ts` 和 `github-token-guide-doc-lint.test.ts`；`docs/README.md`、`docs/INDEX.md` 和 `registry/developer-tools/github.create_issue/README.md` 已同步入口；`@opencap/spec` 导出 `lintGithubFineGrainedTokenGuide()`。Spec 测试数从 68 增至 70。
-- [ ] T173 P2：Execution evidence conformance record。
+- [x] T173 P2：Execution evidence conformance record。
+  - 验收标准：
+    - 新增 `opencap.execution_evidence.v1` conformance record，引用 `docs/质量/execution-evidence-v1.md` 的测试要求。
+    - Record 覆盖 blocked/dry-run requestStarted=false、成功 HTTP response evidence、timeout unknown outcome、retryAttempt/idempotency redaction、provider request id/SQLite persistence、Result Envelope output evidence 和 secret/credential redaction。
+    - Record artifacts 指向现有 runtime tests 和 execution evidence/semantics 文档，不引入新的外部服务或凭据需求。
+    - `packages/spec/src/conformance.test.ts` 将该 record 纳入 skeleton 校验。
+    - `docs/质量/conformance-suite-v1.md` 记录该 profile 的实现状态和 check 列表。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- conformance.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/test/fixtures/conformance/execution-evidence.yml`，并把该 record 纳入 `packages/spec/src/conformance.test.ts`；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.execution_evidence.v1` check 列表。
 - [ ] T190 P2：SECURITY.md 对齐 private reporting。
 - [ ] T205 P2：Usage export format。
 - [ ] T206 P2：Problem details for quota/rate errors。

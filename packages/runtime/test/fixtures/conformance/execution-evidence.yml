@@ -1,0 +1,26 @@
+subject:
+  type: runtime
+  name: opencap-runtime
+  version: 0.1.0-dev
+profile: opencap.execution_evidence.v1
+suite_version: 0.1.0
+result: pass
+source:
+  path: docs/质量/execution-evidence-v1.md
+  section: 测试要求
+checks:
+  EE-001-blocked-and-dry-run-request-start-false: pass
+  EE-002-success-http-response-evidence: pass
+  EE-003-timeout-after-request-unknown-outcome: pass
+  EE-004-retry-attempt-and-idempotency-redaction: pass
+  EE-005-provider-request-id-and-sqlite-persistence: pass
+  EE-006-result-envelope-output-evidence: pass
+  EE-007-secret-and-credential-redaction: pass
+artifacts:
+  - path: packages/runtime/src/domain.test.ts
+  - path: packages/runtime/src/index.test.ts
+  - path: packages/runtime/src/result-envelope.test.ts
+  - path: packages/runtime/src/retry-policy.test.ts
+  - path: packages/runtime/src/credential-lifecycle.test.ts
+  - path: docs/质量/execution-evidence-v1.md
+  - path: docs/设计/execution-semantics-v1.md

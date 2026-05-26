@@ -98,7 +98,7 @@ T153 已在 `@opencap/spec` 中新增最小 conformance suite skeleton：
 - `CORE_CONFORMANCE_GROUPS` 固定声明 V1 核心组：`C-MAN`、`C-PKG`、`C-RUN`、`C-POL`、`C-PG`、`C-CON`、`C-AUD`、`C-HTTP`、`C-MCP`、`C-REG`、`C-SEC`。
 - `validateConformanceRecord()` 校验 record 的 subject、profile、suite_version、result、checks 和 artifacts。
 - artifacts 必须是仓库相对路径，不能使用绝对路径或 `..` 上跳。
-- 当前首批被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml` 和 `packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`。
+- 当前首批被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml` 和 `packages/runtime/test/fixtures/conformance/execution-evidence.yml`。
 
 ## 非目标
 
@@ -139,6 +139,18 @@ T155 已新增 `packages/runtime/src/agentic-abuse-cases.test.ts` 和 `packages/
 - AG-004：任意 URL Capability 在 dry-run plan 中暴露 `arbitrary_url` warning。
 - AG-005：MCP Host 无确认 UI 时返回 `confirmation_required`，不执行。
 - AG-006：外部 API 返回超大输出时，Result Envelope 在 model-visible content 前限制大小并记录 warning。
+
+## Execution Evidence 实现状态
+
+T173 已新增 `packages/runtime/test/fixtures/conformance/execution-evidence.yml`。当前 `opencap.execution_evidence.v1` 组包含：
+
+- EE-001：blocked 和 dry-run 调用的 `requestStarted` 为 false。
+- EE-002：成功 HTTP 调用有 response evidence，包括 status、request/response timestamp 和 side-effect kind。
+- EE-003：request 已发出后的 timeout 记录 `unknown_after_timeout`，不伪造 response timestamp。
+- EE-004：retry attempt 和 idempotency key evidence 只记录次数与 hash，不泄露 key 原文。
+- EE-005：provider request id 和 execution semantics 字段能进入 audit/SQLite evidence。
+- EE-006：Result Envelope 带 output validation、sanitizer、provenance 和 result digest evidence。
+- EE-007：secret 和 credential evidence 只记录 reference/redacted digest，不记录 token 原文。
 
 ## Policy Governance V1 实现状态
 
