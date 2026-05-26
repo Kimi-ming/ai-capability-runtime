@@ -43,6 +43,23 @@ Sigstore/cosign 支持 keyless signing，使用 OIDC identity、短期证书和 
 
 OpenCap V1 不直接实现 cosign，但发布文档应避免与该方向冲突。
 
+参考：
+
+- SLSA provenance specification: <https://slsa.dev/spec/v1.0/provenance>
+- Sigstore keyless signing overview: <https://docs.sigstore.dev/cosign/signing/overview/>
+- npm provenance statements: <https://docs.npmjs.com/generating-provenance-statements>
+- npm trusted publishing: <https://docs.npmjs.com/trusted-publishers>
+
+## Manifest Provenance 预留
+
+Capability manifest 可以声明可选 `provenance` 对象，用来预留 package 和 release 级 metadata：
+
+- `provenance.package` 记录 Git/local/future OCI/SLSA package source、path、commit、digest 和 build type。
+- `provenance.release` 记录 manual/npm trusted publishing/future Sigstore/org signature publisher、provenance 类型、workflow ref、attestation digest 和 transparency log ref。
+- `provenance.policyEffect` 必须固定为 `none`。
+
+该字段只用于来源证明和审查 evidence，不改变 Registry trust level、本地 install policy、Runtime policy、confirmation、outbound policy 或 audit。
+
 ## Registry Signing
 
 未来可设计：

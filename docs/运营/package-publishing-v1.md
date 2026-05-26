@@ -101,3 +101,5 @@ Alpha 发布必须先完成：
 - `CHANGELOG.md` 记录本次发布边界和已知缺口。
 - README 不声称 `serve --mcp` 已完整可用。
 - npm trusted publishing/provenance workflow 以 draft 或 dry-run 方式审查，不使用长期 npm token。
+
+发布和 package provenance 可以在 Capability manifest 的可选 `provenance` 字段中记录摘要和引用。该字段只用于审查和 Trust Card/Registry evidence，`policyEffect` 必须为 `none`，不能因为 npm provenance、SLSA 或 Sigstore evidence 存在就自动允许安装或执行。

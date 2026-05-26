@@ -83,7 +83,7 @@
 | RQ-035 | Manifest 演进可迁移 | `docs/规范/manifest-evolution.md` | T149 | schema migration review |
 | RQ-036 | Registry 分发可追溯 | `docs/生态/registry-distribution.md`、`rfcs/0013-registry-index-signing-v1.md`、`rfcs/0014-registry-index-cache-sync-v1.md` | T147, T272 | registry index signing RFC；index/cache/sync RFC |
 | RQ-037 | SDK/Adapter 不污染 V1 主路径 | `docs/设计/sdk-and-adapter-boundary.md` | T145, T146 | RFC/ADR review |
-| RQ-038 | 包发布供应链清晰 | `docs/运营/package-publishing-v1.md`、`docs/运营/npm-trusted-publishing-workflow.md` | T123, T148 | trusted publishing workflow；release checklist |
+| RQ-038 | 包发布供应链清晰 | `docs/运营/package-publishing-v1.md`、`docs/运营/npm-trusted-publishing-workflow.md`、`docs/安全/signing-and-provenance-roadmap.md` | T123, T148, T274 | trusted publishing workflow；release checklist；manifest provenance schema tests |
 | RQ-039 | 质量门禁可执行 | `docs/质量/quality-gates.md` | T126 | release checklist |
 | RQ-040 | Capability package 结构稳定 | `docs/设计/capability-package-v1.md` | T151, T158 | package lint tests + trust card review |
 | RQ-041 | 用户确认可审计 | `docs/设计/confirmation-and-consent-v1.md` | T152, T073 | consent receipt + confirmation_required tests |

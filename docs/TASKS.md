@@ -1001,7 +1001,28 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `rfcs/0014-registry-index-cache-sync-v1.md`，定义 future Registry index/cache/sync profile、cache 存储位置、sync pipeline、install candidate 验证和 redacted sync evidence。`docs/生态/registry-distribution.md`、`docs/README.md`、`docs/规划/traceability-matrix.md`、`docs/SYSTEM.md` 和 `docs/DECISIONS.md` 已同步入口和口径。
-- [ ] T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
+- [x] T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
+  - 验收标准：
+    - Manifest schema 新增可选 `provenance` 对象，支持 package source/digest/buildType 和 release publisher/provenance/workflow/attestation/transparency log metadata。
+    - `provenance.policyEffect` 必须固定为 `none`，provenance 不能作为 trust level、install policy 或 Runtime policy 的授权来源。
+    - Schema 拒绝伪造 policy/trust authority 的 provenance metadata，并限制 digest/path 基础格式。
+    - Capability package、package publishing、signing/provenance roadmap、traceability 和测试文档已同步字段含义和验证边界。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- index.test.ts -t provenance`
+    - `pnpm --filter @opencap/spec test`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`packages/spec/schema/manifest.schema.json` 新增 top-level `provenance` schema；`CapabilityManifest` 导出 package/release provenance 类型；`index.test.ts` 覆盖 SLSA/Sigstore/npm provenance 预留字段和 `policyEffect: none` 负向约束。Spec 测试数从 58 增至 60。
 
 ### 模块 M5：Conformance、Abuse Cases、隐私和运维
 

@@ -71,6 +71,37 @@ registry/<category>/<capability-id>/
 
 Package lint 只验证目录结构和明显本地状态/secret-shaped 文件；它不替代 manifest schema、model-visible metadata lint、least-privilege auth lint、registry tests 或人工 review。
 
+## Package 和 Release Provenance
+
+Manifest 可以预留 `provenance` 字段，用于记录未来 SLSA、Sigstore、npm provenance 或 OCI artifact 的来源证据。该字段只保存摘要、引用和发布来源，不保存 attestation 原文、私钥、token、provider response 或 CI 私有日志。
+
+最小结构：
+
+```yaml
+provenance:
+  package:
+    source: git
+    repository: https://github.com/opencap/opencap
+    path: registry/developer-tools/github.create_issue
+    commit: 0123456789abcdef
+    digest: sha256:...
+    buildType: manual_review
+  release:
+    publisher: npm_trusted_publishing
+    provenance: npm
+    workflowRef: .github/workflows/npm-publish.yml@refs/tags/v0.1.0
+    attestationDigest: sha256:...
+    transparencyLogRef: rekor:...
+  policyEffect: none
+```
+
+约束：
+
+- `policyEffect` 必须固定为 `none`，provenance 不能提升 trust level，不能绕过 install policy、Runtime policy、confirmation、outbound policy 或 audit。
+- `package.digest` 和 `release.attestationDigest` 只接受 `sha256:<64 hex>` 形式。
+- `package.path` 不能包含路径穿越。
+- `release.provenance` 只表示来源证明类型，例如 `npm`、`future_slsa` 或 `future_sigstore`。
+
 ## Trust Card V1
 
 Trust Card 是用户看到的能力信任摘要。V1 可以从 manifest、registry metadata、CI 状态和 review 状态生成：
@@ -109,3 +140,4 @@ V1 `opencap install <id>` 应安装 package 的可执行定义和必要元数据
 - T125：CLI list 输出 lifecycle/trust card 基础字段。
 - T151：Capability Package lint。
 - T158：Trust Card generation rules。
+- T274：SLSA/Sigstore provenance metadata 预留。

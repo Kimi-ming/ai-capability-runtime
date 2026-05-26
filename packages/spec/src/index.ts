@@ -59,6 +59,29 @@ export interface CapabilityPermission {
   confirmation: "allow" | "ask" | "deny";
 }
 
+export interface CapabilityManifestPackageProvenance {
+  source: "git" | "local" | "future_oci" | "future_slsa";
+  repository?: string;
+  path?: string;
+  commit?: string;
+  digest?: string;
+  buildType?: "manual_review" | "future_slsa" | "future_sigstore" | "future_oci";
+}
+
+export interface CapabilityManifestReleaseProvenance {
+  publisher?: "manual" | "npm_trusted_publishing" | "future_sigstore" | "future_org_signature";
+  provenance?: "none" | "npm" | "future_slsa" | "future_sigstore";
+  workflowRef?: string;
+  attestationDigest?: string;
+  transparencyLogRef?: string;
+}
+
+export interface CapabilityManifestProvenance {
+  package?: CapabilityManifestPackageProvenance;
+  release?: CapabilityManifestReleaseProvenance;
+  policyEffect: "none";
+}
+
 export interface CapabilityManifest {
   id: string;
   name: string;
@@ -71,6 +94,7 @@ export interface CapabilityManifest {
   auth: Record<string, unknown>;
   permissions: CapabilityPermission[];
   execution: Record<string, unknown>;
+  provenance?: CapabilityManifestProvenance;
   metadata: Record<string, unknown>;
 }
 

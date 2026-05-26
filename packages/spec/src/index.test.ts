@@ -131,6 +131,45 @@ describe("validateManifest", () => {
     await expectInvalidField(revokedWithoutAdvisory, "/lifecycle");
   });
 
+  it("accepts package and release provenance metadata reserved for SLSA and Sigstore", async () => {
+    const manifest = baseManifest() as Record<string, unknown>;
+    manifest.provenance = {
+      package: {
+        source: "git",
+        repository: "https://github.com/opencap/opencap",
+        path: "registry/developer-tools/github.create_issue",
+        commit: "0123456789abcdef",
+        digest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        buildType: "manual_review",
+      },
+      release: {
+        publisher: "npm_trusted_publishing",
+        provenance: "npm",
+        workflowRef: ".github/workflows/npm-publish.yml@refs/tags/v0.1.0",
+        attestationDigest: "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        transparencyLogRef: "rekor:entry",
+      },
+      policyEffect: "none",
+    };
+
+    const result = await validateManifest(manifest, "fixture.yml");
+
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects provenance metadata that claims policy or trust authority", async () => {
+    const manifest = baseManifest() as Record<string, unknown>;
+    manifest.provenance = {
+      package: {
+        source: "git",
+        digest: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      },
+      policyEffect: "allow",
+    };
+
+    await expectInvalidField(manifest, "/provenance/policyEffect");
+  });
+
   it("rejects manifests without permissions", async () => {
     const manifest = baseManifest() as Record<string, unknown>;
     delete manifest.permissions;

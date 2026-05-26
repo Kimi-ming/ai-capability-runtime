@@ -344,6 +344,96 @@
         }
       }
     },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyEffect"
+      ],
+      "properties": {
+        "package": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "git",
+                "local",
+                "future_oci",
+                "future_slsa"
+              ]
+            },
+            "repository": {
+              "type": "string",
+              "minLength": 1
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{7,64}$"
+            },
+            "digest": {
+              "$ref": "#/$defs/sha256Digest"
+            },
+            "buildType": {
+              "type": "string",
+              "enum": [
+                "manual_review",
+                "future_slsa",
+                "future_sigstore",
+                "future_oci"
+              ]
+            }
+          }
+        },
+        "release": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "publisher": {
+              "type": "string",
+              "enum": [
+                "manual",
+                "npm_trusted_publishing",
+                "future_sigstore",
+                "future_org_signature"
+              ]
+            },
+            "provenance": {
+              "type": "string",
+              "enum": [
+                "none",
+                "npm",
+                "future_slsa",
+                "future_sigstore"
+              ]
+            },
+            "workflowRef": {
+              "type": "string",
+              "minLength": 1
+            },
+            "attestationDigest": {
+              "$ref": "#/$defs/sha256Digest"
+            },
+            "transparencyLogRef": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "policyEffect": {
+          "type": "string",
+          "const": "none"
+        }
+      }
+    },
     "metadata": {
       "type": "object",
       "additionalProperties": false,
@@ -393,6 +483,10 @@
     }
   },
   "$defs": {
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "jsonValue": {
       "oneOf": [
         { "type": "null" },
