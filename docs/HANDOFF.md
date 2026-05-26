@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T190 已完成；下一项 ready task 预计是 T205 P2：Usage export format。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T190 已完成；T205 P2：Usage export format 已标记阻塞，因为它依赖尚未完成的 T198 Usage event schema。
 
-下一步推荐：先用 `next_task.py` 重新确认 T205，再补充 Usage export format。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先完成或前移 T198 Usage event schema，再恢复 T205；如果保持当前队列顺序，`next_task.py` 当前会选择 T206 P2：Problem details for quota/rate errors。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M5 / T205 P2：Usage export format
+M5 / T198 P1：Usage event schema（用于解除 T205 阻塞）
 ```
 
 原因：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T128/T129/T130/T131/T132/T133/T134/T135/T136/T137/T138/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T153/T154/T155/T156/T157/T158/T159/T160/T161/T162/T163/T164/T165/T167/T168/T170/T173/T185/T186/T187/T188/T189/T190/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T190 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T205。
+- 当前状态：T190 已完成并验证；T205 因依赖 T198 Usage event schema 已标记阻塞。
 
 ## 最近验证
 
@@ -200,9 +200,11 @@ M5 / T205 P2：Usage export format
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T205 P2：Usage export format。
+- T198 P1：Usage event schema，用于解除 T205 Usage export format 阻塞。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T205 展开为带验收标准和验证命令，再补充 Usage export format。
+如果要继续 strict `continuous-doc-dev`，下一轮先处理 T198，或让 `next_task.py` 在 T205 阻塞后选择下一项 ready task。
+
+当前 next ready task：T206 P2：Problem details for quota/rate errors。
 
 ## Secret Resolver V1 env provider 已实现
 

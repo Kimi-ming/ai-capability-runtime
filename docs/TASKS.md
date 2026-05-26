@@ -1203,7 +1203,10 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`SECURITY.md` 已补齐 GitHub private vulnerability reporting、敏感材料边界、报告内容、维护者 triage/advisory 流程和启用检查；新增 `packages/spec/src/security-policy-doc-lint.ts` 与 `security-policy-doc-lint.test.ts`，并从 `@opencap/spec` 导出 `lintSecurityPolicyDoc()`。Spec 测试数从 70 增至 72。
-- [ ] T205 P2：Usage export format。
+- [!] T205 P2：Usage export format。（阻塞：依赖 T198 Usage event schema；先定义 export format 会反向固定尚未完成的 usage event 字段和 non-billing 语义）
+  - 阻塞处理：
+    - 先完成或前移 T198，定义本地 Usage Event schema、必填字段、redaction/non-billing 边界和 audit 关联键。
+    - T198 完成后再恢复 T205，定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。
 - [ ] T206 P2：Problem details for quota/rate errors。
 - [ ] T207 P2：Usage evidence conformance tests。
 
