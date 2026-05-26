@@ -115,6 +115,11 @@ advisories:
   latest: null
 maintainer:
   status: community
+quality:
+  rubric_version: opencap.quality_score.v1
+  total: 82
+  band: tested
+  policy_effect: none
 ```
 
 当前 `opencap list` 已输出 Trust Card 的最小可见化子集：trust level、lifecycle、maintainer、license 和 status。这些字段只用于展示和审查，不改变本地 policy、consent 或 execution gate。
@@ -131,8 +136,10 @@ Runtime 的 Trust Card helper 必须只从已安装 Capability record、manifest
 - `review.reviewDigest` 来自 review evidence digest；least-privilege 结论必须由 review 或 lint evidence 明确提供。
 - `advisories.open/latest/refs` 从 trust/advisory refs 派生；不能因为没有本地缓存就宣称没有 advisory。
 - `maintainer.status` 由 trust level 派生：`official` -> `official`，`maintainer_verified` -> `verified`，`listed/tested` -> `community`，缺失 -> `unknown`。
+- `quality` 必须使用 `opencap.quality_score.v1` 完整结构，保留 `total`、`band`、七个维度、`generatedAt` 和 `policyEffect: none`，只能作为解释性 evidence。
 - `provenance` 只保存 `manifestDigest`、`packageDigest`、`registryCommit` 等摘要或引用，不保存 manifest 原文。
 - `limitations` 必须包含 trust level 不覆盖本地 policy、consent、outbound policy 或 audit 的提示。
+- 当 Trust Card 包含 `quality` 时，`limitations` 必须额外说明 quality score 没有 policy effect。
 - `disclaimer` 必须说明 Trust Card 是 evidence summary，不是安全保证，也不是授权决策。
 
 当前实现入口是 `createTrustCardFromInstalledCapability()`；低层 `createTrustCard()` 仍可用于测试、迁移或未来 Registry Web/Console 自定义 evidence 输入。

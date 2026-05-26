@@ -9,6 +9,7 @@ import {
   createConsentCard,
   createTrustCard,
   createTrustCardFromInstalledCapability,
+  calculateCapabilityQualityScore,
   type InstalledCapabilityRecord,
 } from "./index.js";
 
@@ -140,7 +141,18 @@ describe("Runtime Card public contract", () => {
       review: { leastPrivilege: "pass", reviewedAt: "2026-05-13", reviewDigest: "sha256:review" },
       advisories: { open: 1, latest: "GHSA-demo", refs: ["GHSA-demo"] },
       maintainer: { status: "community", name: "opencap" },
-      quality: { score: 0.82, rubricVersion: "v1" },
+      quality: calculateCapabilityQualityScore({
+        dimensions: {
+          manifest: 15,
+          docs: 12,
+          tests: 18,
+          security: 17,
+          maintenance: 8,
+          compatibility: 6,
+          evidence: 6,
+        },
+        generatedAt: "2026-05-13T00:01:00.000Z",
+      }),
       provenance: { manifestDigest: "sha256:manifest", packageDigest: "sha256:package" },
       generatedAt: "2026-05-13T00:01:00.000Z",
       cardId: "card_trust_test",
@@ -157,9 +169,22 @@ describe("Runtime Card public contract", () => {
   });
 
   it("generates trust cards from installed capability records with derived evidence rules", () => {
+    const quality = calculateCapabilityQualityScore({
+      dimensions: {
+        manifest: 15,
+        docs: 12,
+        tests: 18,
+        security: 17,
+        maintenance: 8,
+        compatibility: 6,
+        evidence: 6,
+      },
+      generatedAt: "2026-05-14T00:00:00.000Z",
+    });
     const card = createTrustCardFromInstalledCapability({
       capability: installedCapability,
       tests: { status: "passing", lastRun: "2026-05-14", evidenceRef: "registry/developer-tools/github.create_issue/tests/basic.yml" },
+      quality,
       generatedAt: "2026-05-14T00:00:00.000Z",
       cardId: "card_trust_generated",
     });
@@ -195,8 +220,25 @@ describe("Runtime Card public contract", () => {
         manifestDigest: "sha256:manifest",
         packageDigest: "sha256:package",
       },
+      quality: {
+        rubricVersion: "opencap.quality_score.v1",
+        total: 82,
+        band: "tested",
+        generatedAt: "2026-05-14T00:00:00.000Z",
+        policyEffect: "none",
+      },
+    });
+    expect(card.quality?.dimensions).toEqual({
+      manifest: 15,
+      docs: 12,
+      tests: 18,
+      security: 17,
+      maintenance: 8,
+      compatibility: 6,
+      evidence: 6,
     });
     expect(card.limitations).toContain("Trust level does not override local policy, consent, outbound policy, or audit.");
+    expect(card.limitations).toContain("Quality score is explanatory evidence and has no policy effect.");
     expect(card.disclaimer).toContain("not an authorization decision");
     expect(JSON.stringify(card)).not.toContain("GITHUB_TOKEN");
     expect(JSON.stringify(card)).not.toContain("ghp_secret_value");

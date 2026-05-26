@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { CapabilityPermission } from "@opencap/spec";
 import type { CapabilityIdentity, ConsentRequest, InstallMetadata, InstalledCapabilityRecord, RiskSummary, TrustSummary } from "./domain.js";
 import type { CompatibilityLedgerCheck, CompatibilityLedgerRecordV1, CompatibilityLedgerResult } from "./ledger.js";
+import type { CapabilityQualityScore } from "./quality-score.js";
 
 export const CARD_SCHEMA_VERSION = "opencap.card.v1" as const;
 export const TRUST_CARD_DISCLAIMER = "Trust Card is an evidence summary, not a security guarantee and not an authorization decision." as const;
@@ -86,10 +87,7 @@ export interface TrustCardMaintainerSummary {
   name?: string;
 }
 
-export interface TrustCardQualitySummary {
-  score?: number;
-  rubricVersion?: string;
-}
+export type TrustCardQualitySummary = CapabilityQualityScore;
 
 export interface TrustCardProvenanceSummary {
   manifestDigest?: string;
@@ -291,10 +289,11 @@ function maintainerStatusFromTrust(trust: TrustSummary | undefined): TrustCardMa
   return "unknown";
 }
 
-function defaultTrustCardLimitations(limitations: string[] | undefined): string[] {
+function defaultTrustCardLimitations(limitations: string[] | undefined, quality: TrustCardQualitySummary | undefined): string[] {
   return [
     ...(limitations ?? []),
     "Trust level does not override local policy, consent, outbound policy, or audit.",
+    ...(quality ? ["Quality score is explanatory evidence and has no policy effect."] : []),
     "Trust Card is generated from available evidence and may lag behind provider or registry changes.",
   ];
 }
@@ -383,7 +382,7 @@ export function createTrustCardFromInstalledCapability(input: CreateTrustCardFro
       packageDigest: capability.identity.packageDigest,
       registryCommit: capability.identity.registryCommit,
     },
-    limitations: defaultTrustCardLimitations(input.limitations),
+    limitations: defaultTrustCardLimitations(input.limitations, input.quality),
   });
 }
 

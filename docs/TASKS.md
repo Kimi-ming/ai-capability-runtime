@@ -963,7 +963,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/quality-score.ts` 和 `quality-score.test.ts`，root entrypoint 导出 `calculateCapabilityQualityScore()`、rubric version 和类型。Helper 按文档权重计算 total/band，clamp 维度分数，并固定 `policyEffect: none`。Runtime 测试数从 247 增至 249。
-- [ ] T195 P2：Trust Card includes quality score。
+- [x] T195 P2：Trust Card includes quality score。
+  - 验收标准：
+    - Trust Card 的 `quality` 字段承接 `opencap.quality_score.v1` 完整结构：rubricVersion、total、band、dimensions、generatedAt 和 `policyEffect: none`。
+    - `createTrustCardFromInstalledCapability()` 可接收 `calculateCapabilityQualityScore()` 的输出并原样写入 Trust Card。
+    - 带 quality score 的 Trust Card 默认 limitations 明确说明质量分只是解释性 evidence，没有 policy effect。
+    - Trust Card 仍不读取 secret、provider 原始响应、input/output 原文，质量分不参与授权决策。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- card.test.ts`
+    - `pnpm --filter @opencap/runtime test`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`TrustCardQualitySummary` 已收紧为完整 `CapabilityQualityScore` 结构；`card.test.ts` 覆盖 Trust Card 接收 `calculateCapabilityQualityScore()` 输出、保留 total/band/dimensions/policyEffect，并在 limitations 中声明 quality score 无 policy effect。Runtime 测试数保持 249。
 - [ ] T272 P2：设计 Registry index/cache/sync RFC。
 - [ ] T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
 
