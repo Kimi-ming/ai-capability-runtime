@@ -8,6 +8,8 @@ export { lintCredentialLifecycleRunbook } from "./credential-lifecycle-doc-lint.
 export type { CredentialLifecycleRunbookFinding, CredentialLifecycleRunbookLintRule } from "./credential-lifecycle-doc-lint.js";
 export { lintGithubFineGrainedTokenGuide } from "./github-token-guide-doc-lint.js";
 export type { GithubFineGrainedTokenGuideFinding, GithubFineGrainedTokenGuideLintRule } from "./github-token-guide-doc-lint.js";
+export { lintSecurityPolicyDoc } from "./security-policy-doc-lint.js";
+export type { SecurityPolicyDocFinding, SecurityPolicyDocLintRule } from "./security-policy-doc-lint.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";

@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 70 个、runtime 267 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 72 个、runtime 267 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -1182,7 +1182,27 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/test/fixtures/conformance/execution-evidence.yml`，并把该 record 纳入 `packages/spec/src/conformance.test.ts`；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.execution_evidence.v1` check 列表。
-- [ ] T190 P2：SECURITY.md 对齐 private reporting。
+- [x] T190 P2：SECURITY.md 对齐 private reporting。
+  - 验收标准：
+    - `SECURITY.md` 明确优先使用 GitHub private vulnerability reporting，并链接官方配置文档。
+    - `SECURITY.md` 禁止在公开 issue/PR/讨论/聊天或模型可见文本中披露 secret、攻击 payload、未公开漏洞细节或真实 provider token。
+    - `SECURITY.md` 列出报告最小信息：受影响组件、复现步骤、影响范围、缓解方案以及是否涉及 secret、Capability、Registry、policy、audit、MCP Host 或 provider。
+    - `SECURITY.md` 说明维护者确认、triage、draft advisory/Capability Advisory、修复、协调披露和 revocation/freeze/release note 的流程。
+    - `SECURITY.md` 说明维护者需要检查 Settings -> Advanced Security -> Private vulnerability reporting，并保持 issue template 的安全政策链接指向仓库 Security policy 页面。
+    - `@opencap/spec` 暴露 SECURITY.md 文档 lint，防止 private reporting 边界回退。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- security-policy-doc-lint.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：`SECURITY.md` 已补齐 GitHub private vulnerability reporting、敏感材料边界、报告内容、维护者 triage/advisory 流程和启用检查；新增 `packages/spec/src/security-policy-doc-lint.ts` 与 `security-policy-doc-lint.test.ts`，并从 `@opencap/spec` 导出 `lintSecurityPolicyDoc()`。Spec 测试数从 70 增至 72。
 - [ ] T205 P2：Usage export format。
 - [ ] T206 P2：Problem details for quota/rate errors。
 - [ ] T207 P2：Usage evidence conformance tests。
