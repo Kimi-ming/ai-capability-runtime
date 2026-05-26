@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留、T116 术语表/文档索引维护、T128 威胁模型 Abuse Cases smoke tests、T138 privacy retention 文档 lint、T153 conformance suite skeleton 和 T155 Agentic abuse cases smoke tests 均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留、T116 术语表/文档索引维护、T128 威胁模型 Abuse Cases smoke tests、T138 privacy retention 文档 lint、T153 conformance suite skeleton、T155 Agentic abuse cases smoke tests 和 T162 credential lifecycle smoke/runbook 验证均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -29,9 +29,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 主要包状态：
 
-- `@opencap/spec` 有 schema、类型、manifest loader/validator API、Capability authoring loop contract、registry test 校验、schema JSON public subpath export、conformance suite skeleton、`api_key` auth placement 和 credential descriptor 约束测试、model-visible metadata lint、privacy retention doc lint、least-privilege auth lint、authoring manifest validation 和 prompt-surface negative fixtures。
+- `@opencap/spec` 有 schema、类型、manifest loader/validator API、Capability authoring loop contract、registry test 校验、schema JSON public subpath export、conformance suite skeleton、`api_key` auth placement 和 credential descriptor 约束测试、model-visible metadata lint、privacy retention doc lint、credential lifecycle runbook lint、least-privilege auth lint、authoring manifest validation 和 prompt-surface negative fixtures。
 - `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`list` 已输出 lifecycle/trust/maintainer/license/status 基础字段；`command-snapshot.test.ts` 已锁定 validate/list/logs/decision-log/policy validate 的稳定 stdout/stderr/exit code；`error-exit-code.test.ts` 已覆盖用户可修正错误 exit `1`；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；package public surface 保持 bin-only；`serve` 仍是骨架。
-- `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract、execution semantics evidence 类型/helper、unknown timeout audit evidence、retry policy decision helper、provider rate limit evidence、local abuse throttle gate、financial consent/spend cap gate、quality score rubric、Trust Card quality score evidence、quality score policy trace boundary、quota/budget pre-secret gate helper 和 GateDecision 语义 helper、本地 state dir 初始化和 precedence tests、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、consent receipt audit fields、Secret Resolver V1 env provider、credential audit evidence、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor、Threat/Agentic Abuse Case smoke tests 和 package export map 测试。
+- `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract、execution semantics evidence 类型/helper、unknown timeout audit evidence、retry policy decision helper、provider rate limit evidence、local abuse throttle gate、financial consent/spend cap gate、quality score rubric、Trust Card quality score evidence、quality score policy trace boundary、quota/budget pre-secret gate helper 和 GateDecision 语义 helper、本地 state dir 初始化和 precedence tests、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、consent receipt audit fields、Secret Resolver V1 env provider、credential audit evidence、credential lifecycle smoke、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor、Threat/Agentic Abuse Case smoke tests 和 package export map 测试。
 - `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由、MCP tool mapping contract snapshots 和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现；model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate 已实现。
 - `@opencap/sdk` 暂缓实现。
 
@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T155 已完成；下一项 ready task 预计是 T162 P2：补充 credential lifecycle smoke/runbook 验证。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T162 已完成；下一项 ready task 预计是 T165 P2：GitHub fine-grained token setup guide。
 
-下一步推荐：先用 `next_task.py` 重新确认 T162，再补充 credential lifecycle smoke/runbook 验证。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T165，再补充 GitHub fine-grained token setup guide。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M5 / T162 P2：补充 credential lifecycle smoke/runbook 验证
+M5 / T165 P2：GitHub fine-grained token setup guide
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T128/T129/T130/T131/T132/T133/T134/T135/T136/T137/T138/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T153/T154/T155/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T188/T189/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T128/T129/T130/T131/T132/T133/T134/T135/T136/T137/T138/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T153/T154/T155/T156/T157/T158/T159/T160/T161/T162/T163/T164/T167/T168/T170/T185/T186/T187/T188/T189/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T155 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T162。
+- 当前状态：T162 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T165。
 
 ## 最近验证
 
@@ -71,6 +71,7 @@ M5 / T162 P2：补充 credential lifecycle smoke/runbook 验证
 - `pnpm --filter @opencap/spec test`
 - `pnpm --filter @opencap/spec test -- advisory.test.ts`
 - `pnpm --filter @opencap/spec test -- privacy-retention-doc-lint.test.ts`
+- `pnpm --filter @opencap/spec test -- credential-lifecycle-doc-lint.test.ts`
 - `pnpm --filter @opencap/spec test -- index.test.ts -t "lifecycle"`
 - `pnpm --filter @opencap/spec test -- index.test.ts -t "auth credential descriptor"`
 - `pnpm --filter @opencap/spec test -- auth-lint.test.ts authoring.test.ts`
@@ -89,6 +90,7 @@ M5 / T162 P2：补充 credential lifecycle smoke/runbook 验证
 - `pnpm --filter @opencap/runtime test -- abuse-throttle.test.ts`
 - `pnpm --filter @opencap/runtime test -- threat-model-abuse-cases.test.ts`
 - `pnpm --filter @opencap/runtime test -- agentic-abuse-cases.test.ts`
+- `pnpm --filter @opencap/runtime test -- credential-lifecycle.test.ts`
 - `pnpm --filter @opencap/runtime test -- financial-consent-spend-gate.test.ts`
 - `pnpm --filter @opencap/runtime test -- index.test.ts -t "listInstalledCapabilities"`
 - `pnpm --filter @opencap/runtime test -- trust-transition.test.ts`
@@ -116,7 +118,7 @@ M5 / T162 P2：补充 credential lifecycle smoke/runbook 验证
 - `audit_docs.py`
 - `next_task.py`
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 66 个、runtime 264 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 68 个、runtime 267 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
 
 ## 本轮文档和后续收敛
 
@@ -185,6 +187,7 @@ M5 / T162 P2：补充 credential lifecycle smoke/runbook 验证
 - T138 已完成：新增 `packages/spec/src/privacy-retention-doc-lint.ts` 和 `privacy-retention-doc-lint.test.ts`，从 `@opencap/spec` 导出 `lintPrivacyRetentionDoc()`，检查 privacy retention 文档必须覆盖本地优先、默认不上传遥测、secret 脱敏、`input_hash`、保留策略、手动删除、Host 日志边界和非目标；`docs/安全/privacy-retention-v1.md` 已补充遥测边界。Spec 测试数从 60 增至 62。
 - T153 已完成：新增 `packages/spec/src/conformance.ts` 和 `conformance.test.ts`，从 `@opencap/spec` 导出 `CONFORMANCE_SUITE_VERSION`、`CORE_CONFORMANCE_GROUPS` 和 `validateConformanceRecord()`；现有 `policy-governance.yml` 与 `threat-model-abuse-cases.yml` 已作为首批 record fixture 接入校验，缺字段和不安全 artifact path 会返回结构化 finding。Spec 测试数从 62 增至 66。
 - T155 已完成：新增 `packages/runtime/src/agentic-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`，把 `docs/安全/agentic-risk-mapping.md` 的 abuse cases 转成 Runtime smoke/conformance checks；覆盖 prompt injection write confirmation、localhost outbound block、重复调用独立 audit/consent、任意 URL warning、MCP `confirmation_required` 和 oversized output limit。Runtime 测试数从 257 增至 264。
+- T162 已完成：新增 `packages/spec/src/credential-lifecycle-doc-lint.ts`、`packages/spec/src/credential-lifecycle-doc-lint.test.ts` 和 `packages/runtime/src/credential-lifecycle.test.ts`，把 `docs/运营/credential-lifecycle.md` 的验收测试转成 runbook lint 和 Runtime smoke；覆盖 env-only 模型、policy/consent/outbound 顺序、轮换不改 manifest、missing env 与 external 401 区分、audit redaction 和 installed list 不展示凭据值。Spec 测试数从 66 增至 68，Runtime 测试数从 264 增至 267。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -192,9 +195,9 @@ M5 / T162 P2：补充 credential lifecycle smoke/runbook 验证
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T162 P2：补充 credential lifecycle smoke/runbook 验证。
+- T165 P2：GitHub fine-grained token setup guide。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T162 展开为带验收标准和验证命令，再补充 credential lifecycle smoke/runbook 验证。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T165 展开为带验收标准和验证命令，再补充 GitHub fine-grained token setup guide。
 
 ## Secret Resolver V1 env provider 已实现
 

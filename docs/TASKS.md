@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 66 个、runtime 264 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 68 个、runtime 267 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -1121,7 +1121,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/agentic-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`，并把该 record 纳入 `packages/spec/src/conformance.test.ts`；Runtime 测试数从 257 增至 264。
-- [ ] T162 P2：补充 credential lifecycle smoke/runbook 验证。
+- [x] T162 P2：补充 credential lifecycle smoke/runbook 验证。
+  - 验收标准：
+    - Credential lifecycle runbook 有可复用 lint，要求覆盖 env-only 凭据模型、policy/consent/outbound gate 顺序、不存储 secret、轮换不改 manifest、missing env 错误、external 401 区分、audit redaction 和 list/Console 不展示凭据值。
+    - Runtime smoke 覆盖 token 轮换只更新 env value、不改变 manifest auth；audit 只记录 redacted credential evidence，不泄露 token 原文。
+    - Runtime smoke 覆盖 missing env 与 external provider 401 在 Result/Audit 中可区分，且 missing env 不发起 fetch。
+    - Runtime smoke 覆盖 installed capability list 不展示 env credential value、env var name 或 Authorization header。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- credential-lifecycle-doc-lint.test.ts`
+    - `pnpm --filter @opencap/runtime test -- credential-lifecycle.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/spec/src/credential-lifecycle-doc-lint.ts`、`packages/spec/src/credential-lifecycle-doc-lint.test.ts` 和 `packages/runtime/src/credential-lifecycle.test.ts`；从 `@opencap/spec` 导出 `lintCredentialLifecycleRunbook()`，并把 `docs/运营/credential-lifecycle.md` 的验收测试固化为文档 lint 和 Runtime smoke。Spec 测试数从 66 增至 68，Runtime 测试数从 264 增至 267。
 - [ ] T165 P2：GitHub fine-grained token setup guide。
 - [ ] T173 P2：Execution evidence conformance record。
 - [ ] T190 P2：SECURITY.md 对齐 private reporting。

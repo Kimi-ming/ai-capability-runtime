@@ -4,6 +4,8 @@ export { CONFORMANCE_SUITE_VERSION, CORE_CONFORMANCE_GROUPS, validateConformance
 export type { ConformanceRecordValidationIssue } from "./conformance.js";
 export { lintPrivacyRetentionDoc } from "./privacy-retention-doc-lint.js";
 export type { PrivacyRetentionDocFinding, PrivacyRetentionDocLintRule } from "./privacy-retention-doc-lint.js";
+export { lintCredentialLifecycleRunbook } from "./credential-lifecycle-doc-lint.js";
+export type { CredentialLifecycleRunbookFinding, CredentialLifecycleRunbookLintRule } from "./credential-lifecycle-doc-lint.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";
