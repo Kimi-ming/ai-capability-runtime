@@ -47,6 +47,10 @@ logs:
 
 `opencap logs` 默认只显示摘要。详细输出也必须是 redacted。
 
+## 遥测边界
+
+V1 不默认上传遥测，不把 audit log 自动同步到远程服务，也不实现远程审计保留策略。未来如果支持导出或远程保留，必须由用户显式启用，并继续遵守脱敏、最小化和本地 policy。
+
 ## MCP 和 Host
 
 OpenCap 不控制 Host 自己的日志。文档应提醒用户：Host 可能记录 tool call arguments。OpenCap 只能保证自己的 Runtime 日志脱敏。

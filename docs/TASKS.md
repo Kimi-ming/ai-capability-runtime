@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 60 个、runtime 257 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 62 个、runtime 257 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -1063,7 +1063,25 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/runtime/src/threat-model-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`；AC-001 到 AC-007 均已转为 Runtime smoke 断言，Runtime 测试数从 249 增至 257。
-- [ ] T138 P2：增加 privacy retention 文档测试或 lint。
+- [x] T138 P2：增加 privacy retention 文档测试或 lint。
+  - 验收标准：
+    - 新增可复用 privacy retention 文档 lint helper，检查 V1 隐私保留文档必须覆盖本地优先、默认不上传遥测、secret 脱敏、`input_hash`、保留策略、手动删除、Host 日志边界和非目标。
+    - 新增单元测试覆盖真实 `docs/安全/privacy-retention-v1.md` 通过，以及不完整文档返回结构化 finding。
+    - `docs/安全/privacy-retention-v1.md` 明确 V1 不默认上传遥测、不自动同步远程 audit log。
+    - helper 从 `@opencap/spec` public API 导出，便于后续接入更完整 docs lint。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- privacy-retention-doc-lint.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/spec/src/privacy-retention-doc-lint.ts` 和测试，`docs/安全/privacy-retention-v1.md` 补充遥测边界；Spec 测试数从 60 增至 62。
 - [ ] T153 P2：建立 conformance suite skeleton。
 - [ ] T155 P2：把 Agentic abuse cases 转成 smoke tests。
 - [ ] T162 P2：补充 credential lifecycle smoke/runbook 验证。

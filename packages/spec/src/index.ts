@@ -1,5 +1,7 @@
 export { lintModelVisibleMetadata } from "./metadata-lint.js";
 export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
+export { lintPrivacyRetentionDoc } from "./privacy-retention-doc-lint.js";
+export type { PrivacyRetentionDocFinding, PrivacyRetentionDocLintRule } from "./privacy-retention-doc-lint.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";
