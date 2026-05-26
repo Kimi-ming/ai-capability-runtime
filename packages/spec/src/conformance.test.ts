@@ -39,6 +39,7 @@ describe("conformance suite skeleton", () => {
     for (const path of [
       "packages/runtime/test/fixtures/conformance/policy-governance.yml",
       "packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml",
+      "packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml",
     ]) {
       await expect(loadYaml(path).then(validateConformanceRecord)).resolves.toEqual([]);
     }

@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 66 个、runtime 257 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 66 个、runtime 264 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -1101,7 +1101,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/spec/src/conformance.ts` 和 `conformance.test.ts`，把现有 `policy-governance.yml`、`threat-model-abuse-cases.yml` 作为首批 skeleton evidence 校验；Spec 测试数从 62 增至 66。
-- [ ] T155 P2：把 Agentic abuse cases 转成 smoke tests。
+- [x] T155 P2：把 Agentic abuse cases 转成 smoke tests。
+  - 验收标准：
+    - 新增 Runtime smoke/conformance 测试，把 `docs/安全/agentic-risk-mapping.md` 的 abuse cases 转成可运行断言。
+    - smoke 覆盖 prompt-injection-like issue body 仍需 write confirmation、localhost outbound block、重复高风险调用独立 audit/consent、任意 URL capability warning、MCP 无确认 UI 返回 `confirmation_required`、超大 provider output 被限制。
+    - 新增 `opencap.agentic_abuse_cases.v1` conformance evidence record，并接入 conformance skeleton validator。
+    - 测试不得读取真实 secret、发起真实外部请求或写入仓库状态目录。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- agentic-abuse-cases.test.ts`
+    - `pnpm --filter @opencap/spec test -- conformance.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/agentic-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`，并把该 record 纳入 `packages/spec/src/conformance.test.ts`；Runtime 测试数从 257 增至 264。
 - [ ] T162 P2：补充 credential lifecycle smoke/runbook 验证。
 - [ ] T165 P2：GitHub fine-grained token setup guide。
 - [ ] T173 P2：Execution evidence conformance record。

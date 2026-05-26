@@ -98,7 +98,7 @@ T153 已在 `@opencap/spec` 中新增最小 conformance suite skeleton：
 - `CORE_CONFORMANCE_GROUPS` 固定声明 V1 核心组：`C-MAN`、`C-PKG`、`C-RUN`、`C-POL`、`C-PG`、`C-CON`、`C-AUD`、`C-HTTP`、`C-MCP`、`C-REG`、`C-SEC`。
 - `validateConformanceRecord()` 校验 record 的 subject、profile、suite_version、result、checks 和 artifacts。
 - artifacts 必须是仓库相对路径，不能使用绝对路径或 `..` 上跳。
-- 当前首批被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml` 和 `packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`。
+- 当前首批被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml` 和 `packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`。
 
 ## 非目标
 
@@ -128,6 +128,17 @@ T128 已新增 `packages/runtime/src/threat-model-abuse-cases.test.ts` 和 `pack
 - AC-005：audit preflight 失败时阻断写执行，不读取 secret、不发起 fetch。
 - AC-006：policy 从 ask 放宽到 allow 会进入 simulation finding，activation 写入 policy ledger 且不保存 policy body。
 - AC-007：breakglass 不能越过 data egress、outbound 或 revoked capability 硬边界。
+
+## Agentic Abuse Cases 实现状态
+
+T155 已新增 `packages/runtime/src/agentic-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`。当前 `opencap.agentic_abuse_cases.v1` 组包含：
+
+- AG-001：prompt-injection-like issue body 仍需 Runtime-owned write confirmation。
+- AG-002：Capability 访问 localhost 时 outbound policy 在 secret/fetch 前阻断。
+- AG-003：Host 重复调用高风险工具时，每次 invocation 都有独立 audit/consent。
+- AG-004：任意 URL Capability 在 dry-run plan 中暴露 `arbitrary_url` warning。
+- AG-005：MCP Host 无确认 UI 时返回 `confirmation_required`，不执行。
+- AG-006：外部 API 返回超大输出时，Result Envelope 在 model-visible content 前限制大小并记录 warning。
 
 ## Policy Governance V1 实现状态
 

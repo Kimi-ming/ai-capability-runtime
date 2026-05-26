@@ -1,0 +1,20 @@
+subject:
+  type: runtime
+  name: opencap-runtime
+  version: 0.1.0-dev
+profile: opencap.agentic_abuse_cases.v1
+suite_version: 0.1.0
+result: pass
+source:
+  path: docs/安全/agentic-risk-mapping.md
+  section: Abuse Case 到测试
+checks:
+  AG-001-prompt-injection-write-confirmation: pass
+  AG-002-localhost-outbound-block: pass
+  AG-003-repeated-high-risk-independent-audit: pass
+  AG-004-overbroad-arbitrary-url-warning: pass
+  AG-005-mcp-confirmation-required: pass
+  AG-006-oversized-output-limited: pass
+artifacts:
+  - path: packages/runtime/src/agentic-abuse-cases.test.ts
+  - path: docs/安全/agentic-risk-mapping.md
