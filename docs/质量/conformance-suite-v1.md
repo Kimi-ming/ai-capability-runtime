@@ -107,6 +107,18 @@ V1 早期先用 Vitest、CLI smoke 和 YAML record 实现，不要求一次性�
 - T153：conformance suite skeleton。
 - T260：policy governance conformance tests。
 
+## Threat Model Abuse Cases 实现状态
+
+T128 已新增 `packages/runtime/src/threat-model-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`。当前 `opencap.threat_model_abuse_cases.v1` 组包含：
+
+- AC-001：write 风险 Capability 默认 `ask`，确认摘要包含目标和字段。
+- AC-002：token-shaped input 被渲染进 URL query 时，Data Egress Gate 在 secret/execution 前 `deny`。
+- AC-003：任意 URL 访问 metadata service 被 outbound policy 在 secret/fetch 前阻断。
+- AC-004：MCP 无 elicitation 时返回并审计 `confirmation_required`，不执行真实请求。
+- AC-005：audit preflight 失败时阻断写执行，不读取 secret、不发起 fetch。
+- AC-006：policy 从 ask 放宽到 allow 会进入 simulation finding，activation 写入 policy ledger 且不保存 policy body。
+- AC-007：breakglass 不能越过 data egress、outbound 或 revoked capability 硬边界。
+
 ## Policy Governance V1 实现状态
 
 T260 已新增 `packages/runtime/src/policy-governance-conformance.test.ts` 和 `packages/runtime/test/fixtures/conformance/policy-governance.yml`。当前 C-PG 组包含：

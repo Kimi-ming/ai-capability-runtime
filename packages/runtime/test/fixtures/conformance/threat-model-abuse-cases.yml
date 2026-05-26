@@ -1,0 +1,21 @@
+subject:
+  type: runtime
+  name: opencap-runtime
+  version: 0.1.0-dev
+profile: opencap.threat_model_abuse_cases.v1
+suite_version: 0.1.0
+result: pass
+source:
+  path: docs/安全/threat-model.md
+  section: Abuse Cases
+checks:
+  AC-001-write-risk-confirmation: pass
+  AC-002-secret-url-egress-deny: pass
+  AC-003-arbitrary-url-outbound-block: pass
+  AC-004-mcp-no-elicitation-confirmation-required: pass
+  AC-005-audit-preflight-blocks-write: pass
+  AC-006-policy-relaxation-simulation-ledger: pass
+  AC-007-breakglass-hard-boundary: pass
+artifacts:
+  - path: packages/runtime/src/threat-model-abuse-cases.test.ts
+  - path: docs/安全/threat-model.md

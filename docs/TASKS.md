@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 58 个、runtime 249 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 60 个、runtime 257 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -1044,7 +1044,25 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `docs/术语表.md`，按核心对象、治理安全、信任证据来源、互操作结果边界四组统一术语；`docs/README.md` 和 `docs/INDEX.md` 已同步入口、阅读路径和维护规则。
-- [ ] T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
+- [x] T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
+  - 验收标准：
+    - 新增 Runtime smoke/conformance 测试，把 `docs/安全/threat-model.md` 的 AC-001 到 AC-007 转成可运行断言。
+    - smoke 覆盖写操作默认确认、token-shaped URL 外发阻断、任意 URL 内网/metadata 阻断、MCP 无确认返回 `confirmation_required`、audit preflight 失败阻断、policy 放宽 simulation/ledger、breakglass 硬边界。
+    - 新增 conformance evidence record，声明 `opencap.threat_model_abuse_cases.v1` profile 和对应 artifact。
+    - 测试不得读取真实 secret、发起真实外部请求或写入仓库状态目录。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- threat-model-abuse-cases.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `packages/runtime/src/threat-model-abuse-cases.test.ts` 和 `packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`；AC-001 到 AC-007 均已转为 Runtime smoke 断言，Runtime 测试数从 249 增至 257。
 - [ ] T138 P2：增加 privacy retention 文档测试或 lint。
 - [ ] T153 P2：建立 conformance suite skeleton。
 - [ ] T155 P2：把 Agentic abuse cases 转成 smoke tests。
