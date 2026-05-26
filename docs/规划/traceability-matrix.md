@@ -81,7 +81,7 @@
 
 | RQ-034 | 版本兼容策略明确 | `docs/规范/versioning-and-compatibility.md` | T122, T149 | CHANGELOG/release checks |
 | RQ-035 | Manifest 演进可迁移 | `docs/规范/manifest-evolution.md` | T149 | schema migration review |
-| RQ-036 | Registry 分发可追溯 | `docs/生态/registry-distribution.md`、`rfcs/0013-registry-index-signing-v1.md` | T147 | registry index signing RFC |
+| RQ-036 | Registry 分发可追溯 | `docs/生态/registry-distribution.md`、`rfcs/0013-registry-index-signing-v1.md`、`rfcs/0014-registry-index-cache-sync-v1.md` | T147, T272 | registry index signing RFC；index/cache/sync RFC |
 | RQ-037 | SDK/Adapter 不污染 V1 主路径 | `docs/设计/sdk-and-adapter-boundary.md` | T145, T146 | RFC/ADR review |
 | RQ-038 | 包发布供应链清晰 | `docs/运营/package-publishing-v1.md`、`docs/运营/npm-trusted-publishing-workflow.md` | T123, T148 | trusted publishing workflow；release checklist |
 | RQ-039 | 质量门禁可执行 | `docs/质量/quality-gates.md` | T126 | release checklist |

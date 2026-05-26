@@ -285,7 +285,7 @@ Governance Surface
 | 可观测指标 | 边界清晰 | V1 从 audit log 派生 |
 | 版本兼容 | 清晰 | CHANGELOG 已添加 |
 | Manifest 演进 | 清晰 | T001/T003 后继续收紧 schema |
-| Registry 分发 | 清晰 | V1 保持 Git-based；T147 已起草 signed index future RFC |
+| Registry 分发 | 清晰 | V1 保持 Git-based；T147 已起草 signed index future RFC；T272 已起草 index/cache/sync future RFC |
 | SDK/Adapter | 边界清晰 | V1 不阻塞主路径 |
 | 发布供应链 | 清晰 | T123 制定发布策略；T148 已补 npm trusted publishing workflow 草案 |
 | Capability 包 | 清晰 | T151 已实现 package lint |

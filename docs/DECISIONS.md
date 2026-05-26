@@ -63,7 +63,7 @@
 ## 下一批需要决策的问题
 
 - 0054：OpenAPI adapter 的人工 review 边界。
-- 0055：Registry index signing 具体格式。
+- 0055：Registry index signing 和 cache/sync 具体格式。
 - 0056：MCP elicitation profile 是否进入 v0.2。
 - 0057：macOS Keychain / external vault provider 是否进入 v0.2。
 - 0058：Idempotency-Key manifest field 是否进入 v0.2。

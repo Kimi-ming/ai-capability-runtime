@@ -50,6 +50,8 @@ registry/<category>/<capability_id>/manifest.yml
 
 索引签名边界见 `rfcs/0013-registry-index-signing-v1.md`。该 RFC 草案明确：签名只证明索引来源和完整性，不证明 Capability 安全、不提升 trust level，也不能绕过 manifest validation、本地 policy、confirmation、outbound policy 或 audit。
 
+Index/cache/sync profile 见 `rfcs/0014-registry-index-cache-sync-v1.md`。该 RFC 草案定义未来 index entry、`opencap.local/cache/registry/` 本地缓存布局、sync state、install candidate 和 sync evidence；cache 只作为 discovery 加速和离线查看来源，不能让远程 metadata 静默替换 installed capability。
+
 ## Mirror 和 Pinning
 
 未来 install 可以支持：
@@ -63,6 +65,7 @@ opencap install github.create_issue --from https://registry.opencap.dev/index.js
 - pin commit 或 digest。
 - 校验 manifest hash。
 - 保留 source metadata。
+- 从 cache 派生的 install candidate 仍必须重新读取并 validate manifest。
 
 ## OCI/Artifact 方向
 

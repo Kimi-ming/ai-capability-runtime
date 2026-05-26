@@ -983,7 +983,24 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`TrustCardQualitySummary` 已收紧为完整 `CapabilityQualityScore` 结构；`card.test.ts` 覆盖 Trust Card 接收 `calculateCapabilityQualityScore()` 输出、保留 total/band/dimensions/policyEffect，并在 limitations 中声明 quality score 无 policy effect。Runtime 测试数保持 249。
-- [ ] T272 P2：设计 Registry index/cache/sync RFC。
+- [x] T272 P2：设计 Registry index/cache/sync RFC。
+  - 验收标准：
+    - 新增 RFC 草案定义 `opencap.registry.index_cache_sync.v1` profile。
+    - RFC 覆盖 index entry、local cache layout、sync state、sync evidence、install candidate 和失败语义。
+    - RFC 明确 index/cache/sync 只用于 discovery 和来源证据，不改变 V1 Git-based install 主路径，不绕过 manifest validation、package lint、policy、confirmation、outbound policy 或 audit。
+    - Registry distribution、文档索引、traceability 和系统概览已链接新 RFC。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `rfcs/0014-registry-index-cache-sync-v1.md`，定义 future Registry index/cache/sync profile、cache 存储位置、sync pipeline、install candidate 验证和 redacted sync evidence。`docs/生态/registry-distribution.md`、`docs/README.md`、`docs/规划/traceability-matrix.md`、`docs/SYSTEM.md` 和 `docs/DECISIONS.md` 已同步入口和口径。
 - [ ] T274 P2：为 SLSA/Sigstore provenance 预留 package 和 release metadata。
 
 ### 模块 M5：Conformance、Abuse Cases、隐私和运维
