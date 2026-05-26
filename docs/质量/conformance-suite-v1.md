@@ -90,6 +90,16 @@ opencap conformance mcp --host-record ./reports/host/claude.yml
 
 V1 早期先用 Vitest、CLI smoke 和 YAML record 实现，不要求一次性做完整命令。
 
+## Skeleton 实现状态
+
+T153 已在 `@opencap/spec` 中新增最小 conformance suite skeleton：
+
+- `CONFORMANCE_SUITE_VERSION = 0.1.0`。
+- `CORE_CONFORMANCE_GROUPS` 固定声明 V1 核心组：`C-MAN`、`C-PKG`、`C-RUN`、`C-POL`、`C-PG`、`C-CON`、`C-AUD`、`C-HTTP`、`C-MCP`、`C-REG`、`C-SEC`。
+- `validateConformanceRecord()` 校验 record 的 subject、profile、suite_version、result、checks 和 artifacts。
+- artifacts 必须是仓库相对路径，不能使用绝对路径或 `..` 上跳。
+- 当前首批被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml` 和 `packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`。
+
 ## 非目标
 
 - Conformance 不保证第三方外部 API 安全。
