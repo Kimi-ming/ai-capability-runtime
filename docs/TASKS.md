@@ -1026,7 +1026,24 @@
 
 ### 模块 M5：Conformance、Abuse Cases、隐私和运维
 
-- [ ] T116 P1：维护术语表和文档索引。
+- [x] T116 P1：维护术语表和文档索引。
+  - 验收标准：
+    - 新增或更新中文术语表，覆盖 Capability、Runtime、Registry、policy、audit、Trust Card、Quality Score、provenance、SLSA/Sigstore、MCP 和 Result Envelope 等高频术语。
+    - `docs/README.md` 的优先阅读路径包含术语表。
+    - `docs/INDEX.md` 的核心入口、阅读路径和维护规则包含术语表。
+    - 术语定义明确哪些字段只作为 evidence，不能替代 policy、consent、audit 或 review。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `docs/术语表.md`，按核心对象、治理安全、信任证据来源、互操作结果边界四组统一术语；`docs/README.md` 和 `docs/INDEX.md` 已同步入口、阅读路径和维护规则。
 - [ ] T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
 - [ ] T138 P2：增加 privacy retention 文档测试或 lint。
 - [ ] T153 P2：建立 conformance suite skeleton。

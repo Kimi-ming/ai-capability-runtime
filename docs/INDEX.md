@@ -17,6 +17,7 @@
 | 文档 | 职责 | 什么时候更新 |
 | --- | --- | --- |
 | [中文文档中心](README.md) | 面向新人和维护者的阅读入口 | 文档结构、阅读路径变化时 |
+| [OpenCap 术语表](术语表.md) | 统一 Capability、Runtime、Registry、policy、provenance 等高频术语 | 新增 profile、schema 字段、安全边界或治理概念时 |
 | [中文文档规范](社区/documentation-governance.md) | 语言、分层、命名和清理规则 | 文档治理规则变化时 |
 | [体系蓝图](SYSTEM.md) | 全局系统结构和子系统列表 | 新增子系统或全局不变量变化时 |
 | [产品规格](SPEC.md) | V1 范围和产品正确性 | 行为、范围或验收口径变化时 |
@@ -66,22 +67,24 @@
 
 1. [README](../README.md)
 2. [中文文档中心](README.md)
-3. [第一次贡献 OpenCap](教程/first-contribution.md)
-4. [体系蓝图](SYSTEM.md)
-5. [当前状态交接](HANDOFF.md)
-6. [开发任务总表](TASKS.md)
+3. [OpenCap 术语表](术语表.md)
+4. [第一次贡献 OpenCap](教程/first-contribution.md)
+5. [体系蓝图](SYSTEM.md)
+6. [当前状态交接](HANDOFF.md)
+7. [开发任务总表](TASKS.md)
 
 ### 架构评审路径
 
 1. [整体系统设计 V1](设计/整体系统设计-v1.md)
 2. [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md)
-3. [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
-4. [架构总览](ARCHITECTURE.md)
-5. [运行时契约](设计/runtime-contracts.md)
-6. [Interoperability Profile Evidence Record Schema](生态/interoperability-evidence-record-schema.md)
-7. [决策索引](DECISIONS.md)
-8. [风险登记](RISKS.md)
-9. [一致性测试体系](质量/conformance-suite-v1.md)
+3. [OpenCap 术语表](术语表.md)
+4. [整体设计二次审查](评审/整体设计二次审查-2026-05-08.md)
+5. [架构总览](ARCHITECTURE.md)
+6. [运行时契约](设计/runtime-contracts.md)
+7. [Interoperability Profile Evidence Record Schema](生态/interoperability-evidence-record-schema.md)
+8. [决策索引](DECISIONS.md)
+9. [风险登记](RISKS.md)
+10. [一致性测试体系](质量/conformance-suite-v1.md)
 
 ### 实现任务路径
 
@@ -114,6 +117,7 @@
 ## 维护规则
 
 - 新增主路径文档时，同步 `docs/README.md` 和本文件。
+- 新增高频术语、profile id、schema 字段或安全边界时，同步 `docs/术语表.md`。
 - 新增长期设计取舍时，同步 `docs/DECISIONS.md`。
 - 新增安全风险时，同步 `docs/RISKS.md`。
 - 新增实现工作时，同步 `docs/TASKS.md`。

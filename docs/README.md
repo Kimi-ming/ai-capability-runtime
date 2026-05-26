@@ -9,11 +9,12 @@
 | 1 | [体系蓝图](SYSTEM.md) | 了解 OpenCap 是什么、由哪些子系统组成。 |
 | 2 | [整体系统设计 V1](设计/整体系统设计-v1.md) | 理解五个平面、三条链路和 Runtime Kernel。 |
 | 3 | [Runtime Kernel 公共契约 V1](设计/runtime-kernel-contract-v1.md) | 理解 CLI、MCP 和未来入口共享的运行时公共语言。 |
-| 4 | [产品规格](SPEC.md) | 明确 V1 做什么、不做什么。 |
-| 5 | [架构总览](ARCHITECTURE.md) | 了解 Runtime、CLI、MCP、Registry 的边界。 |
-| 6 | [当前状态交接](HANDOFF.md) | 接手当前工作，知道最近完成了什么。 |
-| 7 | [开发任务总表](TASKS.md) | 选择下一项可执行任务。 |
-| 8 | [验证策略](TESTING.md) | 知道任务完成前要跑哪些验证。 |
+| 4 | [OpenCap 术语表](术语表.md) | 对齐 Capability、Runtime、Registry、policy、provenance 等术语。 |
+| 5 | [产品规格](SPEC.md) | 明确 V1 做什么、不做什么。 |
+| 6 | [架构总览](ARCHITECTURE.md) | 了解 Runtime、CLI、MCP、Registry 的边界。 |
+| 7 | [当前状态交接](HANDOFF.md) | 接手当前工作，知道最近完成了什么。 |
+| 8 | [开发任务总表](TASKS.md) | 选择下一项可执行任务。 |
+| 9 | [验证策略](TESTING.md) | 知道任务完成前要跑哪些验证。 |
 
 ## 按目的阅读
 
@@ -22,6 +23,7 @@
 - [项目介绍](概览/introduction.md)
 - [产品战略](产品/strategy.md)
 - [用户场景](产品/use-cases.md)
+- [OpenCap 术语表](术语表.md)
 - [体系蓝图](SYSTEM.md)
 - [路线图](ROADMAP.md)
 

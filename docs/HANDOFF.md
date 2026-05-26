@@ -6,7 +6,7 @@
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC 和 T274 SLSA/Sigstore provenance metadata 预留均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
+本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留和 T116 术语表/文档索引维护均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
 
@@ -39,21 +39,21 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T274 已完成；下一项 ready task 预计是 T116 P1：维护术语表和文档索引。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T116 已完成；下一项 ready task 预计是 T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
 
-下一步推荐：先用 `next_task.py` 重新确认 T116，再维护术语表和文档索引。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先用 `next_task.py` 重新确认 T128，再把威胁模型 Abuse Cases 转成 smoke tests。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
 ```text
-M5 / T116 P1：维护术语表和文档索引
+M5 / T128 P2：把威胁模型 Abuse Cases 转成 smoke tests
 ```
 
 原因：
 
-- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T154/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T188/T189/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T271/T272/T273/T274/T275/T276 已完成
+- T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T129/T130/T131/T132/T133/T134/T135/T136/T137/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T154/T156/T157/T158/T159/T160/T161/T163/T164/T167/T168/T170/T185/T186/T187/T188/T189/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T274 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T116。
+- 当前状态：T116 已完成并验证；下一轮从 `next_task.py` 重新选择，预计进入 T128。
 
 ## 最近验证
 
@@ -176,6 +176,7 @@ M5 / T116 P1：维护术语表和文档索引
 - T195 已完成：`TrustCardQualitySummary` 已收紧为完整 `CapabilityQualityScore` 结构；`createTrustCardFromInstalledCapability()` 可接收 `calculateCapabilityQualityScore()` 输出并保留 total/band/dimensions/generatedAt/`policyEffect: none`。带 quality score 的 Trust Card 默认 limitations 会说明质量分只是解释性 evidence，没有 policy effect。Runtime 测试数保持 249。
 - T272 已完成：新增 `rfcs/0014-registry-index-cache-sync-v1.md`，定义 future `opencap.registry.index_cache_sync.v1` profile，覆盖 index entry、local cache layout、sync state、sync evidence、install candidate、失败语义和不改变 V1 Git-based 主路径的安全边界。Registry distribution、文档索引、traceability、SYSTEM 和 DECISIONS 已同步入口。
 - T274 已完成：`packages/spec/schema/manifest.schema.json` 新增可选 `provenance` 对象，预留 package source/digest/buildType 和 release publisher/provenance/workflow/attestation/transparency log metadata；`policyEffect` 固定为 `none`。`packages/spec/src/index.ts` 导出 package/release provenance 类型，`index.test.ts` 覆盖正向和伪造 policy authority 的负向测试。Spec 测试数从 58 增至 60。
+- T116 已完成：新增 `docs/术语表.md`，统一 Capability、Runtime、Registry、policy、audit、Trust Card、Quality Score、provenance、SLSA/Sigstore、MCP、Result Envelope 等高频术语，并在每个定义中强调 evidence 不能替代 policy、consent、audit 或 review 的边界；`docs/README.md` 和 `docs/INDEX.md` 已同步入口、阅读路径和维护规则。
 - 任务队列已模块化：M0 阻塞和外部依赖、M1 核心契约和 Runtime Kernel、M2 执行安全审计和可靠性、M3 CLI/MCP/Host 互操作、M4 Registry/Trust/Lifecycle/供应链、M5 Conformance/Abuse Cases/隐私/运维、M6 Composition/Capability Graph/Agentic Commerce。
 - T070 保持阻塞：需要 MCP SDK 依赖选择和安装授权。
 
@@ -183,9 +184,9 @@ M5 / T116 P1：维护术语表和文档索引
 
 在 T070 仍阻塞时，建议按模块顺序从这些不依赖外部凭据或网络安装的任务中选择：
 
-- T116 P1：维护术语表和文档索引。
+- T128 P2：把威胁模型 Abuse Cases 转成 smoke tests。
 
-如果要继续 strict `continuous-doc-dev`，下一轮先把 T116 展开为带验收标准和验证命令，再维护术语表和文档索引。
+如果要继续 strict `continuous-doc-dev`，下一轮先把 T128 展开为带验收标准和验证命令，再把威胁模型 Abuse Cases 转成 smoke tests。
 
 ## Secret Resolver V1 env provider 已实现
 
