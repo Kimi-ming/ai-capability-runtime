@@ -79,6 +79,7 @@
 - [权限模型](安全/permission-model.md)
 - [身份与授权模型](安全/identity-and-auth-model.md)
 - [Secret Resolver V1](设计/secret-resolver-v1.md)
+- [GitHub fine-grained token 设置指南](教程/github-fine-grained-token-setup.md)
 - [数据外发策略](设计/data-egress-policy-v1.md)
 - [策略决策追踪](设计/policy-decision-trace-v1.md)
 - [策略生命周期与变更控制](运营/policy-lifecycle-and-change-control.md)
@@ -89,6 +90,7 @@
 ### 我要贡献 Capability 或 Registry 条目
 
 - [编写一个 Capability](教程/write-a-capability.md)
+- [GitHub fine-grained token 设置指南](教程/github-fine-grained-token-setup.md)
 - [评审一个 Capability PR](教程/review-a-capability.md)
 - [Registry 供应链 Review 工作流](社区/registry-supply-chain-review.md)
 - [Registry 指南](社区/registry-guidelines.md)

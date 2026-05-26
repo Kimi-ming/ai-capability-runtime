@@ -18,6 +18,8 @@ GITHUB_TOKEN=...
 
 Token 必须有权限在目标仓库创建 issue。
 
+推荐按 `docs/教程/github-fine-grained-token-setup.md` 创建 GitHub fine-grained personal access token：只选择目标仓库，只授予 `Issues: write`，设置过期时间，并通过本地 `GITHUB_TOKEN` 提供给 Runtime。
+
 ## 输入示例
 
 ```json

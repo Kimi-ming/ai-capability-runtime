@@ -19,7 +19,7 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 68 个、runtime 267 个、mcp 21 个、cli 5 个。
+截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 70 个、runtime 267 个、mcp 21 个、cli 5 个。
 
 当前主要缺口：
 
@@ -1141,7 +1141,27 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：新增 `packages/spec/src/credential-lifecycle-doc-lint.ts`、`packages/spec/src/credential-lifecycle-doc-lint.test.ts` 和 `packages/runtime/src/credential-lifecycle.test.ts`；从 `@opencap/spec` 导出 `lintCredentialLifecycleRunbook()`，并把 `docs/运营/credential-lifecycle.md` 的验收测试固化为文档 lint 和 Runtime smoke。Spec 测试数从 66 增至 68，Runtime 测试数从 264 增至 267。
-- [ ] T165 P2：GitHub fine-grained token setup guide。
+- [x] T165 P2：GitHub fine-grained token setup guide。
+  - 验收标准：
+    - 新增中文 GitHub fine-grained token 设置指南，面向 `github.create_issue` 示例能力，引用 GitHub 官方 token 管理、Create issue API 和 API credential 安全文档。
+    - 指南明确优先 fine-grained personal access token、只选择目标仓库、只授予 `Issues: write`、设置过期时间，并说明组织审批 pending 状态。
+    - 指南明确 V1 env-only：token 只通过本地 `GITHUB_TOKEN` 提供，不能写入 manifest、README、registry tests、MCP tool input 或模型可见文本。
+    - 指南包含 dry-run、真实调用前门禁、轮换、撤销、401/403/410/`SECRET_MISSING` 排查和 classic/broad `repo`/`admin` token 禁止项。
+    - `github.create_issue` registry README 指向该指南。
+    - `@opencap/spec` 暴露可复用 guide lint，避免后续文档删掉最小权限和凭据边界。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- github-token-guide-doc-lint.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `pnpm build`
+    - `pnpm lint`
+    - `pnpm test`
+  - 完成记录：新增 `docs/教程/github-fine-grained-token-setup.md`、`packages/spec/src/github-token-guide-doc-lint.ts` 和 `github-token-guide-doc-lint.test.ts`；`docs/README.md`、`docs/INDEX.md` 和 `registry/developer-tools/github.create_issue/README.md` 已同步入口；`@opencap/spec` 导出 `lintGithubFineGrainedTokenGuide()`。Spec 测试数从 68 增至 70。
 - [ ] T173 P2：Execution evidence conformance record。
 - [ ] T190 P2：SECURITY.md 对齐 private reporting。
 - [ ] T205 P2：Usage export format。
