@@ -110,13 +110,51 @@ V1 不要求立刻实现这些命令，但 audit schema 应避免未来无法派
 
 ## Usage Export
 
-未来导出格式应是 append-only JSONL：
+`@opencap/runtime` 导出 `createUsageExportEnvelope()`、`createUsageExportJsonlHeader()` 和 `serializeUsageExportJsonl()`，用于把 `opencap.usage_event.v1` 转成稳定的 JSON/JSONL export format。导出仍是 non-billing evidence，不是账单记录。
+
+JSON envelope：
+
+```ts
+type UsageExportEnvelopeV1 = {
+  schema: "opencap.usage_export.v1";
+  exportVersion: "1";
+  generatedAt: string;
+  format: "json";
+  eventCount: number;
+  filters?: {
+    since?: string;
+    until?: string;
+    capabilityIds?: string[];
+    channels?: Array<"cli" | "mcp" | "console" | "api">;
+    outcomes?: string[];
+    dryRun?: boolean;
+    lifecycleStatuses?: string[];
+  };
+  redactionProfile: "opencap.usage_export.redaction.v1";
+  compatibility: {
+    usageEventSchema: "opencap.usage_event.v1";
+    additiveFieldsAllowed: true;
+    billingEffect: "none";
+  };
+  events: UsageEventV1[];
+};
+```
+
+JSONL export 第一行是 header envelope，后续每行是一条 sanitized usage event：
 
 ```json
+{"schema":"opencap.usage_export.header.v1","exportVersion":"1","format":"jsonl","eventCount":1,"redactionProfile":"opencap.usage_export.redaction.v1","compatibility":{"usageEventSchema":"opencap.usage_event.v1","additiveFieldsAllowed":true,"billingEffect":"none"}}
 {"schema":"opencap.usage_event.v1","eventId":"ue_123","capabilityId":"github.create_issue","outcome":"success","risk":"write","durationMs":1200,"billingEffect":"none"}
 ```
 
-导出必须默认不含 input/output。
+导出规则：
+
+- 只支持 `opencap.usage_event.v1`。
+- 只支持 `billingEffect=none` 和 `policyEffect=none` 的 usage event。
+- JSONL header 和 JSON envelope 都必须记录 `exportVersion`、`filters`、`redactionProfile` 和 compatibility metadata。
+- 导出 helper 只复制 Usage Event 白名单字段，不导出 input/output、credential redaction、provider raw response 或 full URL query。
+- Filter metadata 只描述导出时使用的查询条件，不代表事件已经重新授权。
+- 兼容策略允许 additive fields，但 breaking schema 必须提高 export version。
 
 ## 关联任务
 

@@ -1203,9 +1203,26 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`SECURITY.md` 已补齐 GitHub private vulnerability reporting、敏感材料边界、报告内容、维护者 triage/advisory 流程和启用检查；新增 `packages/spec/src/security-policy-doc-lint.ts` 与 `security-policy-doc-lint.test.ts`，并从 `@opencap/spec` 导出 `lintSecurityPolicyDoc()`。Spec 测试数从 70 增至 72。
-- [ ] T205 P2：Usage export format。（前置条件已满足：T198 已定义 `opencap.usage_event.v1` schema、必填字段、redaction/non-billing 边界和 audit 关联键）
-  - 任务提示：
-    - 基于 T198 的 Usage Event schema，定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。
+- [x] T205 P2：Usage export format。
+  - 验收标准：
+    - `@opencap/runtime` 导出 JSON envelope 和 JSONL usage export helper，基于 `opencap.usage_event.v1` 生成 export format。
+    - Export format 覆盖 `exportVersion`、`filters`、`redactionProfile`、compatibility metadata、event count 和 sanitized events。
+    - Helper 只接受 `billingEffect=none`、`policyEffect=none` 的 `opencap.usage_event.v1`，拒绝非 v1 或可能进入 billing path 的记录。
+    - 测试覆盖 JSON envelope、JSONL header、敏感额外字段不外泄、非 non-billing usage event 拒绝；用量计量、用量证据、测试策略、体系蓝图和 handoff 同步。
+  - 验证：
+    - RED：`pnpm --filter @opencap/runtime test -- usage-export.test.ts` 先因 `createUsageExportEnvelope is not a function` 和 `serializeUsageExportJsonl is not a function` 失败。
+    - GREEN：`pnpm --filter @opencap/runtime test -- usage-export.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `packages/runtime/src/usage-export.ts` 和 `usage-export.test.ts`，导出 `USAGE_EXPORT_SCHEMA`、`USAGE_EXPORT_HEADER_SCHEMA`、`USAGE_EXPORT_VERSION`、`USAGE_EXPORT_REDACTION_PROFILE`、`createUsageExportEnvelope()`、`createUsageExportJsonlHeader()` 和 `serializeUsageExportJsonl()`。Export helper 生成 JSON envelope/JSONL header、记录 filters/redaction/compatibility，白名单复制 usage event 字段，并拒绝非 `opencap.usage_event.v1` 或 `billingEffect!=none` 的记录。
 - [x] T206 P2：Problem details for quota/rate errors。
   - 验收标准：
     - `@opencap/runtime` 导出 `ProblemDetailsV1` 类型和 quota/rate problem details helper，供 CLI、MCP、audit 和 usage evidence 复用。

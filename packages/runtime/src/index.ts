@@ -23,6 +23,7 @@ export { credentialAuditEvidence, resolveEnvCredential } from "./secret-resolver
 export { defaultHttpRetryPolicy, evaluateHttpRetryPolicy } from "./retry-policy.js";
 export { evaluateCompositionFailureRecovery } from "./composition-recovery.js";
 export { USAGE_EVENT_SCHEMA, createUsageEventFromAuditEvent } from "./usage-event.js";
+export { USAGE_EXPORT_HEADER_SCHEMA, USAGE_EXPORT_REDACTION_PROFILE, USAGE_EXPORT_SCHEMA, USAGE_EXPORT_VERSION, createUsageExportEnvelope, createUsageExportJsonlHeader, serializeUsageExportJsonl } from "./usage-export.js";
 export { evaluateTrustLevelTransition } from "./trust-transition.js";
 export { evaluateRevokedCapabilityInvokeGate } from "./lifecycle-gate.js";
 export { CAPABILITY_QUALITY_SCORE_RUBRIC_VERSION, calculateCapabilityQualityScore } from "./quality-score.js";
@@ -47,6 +48,7 @@ export type { CredentialAuditEvidence, ResolvedCredential, ResolvedCredentialTyp
 export type { HttpRetryIdempotencyMode, HttpRetryPolicyDecision, HttpRetryPolicyInput, HttpRetryPolicyV1, HttpRetryReasonCode } from "./retry-policy.js";
 export type { CompositionFailureRecoveryAction, CompositionFailureRecoveryDecision, CompositionFailureRecoveryInput, CompositionFailureRecoveryOutcome, CompositionRecoveryStep, CompositionStepRecoveryOutcome, CompositionStepRole, CompositionStepSideEffectKind } from "./composition-recovery.js";
 export type { CreateUsageEventOptions, UsageEventChannel, UsageEventOutcome, UsageEventSchema, UsageEventSubject, UsageEventV1 } from "./usage-event.js";
+export type { CreateUsageExportOptions, UsageExportCompatibility, UsageExportEnvelopeV1, UsageExportFilters, UsageExportFormat, UsageExportHeaderSchema, UsageExportHeaderV1, UsageExportRedactionProfile, UsageExportSchema, UsageExportVersion } from "./usage-export.js";
 export type { TrustTransitionDecision, TrustTransitionEvidence, TrustTransitionFinding, TrustTransitionFindingCode, TrustTransitionFindingSeverity, TrustTransitionInput, TrustTransitionKind, TrustTransitionPolicyEffect, TrustTransitionTarget } from "./trust-transition.js";
 export type { RevokedCapabilityInvokeGateDecision, RevokedCapabilityInvokeGateEvidence, RevokedCapabilityInvokeGateInput } from "./lifecycle-gate.js";
 export type { CapabilityQualityScore, CapabilityQualityScoreBand, CapabilityQualityScoreDimensions, CapabilityQualityScoreInput, CapabilityQualityScoreRubricVersion } from "./quality-score.js";

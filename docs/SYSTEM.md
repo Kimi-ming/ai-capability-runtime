@@ -317,7 +317,7 @@ Governance Surface
 | Capability Advisory | 清晰 | T187 已补 advisory schema；T188 已补 registry revocation metadata；T189 已补 installed advisory check |
 | Deprecation/Revocation | 清晰 | T186 已补 revoked invoke gate；T188 已补 registry revocation metadata；T191 已补 lifecycle schema；T192 已补 install/list/invoke warnings；T193 已补 search filtering |
 | Quality Score | 清晰 | T194 已补 rubric helper；T196 防止覆盖 policy；T195 落到 Trust Card |
-| 用量计量 | 清晰 | T198 已补 usage event schema；T205 继续补 export format |
+| 用量计量 | 清晰 | T198 已补 usage event schema；T205 已补 export format helper |
 | 配额预算 | 清晰 | T199/T204 做执行前 gate |
 | 限流滥用 | 清晰 | T200/T201 处理 local/provider rate limit |
 | 商业边界 | 清晰 | T202 已补 paid capability manifest RFC；T203 已补 commerce profile RFC |

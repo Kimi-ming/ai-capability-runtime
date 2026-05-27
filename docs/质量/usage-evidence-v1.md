@@ -8,6 +8,7 @@
 Invocation Audit Log
   -> Execution Evidence
   -> Usage Event
+  -> Usage Export
   -> 用量摘要
   -> Future Export / Cloud Sync
 ```
@@ -54,6 +55,8 @@ type UsageEvidenceV1 = {
 - usage event 不包含 input/output 原文。
 - usage event 不包含 secret。
 - usage event 不直接作为账单记录。
+- usage export 只能导出 `billingEffect=none` 的 `opencap.usage_event.v1`。
+- usage export 只能复制 Usage Event 白名单字段，不导出 input/output、credential redaction 或 provider raw response。
 - future billing 必须说明从 usage event 到 billable event 的转换规则。
 
 ## 测试要求
@@ -64,6 +67,7 @@ type UsageEvidenceV1 = {
 - revoked capability usage 可被查询。
 - sourceAuditHash 能关联 audit record。
 - usage event 固定 `policyEffect=none` 和 `billingEffect=none`。
+- usage export JSON/JSONL 记录 export version、filter、redaction profile 和 compatibility metadata。
 
 ## 关联任务
 
