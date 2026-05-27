@@ -7,6 +7,7 @@ export { buildFieldLevelEgressMap } from "./egress-map.js";
 export { minimizeInputByEgressMap } from "./input-minimization.js";
 export { buildRedactedEgressPreview } from "./egress-preview.js";
 export { evaluateQuotaBudgetGate } from "./quota-budget-gate.js";
+export { createProblemDetailsFromProviderRateLimit, createProblemDetailsFromQuotaBudgetGate } from "./problem-details.js";
 export { evaluateFinancialConsentSpendGate } from "./financial-consent-spend-gate.js";
 export { defaultExternalSendAbuseThrottleRule, evaluateAbuseThrottleGate } from "./abuse-throttle.js";
 export { POLICY_TRACE_VERSION } from "./policy-trace.js";
@@ -28,6 +29,7 @@ export type { EgressMapManifestLike, FieldLevelEgressMap, FieldLevelEgressMapEnt
 export type { MinimizedInputResult } from "./input-minimization.js";
 export type { RedactedEgressPreview, RedactedEgressPreviewOptions } from "./egress-preview.js";
 export type { BudgetLimit, BudgetRule, QuotaBudgetContext, QuotaBudgetDecision, QuotaBudgetEvidence, QuotaBudgetMatch, QuotaBudgetPolicy, QuotaLimit, QuotaRule } from "./quota-budget-gate.js";
+export type { CreateProviderRateLimitProblemDetailsInput, CreateQuotaBudgetProblemDetailsInput, ProblemDetailsType, ProblemDetailsV1 } from "./problem-details.js";
 export type { FinancialConsentDecision, FinancialConsentSpendContext, FinancialConsentSpendEvidence } from "./financial-consent-spend-gate.js";
 export type { AbuseThrottleContext, AbuseThrottleDecision, AbuseThrottleEvidence, AbuseThrottleLimit, AbuseThrottleMatch, AbuseThrottlePolicy, AbuseThrottleRule, AbuseThrottleUsageSnapshot } from "./abuse-throttle.js";
 export type { PolicyDecisionTraceDecision, PolicyDecisionTraceGate, PolicyDecisionTraceV1 } from "./policy-trace.js";

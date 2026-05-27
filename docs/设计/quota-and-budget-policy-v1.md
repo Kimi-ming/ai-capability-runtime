@@ -90,11 +90,26 @@ type QuotaBudgetEvidence = {
   quotaRuleId?: string;
   quotaDecision?: 'allow' | 'warn' | 'ask' | 'deny';
   quotaWindow?: string;
+  quotaLimit?: number;
   quotaRemaining?: number;
   budgetRuleId?: string;
   budgetDecision?: 'allow' | 'warn' | 'ask' | 'deny';
+  budgetWindow?: string;
+  budgetLimit?: number;
+  budgetRemaining?: number;
+  budgetCurrency?: string;
 };
 ```
+
+## Problem Details
+
+T206 已为 quota/budget 和 provider rate limit 错误定义 Runtime-generated problem details helper：
+
+- `quota-exceeded`：由 quota deny gate 生成，包含 quota rule id、window、limit、remaining 和 safe detail。
+- `budget-exceeded`：由 budget deny gate 生成，包含 budget rule id、window、limit、remaining、currency 和 safe detail。
+- `provider-rate-limited`：由 HTTP 429 provider evidence 生成，包含 retry-after、reset 时间和安全 header name 白名单。
+
+这些 problem details 是 error/usage/audit evidence，不改变 policy decision，不保存 input/output/secret/provider raw payload。
 
 ## 测试要求
 
@@ -103,6 +118,7 @@ type QuotaBudgetEvidence = {
 - financial risk 默认必须有 explicit consent。
 - trust level/quality score 不能绕过 budget deny。
 - usage event 记录 quota/budget decision。
+- problem details 不包含 raw input、raw output、secret、Authorization、cookie 或 provider token。
 
 ## 关联任务
 

@@ -1207,7 +1207,24 @@
   - 阻塞处理：
     - 先完成或前移 T198，定义本地 Usage Event schema、必填字段、redaction/non-billing 边界和 audit 关联键。
     - T198 完成后再恢复 T205，定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。
-- [ ] T206 P2：Problem details for quota/rate errors。
+- [x] T206 P2：Problem details for quota/rate errors。
+  - 验收标准：
+    - `@opencap/runtime` 导出 `ProblemDetailsV1` 类型和 quota/rate problem details helper，供 CLI、MCP、audit 和 usage evidence 复用。
+    - helper 能从 quota/budget gate decision 生成稳定 problem details，覆盖 `quota-exceeded` 和 `budget-exceeded`，包含 type、title、status、reasonCode、capabilityId、gateId、policy/rule id、window、remaining/limit 摘要和 `redactionProfile`。
+    - helper 能从 provider 429 evidence 生成 `provider-rate-limited` problem details，保留 retryAfterMs、retryAfterAt、rateLimitResetAt 和安全 headerNames，不保存 provider raw headers、token、Authorization、cookie 或 response body 原文。
+    - problem details 的 `detail` 必须是 Runtime-generated safe summary，不包含 input、output、secret、provider token 或 Authorization header value。
+    - root public entrypoint 导出类型和 helper；现有 quota/budget gate、provider rate limit evidence 行为不回退。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- problem-details.test.ts`
+    - `pnpm --filter @opencap/runtime test -- quota-budget-gate.test.ts provider-rate-limit.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+  - 完成记录：新增 `packages/runtime/src/problem-details.ts` 和 `problem-details.test.ts`，从 `@opencap/runtime` root 导出 `ProblemDetailsV1`、`createProblemDetailsFromQuotaBudgetGate()` 和 `createProblemDetailsFromProviderRateLimit()`。Quota/budget evidence 现在携带 limit/remaining/window/currency，problem details 覆盖 `quota-exceeded`、`budget-exceeded` 和 `provider-rate-limited`，并固定 `redactionProfile: "opencap.problem_details.v1"` 与 `policyEffect: "none"` 边界。Runtime 测试数从 267 增至 271。
 - [ ] T207 P2：Usage evidence conformance tests。
 
 ### 模块 M6：Composition、Capability Graph 和 Agentic Commerce

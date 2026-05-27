@@ -51,10 +51,12 @@ export interface QuotaBudgetEvidence {
   quotaRuleId?: string;
   quotaDecision?: QuotaBudgetDecision;
   quotaWindow?: string;
+  quotaLimit?: number;
   quotaRemaining?: number;
   budgetRuleId?: string;
   budgetDecision?: QuotaBudgetDecision;
   budgetWindow?: string;
+  budgetLimit?: number;
   budgetRemaining?: number;
   budgetCurrency?: string;
 }
@@ -93,6 +95,7 @@ function quotaGate(rule: QuotaRule): GateDecision<QuotaBudgetEvidence> {
       quotaRuleId: rule.id,
       quotaDecision: rule.decision,
       quotaWindow: rule.limit.window,
+      quotaLimit: rule.limit.count,
       quotaRemaining: remaining,
     },
   });
@@ -112,6 +115,7 @@ function budgetGate(rule: BudgetRule): GateDecision<QuotaBudgetEvidence> {
       budgetRuleId: rule.id,
       budgetDecision: rule.decision,
       budgetWindow: rule.limit.window,
+      budgetLimit: rule.limit.amount,
       budgetRemaining: remaining,
       budgetCurrency: rule.limit.currency,
     },

@@ -43,6 +43,25 @@ interface OpenCapError {
 
 `message` 必须可展示给用户。`details` 写入前必须脱敏。
 
+## Problem Details V1
+
+Quota、budget 和 provider rate limit 这类可恢复限制错误使用 `ProblemDetailsV1` 作为 Runtime 生成的结构化说明，供 CLI、MCP、audit 和 usage evidence 复用。
+
+当前 Runtime 暴露：
+
+- `createProblemDetailsFromQuotaBudgetGate()`：把 quota/budget gate decision 转成 `quota-exceeded` 或 `budget-exceeded`。
+- `createProblemDetailsFromProviderRateLimit()`：把 provider HTTP 429 evidence 转成 `provider-rate-limited`。
+
+Problem details 只保存安全摘要和 evidence metadata：
+
+- `type`、`title`、`status`、`detail`。
+- `reasonCode`、`capabilityId`、`gateId`、`policyId`。
+- retry/reset 时间、usage limit/remaining/window/unit。
+- `redactionProfile: "opencap.problem_details.v1"`。
+- `policyEffect: "none"`，表示该 evidence 不能改变 policy decision。
+
+Problem details 不得保存 raw input、raw output、secret value、Authorization header value、cookie、provider token、provider raw headers 或 provider response body 原文。
+
 ## CLI 输出
 
 默认：
