@@ -100,11 +100,13 @@
 9. [A2A Agent Card Mapping Profile V1 RFC](../rfcs/0011-a2a-agent-card-mapping-v1.md)
 10. [Remote Runtime OAuth Profile V1 RFC](../rfcs/0012-remote-runtime-oauth-profile-v1.md)
 11. [Registry Index Signing V1 RFC](../rfcs/0013-registry-index-signing-v1.md)
-12. [开发工作流](WORKFLOW.md)
-13. [Release Checklist](releases/release-checklist.md)
-14. [Alpha Release Checklist](releases/alpha-checklist.md)
-15. [发布成熟度门禁](运营/release-readiness.md)
-16. [版本和兼容性策略](规范/versioning-and-compatibility.md)
+12. [Registry Index、Cache 和 Sync Profile V1 RFC](../rfcs/0014-registry-index-cache-sync-v1.md)
+13. [OpenAPI Adapter Profile V1 RFC](../rfcs/0015-openapi-adapter-profile-v1.md)
+14. [开发工作流](WORKFLOW.md)
+15. [Release Checklist](releases/release-checklist.md)
+16. [Alpha Release Checklist](releases/alpha-checklist.md)
+17. [发布成熟度门禁](运营/release-readiness.md)
+18. [版本和兼容性策略](规范/versioning-and-compatibility.md)
 
 ### Capability 贡献评审路径
 

@@ -1245,7 +1245,22 @@
 
 ### 模块 M6：Composition、Capability Graph 和 Agentic Commerce
 
-- [ ] T146 P2：OpenAPI adapter RFC 草案。
+- [x] T146 P2：OpenAPI adapter RFC 草案。
+  - 验收标准：
+    - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
+    - RFC 定义 OpenAPI operation -> Capability Manifest draft 的选择、权限收敛、风险标记、server/security 映射、schema 子集、人工 review 和 registry PR 流程。
+    - RFC 明确不得把整个 OpenAPI document 自动暴露为 MCP tools，不得自动信任 OpenAPI descriptions、examples、servers 或 securitySchemes，也不得绕过 policy、confirmation、secret resolver、outbound policy、audit、result envelope 和 conformance。
+    - `packages/adapters/openapi/README.md`、协议定位文档和文档入口链接到 RFC，并保留未实现状态。
+    - RFC 验证计划包含文档闭环检查、JSON/YAML 解析和 `pnpm validate`。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `rfcs/0015-openapi-adapter-profile-v1.md`，定义 `opencap.openapi.adapter.v1` future profile，覆盖 OpenAPI operation 选择、Manifest draft 映射、schema 子集、server/security 处理、权限风险 review、Runtime 边界、安全隐私、兼容迁移和验证计划。`packages/adapters/openapi/README.md`、协议定位文档、文档入口和索引已同步，且继续明确 OpenAPI adapter 未实现、不能自动暴露整份 OpenAPI 文档为 MCP tools。
 - [ ] T169 P2：Retry/idempotency manifest RFC。
 - [ ] T171 P2：Duplicate invocation detector 草案。
 - [ ] T172 P2：Reconcile hint manifest field。

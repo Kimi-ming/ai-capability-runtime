@@ -112,7 +112,12 @@ OpenAPI Operation
 
 OpenCap 不应直接把整个 OpenAPI 文档自动暴露给 AI。必须有人类选择、权限收敛和风险标记。
 
-参考：OpenAPI 3.1.2：https://spec.openapis.org/oas/v3.1.2.html
+OpenAPI adapter 的 future profile 草案见 `../../rfcs/0015-openapi-adapter-profile-v1.md`。该 RFC 明确 adapter 只能生成 Capability Manifest draft，不能自动安装、授权或暴露 MCP tools。
+
+参考：
+
+- OpenAPI 3.2.0：https://spec.openapis.org/oas/v3.2.0.html
+- OpenAPI 3.1.2：https://spec.openapis.org/oas/v3.1.2.html
 
 ## 设计规则
 
