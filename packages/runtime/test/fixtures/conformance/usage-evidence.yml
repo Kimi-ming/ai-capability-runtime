@@ -1,0 +1,25 @@
+subject:
+  type: runtime
+  name: opencap-runtime
+  version: 0.1.0-dev
+profile: opencap.usage_evidence.v1
+suite_version: 0.1.0
+result: pass
+source:
+  path: docs/质量/usage-evidence-v1.md
+  section: 测试要求
+checks:
+  UE-001-blocked-invocation-request-started-false: pass
+  UE-002-dry-run-and-real-execution-separated: pass
+  UE-003-retry-attempt-not-double-counted: pass
+  UE-004-revoked-or-deprecated-usage-marked: pass
+  UE-005-source-audit-hash-links-audit-record: pass
+  UE-006-usage-event-redacts-input-output-secret: pass
+  UE-007-financial-spend-cap-blocked-before-secret: pass
+artifacts:
+  - path: docs/质量/usage-evidence-v1.md
+  - path: packages/runtime/src/quota-budget-gate.test.ts
+  - path: packages/runtime/src/financial-consent-spend-gate.test.ts
+  - path: packages/runtime/src/retry-policy.test.ts
+  - path: packages/runtime/src/lifecycle-gate.test.ts
+  - path: packages/runtime/src/problem-details.test.ts

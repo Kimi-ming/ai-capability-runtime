@@ -98,7 +98,7 @@ T153 已在 `@opencap/spec` 中新增最小 conformance suite skeleton：
 - `CORE_CONFORMANCE_GROUPS` 固定声明 V1 核心组：`C-MAN`、`C-PKG`、`C-RUN`、`C-POL`、`C-PG`、`C-CON`、`C-AUD`、`C-HTTP`、`C-MCP`、`C-REG`、`C-SEC`。
 - `validateConformanceRecord()` 校验 record 的 subject、profile、suite_version、result、checks 和 artifacts。
 - artifacts 必须是仓库相对路径，不能使用绝对路径或 `..` 上跳。
-- 当前首批被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml` 和 `packages/runtime/test/fixtures/conformance/execution-evidence.yml`。
+- 当前被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/execution-evidence.yml` 和 `packages/runtime/test/fixtures/conformance/usage-evidence.yml`。
 
 ## 非目标
 
@@ -151,6 +151,20 @@ T173 已新增 `packages/runtime/test/fixtures/conformance/execution-evidence.ym
 - EE-005：provider request id 和 execution semantics 字段能进入 audit/SQLite evidence。
 - EE-006：Result Envelope 带 output validation、sanitizer、provenance 和 result digest evidence。
 - EE-007：secret 和 credential evidence 只记录 reference/redacted digest，不记录 token 原文。
+
+## Usage Evidence 实现状态
+
+T207 已新增 `packages/runtime/test/fixtures/conformance/usage-evidence.yml`。当前 `opencap.usage_evidence.v1` 组包含：
+
+- UE-001：blocked invocation 生成 usage evidence 时 `requestStarted=false`。
+- UE-002：dry-run usage 与 real execution 分开统计。
+- UE-003：retryAttempt 不被误算为多个用户 intent。
+- UE-004：revoked 或 deprecated capability usage 可被单独标记。
+- UE-005：`sourceAuditHash` 能关联 audit record。
+- UE-006：usage event 不包含 input、output 或 secret 原文。
+- UE-007：financial spend cap 在 secret resolution 前阻断。
+
+该组只证明 non-billing usage evidence，不代表 billable event、计费规则或商业结算。
 
 ## Policy Governance V1 实现状态
 

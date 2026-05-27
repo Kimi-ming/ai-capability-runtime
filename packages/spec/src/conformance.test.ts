@@ -41,6 +41,7 @@ describe("conformance suite skeleton", () => {
       "packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml",
       "packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml",
       "packages/runtime/test/fixtures/conformance/execution-evidence.yml",
+      "packages/runtime/test/fixtures/conformance/usage-evidence.yml",
     ]) {
       await expect(loadYaml(path).then(validateConformanceRecord)).resolves.toEqual([]);
     }

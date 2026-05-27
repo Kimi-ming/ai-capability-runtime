@@ -1225,7 +1225,23 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
     - `git diff --check`
   - 完成记录：新增 `packages/runtime/src/problem-details.ts` 和 `problem-details.test.ts`，从 `@opencap/runtime` root 导出 `ProblemDetailsV1`、`createProblemDetailsFromQuotaBudgetGate()` 和 `createProblemDetailsFromProviderRateLimit()`。Quota/budget evidence 现在携带 limit/remaining/window/currency，problem details 覆盖 `quota-exceeded`、`budget-exceeded` 和 `provider-rate-limited`，并固定 `redactionProfile: "opencap.problem_details.v1"` 与 `policyEffect: "none"` 边界。Runtime 测试数从 267 增至 271。
-- [ ] T207 P2：Usage evidence conformance tests。
+- [x] T207 P2：Usage evidence conformance tests。
+  - 验收标准：
+    - 新增 `opencap.usage_evidence.v1` conformance record，引用 `docs/质量/usage-evidence-v1.md` 的测试要求。
+    - record 覆盖 blocked invocation `requestStarted=false`、dry-run 与真实执行分开、retryAttempt 不重复计费、revoked/deprecated capability usage 标记、sourceAuditHash 关联 audit record、usage event 不含 input/output/secret、financial spend cap 阻断。
+    - `packages/spec/src/conformance.test.ts` 将 usage evidence record 纳入 skeleton 校验。
+    - `docs/质量/conformance-suite-v1.md` 记录该 profile 的实现状态和 check 列表。
+    - 该 conformance 只证明 non-billing usage evidence，不把 usage event 宣称为账单记录。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- conformance.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `pnpm --filter @opencap/spec test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - `git diff --check`
+  - 完成记录：新增 `packages/runtime/test/fixtures/conformance/usage-evidence.yml`，并把该 record 纳入 `packages/spec/src/conformance.test.ts` 的 skeleton 校验；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.usage_evidence.v1` check 列表。该 conformance 只证明 non-billing usage evidence，不代表 billable event、计费规则或商业结算。
 
 ### 模块 M6：Composition、Capability Graph 和 Agentic Commerce
 
