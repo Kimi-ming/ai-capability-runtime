@@ -1352,7 +1352,27 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `rfcs/0017-composition-profile-v1.md`，定义 `opencap.composition.profile.v1` future profile，覆盖 context shape、step record、composition outcome、step-level Runtime pipeline、MCP/Host metadata 边界、failure/recovery、audit/evidence、兼容迁移和 future tests。`docs/设计/composition-boundary-v1.md`、文档入口和索引已同步，并继续明确 OpenCap 不做 Agent、workflow runtime、自动调度或 workflow-level consent。
-- [ ] T177 P2：Step-level consent tests for composition。
+- [x] T177 P2：Step-level consent tests for composition。
+  - 验收标准：
+    - Runtime 测试覆盖 composition 中不同 step 的 `ask` confirmation 会生成独立 consent receipt，不复用父 step consent。
+    - `ConfirmationRequest` 可携带 `compositionContext`，`createConfirmationAuditEvent()` 会把该 context 写入当前 step 的 audit event。
+    - 子 step 的 `parentInvocationId`、`compositionId` 或 `planHash` 只作为 evidence，不改变 policy decision、consent id 或 input hash。
+    - 文档明确 composition context 不替代 step-level consent，父 step approval 不传递给子 step。
+  - 验证方式：
+    - RED：`pnpm --filter @opencap/runtime test -- index.test.ts -t "composition step"` 先因 confirmation audit event 未保留 `compositionContext` 而失败。
+    - GREEN：`pnpm --filter @opencap/runtime test -- index.test.ts -t "composition step"`
+    - `pnpm --filter @opencap/runtime test -- index.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：`ConfirmationRequest` 新增可选 `compositionContext`，`createConfirmationAuditEvent()` 会把该 context 写入当前 step audit event；`packages/runtime/src/index.test.ts` 新增 step-level composition consent 测试，覆盖同一 composition 中两个 write step 各自生成独立 consent id、不同 input hash，并保留子 step 的 parent invocation/context evidence。`docs/设计/confirmation-and-consent-v1.md`、`docs/设计/composition-boundary-v1.md`、测试策略和 handoff 已同步；Runtime 测试数从 272 增至 273。
 - [ ] T178 P2：Plan hash and evidence chain 草案。
 - [ ] T179 P2：Capability graph metadata RFC。
 - [ ] T180 P2：Risk amplification review checklist。

@@ -107,6 +107,8 @@ type ConsentReceipt = {
 
 当前 AuditEvent 已落入 consent receipt evidence 字段：`consentId`、`consentDecision`、`consentDecidedAt`、`consentChannel`、`consentSubject`、`consentInputHash` 和 `consentPolicyRuleId`。Runtime 只对 policy `ask` 生成 receipt；policy `allow` / `deny` 不伪造用户同意。MCP STDIO 无确认通道会把 receipt decision 记录为 `unavailable`，同时保留 `confirmation_required` 结果。
 
+组合场景下，`ConfirmationRequest` 可以携带 `compositionContext`。`createConfirmationAuditEvent()` 会把该 context 写入当前 step 的 consent/audit event，但不会复用父 step 的 consent：每个 step 仍然按自己的 input hash、policy decision 和 consent receipt 独立确认。`compositionId`、`parentInvocationId` 或 `planHash` 只作为 evidence correlation，不是授权来源。
+
 ## MCP `confirmation_required` 结果
 
 MCP Host 无确认通道时，Runtime 返回结构化结果：

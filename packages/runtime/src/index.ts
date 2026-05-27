@@ -2116,6 +2116,7 @@ export interface ConfirmationRequest {
   operationSummary?: string;
   input?: unknown;
   egress?: ConfirmationEgressSummary;
+  compositionContext?: CompositionContextEvidence;
 }
 
 export interface ConfirmationResult {
@@ -2579,6 +2580,7 @@ export function createConfirmationAuditEvent(
     inputRedactedJson: request.input === undefined ? undefined : stableJsonStringify(redactInput(request.input)),
     ...consentReceipt,
     policyTrace: request.policy.decisionTrace,
+    compositionContext: request.compositionContext,
   };
 }
 

@@ -63,6 +63,8 @@ type CompositionContext = {
 
 这些字段只作为 audit correlation。`compositionId`、`stepId`、`planHash` 或上游 invocation 不能让下游 step 自动 allow，也不能替代 step-level consent。Runtime 不保存 raw plan 或上游 output 原文；若 input 来自上游工具结果，应继续使用 input provenance evidence 记录 digest 和 transformations。
 
+当前 confirmation audit 已支持把 `compositionContext` 写入每个 step 的 consent/audit event。每个 step 都会生成自己的 consent receipt、input hash 和 policy trace；父 step 的 approved consent 不会传递给子 step。
+
 ## 组合层和 Runtime 层分工
 
 | 层 | 负责 | 不负责 |

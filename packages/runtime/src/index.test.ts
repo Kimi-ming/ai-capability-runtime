@@ -1549,6 +1549,83 @@ rules:
     expect(JSON.stringify(event)).not.toContain("ghp_secret");
   });
 
+  it("records independent consent receipts for each composition step", () => {
+    const policy = evaluatePolicy(parsePolicyYml(`default: deny
+rules:
+  - id: ask-write
+    match:
+      capability_id: github.create_issue
+      risk: write
+    decision: ask
+    reason: Human approval is required.
+`), {
+      capabilityId: "github.create_issue",
+      permissions: [{ resource: "github.issue", action: "create", risk: "write" }],
+    });
+
+    const firstStep = createConfirmationAuditEvent(
+      {
+        capabilityId: "github.create_issue",
+        channel: "cli",
+        policy,
+        input: { title: "Create release tracker" },
+        compositionContext: createCompositionContextEvidence({
+          compositionId: "cmp_release_update",
+          stepId: "create_issue",
+          stepIndex: 0,
+          stepName: "Create tracking issue",
+          initiatedBy: "host",
+          planHash: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        }),
+      },
+      {
+        status: "approved",
+        channel: "cli",
+        policyDecision: "ask",
+        prompted: true,
+        reason: "User approved this invocation once.",
+      },
+      new Date("2026-05-27T00:00:00.000Z"),
+    );
+
+    const secondStep = createConfirmationAuditEvent(
+      {
+        capabilityId: "github.create_issue",
+        channel: "cli",
+        policy,
+        input: { title: "Create follow-up tracker" },
+        compositionContext: createCompositionContextEvidence({
+          compositionId: "cmp_release_update",
+          parentInvocationId: firstStep.id,
+          stepId: "create_followup_issue",
+          stepIndex: 1,
+          stepName: "Create follow-up issue",
+          initiatedBy: "host",
+          planHash: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        }),
+      },
+      {
+        status: "approved",
+        channel: "cli",
+        policyDecision: "ask",
+        prompted: true,
+        reason: "User approved this invocation once.",
+      },
+      new Date("2026-05-27T00:00:01.000Z"),
+    );
+
+    expect(firstStep.consentId).toMatch(/^consent_[0-9a-f-]{36}$/);
+    expect(secondStep.consentId).toMatch(/^consent_[0-9a-f-]{36}$/);
+    expect(secondStep.consentId).not.toBe(firstStep.consentId);
+    expect(secondStep.consentInputHash).not.toBe(firstStep.consentInputHash);
+    expect(secondStep.compositionContext).toMatchObject({
+      compositionId: "cmp_release_update",
+      parentInvocationId: firstStep.id,
+      stepId: "create_followup_issue",
+      policyEffect: "none",
+    });
+  });
+
   it("maps MCP confirmation_required to an unavailable consent receipt", async () => {
     const logger = new InMemoryAuditLogger();
     const policy = evaluatePolicy(defaultPolicySet(), {

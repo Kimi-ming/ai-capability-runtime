@@ -26,6 +26,8 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T176 Composition profile RFC：新增 `rfcs/0017-composition-profile-v1.md`，定义 `opencap.composition.profile.v1` future profile，覆盖 composition context、step record、plan hash、composition outcome、Runtime pipeline、MCP/Host metadata 边界、failure/recovery、audit/evidence 和兼容迁移；RFC 明确 OpenCap 不做 Agent、workflow runtime、自动调度、workflow DSL 或 workflow-level consent。
 
+本轮继续完成 T177 Step-level consent tests for composition：`ConfirmationRequest` 新增可选 `compositionContext`，`createConfirmationAuditEvent()` 会把该 context 写入当前 step audit event；新增 Runtime 测试确认同一 composition 中两个 write step 会生成独立 consent id、不同 input hash，并保留子 step 的 parent invocation/context evidence，父 step approval 不传递给子 step。
+
 本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留、T116 术语表/文档索引维护、T128 威胁模型 Abuse Cases smoke tests、T138 privacy retention 文档 lint、T153 conformance suite skeleton、T155 Agentic abuse cases smoke tests、T162 credential lifecycle smoke/runbook 验证、T165 GitHub fine-grained token setup guide、T173 Execution evidence conformance record 和 T190 SECURITY.md private reporting 对齐均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
@@ -61,7 +63,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 `docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T190 已完成；T205 P2：Usage export format 已标记阻塞，因为它依赖尚未完成的 T198 Usage event schema。
 
-下一步推荐：先完成或前移 T198 Usage event schema，再恢复 T205；如果保持当前队列顺序，`next_task.py` 当前会选择 T177 P2：Step-level consent tests for composition。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先完成或前移 T198 Usage event schema，再恢复 T205；如果保持当前队列顺序，`next_task.py` 当前会选择 T178 P2：Plan hash and evidence chain 草案。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
@@ -73,7 +75,7 @@ M5 / T198 P1：Usage event schema（用于解除 T205 阻塞）
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T128/T129/T130/T131/T132/T133/T134/T135/T136/T137/T138/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T153/T154/T155/T156/T157/T158/T159/T160/T161/T162/T163/T164/T165/T167/T168/T170/T173/T185/T186/T187/T188/T189/T190/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T146、T169、T171、T172、T175、T176、T206 和 T207 已完成并验证；T205 因依赖 T198 Usage event schema 已标记阻塞。
+- 当前状态：T146、T169、T171、T172、T175、T176、T177、T206 和 T207 已完成并验证；T205 因依赖 T198 Usage event schema 已标记阻塞。
 
 ## 最近验证
 
@@ -103,6 +105,7 @@ M5 / T198 P1：Usage event schema（用于解除 T205 阻塞）
 - `pnpm --filter @opencap/runtime test -- index.test.ts -t "state dir"`
 - `pnpm --filter @opencap/runtime test -- index.test.ts -t "consent receipt"`
 - `pnpm --filter @opencap/runtime test -- index.test.ts -t "composition context"`
+- `pnpm --filter @opencap/runtime test -- index.test.ts -t "composition step"`
 - `pnpm --filter @opencap/runtime test -- index.test.ts`
 - `pnpm --filter @opencap/runtime test -- package-exports.test.ts`
 - `pnpm --filter @opencap/runtime test -- domain.test.ts result-envelope.test.ts index.test.ts -t "execution semantics"`
@@ -143,7 +146,7 @@ M5 / T198 P1：Usage event schema（用于解除 T205 阻塞）
 - `next_task.py`
 - RFC 0016 草案文本扫描：无待补全文案命中。
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 74 个、runtime 272 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 74 个、runtime 273 个、mcp 21 个、cli 5 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。本轮已把 Runtime HTTP executor 的核心成功、失败、timeout 和 credential audit 测试改为注入式 `fetch`，避免在受限沙箱内因 `listen EPERM` 绑定 `127.0.0.1` 失败；root `pnpm test` 的 CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
 
 ## 本轮文档和后续收敛
 
@@ -227,7 +230,7 @@ M5 / T198 P1：Usage event schema（用于解除 T205 阻塞）
 
 如果要继续 strict `continuous-doc-dev`，下一轮先处理 T198，或让 `next_task.py` 在 T205 阻塞后选择下一项 ready task。
 
-当前 next ready task：T177 P2：Step-level consent tests for composition。
+当前 next ready task：T178 P2：Plan hash and evidence chain 草案。
 
 ## Secret Resolver V1 env provider 已实现
 
