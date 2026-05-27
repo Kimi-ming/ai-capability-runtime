@@ -2,6 +2,24 @@
 
 本文是实现时的架构入口。整体系统模型见 `docs/设计/整体系统设计-v1.md`，Runtime 对外公共语言见 `docs/设计/runtime-kernel-contract-v1.md`，详细实施架构见 `docs/规划/v1-architecture.md`。
 
+## 产品定位
+
+OpenCap 是面向 AI 原生应用的本地优先 Capability Runtime。它让 AI Host 可以安全、可授权、可审计地调用真实世界 API。
+
+OpenCap 不做通用 Agent、聊天入口、模型路由、prompt 编排、中心化 marketplace 或任意自动化平台。它位于 AI Host 和真实 API/业务系统之间，负责把 API、数据源和业务动作定义为 Capability，并在执行前完成标准化、权限判断、确认、密钥隔离、审计和证据生成。
+
+```text
+ChatGPT / Claude / Cursor / 企业内部 Agent
+        |
+        v
+OpenCap Runtime
+        |
+        v
+GitHub / Slack / Vercel / 内部 API / 数据源
+```
+
+一句话边界：AI Host 负责意图和交互，OpenCap 负责能力治理和安全执行，外部系统负责真实动作。
+
 ## 架构原则
 
 1. Runtime 核心不依赖 MCP。
@@ -10,10 +28,27 @@
 4. Audit Logger 是核心路径，不是插件。
 5. V1 只支持 HTTP Capability。
 6. 本地状态明确、可删除、可重建。
+7. Evidence 只能解释和证明，不能替代 Policy、Consent 或 Audit。
+8. Provider raw response 不直接进入 Host，必须先经过 Result Envelope、output validation、redaction 和 sanitizer。
 
 ## 总体模型
 
 OpenCap V1 采用五个平面组织架构：标准面、控制面、执行面、信任面和互操作面。Runtime Core 是执行面内核，CLI/MCP/未来 API 都只是互操作入口；Registry、Policy、Audit、Trust 和 Compatibility 共同构成控制和证据体系。
+
+面向产品和集成者时，可以把系统简化为四层：
+
+```text
+Capability Standard
+  manifest / schema / permission / input-output / risk declaration
+Local Runtime
+  install / policy / confirmation / secret / executor / audit
+Interop Gateway
+  MCP now / future A2A / future OpenAPI / future HTTP API
+Trust & Evidence Layer
+  registry review / conformance / usage evidence / advisory / revocation
+```
+
+这四层共同形成 OpenCap 的核心价值：调用前可判断，调用中可隔离，调用后可追踪，能力包可评审、可安装、可撤销。
 
 ## 模块图
 
@@ -167,6 +202,7 @@ load manifest
   -> classify input
   -> minimize input and build egress map
   -> evaluate data egress policy
+  -> evaluate quota/budget/rate gates
   -> evaluate policy
   -> build policy decision trace
   -> apply allowed override if present
@@ -178,6 +214,7 @@ load manifest
   -> redact and sanitize result
   -> build Result Envelope
   -> write audit log
+  -> write usage/evidence record when applicable
   -> adapt result to CLI/MCP
 ```
 
@@ -198,6 +235,38 @@ Secret Resolver 可以读取 env，但不得把 secret 返回给 Capability outp
 ### HTTP 边界
 
 HTTP executor 只接收已经通过 policy 和 confirmation 的请求。
+
+### Runtime Kernel 边界
+
+CLI、MCP、未来 Console/API 都必须通过 Runtime public contract 进入调用主路径，不能各自拼接 validation、policy、secret、executor 或 audit 流程。Runtime Kernel 是唯一能把 Capability invocation 从输入推进到 Result Envelope 和 audit evidence 的组件。
+
+### Evidence 边界
+
+Trust Card、Quality Score、Usage Event、Problem Details、Compatibility Record 和 Conformance Record 都是证据对象。它们可以解释风险、质量、兼容性和调用结果，但不能把 `ask` 改成 `allow`，不能覆盖 `deny`，不能绕过 egress deny、outbound block、secret ordering、revoked/malicious block 或 audit preflight。
+
+## V1 架构收敛路线
+
+下一阶段不再继续扩散零散 P2 能力，而是把 V1 收敛到一个可运行、可解释、可验证的主链路：
+
+```text
+MCP Host
+  -> OpenCap MCP Bridge
+  -> Runtime Kernel
+  -> Policy / Egress / Quota / Consent Gates
+  -> Secret Resolver
+  -> HTTP Executor
+  -> Result Envelope
+  -> MCP or CLI Adapter
+  -> Audit + Usage Evidence + Conformance
+```
+
+收敛优先级：
+
+1. 完成 `opencap serve --mcp`，让 MCP Host 能发现和调用已安装 Capability。
+2. 以 `github.create_issue` 作为 V1 demo，证明 Host -> MCP -> Runtime -> HTTP -> Audit 主链路。
+3. 定义 Usage Event、quota/rate Problem Details 和 Usage Export，作为 non-billing evidence，不引入计费。
+4. 用 conformance record 验证 MCP、usage、problem details、audit 和 result envelope 边界。
+5. 保持文档状态和实现状态一致，未实现能力必须标注为设计中、阻塞或未来扩展。
 
 ## 未来扩展点
 
