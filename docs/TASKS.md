@@ -1336,7 +1336,22 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：`packages/runtime/src/index.ts` 新增 `CompositionContextEvidence`、`CompositionInitiatedBy` 和 `createCompositionContextEvidence()`，`AuditEvent` 新增可选 `compositionContext`；`SqliteAuditLogger` 新增 `composition_context_json` 列、迁移、写入和查询恢复。`packages/runtime/src/index.test.ts` 新增 composition context audit evidence 测试，确认 SQLite 可持久化 composition id、parent invocation、step metadata、initiator、plan hash 和 `policyEffect: none`，且不保存 raw plan 内容。相关组合边界、audit log、runbook、测试策略和 handoff 已同步；Runtime 测试数从 271 增至 272。
-- [ ] T176 P2：Composition profile RFC。
+- [x] T176 P2：Composition profile RFC。
+  - 验收标准：
+    - 新增 Composition Profile V1 RFC，定义 `opencap.composition.profile.v1` future profile，不引入 workflow runtime、自动调度、workflow DSL 或 workflow-level consent。
+    - RFC 覆盖 composition context、step record、plan hash、composition outcome、Runtime pipeline、MCP/Host 行为、failure/recovery、audit/evidence 和兼容迁移。
+    - RFC 明确每个 step 必须独立经过 validation、policy、consent、secret resolver、outbound/data egress、execution 和 audit。
+    - RFC 明确 raw plan、raw input/output、secret、provider raw response 和模型自由计划文本不得进入 audit/evidence。
+    - composition boundary 文档、文档入口和任务交接链接到 RFC。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `rfcs/0017-composition-profile-v1.md`，定义 `opencap.composition.profile.v1` future profile，覆盖 context shape、step record、composition outcome、step-level Runtime pipeline、MCP/Host metadata 边界、failure/recovery、audit/evidence、兼容迁移和 future tests。`docs/设计/composition-boundary-v1.md`、文档入口和索引已同步，并继续明确 OpenCap 不做 Agent、workflow runtime、自动调度或 workflow-level consent。
 - [ ] T177 P2：Step-level consent tests for composition。
 - [ ] T178 P2：Plan hash and evidence chain 草案。
 - [ ] T179 P2：Capability graph metadata RFC。

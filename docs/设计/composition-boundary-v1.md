@@ -74,7 +74,7 @@ type CompositionContext = {
 
 ## Workflow Builder 边界
 
-OpenCap 可以未来提供 composition profile，但不应变成低代码 workflow builder。
+OpenCap 可以未来提供 composition profile，但不应变成低代码 workflow builder。Profile 草案见 `../../rfcs/0017-composition-profile-v1.md`，其范围是 step evidence、plan hash 和失败恢复语义，不是自动调度。
 
 可以进入 OpenCap 的内容：
 
