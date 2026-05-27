@@ -13,7 +13,7 @@
 | 目标阶段 | V1 后续 |
 | 相关任务 | T179 |
 | 相关 ADR | `docs/决策/0033-step-level-policy-consent-audit.md` |
-| 相关文档 | `docs/生态/capability-graph-v1.md`, `docs/生态/capability-taxonomy.md`, `docs/生态/discovery-and-selection-boundary.md`, `docs/社区/capability-review-checklist.md` |
+| 相关文档 | `docs/生态/capability-graph-v1.md`, `docs/生态/capability-taxonomy.md`, `docs/生态/discovery-and-selection-boundary.md`, `docs/社区/capability-review-checklist.md`, `docs/社区/risk-amplification-review-checklist.md` |
 | 替代或废弃 | 无 |
 
 ## 摘要
@@ -173,6 +173,8 @@ policyEffect: none
 | `credential_scope_overlap` | 多个能力使用同一高权限 provider credential。 |
 
 这些 marker 是 review 信号，不直接改变 Runtime policy。T180 会把 marker 转成人工评审清单。
+
+人工评审清单见 `docs/社区/risk-amplification-review-checklist.md`。
 
 ## 生成与维护
 

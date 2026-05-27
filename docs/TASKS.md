@@ -1403,7 +1403,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `rfcs/0018-capability-graph-metadata-v1.md`，定义 future graph metadata profile、节点/边模型、`can_feed` 与 `risk_escalates_with` 的非授权边界、sidecar/index 试点路径、risk amplification marker 和 future lint/conformance 方向。`docs/生态/capability-graph-v1.md`、文档入口、索引、体系蓝图和 handoff 已同步。
-- [ ] T180 P2：Risk amplification review checklist。
+- [x] T180 P2：Risk amplification review checklist。
+  - 验收标准：
+    - 新增风险放大评审清单，把 Capability Graph Metadata RFC 的 marker 转成 Registry PR 人工检查项。
+    - 清单覆盖使用时机、快速结论、通用检查、marker-specific 检查、severity 判定、review evidence、merge 阻断条件和 Runtime 非授权边界。
+    - 清单明确 `risk_amplification_review`、`risk_escalates_with`、`reviewed_with` 和 graph metadata 只产生 review evidence，`policyEffect=none`。
+    - Capability review checklist、能力图文档、RFC、文档入口、索引、体系蓝图和 handoff 链接到该清单。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `docs/社区/risk-amplification-review-checklist.md`，覆盖 `read_to_write`、`write_then_external_send`、`internal_data_to_external_send`、`destructive_after_search`、`financial_after_model_generated_input` 和 `credential_scope_overlap` 的人工 review 检查、severity、阻断条件和 evidence 模板。相关 Registry review、能力图、RFC、文档入口、体系蓝图和 handoff 已同步。
 - [ ] T181 P2：Registry graph index 草案。
 - [ ] T182 P2：Compensation capability review rules。
 - [ ] T183 P2：Composition failure recovery smoke tests。

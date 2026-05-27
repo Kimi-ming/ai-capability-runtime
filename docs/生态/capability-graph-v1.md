@@ -74,6 +74,8 @@ RFC 0018 进一步把这些字段收敛为结构化 metadata：
 - 边：`requires_auth`、`requires_permission`、`acts_on`、`produces`、`consumes`、`can_feed`、`risk_escalates_with`、`reviewed_with`。
 - 安全边界：所有 graph metadata 都是 review/discovery evidence，不作为 Runtime policy authority。
 
+风险放大人工评审见 `docs/社区/risk-amplification-review-checklist.md`。该清单把 `read_to_write`、`write_then_external_send`、`internal_data_to_external_send`、`destructive_after_search`、`financial_after_model_generated_input` 和 `credential_scope_overlap` 转成 PR review 检查项。
+
 ## 非目标
 
 - 不做自动推荐系统。

@@ -4,6 +4,8 @@
 
 使用方式：先按 [Registry 供应链 Review 工作流](registry-supply-chain-review.md) 判断 PR 来源、范围、供应链风险和 merge evidence，再用本清单逐项检查 Capability 内容。
 
+如果 PR 涉及多步示例、`can_feed`、`risk_escalates_with`、高权限 credential、写操作后外发、读结果驱动写操作、destructive 或 financial 链路，还必须使用 [风险放大评审清单](risk-amplification-review-checklist.md)。
+
 ## 基础结构
 
 - [ ] 目录位于 `registry/<category>/<capability_id>/`。
@@ -60,6 +62,7 @@
 - [ ] 不把用户输入拼进 host，除非有明确风险说明。
 - [ ] 不默认执行 destructive/financial/code_execution。
 - [ ] 输出不包含 secret。
+- [ ] 若输出可喂给其他能力输入，已按风险放大评审清单记录 `can_feed` / `risk_escalates_with` 边界。
 
 ## README
 
