@@ -84,7 +84,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | 用量计量 | 本地 usage evidence | `docs/运营/usage-metering-v1.md` | usage event model |
 | 配额预算 | 执行前额度和预算 gate | `docs/设计/quota-and-budget-policy-v1.md` | quota/budget policy |
 | 限流滥用 | 防止循环调用和刷请求 | `docs/安全/rate-limit-and-abuse-control-v1.md` | abuse controls |
-| 商业边界 | paid capability/commerce profile 边界 | `docs/生态/paid-capability-and-commerce-boundary.md` | future commerce boundary |
+| 商业边界 | paid capability/commerce profile 边界 | `docs/生态/paid-capability-and-commerce-boundary.md`, `rfcs/0019-paid-capability-manifest-v1.md`, `rfcs/0020-commerce-profile-v1.md` | future commerce boundary |
 | 用量证据 | 证明用量来自 invocation | `docs/质量/usage-evidence-v1.md` | usage evidence chain |
 | Tool Projection | 生成模型可见工具元数据 | `docs/设计/tool-projection-v1.md` | MCP tool projection |
 | Prompt Surface | 治理工具描述和结果注入 | `docs/安全/prompt-surface-security-v1.md` | prompt-surface controls |
@@ -320,7 +320,7 @@ Governance Surface
 | 用量计量 | 清晰 | T198 已补 usage event schema；T205 继续补 export format |
 | 配额预算 | 清晰 | T199/T204 做执行前 gate |
 | 限流滥用 | 清晰 | T200/T201 处理 local/provider rate limit |
-| 商业边界 | 清晰 | T202 已补 paid capability manifest RFC；T203 继续补 commerce profile RFC |
+| 商业边界 | 清晰 | T202 已补 paid capability manifest RFC；T203 已补 commerce profile RFC |
 | 用量证据 | 清晰 | T207 做 conformance tests |
 | Tool Projection | 清晰 | T209/T213 落入 MCP projection builder |
 | Prompt Surface | 清晰 | T210/T211 建立 metadata lint 和 negative tests |

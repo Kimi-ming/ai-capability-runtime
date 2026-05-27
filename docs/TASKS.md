@@ -1203,7 +1203,7 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`SECURITY.md` 已补齐 GitHub private vulnerability reporting、敏感材料边界、报告内容、维护者 triage/advisory 流程和启用检查；新增 `packages/spec/src/security-policy-doc-lint.ts` 与 `security-policy-doc-lint.test.ts`，并从 `@opencap/spec` 导出 `lintSecurityPolicyDoc()`。Spec 测试数从 70 增至 72。
-- [ ] T205 P2：Usage export format。（依赖已满足：T198 已定义 `opencap.usage_event.v1` schema、必填字段、redaction/non-billing 边界和 audit 关联键）
+- [ ] T205 P2：Usage export format。（前置条件已满足：T198 已定义 `opencap.usage_event.v1` schema、必填字段、redaction/non-billing 边界和 audit 关联键）
   - 任务提示：
     - 基于 T198 的 Usage Event schema，定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。
 - [x] T206 P2：Problem details for quota/rate errors。
@@ -1502,7 +1502,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `rfcs/0019-paid-capability-manifest-v1.md`，定义 future `commerce` manifest metadata、paid vs financial 边界、manifest review rules、usage event non-billing 边界、Runtime pipeline 边界、兼容迁移和 future tests。相关商业边界文档、文档入口、体系蓝图和 handoff 已同步。
-- [ ] T203 P2：Commerce profile RFC。
+- [x] T203 P2：Commerce profile RFC。
+  - 验收标准：
+    - 新增 Commerce Profile V1 RFC，定义 future `opencap.commerce_profile.v1` 边界。
+    - RFC 区分 paid manifest metadata、non-billing usage event、financial consent/spend gate 和 future transaction evidence。
+    - RFC 覆盖 price quote、purchase authorization、billable event 转换、settlement、refund 和 dispute evidence，并明确不进入 V1 Runtime 主路径。
+    - 商业边界文档、术语表、文档入口、索引、体系蓝图和 handoff 链接到该 RFC。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `rfcs/0020-commerce-profile-v1.md`，定义 future Commerce Profile artifact taxonomy、descriptor、price quote、purchase authorization、billable event conversion、settlement/refund/dispute evidence、Runtime/Registry 边界和 future tests。相关商业边界文档、术语表、文档入口、体系蓝图和 handoff 已同步。
 
 ### 已完成但保留历史任务号
 

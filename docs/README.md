@@ -108,6 +108,7 @@
 - [风险放大评审清单](社区/risk-amplification-review-checklist.md)
 - [Compensation Capability 评审规则](社区/compensation-capability-review-rules.md)
 - [Paid Capability Manifest Metadata V1 RFC](../rfcs/0019-paid-capability-manifest-v1.md)
+- [Commerce Profile V1 RFC](../rfcs/0020-commerce-profile-v1.md)
 - [能力包结构](设计/capability-package-v1.md)
 - [能力评审清单](社区/capability-review-checklist.md)
 - [贡献者路径](社区/contributor-journey.md)
