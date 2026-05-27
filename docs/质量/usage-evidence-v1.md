@@ -18,17 +18,25 @@ Invocation Audit Log
 
 ```ts
 type UsageEvidenceV1 = {
+  schema: "opencap.usage_event.v1";
   eventId: string;
   invocationId: string;
   capabilityId: string;
   capabilityVersion: string;
   outcome: string;
   requestStarted: boolean;
+  dryRun: boolean;
+  httpRequestCount: number;
+  intentCount: 1;
+  retryAttempt: number;
   durationMs?: number;
   quotaDecision?: string;
   budgetDecision?: string;
+  lifecycleStatus?: string;
   sourceAuditHash: string;
   generatedAt: string;
+  policyEffect: "none";
+  billingEffect: "none";
 };
 ```
 
@@ -39,6 +47,7 @@ type UsageEvidenceV1 = {
 - read/write/send/financial 分开统计。
 - revoked/deprecated capability 的 usage 单独标记。
 - retryAttempt 不应被误算为多个用户 intent，除非明确按 request 计量。
+- usage event 保留 `sourceAuditHash`，但不复制 audit 中的 redacted input 或 credential redacted summary。
 
 ## 不变量
 
@@ -54,6 +63,7 @@ type UsageEvidenceV1 = {
 - retryAttempt 不重复计费。
 - revoked capability usage 可被查询。
 - sourceAuditHash 能关联 audit record。
+- usage event 固定 `policyEffect=none` 和 `billingEffect=none`。
 
 ## 关联任务
 

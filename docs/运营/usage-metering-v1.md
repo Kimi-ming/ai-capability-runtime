@@ -29,6 +29,7 @@ V1 可以从 audit log 派生 usage event，也可以未来写入独立表。
 
 ```ts
 type UsageEventV1 = {
+  schema: 'opencap.usage_event.v1';
   eventId: string;
   invocationId: string;
   capabilityId: string;
@@ -39,16 +40,26 @@ type UsageEventV1 = {
   channel: 'cli' | 'mcp' | 'console' | 'api';
   startedAt: string;
   completedAt?: string;
-  outcome: 'success' | 'blocked' | 'failed_before_request' | 'failed_after_request' | 'unknown_after_timeout' | 'partial';
+  generatedAt: string;
+  outcome: 'success' | 'blocked' | 'failed_before_request' | 'failed_after_request' | 'unknown_after_timeout' | 'partial' | 'dry_run';
+  status: 'executed' | 'dry_run' | 'blocked' | 'denied';
   risk: string;
   requestStarted: boolean;
+  dryRun: boolean;
   httpRequestCount: number;
+  intentCount: 1;
   retryAttempt: number;
   durationMs?: number;
   quotaDecision?: 'allowed' | 'blocked' | 'warned';
   budgetDecision?: 'allowed' | 'blocked' | 'warned';
+  lifecycleStatus?: string;
+  sourceAuditHash: string;
+  policyEffect: 'none';
+  billingEffect: 'none';
 };
 ```
+
+当前 `@opencap/runtime` 导出 `createUsageEventFromAuditEvent(auditEvent, options)` 和 `USAGE_EVENT_SCHEMA`。该 helper 从 audit event 派生 usage event，只保留可聚合 metadata、retry attempt、requestStarted、dry-run 状态和 `sourceAuditHash`，不复制 input/output 原文、credential redaction 字段或 provider raw response。
 
 ## Usage Event 与 Audit Log 的区别
 
@@ -72,8 +83,12 @@ V1 推荐维度：
 - channel
 - outcome
 - request started yes/no
+- dry-run yes/no
+- retry attempt
+- source audit hash
 - quota/budget decision
 - duration bucket
+- lifecycle status
 
 不记录：
 
@@ -98,7 +113,7 @@ V1 不要求立刻实现这些命令，但 audit schema 应避免未来无法派
 未来导出格式应是 append-only JSONL：
 
 ```json
-{"event_id":"ue_123","capability_id":"github.create_issue","outcome":"success","risk":"write","duration_ms":1200}
+{"schema":"opencap.usage_event.v1","eventId":"ue_123","capabilityId":"github.create_issue","outcome":"success","risk":"write","durationMs":1200,"billingEffect":"none"}
 ```
 
 导出必须默认不含 input/output。

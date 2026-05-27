@@ -1203,10 +1203,9 @@
     - `pnpm lint`
     - `pnpm test`
   - 完成记录：`SECURITY.md` 已补齐 GitHub private vulnerability reporting、敏感材料边界、报告内容、维护者 triage/advisory 流程和启用检查；新增 `packages/spec/src/security-policy-doc-lint.ts` 与 `security-policy-doc-lint.test.ts`，并从 `@opencap/spec` 导出 `lintSecurityPolicyDoc()`。Spec 测试数从 70 增至 72。
-- [!] T205 P2：Usage export format。（阻塞：依赖 T198 Usage event schema；先定义 export format 会反向固定尚未完成的 usage event 字段和 non-billing 语义）
-  - 阻塞处理：
-    - 先完成或前移 T198，定义本地 Usage Event schema、必填字段、redaction/non-billing 边界和 audit 关联键。
-    - T198 完成后再恢复 T205，定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。
+- [ ] T205 P2：Usage export format。（依赖已满足：T198 已定义 `opencap.usage_event.v1` schema、必填字段、redaction/non-billing 边界和 audit 关联键）
+  - 任务提示：
+    - 基于 T198 的 Usage Event schema，定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。
 - [x] T206 P2：Problem details for quota/rate errors。
   - 验收标准：
     - `@opencap/runtime` 导出 `ProblemDetailsV1` 类型和 quota/rate problem details helper，供 CLI、MCP、audit 和 usage evidence 复用。
@@ -1468,7 +1467,26 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `packages/runtime/src/composition-recovery.ts` 和 `composition-recovery.test.ts`，实现 `evaluateCompositionFailureRecovery()` 纯 decision helper。该 helper 对 unknown required step、blocked step、failed normal step 和 failed compensation step 输出恢复建议、blocking step、completed/failed/unknown/compensation evidence，并保持 `autoCompensationAllowed=false`、`policyEffect=none`。Runtime 测试数从 273 增至 277。
-- [ ] T198 P1：Usage event schema。
+- [x] T198 P1：Usage event schema。
+  - 验收标准：
+    - Runtime 新增 `opencap.usage_event.v1` schema helper，可从 audit event 派生 usage event。
+    - Usage event 覆盖 invocation/capability/channel/outcome/status/risk/requestStarted/dryRun/httpRequestCount/intentCount/retryAttempt/lifecycle/sourceAuditHash，并固定 `policyEffect=none`、`billingEffect=none`。
+    - 测试覆盖 blocked usage 不复制 input/output/secret、dry-run 与真实执行分离、retryAttempt 不增加 user intent、revoked/deprecated lifecycle 标记和 sourceAuditHash。
+    - 用量计量、用量证据、测试策略、体系蓝图和 handoff 同步新 schema；T205 Usage export format 的直接依赖解除。
+  - 验证：
+    - RED：`pnpm --filter @opencap/runtime test -- usage-event.test.ts` 先因 `createUsageEventFromAuditEvent is not a function` 失败。
+    - GREEN：`pnpm --filter @opencap/runtime test -- usage-event.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `packages/runtime/src/usage-event.ts` 和 `usage-event.test.ts`，导出 `USAGE_EVENT_SCHEMA`、`createUsageEventFromAuditEvent()` 和 usage event 类型。Helper 从 audit event 派生 non-billing usage event，不复制 input/output/credential redaction 字段，保留 `sourceAuditHash`、dry-run 状态、retryAttempt 和 `intentCount=1`；Runtime 测试数从 277 增至 281。
 - [ ] T202 P2：Paid capability manifest RFC。
 - [ ] T203 P2：Commerce profile RFC。
 
