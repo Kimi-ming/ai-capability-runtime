@@ -21,6 +21,7 @@ export { applyPolicyOverrides, consumePolicyOverride, createPolicyOverrideAuditE
 export { exportDecisionLogRecords } from "./decision-log.js";
 export { credentialAuditEvidence, resolveEnvCredential } from "./secret-resolver.js";
 export { defaultHttpRetryPolicy, evaluateHttpRetryPolicy } from "./retry-policy.js";
+export { evaluateCompositionFailureRecovery } from "./composition-recovery.js";
 export { evaluateTrustLevelTransition } from "./trust-transition.js";
 export { evaluateRevokedCapabilityInvokeGate } from "./lifecycle-gate.js";
 export { CAPABILITY_QUALITY_SCORE_RUBRIC_VERSION, calculateCapabilityQualityScore } from "./quality-score.js";
@@ -43,6 +44,7 @@ export type { ConsumedPolicyOverrideResult, PolicyOverrideCapabilityStatus, Poli
 export type { DecisionLogRecord } from "./decision-log.js";
 export type { CredentialAuditEvidence, ResolvedCredential, ResolvedCredentialType, SecretCredentialApplyMode, SecretCredentialSource, SecretExecutionTarget, SecretResolveMode, SecretResolveRequest, SecretResolverAuth } from "./secret-resolver.js";
 export type { HttpRetryIdempotencyMode, HttpRetryPolicyDecision, HttpRetryPolicyInput, HttpRetryPolicyV1, HttpRetryReasonCode } from "./retry-policy.js";
+export type { CompositionFailureRecoveryAction, CompositionFailureRecoveryDecision, CompositionFailureRecoveryInput, CompositionFailureRecoveryOutcome, CompositionRecoveryStep, CompositionStepRecoveryOutcome, CompositionStepRole, CompositionStepSideEffectKind } from "./composition-recovery.js";
 export type { TrustTransitionDecision, TrustTransitionEvidence, TrustTransitionFinding, TrustTransitionFindingCode, TrustTransitionFindingSeverity, TrustTransitionInput, TrustTransitionKind, TrustTransitionPolicyEffect, TrustTransitionTarget } from "./trust-transition.js";
 export type { RevokedCapabilityInvokeGateDecision, RevokedCapabilityInvokeGateEvidence, RevokedCapabilityInvokeGateInput } from "./lifecycle-gate.js";
 export type { CapabilityQualityScore, CapabilityQualityScoreBand, CapabilityQualityScoreDimensions, CapabilityQualityScoreInput, CapabilityQualityScoreRubricVersion } from "./quality-score.js";

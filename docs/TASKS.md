@@ -1448,7 +1448,26 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `docs/社区/compensation-capability-review-rules.md`，覆盖 compensation capability 的独立 manifest/permissions/risk/policy/consent/audit 要求、命名限制、reconcile-before-compensation 顺序、confirmation summary 要求、merge 阻断条件和 review evidence 模板。相关 review 清单、runbook、组合边界、文档入口、体系蓝图和 handoff 已同步。
-- [ ] T183 P2：Composition failure recovery smoke tests。
+- [x] T183 P2：Composition failure recovery smoke tests。
+  - 验收标准：
+    - Runtime 新增 composition failure recovery smoke tests，覆盖 required write step `unknown_after_timeout` 需要 reconcile、blocked step 停止后续、后续 external_send 失败形成 partial 且不自动补偿、compensation step 失败进入 manual review。
+    - 新增纯 helper 输出 `opencap.composition.failure_recovery.v1` decision，固定 `autoCompensationAllowed=false` 和 `policyEffect=none`。
+    - Helper 只做 recovery decision/evidence，不调度 workflow、不执行 retry/compensation、不改变 policy/consent/audit gate。
+    - Runtime root export 暴露 helper 和类型，测试策略和 handoff 同步测试数。
+  - 验证：
+    - RED：`pnpm --filter @opencap/runtime test -- composition-recovery.test.ts` 先因缺少模块失败，再因 stub 返回 `completed` 而 4 个断言失败。
+    - GREEN：`pnpm --filter @opencap/runtime test -- composition-recovery.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `packages/runtime/src/composition-recovery.ts` 和 `composition-recovery.test.ts`，实现 `evaluateCompositionFailureRecovery()` 纯 decision helper。该 helper 对 unknown required step、blocked step、failed normal step 和 failed compensation step 输出恢复建议、blocking step、completed/failed/unknown/compensation evidence，并保持 `autoCompensationAllowed=false`、`policyEffect=none`。Runtime 测试数从 273 增至 277。
 - [ ] T198 P1：Usage event schema。
 - [ ] T202 P2：Paid capability manifest RFC。
 - [ ] T203 P2：Commerce profile RFC。
