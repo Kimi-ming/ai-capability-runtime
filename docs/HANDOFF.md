@@ -1,10 +1,12 @@
 # 当前状态交接
 
-更新时间：2026-05-26
+更新时间：2026-05-27
 
 ## 当前阶段
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
+
+已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。下一步应先评审该设计，再进入实施计划；实施顺序建议为 T070 MCP server 闭环、T198 Usage event schema、T206 quota/rate problem details、T205 usage export format、T207 usage evidence conformance tests。
 
 本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留、T116 术语表/文档索引维护、T128 威胁模型 Abuse Cases smoke tests、T138 privacy retention 文档 lint、T153 conformance suite skeleton、T155 Agentic abuse cases smoke tests、T162 credential lifecycle smoke/runbook 验证、T165 GitHub fine-grained token setup guide、T173 Execution evidence conformance record 和 T190 SECURITY.md private reporting 对齐均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
