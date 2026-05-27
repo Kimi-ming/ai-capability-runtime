@@ -80,7 +80,7 @@ pnpm build
 | `@opencap/spec` | 可作为 alpha 候选 | manifest schema、registry validation、metadata lint 已有测试。 |
 | `@opencap/runtime` | 可作为 alpha 候选但需标注 experimental | Runtime API 已覆盖 install/list/policy/audit/http/egress/result/policy governance，但公共 API 仍在 `0.x` 演进。 |
 | `@opencap/cli` | 可作为 alpha 候选 | validate/install/list/invoke/logs/policy/decision-log 已有 smoke coverage。 |
-| `@opencap/mcp` | 暂缓正式发布 | helper 已有 tools/list、tools/call 和 adapter 测试，但完整 `opencap serve --mcp` server 尚未实现。 |
+| `@opencap/mcp` | 暂缓正式发布 | 已有最小 stdio server、tools/list、tools/call 和 adapter 测试，但真实 Host smoke evidence 仍未完成。 |
 | `@opencap/sdk-js` | 暂缓发布 | SDK 仍是占位/后续边界，API 尚未稳定。 |
 
 ## Package public exports

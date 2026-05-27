@@ -1,13 +1,31 @@
 import type { CapabilityManifest } from "@opencap/spec";
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  type CallToolRequest,
+  type CallToolResult,
+  type ListToolsResult,
+  type Tool,
+} from "@modelcontextprotocol/sdk/types.js";
 import { buildMcpToolProjection, capabilityIdToMcpToolName } from "./tool-projection.js";
 import {
   McpNoElicitationConfirmationHandler,
+  SqliteAuditLogger,
   confirmWithAudit,
   evaluatePolicy,
+  executeHttpCapability,
+  loadInstalledCapabilities,
+  loadPolicySet,
+  resultEnvelopeFromHttpExecutionResult,
   type AuditLogger,
   type PolicySet,
   type ResultEnvelopeV1,
 } from "@opencap/runtime";
+
+export const MCP_TYPESCRIPT_SDK_PACKAGE = "@modelcontextprotocol/sdk" as const;
+export const MCP_TYPESCRIPT_SDK_VERSION_RANGE = "^1.29.0" as const;
 
 export interface CapabilityLike {
   id: string;
@@ -207,4 +225,111 @@ export async function routeMcpToolCall(
   }
 
   return textResult("Tool call completed.", output, false);
+}
+
+export interface OpenCapMcpServerOptions extends McpToolCallRouterOptions {
+  manifests: CapabilityManifest[];
+  serverName?: string;
+  serverVersion?: string;
+}
+
+export interface OpenCapMcpServerHandlers {
+  listTools: () => Promise<ListToolsResult>;
+  callTool: (request: Pick<CallToolRequest, "params">) => Promise<CallToolResult>;
+}
+
+function toSdkTool(tool: ReturnType<typeof describeCapabilityAsTool>): Tool {
+  return {
+    name: tool.name,
+    title: tool.title,
+    description: tool.description,
+    inputSchema: tool.inputSchema as Tool["inputSchema"],
+    outputSchema: tool.outputSchema as Tool["outputSchema"],
+    _meta: tool.metadata,
+  };
+}
+
+function toSdkCallToolResult(result: McpToolCallResult): CallToolResult {
+  const structuredContent = typeof result.structuredContent === "object" && result.structuredContent !== null && !Array.isArray(result.structuredContent)
+    ? result.structuredContent as Record<string, unknown>
+    : { value: result.structuredContent };
+
+  return {
+    isError: result.isError,
+    content: result.content,
+    structuredContent,
+  };
+}
+
+export function createOpenCapMcpServerHandlers(options: OpenCapMcpServerOptions): OpenCapMcpServerHandlers {
+  return {
+    listTools: async () => ({
+      tools: buildMcpToolsList(options.manifests).tools.map((tool) => toSdkTool(tool)),
+    }),
+    callTool: async (request) => toSdkCallToolResult(await routeMcpToolCall(
+      options.manifests,
+      {
+        name: request.params.name,
+        arguments: request.params.arguments,
+      },
+      options,
+    )),
+  };
+}
+
+export function createOpenCapMcpServer(options: OpenCapMcpServerOptions): Server {
+  const server = new Server(
+    {
+      name: options.serverName ?? "opencap",
+      version: options.serverVersion ?? "0.1.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    },
+  );
+  const handlers = createOpenCapMcpServerHandlers(options);
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => handlers.listTools());
+  server.setRequestHandler(CallToolRequestSchema, async (request) => handlers.callTool(request));
+
+  return server;
+}
+
+export async function connectOpenCapMcpStdioServer(
+  server: Server,
+  transport = new StdioServerTransport(),
+): Promise<void> {
+  await server.connect(transport);
+}
+
+export interface OpenCapMcpServerFromStateOptions {
+  cwd?: string;
+  stateDir?: string;
+  env?: Record<string, string | undefined>;
+}
+
+export async function createOpenCapMcpServerFromState(options: OpenCapMcpServerFromStateOptions = {}): Promise<Server> {
+  const env = options.env ?? process.env;
+  const loaded = await loadInstalledCapabilities({ cwd: options.cwd, stateDir: options.stateDir, env });
+  const policySet = await loadPolicySet({ cwd: options.cwd, stateDir: options.stateDir, env });
+  const auditLogger = new SqliteAuditLogger({ cwd: options.cwd, stateDir: options.stateDir, env });
+
+  return createOpenCapMcpServer({
+    manifests: loaded.capabilities.map((capability) => capability.manifest),
+    policySet,
+    auditLogger,
+    execute: async (manifest, input) => resultEnvelopeFromHttpExecutionResult(
+      await executeHttpCapability(manifest, input, {
+        env,
+        auditLogger,
+        channel: "mcp",
+      }),
+    ),
+  });
+}
+
+export async function serveOpenCapMcpStdio(options: OpenCapMcpServerFromStateOptions = {}): Promise<void> {
+  await connectOpenCapMcpStdioServer(await createOpenCapMcpServerFromState(options));
 }

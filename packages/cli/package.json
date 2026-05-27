@@ -12,11 +12,12 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "pnpm --filter @opencap/spec build && pnpm --filter @opencap/runtime build && tsx src/index.ts",
-    "test": "pnpm --filter @opencap/spec build && pnpm --filter @opencap/runtime build && vitest run --passWithNoTests",
+    "dev": "pnpm --filter @opencap/spec build && pnpm --filter @opencap/runtime build && pnpm --filter @opencap/mcp build && tsx src/index.ts",
+    "test": "pnpm --filter @opencap/spec build && pnpm --filter @opencap/runtime build && pnpm --filter @opencap/mcp build && vitest run --passWithNoTests",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@opencap/mcp": "workspace:*",
     "@opencap/runtime": "workspace:*",
     "@opencap/spec": "workspace:*",
     "commander": "^12.1.0",

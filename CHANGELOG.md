@@ -19,7 +19,7 @@
 - 单元测试基础设施现状文档化，明确 spec、runtime、mcp helper 已覆盖的测试入口和 CLI 测试缺口。
 - Runtime 临时测试项目 helper，覆盖 install/list/logs 写入显式临时 state dir 且不污染默认 `opencap.local/`。
 - CLI 端到端 smoke test，使用临时 `--state-dir` 跑通 validate、install、list、invoke dry-run 和 logs。
-- README 快速开始更新为当前真实可运行的 CLI 闭环，并明确 `serve --mcp` 仍是骨架入口。
+- README 快速开始更新为当前真实可运行的 CLI 闭环，并明确 `serve --mcp` 已接入最小 stdio MCP server。
 - 第一次贡献教程，串联环境准备、任务选择、验证、文档同步和提交推送。
 - 架构总览新增 V1 Runtime 主路径 Mermaid 图，明确 CLI、Runtime、Policy、Audit、HTTP Executor、Local State 和外部 API 的关系。
 - Alpha release checklist，区分发布阻断项和可后续跟进项，并明确未实现能力边界。
@@ -145,7 +145,7 @@
 
 ### 已知缺口
 
-- 完整 `opencap serve --mcp` server 尚未实现；当前已有 MCP tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper。
+- `opencap serve --mcp` 已接入最小 stdio MCP server；Claude Desktop/Cursor 等真实 Host smoke 仍需补 evidence。
 - Console UI、Cloud/团队能力、完整 OAuth flow、SDK/adapters 和 Registry signing 尚未实现。
 - Outbound policy 私网阻断、audit failure preflight 和更多 conformance negative tests 仍需补齐。
 - CLI command snapshot、stdout/stderr 和 exit code 细粒度测试仍需补齐。

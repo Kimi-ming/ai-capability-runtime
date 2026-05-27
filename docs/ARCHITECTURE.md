@@ -101,7 +101,7 @@ flowchart TD
   Result --> CLI
 ```
 
-说明：上图描述当前 V1 的 CLI 到 Runtime 主路径。`@opencap/mcp` 已有 tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper，但完整 `opencap serve --mcp` server 仍在后续任务中实现。
+说明：上图描述当前 V1 的 CLI 到 Runtime 主路径。`@opencap/mcp` 已接入官方 MCP TypeScript SDK，`opencap serve --mcp` 可启动最小 stdio server，并复用 tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper。
 
 ## 包职责
 

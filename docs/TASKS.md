@@ -19,11 +19,11 @@
 
 ## 当前完成度快照
 
-截至 2026-05-14，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP helper、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests 和 CLI user-error exit code tests。最近一次全量验证通过 `pnpm validate`、`pnpm lint`、`pnpm build`、`pnpm test`，测试覆盖 spec 72 个、runtime 267 个、mcp 21 个、cli 5 个。
+截至 2026-05-27，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP SDK server wiring、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests、CLI user-error exit code tests 和 usage export format。最近一次验证通过 MCP/CLI focused build/test、`pnpm validate`、`pnpm build`、`pnpm lint` 和 `pnpm test`。
 
 当前主要缺口：
 
-- 完整 `opencap serve --mcp` server 仍被 T070 阻塞。
+- `opencap serve --mcp` 已接入最小 stdio server；真实 Host smoke 仍需按 `docs/教程/connect-mcp-host.md` 记录。
 - V1 需要把 lifecycle warnings、Card 输出命令和具体 ledger writer/迁移策略继续落到类型、测试和实现里。
 - CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
@@ -35,10 +35,10 @@
 
 | 模块 | 名称 | 目标 | 当前判断 |
 | --- | --- | --- | --- |
-| M0 | 阻塞和外部依赖 | 跟踪需要用户确认、网络、凭据或外部 SDK 的任务 | T070 仍阻塞 |
+| M0 | 阻塞和外部依赖 | 跟踪需要用户确认、网络、凭据或外部 SDK 的任务 | 当前无 ready 阻塞 |
 | M1 | 核心契约和 Runtime Kernel | 把设计对象落成 public types、接口和稳定包导出 | 基础契约已完成 |
 | M2 | 执行安全、审计和可靠性 | 补齐调用前门禁、审计失败保护、状态路径、重试和限流 | 下一步优先 |
-| M3 | CLI、MCP 和 Host 互操作 | 补齐 CLI 细粒度测试、MCP 映射、Host evidence 和 profile | 等 T070 解阻后加速 |
+| M3 | CLI、MCP 和 Host 互操作 | 补齐 CLI 细粒度测试、MCP 映射、Host evidence 和 profile | 下一步补真实 Host smoke |
 | M4 | Registry、Trust、Lifecycle 和供应链 | 建立能力包、信任卡、生命周期、安全公告和供应链闭环 | V1 生态根基 |
 | M5 | Conformance、Abuse Cases、隐私和运维 | 把设计风险转为一致性测试、smoke、runbook 和文档门禁 | 质量增强 |
 | M6 | Composition、Capability Graph 和 Agentic Commerce | 规划多步组合、能力图、用量计费和商业边界 | V1 后续扩展 |
@@ -47,7 +47,7 @@
 
 ### 模块 M0：阻塞和外部依赖
 
-- [!] T070 P0：选择 MCP TypeScript SDK 并接入。（阻塞：需要确认依赖包名/版本并允许安装新 npm 依赖）
+- [x] T070 P0：选择 MCP TypeScript SDK 并接入。
 
 ### 模块 M1：核心契约和 Runtime Kernel
 
@@ -2629,13 +2629,7 @@ pnpm lint
 
 ### T070 P0：选择 MCP TypeScript SDK 并接入
 
-- [!] T070 P0：选择 MCP TypeScript SDK 并接入
-
-阻塞状态：
-
-- 需要确认 MCP TypeScript SDK 的包名、版本和接入边界。
-- 需要允许安装新的 npm 依赖；当前开发环境网络受限，未获批准前不自动修改依赖。
-- 如果暂不引入 SDK，可改走最小 stdio JSON-RPC server spike，但需要重新确认验收标准。
+- [x] T070 P0：选择 MCP TypeScript SDK 并接入
 
 验收标准：
 
@@ -2647,7 +2641,10 @@ pnpm lint
 验证：
 
 ```bash
+pnpm --filter @opencap/mcp test -- sdk-server.test.ts
+pnpm --filter @opencap/mcp test
 pnpm --filter @opencap/mcp build
+pnpm --filter @opencap/cli build
 pnpm lint
 pnpm validate
 ```
@@ -2658,6 +2655,14 @@ pnpm validate
 - 添加依赖
 - 写最小 MCP server
 - 不破坏 STDIO 输出
+
+完成记录：
+
+- 选择官方 `@modelcontextprotocol/sdk`，`packages/mcp/package.json` 记录版本范围 `^1.29.0`，`pnpm-lock.yaml` 锁定 `1.29.0`。
+- `@opencap/mcp` 新增 SDK server wiring：`createOpenCapMcpServerHandlers()`、`createOpenCapMcpServer()`、`connectOpenCapMcpStdioServer()`、`createOpenCapMcpServerFromState()` 和 `serveOpenCapMcpStdio()`。
+- 最小 server 复用现有 `buildMcpToolsList()` 和 `routeMcpToolCall()`，MCP 仍是 adapter，不改变 Runtime Kernel；`ask` 继续返回 `CONFIRMATION_REQUIRED`，不走终端 prompt。
+- `@opencap/cli` 的 `serve --mcp` 已接入 `serveOpenCapMcpStdio()`，MCP stdio 模式不向 stdout 输出普通启动日志。
+- 新增 `packages/mcp/src/sdk-server.test.ts`，覆盖 SDK 依赖记录、tools/list handler、tools/call handler、server factory 和 state-backed factory。MCP 测试数从 21 增至 25。
 
 ### T071 P0：实现 tools/list
 

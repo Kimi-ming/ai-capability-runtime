@@ -7,6 +7,7 @@ import { Command } from "commander";
 import { isAbsolute, resolve } from "node:path";
 import YAML from "yaml";
 import { formatManifestValidationIssue, validateManifestPath } from "@opencap/spec";
+import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
   InstallCapabilityError,
   SqliteAuditLogger,
@@ -729,9 +730,18 @@ program
   .option("--state-dir <path>", "Local OpenCap state directory")
   .option("--mcp", "Expose installed Capabilities as MCP tools")
   .description("Start the OpenCap runtime.")
-  .action((options: { stateDir?: string; mcp?: boolean }) => {
-    console.log(options.mcp ? "MCP runtime is not implemented yet" : "runtime is not implemented yet");
-  });
+  .action((options: { stateDir?: string; mcp?: boolean }) => runCliAction(async () => {
+    if (options.mcp) {
+      await serveOpenCapMcpStdio({
+        cwd: process.env.INIT_CWD ?? process.cwd(),
+        stateDir: options.stateDir,
+        env: process.env,
+      });
+      return;
+    }
+
+    console.log("runtime is not implemented yet");
+  }, "Failed to start runtime"));
 
 program
   .command("logs")

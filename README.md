@@ -126,9 +126,9 @@ pnpm lint
 
 ### MCP 当前状态
 
-V1 的目标是让 MCP Host 通过 `opencap serve --mcp` 发现并调用已安装 Capability。当前代码已经有 MCP tool name 映射、`tools/list` 投影和 `tools/call` 路由 helper，但 CLI 的 `serve --mcp` 仍是骨架入口，还不能作为完整 MCP server 使用。
+V1 的目标是让 MCP Host 通过 `opencap serve --mcp` 发现并调用已安装 Capability。当前代码已经接入官方 `@modelcontextprotocol/sdk`，`opencap serve --mcp` 会启动最小 stdio MCP server，复用 MCP tool name 映射、`tools/list` 投影和 `tools/call` 路由；真实 Claude Desktop/Cursor 等 Host smoke 仍需按文档记录。
 
-未来完整 Runtime 实现后，MCP Host 配置形态会是：
+MCP Host 配置形态：
 
 ```json
 {

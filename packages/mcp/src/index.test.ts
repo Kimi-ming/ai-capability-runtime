@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InMemoryAuditLogger, parsePolicyYml } from "@opencap/runtime";
+import type { CapabilityManifest } from "@opencap/spec";
 import {
   McpToolNameCollisionError,
   buildMcpToolNameMap,
@@ -9,7 +10,7 @@ import {
   routeMcpToolCall,
 } from "./index.js";
 
-function manifest() {
+function manifest(): CapabilityManifest {
   return {
     id: "github.create_issue",
     name: "Create GitHub Issue",

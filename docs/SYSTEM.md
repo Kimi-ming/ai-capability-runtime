@@ -276,12 +276,12 @@ Governance Surface
 | HTTP 执行 | 设计收敛 | T053/T052 实现 body/auth |
 | Policy | 设计收敛 | T030/T031 实现 parser/engine |
 | Audit | 设计收敛 | T040/T041/T042 实现 SQLite 和脱敏 |
-| MCP | 边界清晰 | T070/T073 做 SDK spike |
+| MCP | 已接入最小 stdio server | T070 已接入 SDK；T073 保持 confirmation_required 边界 |
 | Registry | 规则清晰 | T080/T081 已实现 CI；T129 已补供应链 review 工作流；T140 已把 Capability 分类落入 Registry 指南和评审清单；T141 已把 checklist 接入 PR/issue 流程 |
 | 发布治理 | 清晰 | release readiness matrix 和可执行 release checklist 已定义 |
 | CLI 契约 | 清晰 | T001/T013 按契约实现 |
 | 本地状态 | 清晰 | T010/T014 实现 helper |
-| MCP 接口 | 清晰 | T070-T073 实现 bridge |
+| MCP 接口 | 清晰 | T070-T073 已实现 bridge；后续补真实 Host smoke |
 | 错误模型 | 清晰 | T013/T137 实现错误测试 |
 | 生态分类 | 清晰 | T140/T141 落到 registry docs |
 | Host 兼容 | 框架清晰 | T127 维护矩阵 |

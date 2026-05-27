@@ -2,7 +2,7 @@
 
 本文说明如何把 OpenCap Runtime 作为本地 MCP stdio server 接入 Claude Desktop、Claude Code、Cursor 或其他 MCP Host，并手动验证 `tools/list`、`tools/call`、策略阻断和审计日志。
 
-> 当前实现状态：截至 T074，`opencap serve --mcp` 命令仍是骨架，会输出 `MCP runtime is not implemented yet`。本文先固化 V1 手动测试流程；真正接入 Host 前，需要先完成 T070 的 MCP server 实现。
+> 当前实现状态：截至 T070，`opencap serve --mcp` 已接入官方 MCP TypeScript SDK 并启动最小 stdio server。本文用于真实 Host smoke；未完成 smoke 前，Claude Desktop/Cursor 兼容结论仍保持 `pending-smoke`。
 
 ## 适用范围
 
@@ -51,17 +51,17 @@ MCP Host 通过 stdio 启动本地 server。OpenCap V1 的目标启动命令是�
 opencap serve --mcp --state-dir /tmp/opencap-mcp-smoke
 ```
 
-本地开发时可以先通过 CLI workspace 命令验证骨架状态：
+本地开发时可以先通过 CLI workspace 命令启动 stdio server：
 
 ```bash
 pnpm --filter @opencap/cli dev -- serve --mcp --state-dir /tmp/opencap-mcp-smoke
 ```
 
-如果输出 `MCP runtime is not implemented yet`，说明 MCP server 尚未接入真实 stdio 协议，此时不要把它配置进真实 Host 做交互测试。
+stdio server 的 stdout 只能承载 MCP JSON-RPC 消息。启动日志、warning 和 debug 必须写 stderr；如果 Host 报 JSON 解析错误，先检查是否有普通文本写入 stdout。
 
 ## 配置 Claude Desktop
 
-Claude Desktop 使用 `mcpServers` 配置 stdio server。OpenCap Runtime 实现后，可在 Claude Desktop 的 MCP 配置中加入：
+Claude Desktop 使用 `mcpServers` 配置 stdio server。可在 Claude Desktop 的 MCP 配置中加入：
 
 ```json
 {
