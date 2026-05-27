@@ -36,6 +36,8 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T181 Registry graph index 草案：新增 `docs/生态/registry-graph-index-v1.md`，定义 `opencap.registry.graph_index.v1` future profile，覆盖 graph index envelope、capability/node/edge/risk/review entry、生成流程、只读查询、默认 lifecycle/advisory 过滤、cache layout 和安全隐私边界。草案明确 graph index 只用于 review/discovery/inspection，不生成 workflow、自动安装、暴露 MCP tools 或改变 Runtime policy。
 
+本轮继续完成 T182 Compensation capability review rules：新增 `docs/社区/compensation-capability-review-rules.md`，定义补偿能力的 Registry review 规则，覆盖使用时机、命名、manifest、权限风险、输入确认、reconcile 顺序、graph metadata、阻断条件和 `opencap.compensation.review.v1` evidence 模板。规则明确 compensation 是独立 Capability invocation，不是隐式 rollback，不保证恢复原状态，也不能复用原 step consent、input hash 或 policy decision。
+
 本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留、T116 术语表/文档索引维护、T128 威胁模型 Abuse Cases smoke tests、T138 privacy retention 文档 lint、T153 conformance suite skeleton、T155 Agentic abuse cases smoke tests、T162 credential lifecycle smoke/runbook 验证、T165 GitHub fine-grained token setup guide、T173 Execution evidence conformance record 和 T190 SECURITY.md private reporting 对齐均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
@@ -71,7 +73,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 `docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务，T190 已完成；T205 P2：Usage export format 已标记阻塞，因为它依赖尚未完成的 T198 Usage event schema。
 
-下一步推荐：先继续当前队列的 T182 Compensation capability review rules；如果要优先解除 T205 阻塞，也可以前移 T198 Usage event schema。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：先继续当前队列的 T183 Composition failure recovery smoke tests；如果要优先解除 T205 阻塞，也可以前移 T198 Usage event schema。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
@@ -238,7 +240,7 @@ M5 / T198 P1：Usage event schema（用于解除 T205 阻塞）
 
 如果要继续 strict `continuous-doc-dev`，下一轮先处理 T198，或让 `next_task.py` 在 T205 阻塞后选择下一项 ready task。
 
-当前 next ready task：T182 P2：Compensation capability review rules。
+当前 next ready task：T183 P2：Composition failure recovery smoke tests。
 
 ## Secret Resolver V1 env provider 已实现
 

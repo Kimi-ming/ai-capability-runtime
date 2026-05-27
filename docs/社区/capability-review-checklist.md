@@ -6,6 +6,8 @@
 
 如果 PR 涉及多步示例、`can_feed`、`risk_escalates_with`、高权限 credential、写操作后外发、读结果驱动写操作、destructive 或 financial 链路，还必须使用 [风险放大评审清单](risk-amplification-review-checklist.md)。
 
+如果 PR 声称可以撤销、取消、关闭、删除、退款、回滚、修正或补偿另一个 Capability 的结果，还必须使用 [Compensation Capability 评审规则](compensation-capability-review-rules.md)。
+
 ## 基础结构
 
 - [ ] 目录位于 `registry/<category>/<capability_id>/`。
@@ -63,6 +65,7 @@
 - [ ] 不默认执行 destructive/financial/code_execution。
 - [ ] 输出不包含 secret。
 - [ ] 若输出可喂给其他能力输入，已按风险放大评审清单记录 `can_feed` / `risk_escalates_with` 边界。
+- [ ] 若能力是 compensation，已确认它是独立 Capability，不承诺自动 rollback 或 guaranteed restore。
 
 ## README
 

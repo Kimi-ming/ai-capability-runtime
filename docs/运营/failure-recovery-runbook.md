@@ -91,6 +91,8 @@ V1 不自动 compensation。后续如果支持，必须满足：
 - 原 invocation 和 compensation invocation 都写 audit。
 - 不把 compensation 描述为 rollback guarantee。
 
+Registry review 规则见 `docs/社区/compensation-capability-review-rules.md`。
+
 ## 用户提示模板
 
 ### Unknown after timeout

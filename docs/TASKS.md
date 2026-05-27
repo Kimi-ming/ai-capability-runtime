@@ -1433,7 +1433,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `docs/生态/registry-graph-index-v1.md`，定义 future `graph-index.json` envelope、capability/node/edge/risk/review entry、deterministic generation pipeline、read-only query examples、revoked/yanked 默认过滤、cache layout 和安全隐私边界。相关能力图、Registry 分发、RFC、文档入口、体系蓝图和 handoff 已同步。
-- [ ] T182 P2：Compensation capability review rules。
+- [x] T182 P2：Compensation capability review rules。
+  - 验收标准：
+    - 新增 Compensation Capability 评审规则，面向 Registry review 定义补偿能力的使用时机、基本原则、命名、manifest、权限风险、输入确认、reconcile 顺序、graph metadata 和阻断条件。
+    - 规则明确 compensation 是独立 Capability invocation，不是隐式 rollback，不保证恢复原状态，也不能复用原 step consent、input hash 或 policy decision。
+    - 规则提供 `opencap.compensation.review.v1` evidence 模板，并固定 `policyEffect=none`。
+    - Capability review checklist、失败恢复 runbook、组合失败 runbook、多步执行边界、文档入口、索引、体系蓝图和 handoff 链接到该规则。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `docs/社区/compensation-capability-review-rules.md`，覆盖 compensation capability 的独立 manifest/permissions/risk/policy/consent/audit 要求、命名限制、reconcile-before-compensation 顺序、confirmation summary 要求、merge 阻断条件和 review evidence 模板。相关 review 清单、runbook、组合边界、文档入口、体系蓝图和 handoff 已同步。
 - [ ] T183 P2：Composition failure recovery smoke tests。
 - [ ] T198 P1：Usage event schema。
 - [ ] T202 P2：Paid capability manifest RFC。

@@ -25,6 +25,8 @@ composition_id: c_123
 - compensation 本身也可能失败。
 - compensation 步骤不一定按原步骤逆序执行。
 
+Registry 对补偿能力的人工评审规则见 `docs/社区/compensation-capability-review-rules.md`。补偿关系可以作为 graph/review evidence 记录，但不能让 Runtime 自动执行 rollback。
+
 ## Composition Outcome
 
 组合整体 outcome 不能覆盖 step outcome。

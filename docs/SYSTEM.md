@@ -75,6 +75,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | Registry Graph Index | 从 graph metadata 生成只读发现/评审索引 | `docs/生态/registry-graph-index-v1.md` | graph index 草案 |
 | 多步执行 | 定义 step outcome 和补偿边界 | `docs/设计/multi-step-execution-boundary.md` | multi-step outcome model |
 | 组合失败恢复 | 指导 partial/unknown/manual review | `docs/运营/composition-failure-runbook.md` | recovery runbook |
+| Compensation 评审 | 评审独立补偿能力而非隐式 rollback | `docs/社区/compensation-capability-review-rules.md` | review rules |
 | 组合调研 | Saga/workflow 边界依据 | `docs/调研/composition-and-saga-scan-2026-05-07.md` | research notes |
 | Trust 模型 | 把信任变成证据摘要 | `docs/生态/trust-model-v1.md` | trust level rules |
 | Capability Advisory | 处理能力漏洞和恶意风险 | `docs/安全/capability-advisory-process.md` | advisory lifecycle |
@@ -310,7 +311,7 @@ Governance Surface
 | 风险放大评审 | 清晰 | T180 已补 Registry review checklist |
 | Registry Graph Index | 清晰 | T181 已补 graph index 草案 |
 | 多步执行 | 清晰 | T175 已增加 composition context audit fields；T178 已补 plan hash/evidence chain 草案 |
-| 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
+| 组合失败恢复 | 清晰 | T182 已定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |
 | Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185 已补 transition helper/tests；T195 继续补 quality |
 | Capability Advisory | 清晰 | T187 已补 advisory schema；T188 已补 registry revocation metadata；T189 已补 installed advisory check |

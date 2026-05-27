@@ -10,6 +10,8 @@
 - 把每个补偿动作当作新的能力调用。
 - 需要人工确认时宁可停止，不要继续扩大副作用。
 
+Compensation capability 的 Registry review 规则见 `docs/社区/compensation-capability-review-rules.md`。任何补偿能力都必须独立声明 manifest、permissions、risk、policy、consent 和 audit 边界，不能承诺自动 rollback。
+
 ## 场景 1：中间步骤被 policy deny
 
 处理：
