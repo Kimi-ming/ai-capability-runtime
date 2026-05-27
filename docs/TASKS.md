@@ -1388,7 +1388,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `docs/设计/plan-hash-evidence-chain-v1.md`，把 composition context、input provenance、policy trace、consent receipt、execution evidence、reconcile hint 和 future source audit hash 组织为只读 evidence chain。草案明确 plan hash 只接受 `sha256:<64 hex>` 形式，不保存 raw plan，不验证计划正确性，不改变任何 gate；`rfcs/0017-composition-profile-v1.md`、`docs/设计/multi-step-execution-boundary.md`、文档入口、索引、体系蓝图、测试策略和 handoff 已同步。
-- [ ] T179 P2：Capability graph metadata RFC。
+- [x] T179 P2：Capability graph metadata RFC。
+  - 验收标准：
+    - 新增 Capability Graph Metadata V1 RFC，定义 `opencap.capability_graph.metadata.v1` profile。
+    - RFC 覆盖 graph metadata 的节点、边、字段规则、风险放大 marker、生成/维护来源、安全隐私边界、兼容迁移和 future implementation tests。
+    - RFC 明确 graph metadata 是 review/discovery/evidence metadata，不是 workflow、推荐系统、执行计划、安装授权或 Runtime policy authority。
+    - 能力图文档、文档入口、索引、体系蓝图和 handoff 链接到该 RFC。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `rfcs/0018-capability-graph-metadata-v1.md`，定义 future graph metadata profile、节点/边模型、`can_feed` 与 `risk_escalates_with` 的非授权边界、sidecar/index 试点路径、risk amplification marker 和 future lint/conformance 方向。`docs/生态/capability-graph-v1.md`、文档入口、索引、体系蓝图和 handoff 已同步。
 - [ ] T180 P2：Risk amplification review checklist。
 - [ ] T181 P2：Registry graph index 草案。
 - [ ] T182 P2：Compensation capability review rules。

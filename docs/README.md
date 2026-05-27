@@ -77,6 +77,7 @@
 - [Duplicate Invocation Detector V1 草案](设计/duplicate-invocation-detector-v1.md)
 - [Composition Profile V1 RFC](../rfcs/0017-composition-profile-v1.md)
 - [Plan Hash 与 Evidence Chain V1 草案](设计/plan-hash-evidence-chain-v1.md)
+- [Capability Graph Metadata V1 RFC](../rfcs/0018-capability-graph-metadata-v1.md)
 
 ### 我要处理安全和治理
 
@@ -101,6 +102,8 @@
 - [Registry 指南](社区/registry-guidelines.md)
 - [Registry 根目录说明](../registry/README.md)
 - [能力分类体系](生态/capability-taxonomy.md)
+- [能力图 V1](生态/capability-graph-v1.md)
+- [Capability Graph Metadata V1 RFC](../rfcs/0018-capability-graph-metadata-v1.md)
 - [能力包结构](设计/capability-package-v1.md)
 - [能力评审清单](社区/capability-review-checklist.md)
 - [贡献者路径](社区/contributor-journey.md)

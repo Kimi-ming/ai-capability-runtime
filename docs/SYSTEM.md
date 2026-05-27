@@ -304,7 +304,7 @@ Governance Surface
 | 失败恢复 | 清晰 | T172 已增加 `execution.reconcile` manifest hint |
 | 执行证据 | 清晰 | T173 接入 conformance record |
 | 组合边界 | 清晰 | T176 已新增 Composition Profile RFC |
-| 能力图 | 清晰 | T179 定义 graph metadata RFC |
+| 能力图 | 清晰 | T179 已定义 Capability Graph Metadata RFC |
 | 多步执行 | 清晰 | T175 已增加 composition context audit fields；T178 已补 plan hash/evidence chain 草案 |
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |

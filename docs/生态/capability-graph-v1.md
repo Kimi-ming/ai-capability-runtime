@@ -2,6 +2,8 @@
 
 本文定义 OpenCap 如何描述 Capability 之间的关系。能力图不是 workflow，它是发现、评审、组合和风险分析的元数据基础。
 
+Capability Graph Metadata Profile 草案见 `../../rfcs/0018-capability-graph-metadata-v1.md`。该 RFC 定义 `opencap.capability_graph.metadata.v1`、节点/边类型、风险放大 marker、sidecar/index 形态和 `policyEffect=none` 边界。
+
 ## 目标
 
 Capability Graph 用来回答：
@@ -66,12 +68,19 @@ risk_notes:
   - write operation can be chained with external_send.
 ```
 
+RFC 0018 进一步把这些字段收敛为结构化 metadata：
+
+- 节点：capability、provider、resource type、permission、input/output artifact、risk marker、review evidence。
+- 边：`requires_auth`、`requires_permission`、`acts_on`、`produces`、`consumes`、`can_feed`、`risk_escalates_with`、`reviewed_with`。
+- 安全边界：所有 graph metadata 都是 review/discovery evidence，不作为 Runtime policy authority。
+
 ## 非目标
 
 - 不做自动推荐系统。
 - 不做 plan optimizer。
 - 不证明组合安全。
 - 不把 `can_feed` 变成自动执行许可。
+- 不把 `risk_escalates_with` 直接变成 deny/allow。
 
 ## 关联任务
 
