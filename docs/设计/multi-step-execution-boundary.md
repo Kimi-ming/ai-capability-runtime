@@ -62,6 +62,8 @@ OpenCap 可以把 planHash 写入 audit，证明每一步属于同一计划。�
 
 当前 Runtime audit event 已支持 `compositionContext`，包含 `compositionId`、`parentInvocationId`、`stepId`、`stepIndex`、`stepName`、`initiatedBy`、`planHash` 和 `policyEffect=none`。这些字段只做 evidence correlation；不能让 policy 自动 allow，不能替代 step-level consent，也不能保存 raw plan。
 
+更完整的 plan hash 与 evidence chain 草案见 `docs/设计/plan-hash-evidence-chain-v1.md`。该草案把 `compositionContext`、`inputProvenance`、policy trace、consent receipt、execution evidence 和 recovery hint 组织成只读链路，不新增 workflow runtime 或授权通道。
+
 ## Derived Input Evidence Chain
 
 当某一步的 input 来自上一步工具结果时，新的 invocation 不能继承上一步的授权结论。Runtime evidence 必须记录：

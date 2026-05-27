@@ -69,6 +69,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | 失败恢复 | 状态未知时指导恢复 | `docs/运营/failure-recovery-runbook.md` | recovery runbook |
 | 执行证据 | 证明调用发生了什么 | `docs/质量/execution-evidence-v1.md` | evidence fields |
 | 组合边界 | 防止滑向 Agent Builder | `docs/设计/composition-boundary-v1.md` | composition invariants |
+| Plan Hash 与 Evidence Chain | 关联多步调用证据且不扩大授权 | `docs/设计/plan-hash-evidence-chain-v1.md` | chain evidence 草案 |
 | 能力图 | 描述能力关系和风险放大 | `docs/生态/capability-graph-v1.md` | graph metadata 草案 |
 | 多步执行 | 定义 step outcome 和补偿边界 | `docs/设计/multi-step-execution-boundary.md` | multi-step outcome model |
 | 组合失败恢复 | 指导 partial/unknown/manual review | `docs/运营/composition-failure-runbook.md` | recovery runbook |
@@ -304,7 +305,7 @@ Governance Surface
 | 执行证据 | 清晰 | T173 接入 conformance record |
 | 组合边界 | 清晰 | T176 已新增 Composition Profile RFC |
 | 能力图 | 清晰 | T179 定义 graph metadata RFC |
-| 多步执行 | 清晰 | T175 已增加 composition context audit fields；T178 继续补 plan hash/evidence chain |
+| 多步执行 | 清晰 | T175 已增加 composition context audit fields；T178 已补 plan hash/evidence chain 草案 |
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |
 | Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185 已补 transition helper/tests；T195 继续补 quality |

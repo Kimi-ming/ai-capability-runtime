@@ -76,6 +76,7 @@
 - [Retry and Idempotency Manifest Profile V1 RFC](../rfcs/0016-retry-idempotency-manifest-profile-v1.md)
 - [Duplicate Invocation Detector V1 草案](设计/duplicate-invocation-detector-v1.md)
 - [Composition Profile V1 RFC](../rfcs/0017-composition-profile-v1.md)
+- [Plan Hash 与 Evidence Chain V1 草案](设计/plan-hash-evidence-chain-v1.md)
 
 ### 我要处理安全和治理
 

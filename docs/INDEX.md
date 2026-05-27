@@ -105,11 +105,12 @@
 14. [Retry and Idempotency Manifest Profile V1 RFC](../rfcs/0016-retry-idempotency-manifest-profile-v1.md)
 15. [Duplicate Invocation Detector V1 草案](设计/duplicate-invocation-detector-v1.md)
 16. [Composition Profile V1 RFC](../rfcs/0017-composition-profile-v1.md)
-17. [开发工作流](WORKFLOW.md)
-18. [Release Checklist](releases/release-checklist.md)
-19. [Alpha Release Checklist](releases/alpha-checklist.md)
-20. [发布成熟度门禁](运营/release-readiness.md)
-21. [版本和兼容性策略](规范/versioning-and-compatibility.md)
+17. [Plan Hash 与 Evidence Chain V1 草案](设计/plan-hash-evidence-chain-v1.md)
+18. [开发工作流](WORKFLOW.md)
+19. [Release Checklist](releases/release-checklist.md)
+20. [Alpha Release Checklist](releases/alpha-checklist.md)
+21. [发布成熟度门禁](运营/release-readiness.md)
+22. [版本和兼容性策略](规范/versioning-and-compatibility.md)
 
 ### Capability 贡献评审路径
 

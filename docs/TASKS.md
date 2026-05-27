@@ -1373,7 +1373,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：`ConfirmationRequest` 新增可选 `compositionContext`，`createConfirmationAuditEvent()` 会把该 context 写入当前 step audit event；`packages/runtime/src/index.test.ts` 新增 step-level composition consent 测试，覆盖同一 composition 中两个 write step 各自生成独立 consent id、不同 input hash，并保留子 step 的 parent invocation/context evidence。`docs/设计/confirmation-and-consent-v1.md`、`docs/设计/composition-boundary-v1.md`、测试策略和 handoff 已同步；Runtime 测试数从 272 增至 273。
-- [ ] T178 P2：Plan hash and evidence chain 草案。
+- [x] T178 P2：Plan hash and evidence chain 草案。
+  - 验收标准：
+    - 新增 Plan Hash 与 Evidence Chain V1 草案，定义 `opencap.plan_hash_evidence_chain.v1` 的目标、非目标、plan hash 格式、chain link shape、composition summary 和 `policyEffect=none` 边界。
+    - 草案明确 `planHash`、`parentInvocationId`、`sourceResultDigest` 和 `sourceAuditHash` 只作为 evidence correlation，不能覆盖 policy、consent、quota/budget、outbound、data egress、secret resolver、execution 或 audit gate。
+    - 草案覆盖 audit 映射、CLI/Console 只读 inspection、unknown/reconcile/duplicate/compensation 恢复语义和 future implementation tests。
+    - Composition Profile RFC、多步执行边界、文档入口、索引、体系蓝图、测试策略和 handoff 链接到该草案。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `docs/设计/plan-hash-evidence-chain-v1.md`，把 composition context、input provenance、policy trace、consent receipt、execution evidence、reconcile hint 和 future source audit hash 组织为只读 evidence chain。草案明确 plan hash 只接受 `sha256:<64 hex>` 形式，不保存 raw plan，不验证计划正确性，不改变任何 gate；`rfcs/0017-composition-profile-v1.md`、`docs/设计/multi-step-execution-boundary.md`、文档入口、索引、体系蓝图、测试策略和 handoff 已同步。
 - [ ] T179 P2：Capability graph metadata RFC。
 - [ ] T180 P2：Risk amplification review checklist。
 - [ ] T181 P2：Registry graph index 草案。

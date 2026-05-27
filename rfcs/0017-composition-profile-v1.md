@@ -185,6 +185,8 @@ Composition profile 依赖以下 evidence：
 - `consent receipt`：每个 ask step 的独立 consent evidence。
 - `policyTrace`：每个 step 的 policySetId、policyRevision、matched rule 和 reason code。
 
+更细的 plan hash 和 evidence chain 组织方式见 `docs/设计/plan-hash-evidence-chain-v1.md`。该草案把 profile evidence 聚合为只读链路，并明确 `planHash`、`parentInvocationId`、`sourceResultDigest` 和 `sourceAuditHash` 均为 evidence correlation，不是 policy authority。
+
 不得包含：
 
 - raw plan。
