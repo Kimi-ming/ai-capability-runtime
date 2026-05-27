@@ -72,6 +72,7 @@ OpenCap 的总体设计收敛为五个平面：标准面定义 Capability，控�
 | Plan Hash 与 Evidence Chain | 关联多步调用证据且不扩大授权 | `docs/设计/plan-hash-evidence-chain-v1.md` | chain evidence 草案 |
 | 能力图 | 描述能力关系和风险放大 | `docs/生态/capability-graph-v1.md` | graph metadata 草案 |
 | 风险放大评审 | 把 graph marker 转成 Registry review 检查项 | `docs/社区/risk-amplification-review-checklist.md` | review checklist |
+| Registry Graph Index | 从 graph metadata 生成只读发现/评审索引 | `docs/生态/registry-graph-index-v1.md` | graph index 草案 |
 | 多步执行 | 定义 step outcome 和补偿边界 | `docs/设计/multi-step-execution-boundary.md` | multi-step outcome model |
 | 组合失败恢复 | 指导 partial/unknown/manual review | `docs/运营/composition-failure-runbook.md` | recovery runbook |
 | 组合调研 | Saga/workflow 边界依据 | `docs/调研/composition-and-saga-scan-2026-05-07.md` | research notes |
@@ -307,6 +308,7 @@ Governance Surface
 | 组合边界 | 清晰 | T176 已新增 Composition Profile RFC |
 | 能力图 | 清晰 | T179 已定义 Capability Graph Metadata RFC |
 | 风险放大评审 | 清晰 | T180 已补 Registry review checklist |
+| Registry Graph Index | 清晰 | T181 已补 graph index 草案 |
 | 多步执行 | 清晰 | T175 已增加 composition context audit fields；T178 已补 plan hash/evidence chain 草案 |
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |

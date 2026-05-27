@@ -1418,7 +1418,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `docs/社区/risk-amplification-review-checklist.md`，覆盖 `read_to_write`、`write_then_external_send`、`internal_data_to_external_send`、`destructive_after_search`、`financial_after_model_generated_input` 和 `credential_scope_overlap` 的人工 review 检查、severity、阻断条件和 evidence 模板。相关 Registry review、能力图、RFC、文档入口、体系蓝图和 handoff 已同步。
-- [ ] T181 P2：Registry graph index 草案。
+- [x] T181 P2：Registry graph index 草案。
+  - 验收标准：
+    - 新增 Registry Graph Index V1 草案，定义 `opencap.registry.graph_index.v1` 的目标、非目标、envelope、capability/node/edge/risk/review entry 和生成流程。
+    - 草案覆盖查询语义、默认 lifecycle/advisory 过滤、安全隐私边界、与 registry index/cache/sync 的关系和 future implementation tests。
+    - 草案明确 graph index 只用于 review/discovery/inspection，不生成 workflow、自动安装、暴露 MCP tools 或改变 Runtime policy。
+    - 能力图、Registry 分发、Capability Graph Metadata RFC、文档入口、索引、体系蓝图和 handoff 链接到该草案。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `docs/生态/registry-graph-index-v1.md`，定义 future `graph-index.json` envelope、capability/node/edge/risk/review entry、deterministic generation pipeline、read-only query examples、revoked/yanked 默认过滤、cache layout 和安全隐私边界。相关能力图、Registry 分发、RFC、文档入口、体系蓝图和 handoff 已同步。
 - [ ] T182 P2：Compensation capability review rules。
 - [ ] T183 P2：Composition failure recovery smoke tests。
 - [ ] T198 P1：Usage event schema。

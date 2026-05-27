@@ -31,6 +31,7 @@
 | [Policy 事故响应手册](运营/policy-incident-runbook.md) | 策略误放开、override 滥用和紧急阻断恢复流程 | 事故响应流程、policy rollback 或 advisory/revocation 联动变化时 |
 | [GitHub fine-grained token 设置指南](教程/github-fine-grained-token-setup.md) | `github.create_issue` 示例能力的最小权限 token 设置流程 | GitHub token 权限、凭据边界或示例能力认证方式变化时 |
 | [风险放大评审清单](社区/risk-amplification-review-checklist.md) | Registry PR 中识别跨能力组合、外发、destructive、financial 和 credential scope 风险放大 | Capability graph marker、Registry review 或组合风险规则变化时 |
+| [Registry Graph Index V1 草案](生态/registry-graph-index-v1.md) | 定义 future graph index envelope、节点/边 entry、默认过滤和 cache 边界 | Capability graph index、Registry discovery 或组合风险 inspection 变化时 |
 | [版本和兼容性策略](规范/versioning-and-compatibility.md) | Package、schema 和 Registry 兼容规则 | 版本、发布或公共契约变化时 |
 | [发布成熟度门禁](运营/release-readiness.md) | v0.1-v1.0 release maturity gate matrix | 发布阶段、hard gate、release notes 或发布承诺变化时 |
 | [Release Checklist](releases/release-checklist.md) | 发布前逐项操作和 evidence 记录格式 | 发布流程、验证命令或 release evidence 变化时 |
@@ -123,8 +124,9 @@
 5. [注册表指南](社区/registry-guidelines.md)
 6. [能力分类体系](生态/capability-taxonomy.md)
 7. [能力图 V1](生态/capability-graph-v1.md)
-8. [风险放大评审清单](社区/risk-amplification-review-checklist.md)
-9. [能力评审清单](社区/capability-review-checklist.md)
+8. [Registry Graph Index V1 草案](生态/registry-graph-index-v1.md)
+9. [风险放大评审清单](社区/risk-amplification-review-checklist.md)
+10. [能力评审清单](社区/capability-review-checklist.md)
 
 ## 维护规则
 

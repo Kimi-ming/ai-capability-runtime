@@ -103,6 +103,7 @@
 - [Registry 根目录说明](../registry/README.md)
 - [能力分类体系](生态/capability-taxonomy.md)
 - [能力图 V1](生态/capability-graph-v1.md)
+- [Registry Graph Index V1 草案](生态/registry-graph-index-v1.md)
 - [Capability Graph Metadata V1 RFC](../rfcs/0018-capability-graph-metadata-v1.md)
 - [风险放大评审清单](社区/risk-amplification-review-checklist.md)
 - [能力包结构](设计/capability-package-v1.md)

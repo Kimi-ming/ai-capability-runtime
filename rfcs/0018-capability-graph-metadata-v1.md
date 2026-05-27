@@ -13,7 +13,7 @@
 | 目标阶段 | V1 后续 |
 | 相关任务 | T179 |
 | 相关 ADR | `docs/决策/0033-step-level-policy-consent-audit.md` |
-| 相关文档 | `docs/生态/capability-graph-v1.md`, `docs/生态/capability-taxonomy.md`, `docs/生态/discovery-and-selection-boundary.md`, `docs/社区/capability-review-checklist.md`, `docs/社区/risk-amplification-review-checklist.md` |
+| 相关文档 | `docs/生态/capability-graph-v1.md`, `docs/生态/registry-graph-index-v1.md`, `docs/生态/capability-taxonomy.md`, `docs/生态/discovery-and-selection-boundary.md`, `docs/社区/capability-review-checklist.md`, `docs/社区/risk-amplification-review-checklist.md` |
 | 替代或废弃 | 无 |
 
 ## 摘要
@@ -199,7 +199,7 @@ Metadata 可由三类来源生成：
 - Registry 可以先以 sidecar 或 generated index 的形式试点。
 - 旧 Runtime 可以忽略该 profile，仍按单步 invocation 执行。
 - Future `opencap validate` 可以把 graph metadata lint 加入 package lint，但必须保持 `policyEffect=none`。
-- T181 registry graph index 应从该 profile 派生 index，不反向要求所有 package 手写完整图。
+- T181 registry graph index 草案见 `docs/生态/registry-graph-index-v1.md`；它应从该 profile 派生 index，不反向要求所有 package 手写完整图。
 
 ## 验证计划
 

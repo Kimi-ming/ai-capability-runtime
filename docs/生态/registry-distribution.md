@@ -52,6 +52,8 @@ registry/<category>/<capability_id>/manifest.yml
 
 Index/cache/sync profile 见 `rfcs/0014-registry-index-cache-sync-v1.md`。该 RFC 草案定义未来 index entry、`opencap.local/cache/registry/` 本地缓存布局、sync state、install candidate 和 sync evidence；cache 只作为 discovery 加速和离线查看来源，不能让远程 metadata 静默替换 installed capability。
 
+Registry graph index 草案见 `docs/生态/registry-graph-index-v1.md`。该草案定义 future `graph-index.json` 如何从 Capability graph metadata、risk amplification review evidence 和 conformance evidence 派生；graph index 只能用于 review/discovery/inspection，不能生成 workflow、自动安装、暴露 MCP tools 或改变 Runtime policy。
+
 ## Mirror 和 Pinning
 
 未来 install 可以支持：

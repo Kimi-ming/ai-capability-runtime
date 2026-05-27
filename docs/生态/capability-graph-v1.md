@@ -2,7 +2,7 @@
 
 本文定义 OpenCap 如何描述 Capability 之间的关系。能力图不是 workflow，它是发现、评审、组合和风险分析的元数据基础。
 
-Capability Graph Metadata Profile 草案见 `../../rfcs/0018-capability-graph-metadata-v1.md`。该 RFC 定义 `opencap.capability_graph.metadata.v1`、节点/边类型、风险放大 marker、sidecar/index 形态和 `policyEffect=none` 边界。
+Capability Graph Metadata Profile 草案见 `../../rfcs/0018-capability-graph-metadata-v1.md`。该 RFC 定义 `opencap.capability_graph.metadata.v1`、节点/边类型、风险放大 marker、sidecar/index 形态和 `policyEffect=none` 边界。Registry Graph Index 草案见 `registry-graph-index-v1.md`，用于未来从 graph metadata 生成只读发现/评审索引。
 
 ## 目标
 
