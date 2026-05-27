@@ -74,6 +74,7 @@
 - [Registry Index、Cache 和 Sync Profile V1 RFC](../rfcs/0014-registry-index-cache-sync-v1.md)
 - [OpenAPI Adapter Profile V1 RFC](../rfcs/0015-openapi-adapter-profile-v1.md)
 - [Retry and Idempotency Manifest Profile V1 RFC](../rfcs/0016-retry-idempotency-manifest-profile-v1.md)
+- [Duplicate Invocation Detector V1 草案](设计/duplicate-invocation-detector-v1.md)
 
 ### 我要处理安全和治理
 

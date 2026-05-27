@@ -1277,7 +1277,22 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `rfcs/0016-retry-idempotency-manifest-profile-v1.md`，定义 `opencap.retry_idempotency.manifest.v1` future profile，覆盖 `execution.retry`、`execution.idempotency`、provider key、payload binding、reconcile hint、unknown timeout、audit/evidence 脱敏、兼容迁移和验证计划。`docs/设计/retry-and-idempotency-v1.md`、文档入口和索引已同步，并继续明确当前 Runtime 默认不自动 retry、HTTP executor 不执行 retry loop。
-- [ ] T171 P2：Duplicate invocation detector 草案。
+- [x] T171 P2：Duplicate invocation detector 草案。
+  - 验收标准：
+    - 新增 Duplicate Invocation Detector V1 草案，明确 detector 是 future local pre-secret gate，不提供 exactly-once、不跨机器去重、不阻止用户明确再次执行。
+    - 草案定义匹配键、匹配类型、默认时间窗口、decision 语义和 evidence 字段，覆盖 same input、unknown outcome pending、idempotency key/payload 冲突和 rapid repetition。
+    - 草案明确 detector 不能绕过或替代 policy、consent、quota/budget、outbound、secret resolver、audit、retry/idempotency 或 provider reconcile。
+    - 草案明确 audit/evidence/usage 只保存 hash、时间、decision、outcome 和 evidence ref，不保存 input/output 原文、secret、provider raw response 或 idempotency key 原文。
+    - retry/idempotency 设计文档、文档入口和任务交接链接到草案。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `docs/设计/duplicate-invocation-detector-v1.md`，定义 future Duplicate Invocation Detector V1 草案，覆盖 Runtime pipeline 位置、匹配键、匹配类型、默认窗口、decision/evidence、consent UX、audit/storage、retry/idempotency 关系、usage evidence 口径和未来测试计划。草案继续明确 OpenCap 不提供 exactly-once，detector 不跨机器去重，不替代用户确认、policy 或 provider reconcile。
 - [ ] T172 P2：Reconcile hint manifest field。
 - [ ] T175 P2：Composition context audit fields。
 - [ ] T176 P2：Composition profile RFC。

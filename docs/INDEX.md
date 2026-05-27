@@ -103,11 +103,12 @@
 12. [Registry Index、Cache 和 Sync Profile V1 RFC](../rfcs/0014-registry-index-cache-sync-v1.md)
 13. [OpenAPI Adapter Profile V1 RFC](../rfcs/0015-openapi-adapter-profile-v1.md)
 14. [Retry and Idempotency Manifest Profile V1 RFC](../rfcs/0016-retry-idempotency-manifest-profile-v1.md)
-15. [开发工作流](WORKFLOW.md)
-16. [Release Checklist](releases/release-checklist.md)
-17. [Alpha Release Checklist](releases/alpha-checklist.md)
-18. [发布成熟度门禁](运营/release-readiness.md)
-19. [版本和兼容性策略](规范/versioning-and-compatibility.md)
+15. [Duplicate Invocation Detector V1 草案](设计/duplicate-invocation-detector-v1.md)
+16. [开发工作流](WORKFLOW.md)
+17. [Release Checklist](releases/release-checklist.md)
+18. [Alpha Release Checklist](releases/alpha-checklist.md)
+19. [发布成熟度门禁](运营/release-readiness.md)
+20. [版本和兼容性策略](规范/versioning-and-compatibility.md)
 
 ### Capability 贡献评审路径
 

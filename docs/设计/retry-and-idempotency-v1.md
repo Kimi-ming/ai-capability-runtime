@@ -62,6 +62,8 @@ V1 防线：
 - V1 不阻止用户明确再次执行。
 - V1 不跨机器去重。
 
+Future Duplicate Invocation Detector 草案见 `duplicate-invocation-detector-v1.md`。该草案定义本地 pre-secret detector 的匹配键、窗口、decision 和脱敏 evidence，但不改变当前 Runtime 行为，也不提供 provider 级去重保证。
+
 ## Retry Policy 草案
 
 ```yaml
