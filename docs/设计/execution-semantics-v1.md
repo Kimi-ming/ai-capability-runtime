@@ -83,33 +83,27 @@ HTTP 规范中，GET/HEAD/OPTIONS 是 safe；GET/HEAD/OPTIONS/PUT/DELETE 通常�
 | POST | no | no | 不自动重试，除非声明 idempotency |
 | PATCH | no | no | 不自动重试，除非声明 idempotency |
 
-## Manifest 扩展草案
+## Manifest reconcile hint
 
-V1 schema 可以先不实现，但设计应预留：
+V1 manifest schema 已支持 `execution.reconcile`，用于在 unknown outcome 后提示如何确认外部状态。该字段只生成恢复提示和 evidence，不自动 retry，不执行 provider lookup，也不改变 policy/consent 结果。
 
 ```yaml
 execution:
   method: POST
   url: https://api.github.com/repos/{{owner}}/{{repo}}/issues
   timeout_ms: 10000
-  effects:
-    kind: write
-    idempotency:
-      mode: provider_key
-      header: Idempotency-Key
-      key_template: "{{invocation_id}}"
-    retry:
-      automatic: false
-      retryable_status:
-        - 408
-        - 429
-        - 500
-        - 502
-        - 503
-        - 504
-    reconcile:
-      capability: github.search_issue_by_title
+  reconcile:
+    strategy: provider_lookup
+    hint: Search recent GitHub issues by title before retrying after an unknown timeout.
+    provider_request_id_field: headers.x-github-request-id
+    resource_ref_fields:
+      - body.issue_url
+      - body.id
+    retry_guidance: do_not_retry_until_reconciled
+    policy_effect: none
 ```
+
+`policy_effect` 必须是 `none`。`retry_guidance` 必须提醒调用方先 reconcile 再 retry，不能把未知状态写操作伪装成可安全重复。
 
 ## V1 决策
 

@@ -92,6 +92,19 @@ export interface CapabilityManifestProvenance {
   policyEffect: "none";
 }
 
+export interface CapabilityManifestExecutionReconcile {
+  strategy: "manual" | "provider_lookup";
+  hint: string;
+  provider_request_id_field?: string;
+  resource_ref_fields?: string[];
+  retry_guidance: "do_not_retry_until_reconciled";
+  policy_effect: "none";
+}
+
+export interface CapabilityManifestExecution extends Record<string, unknown> {
+  reconcile?: CapabilityManifestExecutionReconcile;
+}
+
 export interface CapabilityManifest {
   id: string;
   name: string;
@@ -103,7 +116,7 @@ export interface CapabilityManifest {
   output: Record<string, unknown>;
   auth: Record<string, unknown>;
   permissions: CapabilityPermission[];
-  execution: Record<string, unknown>;
+  execution: CapabilityManifestExecution;
   provenance?: CapabilityManifestProvenance;
   metadata: Record<string, unknown>;
 }

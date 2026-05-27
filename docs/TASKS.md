@@ -1293,7 +1293,27 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `docs/设计/duplicate-invocation-detector-v1.md`，定义 future Duplicate Invocation Detector V1 草案，覆盖 Runtime pipeline 位置、匹配键、匹配类型、默认窗口、decision/evidence、consent UX、audit/storage、retry/idempotency 关系、usage evidence 口径和未来测试计划。草案继续明确 OpenCap 不提供 exactly-once，detector 不跨机器去重，不替代用户确认、policy 或 provider reconcile。
-- [ ] T172 P2：Reconcile hint manifest field。
+- [x] T172 P2：Reconcile hint manifest field。
+  - 验收标准：
+    - Manifest schema 支持可选 `execution.reconcile` 字段，用于 unknown outcome 后恢复提示，不改变当前 Runtime 不自动 retry 的行为。
+    - `execution.reconcile` 至少定义 `strategy`、`hint`、`retry_guidance` 和 `policy_effect`；支持 provider request id field 和 resource ref fields。
+    - schema 只允许 `strategy: manual | provider_lookup`，`retry_guidance: do_not_retry_until_reconciled`，`policy_effect: none`，并拒绝未知字段或声明授权效果的值。
+    - `@opencap/spec` 导出 `CapabilityManifestExecutionReconcile` 和 `CapabilityManifestExecution` 类型。
+    - Manifest 规范、execution semantics、failure recovery runbook、测试策略和任务交接同步字段语义与验证方式。
+  - 验证方式：
+    - RED：`pnpm --filter @opencap/spec test -- index.test.ts` 先因 `policy_effect: allow` 被错误接受而失败。
+    - GREEN：`pnpm --filter @opencap/spec test -- index.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm --filter @opencap/spec lint`
+    - `pnpm --filter @opencap/spec test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：`packages/spec/schema/manifest.schema.json` 新增 `execution.reconcile` schema，支持 `manual` / `provider_lookup` 恢复提示、provider request id field、resource ref fields、固定 `retry_guidance: do_not_retry_until_reconciled` 和 `policy_effect: none`；`packages/spec/src/index.ts` 导出 manifest execution/reconcile 类型；`packages/spec/src/index.test.ts` 新增 2 个 schema 测试，覆盖合法 reconcile hint、拒绝 `policy_effect: allow` 和未知字段。Manifest 规范、execution semantics、failure recovery runbook、测试策略和 handoff 已同步；spec 测试数从 72 增至 74。
 - [ ] T175 P2：Composition context audit fields。
 - [ ] T176 P2：Composition profile RFC。
 - [ ] T177 P2：Step-level consent tests for composition。

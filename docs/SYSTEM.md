@@ -300,7 +300,7 @@ Governance Surface
 | 远程 OAuth 边界 | 清晰 | T163 已形成 RFC 草案，不进 V1 主路径 |
 | 执行语义 | 清晰 | T167 已落入类型、Result Envelope evidence 和 audit 字段 |
 | 重试与幂等 | 清晰 | T169 走 manifest RFC |
-| 失败恢复 | 清晰 | T172 增加 reconcile hint |
+| 失败恢复 | 清晰 | T172 已增加 `execution.reconcile` manifest hint |
 | 执行证据 | 清晰 | T173 接入 conformance record |
 | 组合边界 | 清晰 | T176 走 composition profile RFC |
 | 能力图 | 清晰 | T179 定义 graph metadata RFC |

@@ -208,6 +208,48 @@ describe("validateManifest", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("accepts reconcile hints for unknown outcome recovery", async () => {
+    const manifest = baseManifest();
+    (manifest.execution as Record<string, unknown>).reconcile = {
+      strategy: "provider_lookup",
+      hint: "Search recent GitHub issues by title before retrying after an unknown timeout.",
+      provider_request_id_field: "headers.x-github-request-id",
+      resource_ref_fields: ["body.issue_url", "body.id"],
+      retry_guidance: "do_not_retry_until_reconciled",
+      policy_effect: "none",
+    };
+
+    const result = await validateManifest(manifest, "fixture.yml");
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.manifest.execution.reconcile?.strategy).toBe("provider_lookup");
+    }
+  });
+
+  it("rejects reconcile hints that claim policy effect or unknown fields", async () => {
+    const manifestWithPolicyEffect = baseManifest();
+    (manifestWithPolicyEffect.execution as Record<string, unknown>).reconcile = {
+      strategy: "manual",
+      hint: "Check the provider dashboard before retrying.",
+      retry_guidance: "do_not_retry_until_reconciled",
+      policy_effect: "allow",
+    };
+
+    await expectInvalidField(manifestWithPolicyEffect, "/execution/reconcile/policy_effect");
+
+    const manifestWithUnknownField = baseManifest();
+    (manifestWithUnknownField.execution as Record<string, unknown>).reconcile = {
+      strategy: "manual",
+      hint: "Check the provider dashboard before retrying.",
+      retry_guidance: "do_not_retry_until_reconciled",
+      policy_effect: "none",
+      execute: true,
+    };
+
+    await expectInvalidField(manifestWithUnknownField, "/execution/reconcile/execute");
+  });
+
   it("accepts api_key header placement when a header name is declared", async () => {
     const manifest = baseManifest();
     (manifest.auth as Record<string, unknown>).placement = { type: "header", name: "X-API-Key" };

@@ -122,6 +122,8 @@ Check the external service or use a reconcile capability before retrying.
 - reconcile hint
 - provider request id if available
 
+Manifest 可以通过 `execution.reconcile` 提供恢复提示。该字段只能声明 `manual` 或 `provider_lookup` 策略、人工可读 hint、provider request id/resource ref 字段路径、`retry_guidance: do_not_retry_until_reconciled` 和 `policy_effect: none`。它不执行查询，不授权 retry，也不能替代 policy、consent 或 audit。
+
 ## 关联任务
 
 - T168：unknown outcome audit tests。

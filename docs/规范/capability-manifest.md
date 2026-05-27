@@ -140,6 +140,34 @@ execution:
 - 可选完整变量缺失或为 `null` 时省略该 body 字段。
 - Runtime 只会外发 `execution.body.fields` 显式声明的字段，不会默认发送完整 input。
 
+### Reconcile Hint
+
+当写操作可能出现 request 已发出但 outcome unknown 的情况时，可以用 `execution.reconcile` 声明恢复提示。该字段只帮助 Runtime、CLI、Console 或 reviewer 告诉用户如何确认外部状态，不提供授权、不自动 retry，也不执行 reconcile。
+
+```yaml
+execution:
+  method: POST
+  url: https://api.github.com/repos/{{owner}}/{{repo}}/issues
+  timeout_ms: 10000
+  reconcile:
+    strategy: provider_lookup
+    hint: Search recent GitHub issues by title before retrying after an unknown timeout.
+    provider_request_id_field: headers.x-github-request-id
+    resource_ref_fields:
+      - body.issue_url
+      - body.id
+    retry_guidance: do_not_retry_until_reconciled
+    policy_effect: none
+```
+
+规则：
+
+- `strategy` 目前支持 `manual` 和 `provider_lookup`。
+- `hint` 必须是人工可读、安全的恢复提示，不得包含 secret、token、生产日志或 provider raw response。
+- `provider_request_id_field` 和 `resource_ref_fields` 只声明从已脱敏 execution evidence 中读取的字段路径。
+- `retry_guidance` 必须是 `do_not_retry_until_reconciled`。
+- `policy_effect` 必须是 `none`；reconcile hint 不能绕过 policy、consent、quota/budget、outbound、secret resolver 或 audit。
+
 ## 元数据
 
 元数据帮助 Registry 评审者和用户评估 Capability。
