@@ -34,16 +34,22 @@ Future Cloud/Marketplace
 
 ## Paid Capability 元数据草案
 
+Paid Capability Manifest RFC 见 `../../rfcs/0019-paid-capability-manifest-v1.md`。该 RFC 定义 future `opencap.paid_capability.manifest.v1` metadata，并明确 paid metadata 只用于展示、review 和 future commerce profile 输入，不执行购买、扣费、结算或发票。
+
 ```yaml
 commerce:
+  profile: opencap.paid_capability.manifest.v1
   mode: free | paid | external
   pricing:
     unit: invocation
     amount: 0.02
     currency: USD
+    estimate_only: true
   settlement:
     provider: stripe
   requires_commerce_profile: true
+  policyEffect: none
+  billingEffect: none
 ```
 
 V1 schema 不实现该字段。它属于 future RFC。

@@ -42,6 +42,8 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T198 Usage event schema：新增 `packages/runtime/src/usage-event.ts` 和 `usage-event.test.ts`，导出 `USAGE_EVENT_SCHEMA`、`createUsageEventFromAuditEvent()` 和 usage event 类型。Helper 从 audit event 派生 `opencap.usage_event.v1` non-billing usage event，覆盖 blocked redaction、dry-run 分离、retryAttempt 不增加 user intent、revoked/deprecated lifecycle 标记和 sourceAuditHash；usage event 固定 `policyEffect=none`、`billingEffect=none`，不复制 input/output/credential redaction 字段。
 
+本轮继续完成 T202 Paid capability manifest RFC：新增 `rfcs/0019-paid-capability-manifest-v1.md`，定义 future `opencap.paid_capability.manifest.v1` metadata。RFC 区分 paid capability metadata、financial risk 和 usage evidence，明确 V1 不做 purchase、checkout、invoice、settlement、refund、dispute 或 payout；paid metadata 固定 `policyEffect=none`、`billingEffect=none`，不能改变 Runtime policy、risk、trust、quality、usage event 或 billing。
+
 本轮完成了项目完成度审查和自主开发推进：T124 Runtime 领域模型 public contract、T145 workspace package public exports、T268 Runtime Gate public contract、T269 Runtime Ledger storage contract、T270 Runtime Card schema contract、T273 Capability identity contract、T275 Capability authoring loop、T276 release maturity gate matrix、T131 `execution.body.fields` 渲染边界、T132 audit failure preflight、T133 outbound policy 私网阻断、T135 state dir precedence tests、T152 consent receipt audit fields、T160 credential descriptor schema tests、T161 least-privilege auth lint、T167 execution semantics evidence、T168 unknown outcome audit tests、T170 retry policy tests、T196 score cannot override policy tests、T199 quota/budget policy gates、T200 provider rate limit handling、T201 local abuse throttle、T204 financial consent/spend cap gate、T125 `opencap list` lifecycle/trust fields、T127 Host compatibility matrix、T134 CLI command snapshot tests、T136 MCP tool mapping contract tests、T137 CLI error exit code tests、T142 Host compatibility test records、T143 local metrics command draft、T154 Host compatibility evidence records、T156 MCP elicitation profile RFC、T157 A2A Agent Card mapping RFC、T163 Remote Runtime OAuth Profile RFC、T271 Interoperability evidence record schema、T126 executable release checklist、T129 Registry supply chain review workflow、T139 CI security baseline workflow、T140 Capability taxonomy registry guidance、T141 Capability review checklist PR flow、T144 RFC template、T147 Registry index signing RFC、T148 npm trusted publishing workflow draft、T195 Trust Card quality score integration、T272 Registry index/cache/sync RFC、T274 SLSA/Sigstore provenance metadata 预留、T116 术语表/文档索引维护、T128 威胁模型 Abuse Cases smoke tests、T138 privacy retention 文档 lint、T153 conformance suite skeleton、T155 Agentic abuse cases smoke tests、T162 credential lifecycle smoke/runbook 验证、T165 GitHub fine-grained token setup guide、T173 Execution evidence conformance record 和 T190 SECURITY.md private reporting 对齐均已落入代码或文档并验证。当前唯一明确产品/依赖阻塞项仍是 T070：选择并接入 MCP TypeScript SDK，需要确认依赖包名/版本并允许安装新 npm 依赖。
 
 已经完成的实现主线：
@@ -77,7 +79,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 `docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。`next_task.py` 现在能识别开放任务；T198 Usage event schema 已完成，T205 Usage export format 的直接依赖已解除。
 
-下一步推荐：`next_task.py` 当前选择 T202 Paid capability manifest RFC。T205 Usage export format 的依赖已满足，可在后续基于 T198 的 `opencap.usage_event.v1` schema 定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
+下一步推荐：`next_task.py` 当前选择 T203 Commerce profile RFC。T205 Usage export format 的依赖已满足，可在后续基于 T198 的 `opencap.usage_event.v1` schema 定义 JSONL/JSON export envelope、version、filter、redaction 和 compatibility rules。T070 仍保持 M0 阻塞，解除依赖选择和安装授权后再推进完整 MCP server。
 
 推荐第一个任务：
 
@@ -244,7 +246,7 @@ M5 / T205 P2：Usage export format
 
 如果要继续 strict `continuous-doc-dev`，下一轮先处理 T205。
 
-当前 next ready task：T202 P2：Paid capability manifest RFC。
+当前 next ready task：T203 P2：Commerce profile RFC。
 
 ## Secret Resolver V1 env provider 已实现
 

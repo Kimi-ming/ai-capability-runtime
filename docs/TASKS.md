@@ -1487,7 +1487,21 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `packages/runtime/src/usage-event.ts` 和 `usage-event.test.ts`，导出 `USAGE_EVENT_SCHEMA`、`createUsageEventFromAuditEvent()` 和 usage event 类型。Helper 从 audit event 派生 non-billing usage event，不复制 input/output/credential redaction 字段，保留 `sourceAuditHash`、dry-run 状态、retryAttempt 和 `intentCount=1`；Runtime 测试数从 277 增至 281。
-- [ ] T202 P2：Paid capability manifest RFC。
+- [x] T202 P2：Paid capability manifest RFC。
+  - 验收标准：
+    - 新增 Paid Capability Manifest Metadata V1 RFC，定义 future `opencap.paid_capability.manifest.v1` metadata。
+    - RFC 区分 paid capability metadata、financial risk 和 usage evidence，明确 V1 不做 purchase、checkout、invoice、settlement、refund、dispute 或 payout。
+    - RFC 固定 `policyEffect=none` 和 `billingEffect=none`，并规定 paid metadata 不能改变 Runtime policy、risk、trust、quality、usage event 或 billing。
+    - 付费能力与商业边界文档、文档入口、索引、体系蓝图和 handoff 链接到该 RFC。
+  - 验证：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `rfcs/0019-paid-capability-manifest-v1.md`，定义 future `commerce` manifest metadata、paid vs financial 边界、manifest review rules、usage event non-billing 边界、Runtime pipeline 边界、兼容迁移和 future tests。相关商业边界文档、文档入口、体系蓝图和 handoff 已同步。
 - [ ] T203 P2：Commerce profile RFC。
 
 ### 已完成但保留历史任务号

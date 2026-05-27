@@ -320,7 +320,7 @@ Governance Surface
 | 用量计量 | 清晰 | T198 已补 usage event schema；T205 继续补 export format |
 | 配额预算 | 清晰 | T199/T204 做执行前 gate |
 | 限流滥用 | 清晰 | T200/T201 处理 local/provider rate limit |
-| 商业边界 | 清晰 | T202/T203 走 future RFC |
+| 商业边界 | 清晰 | T202 已补 paid capability manifest RFC；T203 继续补 commerce profile RFC |
 | 用量证据 | 清晰 | T207 做 conformance tests |
 | Tool Projection | 清晰 | T209/T213 落入 MCP projection builder |
 | Prompt Surface | 清晰 | T210/T211 建立 metadata lint 和 negative tests |

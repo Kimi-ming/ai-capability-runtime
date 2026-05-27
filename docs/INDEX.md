@@ -33,6 +33,7 @@
 | [风险放大评审清单](社区/risk-amplification-review-checklist.md) | Registry PR 中识别跨能力组合、外发、destructive、financial 和 credential scope 风险放大 | Capability graph marker、Registry review 或组合风险规则变化时 |
 | [Compensation Capability 评审规则](社区/compensation-capability-review-rules.md) | Registry PR 中评审撤销、取消、退款、关闭和修正类补偿能力 | Compensation 语义、组合失败恢复或 Capability review 规则变化时 |
 | [Registry Graph Index V1 草案](生态/registry-graph-index-v1.md) | 定义 future graph index envelope、节点/边 entry、默认过滤和 cache 边界 | Capability graph index、Registry discovery 或组合风险 inspection 变化时 |
+| [Paid Capability Manifest Metadata V1 RFC](../rfcs/0019-paid-capability-manifest-v1.md) | 定义 future paid capability manifest metadata 和 non-billing 边界 | Paid metadata、commerce profile 或 usage/billing 边界变化时 |
 | [版本和兼容性策略](规范/versioning-and-compatibility.md) | Package、schema 和 Registry 兼容规则 | 版本、发布或公共契约变化时 |
 | [发布成熟度门禁](运营/release-readiness.md) | v0.1-v1.0 release maturity gate matrix | 发布阶段、hard gate、release notes 或发布承诺变化时 |
 | [Release Checklist](releases/release-checklist.md) | 发布前逐项操作和 evidence 记录格式 | 发布流程、验证命令或 release evidence 变化时 |
@@ -128,7 +129,8 @@
 8. [Registry Graph Index V1 草案](生态/registry-graph-index-v1.md)
 9. [风险放大评审清单](社区/risk-amplification-review-checklist.md)
 10. [Compensation Capability 评审规则](社区/compensation-capability-review-rules.md)
-11. [能力评审清单](社区/capability-review-checklist.md)
+11. [Paid Capability Manifest Metadata V1 RFC](../rfcs/0019-paid-capability-manifest-v1.md)
+12. [能力评审清单](社区/capability-review-checklist.md)
 
 ## 维护规则
 
