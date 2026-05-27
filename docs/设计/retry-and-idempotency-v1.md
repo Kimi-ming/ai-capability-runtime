@@ -98,6 +98,8 @@ evaluateHttpRetryPolicy(input)
 
 该 helper 只生成 retry decision / evidence，不在 HTTP executor 中执行自动 retry loop。它用于固定 V1 安全边界：默认不自动 retry；非幂等写操作返回 `non_idempotent_operation`；`unknown_after_timeout` 写操作返回 `unknown_outcome_requires_reconcile`；401/403 返回 `non_retryable_error`；显式 read-only retry policy 才能把 408/429/5xx 评估为 `retry_allowed`。provider idempotency key 只能以 `sha256:<prefix>` 形式出现在 decision evidence 中。
 
+Manifest 层 future profile 草案见 `../../rfcs/0016-retry-idempotency-manifest-profile-v1.md`。该 RFC 定义 `execution.retry` 和 `execution.idempotency` 字段草案，但不改变当前默认不自动 retry 的 Runtime 行为。
+
 ## Retry-After
 
 当 provider 返回 `Retry-After` 时，Runtime 可以把它记录为 recommendation。V1 不需要自动等待执行，但后续 retry engine 应尊重它。

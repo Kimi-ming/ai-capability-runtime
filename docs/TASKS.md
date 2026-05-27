@@ -1261,7 +1261,22 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：新增 `rfcs/0015-openapi-adapter-profile-v1.md`，定义 `opencap.openapi.adapter.v1` future profile，覆盖 OpenAPI operation 选择、Manifest draft 映射、schema 子集、server/security 处理、权限风险 review、Runtime 边界、安全隐私、兼容迁移和验证计划。`packages/adapters/openapi/README.md`、协议定位文档、文档入口和索引已同步，且继续明确 OpenAPI adapter 未实现、不能自动暴露整份 OpenAPI 文档为 MCP tools。
-- [ ] T169 P2：Retry/idempotency manifest RFC。
+- [x] T169 P2：Retry/idempotency manifest RFC。
+  - 验收标准：
+    - 新增 Retry/Idempotency Manifest Profile RFC，明确 retry/idempotency 是 manifest future profile，不改变当前 Runtime 默认不自动 retry 的行为。
+    - RFC 定义 manifest 字段草案：retry automatic/maxAttempts/backoff/retryableStatus，以及 idempotency mode/header/key source/payload binding/reconcile hint。
+    - RFC 明确写操作默认不自动 retry；POST/PATCH 只有 provider 文档明确支持 idempotency key 或条件请求时才可被视为 repeatable；timeout after request 进入 unknown/reconcile，不伪造成功或失败。
+    - RFC 明确 idempotency key 只能写入 executor-private request header，audit/evidence 只记录 hash，不保存 key 原文、payload 原文、secret 或 provider raw response。
+    - retry/idempotency 设计文档、文档入口和任务交接链接到 RFC。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：新增 `rfcs/0016-retry-idempotency-manifest-profile-v1.md`，定义 `opencap.retry_idempotency.manifest.v1` future profile，覆盖 `execution.retry`、`execution.idempotency`、provider key、payload binding、reconcile hint、unknown timeout、audit/evidence 脱敏、兼容迁移和验证计划。`docs/设计/retry-and-idempotency-v1.md`、文档入口和索引已同步，并继续明确当前 Runtime 默认不自动 retry、HTTP executor 不执行 retry loop。
 - [ ] T171 P2：Duplicate invocation detector 草案。
 - [ ] T172 P2：Reconcile hint manifest field。
 - [ ] T175 P2：Composition context audit fields。
