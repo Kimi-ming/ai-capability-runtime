@@ -304,7 +304,7 @@ Governance Surface
 | 执行证据 | 清晰 | T173 接入 conformance record |
 | 组合边界 | 清晰 | T176 走 composition profile RFC |
 | 能力图 | 清晰 | T179 定义 graph metadata RFC |
-| 多步执行 | 清晰 | T175/T178 增加 evidence chain |
+| 多步执行 | 清晰 | T175 已增加 composition context audit fields；T178 继续补 plan hash/evidence chain |
 | 组合失败恢复 | 清晰 | T182 定义 compensation review rules |
 | 组合调研 | 完成 | 后续 RFC 参考 |
 | Trust 模型 | 清晰 | T158 已补 Trust Card generation rules；T185 已补 transition helper/tests；T195 继续补 quality |

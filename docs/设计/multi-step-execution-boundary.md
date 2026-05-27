@@ -60,6 +60,8 @@ type CompositionPlan = {
 
 OpenCap 可以把 planHash 写入 audit，证明每一步属于同一计划。但 V1 不验证计划正确性。
 
+当前 Runtime audit event 已支持 `compositionContext`，包含 `compositionId`、`parentInvocationId`、`stepId`、`stepIndex`、`stepName`、`initiatedBy`、`planHash` 和 `policyEffect=none`。这些字段只做 evidence correlation；不能让 policy 自动 allow，不能替代 step-level consent，也不能保存 raw plan。
+
 ## Derived Input Evidence Chain
 
 当某一步的 input 来自上一步工具结果时，新的 invocation 不能继承上一步的授权结论。Runtime evidence 必须记录：

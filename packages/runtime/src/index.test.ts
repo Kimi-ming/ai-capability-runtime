@@ -14,6 +14,7 @@ import {
   confirmWithAudit,
   confirmationSummaryFromDataEgress,
   createConfirmationAuditEvent,
+  createCompositionContextEvidence,
   createConsentReceiptAuditEvidence,
   createDataEgressAuditEvent,
   createInputProvenanceEvidence,
@@ -1907,6 +1908,53 @@ describe("SQLite audit logger", () => {
         },
       ]);
       expect(JSON.stringify(recent)).not.toContain("ghp_secret_value");
+    } finally {
+      logger.close();
+    }
+  });
+
+  it("persists composition context audit evidence without raw plan content", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-composition-"));
+    const logger = new SqliteAuditLogger({ cwd, env: {} });
+
+    try {
+      await logger.record({
+        id: "evt-composition-context",
+        timestamp: "2026-05-27T00:00:00.000Z",
+        channel: "mcp",
+        capabilityId: "github.create_issue",
+        status: "executed",
+        policyDecision: "allow",
+        confirmationStatus: "approved",
+        reason: "HTTP execution succeeded.",
+        compositionContext: createCompositionContextEvidence({
+          compositionId: "cmp_release_update",
+          parentInvocationId: "inv_parent",
+          stepId: "create_issue",
+          stepIndex: 0,
+          stepName: "Create tracking issue",
+          initiatedBy: "host",
+          planHash: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        }),
+      });
+
+      const recent = await logger.recent(10);
+      expect(recent).toMatchObject([
+        {
+          capabilityId: "github.create_issue",
+          compositionContext: {
+            compositionId: "cmp_release_update",
+            parentInvocationId: "inv_parent",
+            stepId: "create_issue",
+            stepIndex: 0,
+            stepName: "Create tracking issue",
+            initiatedBy: "host",
+            planHash: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            policyEffect: "none",
+          },
+        },
+      ]);
+      expect(JSON.stringify(recent)).not.toContain("Create release plan with customer raw notes");
     } finally {
       logger.close();
     }

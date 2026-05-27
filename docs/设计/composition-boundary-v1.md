@@ -44,22 +44,24 @@ V1 可以做：
 - Compensation 也是 Capability invocation，不是隐式 rollback。
 - OpenCap 不为外部 Agent 的整体计划正确性背书。
 
-## Composition Context 草案
+## Composition Context audit evidence
 
-未来 Runtime 可以接受可选上下文：
+Runtime audit event 已支持可选 composition context evidence：
 
 ```ts
 type CompositionContext = {
   compositionId: string;
   parentInvocationId?: string;
+  stepId?: string;
   stepIndex?: number;
   stepName?: string;
   initiatedBy: 'host' | 'user' | 'runtime' | 'external_agent';
   planHash?: string;
+  policyEffect: 'none';
 };
 ```
 
-V1 可以先不实现，但 audit log 设计应避免以后无法扩展。
+这些字段只作为 audit correlation。`compositionId`、`stepId`、`planHash` 或上游 invocation 不能让下游 step 自动 allow，也不能替代 step-level consent。Runtime 不保存 raw plan 或上游 output 原文；若 input 来自上游工具结果，应继续使用 input provenance evidence 记录 digest 和 transformations。
 
 ## 组合层和 Runtime 层分工
 

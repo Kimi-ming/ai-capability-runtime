@@ -2368,6 +2368,7 @@ export class McpNoElicitationConfirmationHandler implements ConfirmationHandler 
 export type AuditInvocationStatus = "blocked" | "denied" | "executed" | "dry_run";
 export type AuditConsentDecision = "approved" | "rejected" | "unavailable" | "expired";
 export type AuditConsentSubject = "local_user" | "unknown";
+export type CompositionInitiatedBy = "host" | "user" | "runtime" | "external_agent";
 
 export interface AuditConsentReceiptEvidence {
   consentId: string;
@@ -2377,6 +2378,30 @@ export interface AuditConsentReceiptEvidence {
   consentSubject: AuditConsentSubject;
   consentInputHash?: string;
   consentPolicyRuleId?: string;
+}
+
+export interface CompositionContextEvidence {
+  compositionId: string;
+  parentInvocationId?: string;
+  stepId?: string;
+  stepIndex?: number;
+  stepName?: string;
+  initiatedBy: CompositionInitiatedBy;
+  planHash?: string;
+  policyEffect: "none";
+}
+
+export function createCompositionContextEvidence(input: Omit<CompositionContextEvidence, "policyEffect">): CompositionContextEvidence {
+  return {
+    compositionId: input.compositionId,
+    parentInvocationId: input.parentInvocationId,
+    stepId: input.stepId,
+    stepIndex: input.stepIndex,
+    stepName: input.stepName,
+    initiatedBy: input.initiatedBy,
+    planHash: input.planHash,
+    policyEffect: "none",
+  };
 }
 
 export interface AuditEvent {
@@ -2425,6 +2450,7 @@ export interface AuditEvent {
   consentPolicyRuleId?: string;
   inputProvenance?: InputProvenanceEvidence;
   policyTrace?: PolicyDecisionTraceV1;
+  compositionContext?: CompositionContextEvidence;
 }
 
 export interface AuditPreflightCheck {
@@ -2694,6 +2720,7 @@ interface AuditEventRow {
   consent_policy_rule_id: string | null;
   input_provenance_json: string | null;
   policy_trace_json: string | null;
+  composition_context_json: string | null;
 }
 
 const require = createRequire(import.meta.url);
@@ -2751,7 +2778,8 @@ CREATE TABLE IF NOT EXISTS invocations (
   consent_input_hash TEXT,
   consent_policy_rule_id TEXT,
   input_provenance_json TEXT,
-  policy_trace_json TEXT
+  policy_trace_json TEXT,
+  composition_context_json TEXT
 ) STRICT;
 `;
 
@@ -2798,6 +2826,7 @@ function ensureAuditSchema(database: DatabaseSync): void {
     ["consent_policy_rule_id", "TEXT"],
     ["input_provenance_json", "TEXT"],
     ["policy_trace_json", "TEXT"],
+    ["composition_context_json", "TEXT"],
   ];
 
   for (const [columnName, columnType] of additionalColumns) {
@@ -2880,6 +2909,32 @@ function parsePolicyTrace(value: string | null): PolicyDecisionTraceV1 | undefin
   }
 }
 
+function parseCompositionContext(value: string | null): CompositionContextEvidence | undefined {
+  if (value === null) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Partial<CompositionContextEvidence>;
+    if (typeof parsed.compositionId !== "string" || typeof parsed.initiatedBy !== "string" || parsed.policyEffect !== "none") {
+      return undefined;
+    }
+
+    return {
+      compositionId: parsed.compositionId,
+      parentInvocationId: typeof parsed.parentInvocationId === "string" ? parsed.parentInvocationId : undefined,
+      stepId: typeof parsed.stepId === "string" ? parsed.stepId : undefined,
+      stepIndex: typeof parsed.stepIndex === "number" ? parsed.stepIndex : undefined,
+      stepName: typeof parsed.stepName === "string" ? parsed.stepName : undefined,
+      initiatedBy: parsed.initiatedBy as CompositionInitiatedBy,
+      planHash: typeof parsed.planHash === "string" ? parsed.planHash : undefined,
+      policyEffect: "none",
+    };
+  } catch {
+    return undefined;
+  }
+}
+
 function auditEventFromRow(row: AuditEventRow): AuditEvent {
   return {
     id: row.id,
@@ -2927,6 +2982,7 @@ function auditEventFromRow(row: AuditEventRow): AuditEvent {
     consentPolicyRuleId: row.consent_policy_rule_id ?? undefined,
     inputProvenance: parseInputProvenance(row.input_provenance_json),
     policyTrace: parsePolicyTrace(row.policy_trace_json),
+    compositionContext: parseCompositionContext(row.composition_context_json),
   };
 }
 
@@ -2953,8 +3009,8 @@ export class SqliteAuditLogger implements AuditLogger {
           execution_provider_request_id, execution_idempotency_key_hash, execution_reconcile_hint, egress_decision, egress_data_classes_json,
           egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
           outbound_reason_code, consent_id, consent_decision, consent_decided_at, consent_channel, consent_subject,
-          consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json, composition_context_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         event.id,
@@ -3002,6 +3058,7 @@ export class SqliteAuditLogger implements AuditLogger {
         event.consentPolicyRuleId ?? null,
         event.inputProvenance === undefined ? null : stableJsonStringify(event.inputProvenance),
         event.policyTrace === undefined ? null : stableJsonStringify(event.policyTrace),
+        event.compositionContext === undefined ? null : stableJsonStringify(event.compositionContext),
       );
   }
 
@@ -3064,7 +3121,7 @@ export class SqliteAuditLogger implements AuditLogger {
                 execution_provider_request_id, execution_idempotency_key_hash, execution_reconcile_hint, egress_decision, egress_data_classes_json,
                 egress_target_origin, egress_matched_rule_id, egress_redacted_preview_json, outbound_decision, outbound_target_type,
                 outbound_reason_code, consent_id, consent_decision, consent_decided_at, consent_channel, consent_subject,
-                consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json
+                consent_input_hash, consent_policy_rule_id, input_provenance_json, policy_trace_json, composition_context_json
          FROM invocations
          ${whereSql}
          ORDER BY timestamp DESC, id DESC

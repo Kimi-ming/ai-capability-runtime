@@ -101,7 +101,18 @@ export interface CapabilityManifestExecutionReconcile {
   policy_effect: "none";
 }
 
+export interface CapabilityManifestExecutionBody {
+  type?: "json";
+  fields: Record<string, unknown>;
+}
+
 export interface CapabilityManifestExecution extends Record<string, unknown> {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  url?: string;
+  timeout_ms?: number;
+  headers?: Record<string, string>;
+  query?: Record<string, string>;
+  body?: CapabilityManifestExecutionBody;
   reconcile?: CapabilityManifestExecutionReconcile;
 }
 

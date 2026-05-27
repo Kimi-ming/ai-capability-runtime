@@ -218,6 +218,21 @@ HTTP execution audit event 会记录：
 
 这些字段来自 Runtime 生成的 execution semantics evidence。`secret_missing`、`audit_failed`、`outbound_blocked` 等请求前失败或阻断不会伪造 request start timestamp；请求发出后 timeout 会记录 `executionOutcome=unknown_after_timeout` 和 `executionRequestStartedAt`，但不会设置 `executionResponseReceivedAt`，避免把未知执行结果伪装成已收到响应。SQLite logger 会持久化这些字段并在打开既有数据库时补齐缺失列。
 
+## Composition Context Audit 实现状态
+
+Runtime audit event 已支持可选 `compositionContext` evidence，并通过 SQLite `composition_context_json` 持久化和查询恢复。字段包括：
+
+- `compositionId`。
+- `parentInvocationId`。
+- `stepId`。
+- `stepIndex`。
+- `stepName`。
+- `initiatedBy`。
+- `planHash`。
+- `policyEffect=none`。
+
+这些字段只用于跨 step 关联和后续组合 profile 证据链，不构成授权、不允许跳过 step-level policy/consent，也不保存 raw plan、用户自由文本计划或上游 output 原文。
+
 ## 脱敏规则
 
 字段名包含以下片段时默认脱敏：

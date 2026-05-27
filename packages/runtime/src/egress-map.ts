@@ -17,16 +17,9 @@ interface HttpBodyLike {
   fields?: Record<string, unknown>;
 }
 
-interface HttpExecutionLike {
-  method?: unknown;
-  url?: unknown;
-  timeout_ms?: unknown;
-  body?: HttpBodyLike;
-}
-
 export interface EgressMapManifestLike {
   id?: unknown;
-  execution?: HttpExecutionLike;
+  execution?: Record<string, unknown>;
 }
 
 const TEMPLATE_PATTERN = /{{\s*([A-Za-z0-9_-]+)\s*}}/g;
@@ -101,7 +94,10 @@ export function buildFieldLevelEgressMap(
     }
   }
 
-  for (const value of Object.values(execution?.body?.fields ?? {})) {
+  const body = execution?.body;
+  const bodyFields = typeof body === "object" && body !== null ? (body as HttpBodyLike).fields : undefined;
+
+  for (const value of Object.values(bodyFields ?? {})) {
     collectFromTemplate(fields, value, "body", classification);
   }
 

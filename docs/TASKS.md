@@ -1314,7 +1314,28 @@
     - `pnpm validate`
     - `git diff --check`
   - 完成记录：`packages/spec/schema/manifest.schema.json` 新增 `execution.reconcile` schema，支持 `manual` / `provider_lookup` 恢复提示、provider request id field、resource ref fields、固定 `retry_guidance: do_not_retry_until_reconciled` 和 `policy_effect: none`；`packages/spec/src/index.ts` 导出 manifest execution/reconcile 类型；`packages/spec/src/index.test.ts` 新增 2 个 schema 测试，覆盖合法 reconcile hint、拒绝 `policy_effect: allow` 和未知字段。Manifest 规范、execution semantics、failure recovery runbook、测试策略和 handoff 已同步；spec 测试数从 72 增至 74。
-- [ ] T175 P2：Composition context audit fields。
+- [x] T175 P2：Composition context audit fields。
+  - 验收标准：
+    - Runtime `AuditEvent` 支持可选 `compositionContext` evidence，字段包含 composition id、parent invocation id、step id/index/name、initiator、plan hash 和固定 `policyEffect: none`。
+    - `createCompositionContextEvidence()` 只生成脱敏 step/correlation metadata，不保存 raw plan、用户自由文本计划、上游 output 原文、secret 或 provider response。
+    - `SqliteAuditLogger` 能持久化、迁移并查询恢复 composition context 字段。
+    - composition context 只作为 evidence correlation，不能改变 policy、consent、quota/budget、outbound、secret resolver、execution 或 audit gate。
+    - 组合边界、多步执行边界、组合失败 runbook、audit log 文档、测试策略和 handoff 同步该字段语义。
+  - 验证方式：
+    - RED：`pnpm --filter @opencap/runtime test -- index.test.ts -t "composition context"` 先因 `createCompositionContextEvidence` 缺失而失败。
+    - GREEN：`pnpm --filter @opencap/runtime test -- index.test.ts -t "composition context"`
+    - `pnpm --filter @opencap/runtime test -- index.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm --filter @opencap/runtime lint`
+    - `pnpm --filter @opencap/runtime test`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/next_task.py .`
+    - JSON parser 校验 workspace package/schema `package.json`
+    - Ruby YAML parser 校验 `**/*.yml`、`.github/**/*.yml` 和 `.github/**/*.yaml`
+    - `pnpm validate`
+    - `git diff --check`
+  - 完成记录：`packages/runtime/src/index.ts` 新增 `CompositionContextEvidence`、`CompositionInitiatedBy` 和 `createCompositionContextEvidence()`，`AuditEvent` 新增可选 `compositionContext`；`SqliteAuditLogger` 新增 `composition_context_json` 列、迁移、写入和查询恢复。`packages/runtime/src/index.test.ts` 新增 composition context audit evidence 测试，确认 SQLite 可持久化 composition id、parent invocation、step metadata、initiator、plan hash 和 `policyEffect: none`，且不保存 raw plan 内容。相关组合边界、audit log、runbook、测试策略和 handoff 已同步；Runtime 测试数从 271 增至 272。
 - [ ] T176 P2：Composition profile RFC。
 - [ ] T177 P2：Step-level consent tests for composition。
 - [ ] T178 P2：Plan hash and evidence chain 草案。

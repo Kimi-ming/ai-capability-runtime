@@ -69,6 +69,8 @@ Composition audit evidence 应包含：
 - plan hash if provided
 - compensation relation if any
 
+当前 Runtime 可在 audit event 的 `compositionContext` 中持久化 composition id、parent invocation id、step id/index/name、initiator、plan hash 和 `policyEffect=none`。这些字段只用于关联失败步骤和后续人工恢复，不代表 workflow-level authorization。
+
 ## 关联任务
 
 - T175：composition context audit fields。
