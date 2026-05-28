@@ -64,6 +64,8 @@ quality_score:
 
 Trust Card 的 `quality` 字段现在承接这份完整结构，而不是只展示一个分数。带 quality score 的 Trust Card 必须在 limitations 中说明质量分只是解释性 evidence，没有 policy effect。Quality Score 只能进入 Trust Card 或 policy trace，不能参与授权匹配。
 
+`@opencap/spec` 还提供 `buildRegistryQualitySummary()`，用于读取本地 Registry 的 manifests、package lint、registry tests、least-privilege auth lint 和 capability advisories，并为每个 Capability 输出 Registry quality evidence summary。该 summary 会标记 lifecycle/advisory 状态、默认安装可信判断、阻断原因和 `policyEffect: none` 的 quality score；它不改变 trust level、policy decision 或 install allow/deny。
+
 ## 非目标
 
 - 不做商业排名。
@@ -75,4 +77,5 @@ Trust Card 的 `quality` 字段现在承接这份完整结构，而不是只展�
 
 - T194：quality score rubric implementation draft。
 - T195：Trust Card includes quality score。
+- T289：Registry quality summary report helper。
 - T196：score cannot override policy tests。

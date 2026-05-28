@@ -712,7 +712,7 @@
 
 ### 模块 M4：Registry、Trust、Lifecycle 和供应链
 
-- [ ] T289 P2：实现 Registry quality summary report。
+- [x] T289 P2：实现 Registry quality summary report。
   - 验收标准：
     - `@opencap/spec` 或 `@opencap/runtime` 提供 registry quality summary helper，读取 registry manifests/tests/advisories 并输出每个 Capability 的 quality evidence summary。
     - Summary 至少包含 manifest validation、package lint、registry tests、auth least-privilege lint、lifecycle/advisory status 和 quality score。
@@ -722,6 +722,7 @@
     - `pnpm --filter @opencap/spec test -- registry-quality-summary.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增 `buildRegistryQualitySummary()` 和 `opencap.registry_quality_summary.v1` 输出类型，读取 registry manifests、Capability package lint、registry tests、least-privilege auth lint 和 Capability advisories，为每个 Capability 输出 manifest/package/test/auth/lifecycle/advisory/quality evidence summary。Summary 固定 `policyEffect: "none"`，只产生 evidence，不改变 trust level、policy decision 或 install allow/deny；`http.request_demo` 会因 `OCAP-2026-0001` revoked advisory 和 `unsafe_by_default` metadata 被标记为 `defaultInstallTrusted: false`。新增 `packages/spec/src/registry-quality-summary.test.ts` 覆盖现有 5 个 registry Capability，spec 包测试数从 74 增至 75。
 
 - [ ] T290 P2：新增 `opencap registry report` 本地报告命令。
   - 验收标准：

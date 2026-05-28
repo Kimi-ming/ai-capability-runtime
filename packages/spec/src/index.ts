@@ -35,10 +35,11 @@ export type {
 } from "./authoring.js";
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { basename, extname, join } from "node:path";
+import { basename, dirname, extname, join } from "node:path";
 import YAML from "yaml";
 import { lintLeastPrivilegeAuth, type LeastPrivilegeAuthFinding } from "./auth-lint.js";
 import { lintModelVisibleMetadata, type ModelVisibleMetadataFinding } from "./metadata-lint.js";
+import { validateCapabilityPackage, type CapabilityPackageValidationIssue } from "./package-lint.js";
 
 export type RiskLevel =
   | "read_only"
@@ -181,6 +182,86 @@ export interface RegistryCapabilitySearchResults {
   results: RegistryCapabilitySearchResult[];
   excludedByLifecycle: RegistryCapabilitySearchResult[];
   invalid: ManifestValidationFailure[];
+}
+
+export const REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION = "opencap.registry_quality_summary.v1" as const;
+export const REGISTRY_QUALITY_SCORE_RUBRIC_VERSION = "opencap.quality_score.v1" as const;
+
+export type RegistryQualitySummarySchemaVersion = typeof REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION;
+export type RegistryQualityEvidenceStatus = "pass" | "fail";
+export type RegistryQualityAdvisoryStatus = "none" | CapabilityAdvisoryStatus;
+export type RegistryQualityScoreBand = "incomplete" | "experimental" | "listed" | "tested" | "verified";
+
+export interface RegistryQualityScoreDimensions {
+  manifest: number;
+  docs: number;
+  tests: number;
+  security: number;
+  maintenance: number;
+  compatibility: number;
+  evidence: number;
+}
+
+export interface RegistryQualityScore {
+  rubricVersion: typeof REGISTRY_QUALITY_SCORE_RUBRIC_VERSION;
+  total: number;
+  band: RegistryQualityScoreBand;
+  dimensions: RegistryQualityScoreDimensions;
+  generatedAt: string;
+  policyEffect: "none";
+}
+
+export interface RegistryQualityCheckSummary {
+  status: RegistryQualityEvidenceStatus;
+  issues: string[];
+}
+
+export interface RegistryQualityRegistryTestSummary extends RegistryQualityCheckSummary {
+  count: number;
+}
+
+export interface RegistryQualityLifecycleSummary {
+  status: CapabilityManifestLifecycleStatus | "active";
+  advisory?: string;
+}
+
+export interface RegistryQualityAdvisorySummary {
+  status: RegistryQualityAdvisoryStatus;
+  open: number;
+  ids: string[];
+  runtimeDefault?: CapabilityAdvisoryRuntimeDefault;
+}
+
+export interface RegistryCapabilityQualitySummary {
+  id: string;
+  category: string;
+  version: string;
+  manifestPath: string;
+  packageDir: string;
+  manifestValidation: RegistryQualityCheckSummary;
+  packageLint: RegistryQualityCheckSummary;
+  registryTests: RegistryQualityRegistryTestSummary;
+  authLeastPrivilege: RegistryQualityCheckSummary;
+  lifecycle: RegistryQualityLifecycleSummary;
+  advisory: RegistryQualityAdvisorySummary;
+  qualityScore: RegistryQualityScore;
+  defaultInstallTrusted: boolean;
+  blockingReasons: string[];
+  policyEffect: "none";
+}
+
+export interface RegistryQualitySummary {
+  schemaVersion: RegistryQualitySummarySchemaVersion;
+  registryRoot: string;
+  generatedAt: string;
+  capabilities: RegistryCapabilityQualitySummary[];
+  invalidManifests: ManifestValidationFailure[];
+  invalidAdvisories: CapabilityAdvisoryValidationFailure[];
+  policyEffect: "none";
+}
+
+export interface BuildRegistryQualitySummaryOptions {
+  generatedAt?: string;
 }
 
 let compiledManifestValidator: ValidateFunction | undefined;
@@ -726,6 +807,232 @@ export async function validateCapabilityAdvisoryPath(targetPath: string): Promis
     advisories,
     valid: results.filter((result): result is CapabilityAdvisoryValidationSuccess => result.ok),
     invalid: results.filter((result): result is CapabilityAdvisoryValidationFailure => !result.ok),
+  };
+}
+
+const REGISTRY_QUALITY_DIMENSION_WEIGHTS: RegistryQualityScoreDimensions = {
+  manifest: 15,
+  docs: 15,
+  tests: 20,
+  security: 20,
+  maintenance: 10,
+  compatibility: 10,
+  evidence: 10,
+};
+
+function registryQualityBand(total: number): RegistryQualityScoreBand {
+  if (total >= 90) {
+    return "verified";
+  }
+  if (total >= 75) {
+    return "tested";
+  }
+  if (total >= 60) {
+    return "listed";
+  }
+  if (total >= 40) {
+    return "experimental";
+  }
+  return "incomplete";
+}
+
+function clampRegistryQualityDimension(score: number, max: number): number {
+  if (!Number.isFinite(score)) {
+    return 0;
+  }
+  return Math.min(Math.max(Math.round(score), 0), max);
+}
+
+function calculateRegistryQualityScore(dimensions: RegistryQualityScoreDimensions, generatedAt: string): RegistryQualityScore {
+  const clamped: RegistryQualityScoreDimensions = {
+    manifest: clampRegistryQualityDimension(dimensions.manifest, REGISTRY_QUALITY_DIMENSION_WEIGHTS.manifest),
+    docs: clampRegistryQualityDimension(dimensions.docs, REGISTRY_QUALITY_DIMENSION_WEIGHTS.docs),
+    tests: clampRegistryQualityDimension(dimensions.tests, REGISTRY_QUALITY_DIMENSION_WEIGHTS.tests),
+    security: clampRegistryQualityDimension(dimensions.security, REGISTRY_QUALITY_DIMENSION_WEIGHTS.security),
+    maintenance: clampRegistryQualityDimension(dimensions.maintenance, REGISTRY_QUALITY_DIMENSION_WEIGHTS.maintenance),
+    compatibility: clampRegistryQualityDimension(dimensions.compatibility, REGISTRY_QUALITY_DIMENSION_WEIGHTS.compatibility),
+    evidence: clampRegistryQualityDimension(dimensions.evidence, REGISTRY_QUALITY_DIMENSION_WEIGHTS.evidence),
+  };
+  const total = Object.values(clamped).reduce((sum, score) => sum + score, 0);
+
+  return {
+    rubricVersion: REGISTRY_QUALITY_SCORE_RUBRIC_VERSION,
+    total,
+    band: registryQualityBand(total),
+    dimensions: clamped,
+    generatedAt,
+    policyEffect: "none",
+  };
+}
+
+function issueSummaries(issues: Array<ManifestValidationIssue | CapabilityPackageValidationIssue>): string[] {
+  return issues.map((issue) => `${issue.keyword ?? "issue"} ${issue.fieldPath}: ${issue.message}`);
+}
+
+function stringMetadata(manifest: CapabilityManifest, field: string): string | undefined {
+  const value = manifest.metadata[field];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function booleanMetadata(manifest: CapabilityManifest, field: string): boolean {
+  return manifest.metadata[field] === true;
+}
+
+function advisorySummaryForCapability(advisories: CapabilityAdvisory[], capabilityId: string): RegistryQualityAdvisorySummary {
+  const matching = advisories.filter((advisory) => advisory.capability === capabilityId);
+  const mostSevere = matching.find((advisory) => advisory.status === "revoked") ?? matching[0];
+
+  return {
+    status: mostSevere?.status ?? "none",
+    open: matching.length,
+    ids: matching.map((advisory) => advisory.id).sort(),
+    runtimeDefault: mostSevere?.actions.runtime_default,
+  };
+}
+
+function blockingReasonsForCapability(
+  manifest: CapabilityManifest,
+  lifecycle: RegistryQualityLifecycleSummary,
+  advisory: RegistryQualityAdvisorySummary,
+): string[] {
+  const reasons: string[] = [];
+
+  if (lifecycle.status === "revoked" || lifecycle.status === "yanked") {
+    reasons.push(`lifecycle:${lifecycle.status}`);
+  }
+  if (advisory.status === "revoked" || advisory.runtimeDefault === "deny") {
+    for (const advisoryId of advisory.ids) {
+      reasons.push(`advisory:${advisoryId}:${advisory.status}`);
+    }
+  }
+  if (booleanMetadata(manifest, "unsafe_by_default")) {
+    reasons.push("metadata:unsafe_by_default");
+  }
+
+  return [...new Set(reasons)].sort();
+}
+
+function defaultInstallTrustedFromEvidence(
+  checks: {
+    manifestValidation: RegistryQualityCheckSummary;
+    packageLint: RegistryQualityCheckSummary;
+    registryTests: RegistryQualityRegistryTestSummary;
+    authLeastPrivilege: RegistryQualityCheckSummary;
+  },
+  blockingReasons: string[],
+): boolean {
+  return checks.manifestValidation.status === "pass"
+    && checks.packageLint.status === "pass"
+    && checks.registryTests.status === "pass"
+    && checks.registryTests.count > 0
+    && checks.authLeastPrivilege.status === "pass"
+    && blockingReasons.length === 0;
+}
+
+function qualityDimensions(input: {
+  manifestValidation: RegistryQualityCheckSummary;
+  packageLint: RegistryQualityCheckSummary;
+  registryTests: RegistryQualityRegistryTestSummary;
+  authLeastPrivilege: RegistryQualityCheckSummary;
+  advisory: RegistryQualityAdvisorySummary;
+  manifest: CapabilityManifest;
+}): RegistryQualityScoreDimensions {
+  const hasDocs = input.packageLint.status === "pass";
+  const hasMaintainer = stringMetadata(input.manifest, "maintainer") !== undefined;
+  const hasLicense = stringMetadata(input.manifest, "license") !== undefined;
+  const securityPasses = input.authLeastPrivilege.status === "pass" && input.advisory.status !== "revoked" && input.advisory.runtimeDefault !== "deny";
+
+  return {
+    manifest: input.manifestValidation.status === "pass" ? 15 : 0,
+    docs: hasDocs ? 15 : 0,
+    tests: input.registryTests.status === "pass" && input.registryTests.count > 0 ? 20 : 0,
+    security: securityPasses ? 20 : 0,
+    maintenance: hasMaintainer && hasLicense ? 10 : hasMaintainer || hasLicense ? 5 : 0,
+    compatibility: 0,
+    evidence: input.manifestValidation.status === "pass" && input.packageLint.status === "pass" && input.registryTests.status === "pass" ? 10 : 0,
+  };
+}
+
+export async function buildRegistryQualitySummary(
+  registryRoot: string,
+  options: BuildRegistryQualitySummaryOptions = {},
+): Promise<RegistryQualitySummary> {
+  const generatedAt = options.generatedAt ?? new Date().toISOString();
+  const manifestValidation = await validateManifestPath(registryRoot);
+  const advisoryValidation = await validateCapabilityAdvisoryPath(registryRoot);
+  const validAdvisories = advisoryValidation.valid.map((result) => result.advisory);
+  const capabilities = await Promise.all(manifestValidation.valid.map(async (valid): Promise<RegistryCapabilityQualitySummary> => {
+    const manifest = valid.manifest;
+    const packageDir = dirname(valid.filePath);
+    const category = stringMetadata(manifest, "category") ?? basename(dirname(packageDir));
+    const authoring = await validateCapabilityAuthoringManifestFile(valid.filePath);
+    const packageLint = await validateCapabilityPackage(packageDir);
+    const registryTests = await validateRegistryTestPath(packageDir);
+    const authFindings = lintLeastPrivilegeAuth(manifest);
+    const manifestValidationSummary: RegistryQualityCheckSummary = {
+      status: authoring.ok ? "pass" : "fail",
+      issues: authoring.ok ? [] : issueSummaries(authoring.issues),
+    };
+    const packageLintSummary: RegistryQualityCheckSummary = {
+      status: packageLint.ok ? "pass" : "fail",
+      issues: packageLint.ok ? [] : issueSummaries(packageLint.issues),
+    };
+    const registryTestsSummary: RegistryQualityRegistryTestSummary = {
+      status: registryTests.invalid.length === 0 && registryTests.valid.length > 0 ? "pass" : "fail",
+      count: registryTests.valid.length,
+      issues: registryTests.invalid.flatMap((invalid) => issueSummaries(invalid.issues)),
+    };
+    const authLeastPrivilegeSummary: RegistryQualityCheckSummary = {
+      status: authFindings.length === 0 ? "pass" : "fail",
+      issues: authFindings.map((finding) => `least-privilege-auth-lint:${finding.rule} ${finding.path}: ${finding.message}`),
+    };
+    const lifecycle: RegistryQualityLifecycleSummary = {
+      status: manifest.lifecycle?.status ?? "active",
+      advisory: manifest.lifecycle?.advisory,
+    };
+    const advisory = advisorySummaryForCapability(validAdvisories, manifest.id);
+    const blockingReasons = blockingReasonsForCapability(manifest, lifecycle, advisory);
+    const qualityScore = calculateRegistryQualityScore(qualityDimensions({
+      manifestValidation: manifestValidationSummary,
+      packageLint: packageLintSummary,
+      registryTests: registryTestsSummary,
+      authLeastPrivilege: authLeastPrivilegeSummary,
+      advisory,
+      manifest,
+    }), generatedAt);
+
+    return {
+      id: manifest.id,
+      category,
+      version: manifest.version,
+      manifestPath: valid.filePath,
+      packageDir,
+      manifestValidation: manifestValidationSummary,
+      packageLint: packageLintSummary,
+      registryTests: registryTestsSummary,
+      authLeastPrivilege: authLeastPrivilegeSummary,
+      lifecycle,
+      advisory,
+      qualityScore,
+      defaultInstallTrusted: defaultInstallTrustedFromEvidence({
+        manifestValidation: manifestValidationSummary,
+        packageLint: packageLintSummary,
+        registryTests: registryTestsSummary,
+        authLeastPrivilege: authLeastPrivilegeSummary,
+      }, blockingReasons),
+      blockingReasons,
+      policyEffect: "none",
+    };
+  }));
+
+  return {
+    schemaVersion: REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION,
+    registryRoot,
+    generatedAt,
+    capabilities: capabilities.sort((left, right) => left.id.localeCompare(right.id)),
+    invalidManifests: manifestValidation.invalid,
+    invalidAdvisories: advisoryValidation.invalid,
+    policyEffect: "none",
   };
 }
 

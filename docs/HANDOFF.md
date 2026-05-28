@@ -12,15 +12,17 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T288：`opencap card` 新增 `--kind capability|trust`，默认继续输出 Capability Card；`--kind trust --json` 从本地已安装 Capability 生成 Runtime Trust Card，包含 trust level、maintainer、advisory summary、provenance、limitations 和固定 disclaimer。命令不读取 provider secret、不执行 Capability、不修改 state；非法 `--kind` 返回用户错误 exit `1` 且不打印 stack。`packages/cli/src/card-command.test.ts` 覆盖 Trust Card 输出、state 不变和非法 kind，CLI 包测试数从 10 增至 12。
 
-本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入、T285 ledger export、T286 自动化 MCP stdio smoke、T287 Host evidence 文档和 T288 Trust Card CLI 均已完成；后续依次推进 Registry quality report、release evidence、doctor JSON 和 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
+本轮继续完成 T289：`@opencap/spec` 新增 `buildRegistryQualitySummary()`，可读取 registry manifests、Capability package lint、registry tests、least-privilege auth lint 和 Capability advisories，为每个 Capability 输出 manifest/package/test/auth/lifecycle/advisory/quality evidence summary。Summary 固定 `policyEffect: "none"`，不改变 trust level、policy decision 或 install allow/deny；revoked `http.request_demo` 会被标记为 `defaultInstallTrusted: false`。新增 `packages/spec/src/registry-quality-summary.test.ts` 覆盖现有 5 个 registry Capability，spec 包测试数从 74 增至 75。
+
+本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入、T285 ledger export、T286 自动化 MCP stdio smoke、T287 Host evidence 文档、T288 Trust Card CLI 和 T289 Registry quality summary helper 均已完成；后续依次推进 release evidence、doctor JSON 和 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
 
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready 是 T289 P2：实现 Registry quality summary report。
+下一项 ready 是 T290 P2：新增 `opencap registry report` 本地报告命令。
 
-已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。对应早期实施任务已陆续完成；当前连续开发队列以 `docs/TASKS.md` 中 T289 及后续 ready 任务为准。
+已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。对应早期实施任务已陆续完成；当前连续开发队列以 `docs/TASKS.md` 中 T290 及后续 ready 任务为准。
 
 本轮已把产品定位和架构完善方向同步到正式架构文档：`docs/ARCHITECTURE.md` 明确 OpenCap 是 AI Host 和真实 API 之间的本地优先 Capability Runtime，不是 Agent、聊天入口、模型路由或 marketplace；`docs/规划/v1-architecture.md` 已补充产品分层、Runtime Kernel 边界、gate 顺序、Result Envelope 边界和 Architecture Convergence 实施顺序。
 

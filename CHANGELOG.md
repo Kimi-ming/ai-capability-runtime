@@ -112,6 +112,7 @@
 - 结果信封、输出校验、工具结果净化、结果来源和结果投递边界文档。
 - 输入数据治理、数据分类、数据外发策略、输入来源和数据最小化文档。
 - Runtime input classification engine，导出 `classifyInput`，识别 secret_like、pii、internal_url、source_code、financial_data 和 free_text_unknown，并生成 redacted preview。
+- `@opencap/spec` 新增 Registry quality summary helper，读取 registry manifests、package lint、registry tests、least-privilege auth lint 和 advisories，为每个 Capability 输出 quality evidence summary 与 `policyEffect: none` 的 quality score。
 - Runtime sensitive input classification fixtures，覆盖 secret-like、pii、internal URL、source/config 和 large free text unknown，并验证 redacted preview 不含敏感原文。
 - Runtime Data Egress Policy Gate，默认阻断 `secret_like` 和 `internal_url` 外发，要求 `pii/source_code` 到 `external_send` 进入确认，并在 deny 时禁止 secret resolution 和执行。
 - Runtime Data Egress negative tests，覆盖 private IP、metadata service、`.env` secret assignment、stack trace 和 source diff 外发边界。
