@@ -214,6 +214,8 @@ opencap release package report --package <package> --pack-json <pack-json> --jso
 
 该 report 用于确认 package metadata、候选包 allowlist、tarball file count/size 和 forbidden files。它不发布 package、不读取 npm token、不替代 workflow dry-run 或 trusted publishing；如果存在 blocker，应先修复或在 release evidence 中记录为阻断。
 
+Workflow dry-run 前的顺序固定为：package `files` allowlist -> 本地 pack dry-run smoke -> package readiness report -> workflow npm publish dry-run。当前 `@opencap/spec` 和 `@opencap/cli` 仍保持 `private: true`，因此 readiness report 会保留发布 blocker；这不是 workflow 故障，而是正式 release decision 前的安全闸门。
+
 ## 后续实现任务
 
 - 创建受保护的 `npm-production` environment。

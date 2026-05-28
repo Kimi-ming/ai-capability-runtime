@@ -202,12 +202,15 @@ release_evidence:
 
 npm package readiness evidence 核对步骤：
 
+- [ ] 确认 package `files` allowlist 已声明且只覆盖发布所需文件；候选包当前应先保持 `private: true`，直到发布者明确解除。
 - [ ] 运行 `pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>`，只生成本地 pack 摘要，不发布 package。
 - [ ] 运行 `opencap release package report --package <package> --pack-json <pack-json> --json`。
 - [ ] Evidence 记录 `opencap.npm_package_readiness.v1` 的 package、version、blockers、warnings、pack evidence、forbidden files 和 `policyEffect: none`。
 - [ ] 如果 `blockers` 非空，不能发布该 npm package；可把 report 作为 blocker evidence 写入 release notes/handoff。
 - [ ] 如果没有运行 pack dry-run，必须把 `pack_evidence: not-run` 写入 evidence，不能伪造 tarball 内容审查已完成。
 - [ ] Report 不包含 token、`NPM_TOKEN`、`NODE_AUTH_TOKEN`、`.env` 内容、`opencap.local/` 内容、数据库内容、provider raw response 或私有日志正文。
+
+顺序必须是：package `files` allowlist -> 本地 `npm pack --dry-run --json` -> `opencap release package report` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。前一步存在 blocker 时不得进入后一步。
 
 如果 release 涉及 npm package，发布者应先手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，记录 package、version、workflow run URL、dry-run 结果和 `real_publish: false` 边界。真实 npm 发布仍需要 npm trusted publisher、受保护的 `npm-production` environment 和人工批准；dry-run evidence 不能写成 npm package 已发布。
 

@@ -81,6 +81,8 @@ Alpha 候选 package 必须声明 `files` allowlist，先收窄 npm pack 输入�
 | `@opencap/spec` | `dist`, `schema`, `package.json` | 仍为 `private: true`，不得发布 |
 | `@opencap/cli` | `dist`, `package.json` | 仍为 `private: true`，不得发布 |
 
+发布前顺序固定为：确认 `files` allowlist -> 本地 `npm pack --dry-run --json` -> `opencap release package report` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。`private: true` 是当前刻意保留的 blocker，不应在没有 maintainer release decision、release tag、CI/release notes 和 npm trusted publisher 准备前移除。
+
 ## 不发布条件
 
 - CLI 命令和 README 不一致。

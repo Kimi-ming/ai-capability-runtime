@@ -1594,7 +1594,7 @@
     - `pnpm validate`
   - 完成记录：`packages/cli/src/release-package-report-command.test.ts` 新增本地 `npm pack --dry-run --json` smoke，针对 `@opencap/spec` 和 `@opencap/cli` 使用临时 npm cache 生成 pack 摘要，再喂给 `opencap release package report --pack-json`。Smoke 验证 pack evidence 为 `provided`、file count 大于 0、forbidden files 为空，并确认当前 `private: true` 仍作为发布 blocker 记录；不发布 package、不触网、不读取 npm token。Pack smoke 发现 spec 的 `dist` 曾包含测试产物，本轮已将 `packages/spec/tsconfig.json` 排除 `src/**/*.test.ts`，并新增 `packages/spec/.npmignore` 兜底排除 stale `dist/**/*.test.*`。CLI 包测试数从 28 增至 29。
 
-- [ ] T309 P2：把 package files/pack smoke 纳入 release evidence 文档。
+- [x] T309 P2：把 package files/pack smoke 纳入 release evidence 文档。
   - 验收标准：
     - `docs/releases/release-checklist.md` 说明 package `files` allowlist、pack dry-run smoke 和 readiness report 三者的顺序。
     - V1 alpha evidence 样例说明当前 package publish 仍 blocked by `private: true`，但 pack content allowlist/smoke 可作为后续 release evidence。
@@ -1604,6 +1604,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已说明 package `files` allowlist、本地 `npm pack --dry-run --json`、`opencap release package report`、GitHub workflow npm publish dry-run 和真实发布审批的顺序，且前一步存在 blocker 时不得进入后一步。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 已说明当前 release evidence 中 package readiness 仍为 `not-run`，仓库已有 automated pack smoke 但不等于某次 release evidence 已采集；当前 `@opencap/spec` / `@opencap/cli` 保留 `private: true`，因此 package publish 仍被预期 blocker 阻断。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 package files allowlist、pack smoke 和 readiness report 边界。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
