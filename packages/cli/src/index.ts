@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { access, readFile, stat } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { Command } from "commander";
 import { isAbsolute, resolve } from "node:path";
 import YAML from "yaml";
-import { formatManifestValidationIssue, validateManifestPath } from "@opencap/spec";
+import { formatManifestValidationIssue, validateManifestPath, type CapabilityManifest } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
   InstallCapabilityError,
@@ -15,6 +15,8 @@ import {
   CliConfirmationHandler,
   blockedResultEnvelope,
   buildHttpDryRunPlan,
+  createCapabilityCard,
+  createCapabilityIdentity,
   createCapabilityLifecycleWarning,
   createConfirmationAuditEvent,
   createConsentReceiptAuditEvidence,
@@ -35,8 +37,12 @@ import {
   simulatePolicyDiff,
   validatePolicyYml,
   type CapabilityLifecycleWarning,
+  type CapabilityLifecycleState,
+  type InstalledCapability,
+  type TrustSummary,
   type PolicyDecision,
   type PolicySimulationScenario,
+  type RiskSummary,
   type ResultEnvelopeV1,
 } from "@opencap/runtime";
 
@@ -406,6 +412,80 @@ function trustLevelFromMetadata(metadata: Record<string, unknown>): string | und
   return typeof metadata.trust_level === "string" ? metadata.trust_level : undefined;
 }
 
+const TRUST_LEVELS = new Set<TrustSummary["level"]>([
+  "unverified",
+  "listed",
+  "tested",
+  "maintainer_verified",
+  "official",
+]);
+
+function trustSummaryFromManifest(manifest: CapabilityManifest): TrustSummary | undefined {
+  const trustLevel = trustLevelFromMetadata(manifest.metadata);
+
+  if (trustLevel === undefined || !TRUST_LEVELS.has(trustLevel as TrustSummary["level"])) {
+    return undefined;
+  }
+
+  return { level: trustLevel as TrustSummary["level"] };
+}
+
+const RISK_ORDER: Array<CapabilityManifest["permissions"][number]["risk"]> = [
+  "read_only",
+  "write",
+  "external_send",
+  "destructive",
+  "financial",
+  "code_execution",
+  "secret_access",
+];
+
+function riskSummaryFromManifest(manifest: CapabilityManifest): RiskSummary {
+  const risks = new Set(manifest.permissions.map((permission) => permission.risk));
+  const highestRisk = [...RISK_ORDER].reverse().find((risk) => risks.has(risk)) ?? "unknown";
+
+  return {
+    highestRisk,
+    requiresConfirmation: manifest.permissions.some((permission) => permission.confirmation !== "allow"),
+    permissions: manifest.permissions,
+  };
+}
+
+function sha256Digest(value: string): string {
+  return `sha256:${createHash("sha256").update(value).digest("hex")}`;
+}
+
+async function manifestDigest(manifestPath: string): Promise<string> {
+  return sha256Digest(await readFile(manifestPath, "utf8"));
+}
+
+async function createCapabilityCardForInstalled(capability: InstalledCapability) {
+  const installPathStatus = await stat(capability.installPath);
+
+  return createCapabilityCard({
+    capability: {
+      identity: createCapabilityIdentity({
+        manifest: capability.manifest,
+        packagePath: capability.installPath,
+        manifestPath: capability.manifestPath,
+        manifestDigest: await manifestDigest(capability.manifestPath),
+        lifecycle: capability.manifest.lifecycle?.status as CapabilityLifecycleState | undefined,
+      }),
+      manifest: capability.manifest,
+      install: {
+        installedAt: installPathStatus.mtime.toISOString(),
+        source: "registry",
+        sourceRef: capability.id,
+      },
+      trust: trustSummaryFromManifest(capability.manifest),
+      derived: {
+        riskSummary: riskSummaryFromManifest(capability.manifest),
+        modelVisibleSummary: capability.manifest.description,
+      },
+    },
+  });
+}
+
 async function runCliAction(action: () => Promise<void>, fallbackMessage: string): Promise<void> {
   try {
     await action();
@@ -521,6 +601,35 @@ program
       printLifecycleWarning(capability.lifecycleWarning);
     }
   }, "Failed to list installed capabilities"));
+
+program
+  .command("card")
+  .argument("<id>", "Installed Capability id")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .description("Generate a local Capability Card for an installed Capability.")
+  .action((id: string, options: { stateDir?: string; json?: boolean }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const loaded = await loadInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
+    const capability = loaded.capabilities.find((installed) => installed.id === id);
+
+    if (capability === undefined) {
+      throw new CliUserInputError(`Installed capability not found: ${id}`);
+    }
+
+    const card = await createCapabilityCardForInstalled(capability);
+
+    if (options.json) {
+      console.log(JSON.stringify(card, null, 2));
+      return;
+    }
+
+    console.log(`Capability Card ${card.capability.id}@${card.capability.version}`);
+    console.log(`schema: ${card.schemaVersion}`);
+    console.log(`risk: ${card.risk.highestRisk}`);
+    console.log(`auth: ${card.auth.provider ?? card.auth.type ?? "none"} ${card.auth.placement}`);
+    console.log(`credential: redacted`);
+  }, `Failed to generate Capability Card for ${id}`));
 
 
 

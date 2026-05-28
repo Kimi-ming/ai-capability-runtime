@@ -1,10 +1,12 @@
 # 当前状态交接
 
-更新时间：2026-05-27
+更新时间：2026-05-28
 
 ## 当前阶段
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
+
+本轮在任务队列清空后新增并完成 T282：`opencap card <id> --json`。CLI 现在可以从本地已安装 Capability 生成脱敏 `opencap.card.v1` Capability Card JSON，复用 Runtime Card schema，包含 capability identity、risk、permissions、auth redaction summary、install summary 和 manifest digest evidence；该命令不读取 provider secret、不执行 Capability、不写审计。新增 `packages/cli/src/card-command.test.ts` 覆盖已安装输出和未安装用户错误，CLI 包测试数从 5 增至 7。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。下一步应先评审该设计，再进入实施计划；实施顺序建议为 T070 MCP server 闭环、T198 Usage event schema、T206 quota/rate problem details、T205 usage export format、T207 usage evidence conformance tests。
 
@@ -74,7 +76,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 主要包状态：
 
 - `@opencap/spec` 有 schema、类型、manifest loader/validator API、Capability authoring loop contract、registry test 校验、schema JSON public subpath export、conformance suite skeleton、`api_key` auth placement 和 credential descriptor 约束测试、model-visible metadata lint、privacy retention doc lint、credential lifecycle runbook lint、GitHub fine-grained token guide lint、SECURITY.md private reporting lint、least-privilege auth lint、authoring manifest validation 和 prompt-surface negative fixtures。
-- `@opencap/cli` 的 `validate`、`install`、`list`、`doctor`、`logs` 已接入真实逻辑；`list` 已输出 lifecycle/trust/maintainer/license/status 基础字段；`command-snapshot.test.ts` 已锁定 validate/list/logs/decision-log/policy validate 的稳定 stdout/stderr/exit code；`error-exit-code.test.ts` 已覆盖用户可修正错误 exit `1`；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；`serve --mcp` 已启动最小 stdio MCP server；package public surface 保持 bin-only。
+- `@opencap/cli` 的 `validate`、`install`、`list`、`card`、`doctor`、`logs` 已接入真实逻辑；`list` 已输出 lifecycle/trust/maintainer/license/status 基础字段；`card` 已输出脱敏 Capability Card JSON；`command-snapshot.test.ts` 已锁定 validate/list/logs/decision-log/policy validate 的稳定 stdout/stderr/exit code；`error-exit-code.test.ts` 已覆盖用户可修正错误 exit `1`；`card-command.test.ts` 已覆盖 Capability Card 输出和未安装错误；`invoke` 已支持 dry-run、真实 HTTP 执行和 Result Envelope 输出；`serve --mcp` 已启动最小 stdio MCP server；package public surface 保持 bin-only。
 - `@opencap/runtime` 有 Runtime Kernel public contract 类型、Runtime Gate public contract、Runtime Ledger storage contract、Runtime Card schema contract、Capability identity contract、execution semantics evidence 类型/helper、unknown timeout audit evidence、retry policy decision helper、provider rate limit evidence、quota/rate Problem Details helper、local abuse throttle gate、financial consent/spend cap gate、quality score rubric、Trust Card quality score evidence、quality score policy trace boundary、quota/budget pre-secret gate helper 和 GateDecision 语义 helper、本地 state dir 初始化和 precedence tests、install/list/load installed capabilities、policy parser、Policy Engine、Confirmation Handler、consent receipt audit fields、Secret Resolver V1 env provider、credential audit evidence、credential lifecycle smoke、custom header placement audit evidence、confirmation egress summary、input provenance audit evidence、field-level egress map、derived input evidence chain、input minimization、redacted egress preview、dry-run egress preview、internal URL/source/config egress negative tests、Data Egress Policy Gate、egress decision audit fields、内存/SQLite Audit Logger、audit preflight、outbound policy gate、HTTP dry-run plan、HTTP executor、Threat/Agentic Abuse Case smoke tests 和 package export map 测试。
 - `@opencap/mcp` 有 tool name 映射、冲突检测、tools/list 投影、tools/call 路由、MCP tool mapping contract snapshots 和稳定的 confirmation_required 结果格式；MCP Host 手动测试指南已补齐；Registry manifest CI 已接入；Capability PR 评审指南已新增；Registry README 已补齐；GitHub Issue/PR templates 已补齐；slack.send_message 示例 Capability 已新增；token passthrough 禁止测试已补齐；最小 outbound policy 设计已补强；审计日志隐私分级已补齐；威胁模型矩阵已补强；pnpm workspace 全量验证已通过；单元测试基础设施现状已文档化；临时目录测试工具已补齐；CLI 端到端 smoke test 已补齐；README 快速开始已同步真实命令；第一次贡献教程已新增；V1 Runtime 主路径架构图已补齐；alpha release checklist 已新增；CHANGELOG 已知缺口已校准；版本兼容策略已补强；MCP Tool Projection builder 已实现；model-visible metadata lint 和 prompt-surface negative fixtures 和 tool projection hash/evidence 和 Runtime-generated risk summary 和 Discovery Profile V1 RFC 和 Selection Evidence record 和 Capability Review model-visible text 检查和 tool result prompt-surface sanitizer 草案和 Host tool metadata compatibility records 和 Result Envelope V1 builder 和 output schema validation 和 MCP structuredContent adapter 和 Tool Result Sanitizer 和 Result provenance/evidence 和 oversized result handling 和 Host result compatibility records 和 Output Selector V1 RFC 和 Resource Delivery Profile V1 RFC 和 Result sanitizer negative fixtures 和 Taint label tests 和 CLI result envelope output 和 Result Envelope public type exports 和 input classification engine、sensitive input classification fixtures 和 Data Egress Policy Gate 已实现。
 - `@opencap/sdk` 暂缓实现。
@@ -83,7 +85,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198 和 T205 均已完成；当前没有 ready 开放任务。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205 和 T282 均已完成；当前没有 ready 开放任务。
 
 下一步推荐：`next_task.py` 当前进入 Handoff 状态。建议新增下一批 ready 任务，或按 `docs/教程/connect-mcp-host.md` 补 Claude Desktop/Cursor 真实 Host smoke evidence。
 
@@ -91,7 +93,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T128/T129/T130/T131/T132/T133/T134/T135/T136/T137/T138/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T153/T154/T155/T156/T157/T158/T159/T160/T161/T162/T163/T164/T165/T167/T168/T170/T173/T185/T186/T187/T188/T189/T190/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T070、T146、T169、T171、T172、T175、T176、T177、T198、T205、T206 和 T207 已完成并验证；当前无 ready 开放任务。
+- 当前状态：T070、T146、T169、T171、T172、T175、T176、T177、T198、T205、T206、T207 和 T282 已完成并验证；当前无 ready 开放任务。
 
 ## 最近验证
 

@@ -19,13 +19,12 @@
 
 ## 当前完成度快照
 
-截至 2026-05-27，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP SDK server wiring、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests、CLI user-error exit code tests 和 usage export format。最近一次验证通过 MCP/CLI focused build/test、`pnpm validate`、`pnpm build`、`pnpm lint` 和 `pnpm test`。
+截至 2026-05-28，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP SDK server wiring、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests、CLI user-error exit code tests、CLI Capability Card output 和 usage export format。最近一次验证通过 MCP/CLI focused build/test、`pnpm validate`、`pnpm build`、`pnpm lint` 和 `pnpm test`。
 
 当前主要缺口：
 
 - `opencap serve --mcp` 已接入最小 stdio server；真实 Host smoke 仍需按 `docs/教程/connect-mcp-host.md` 记录。
-- V1 需要把 lifecycle warnings、Card 输出命令和具体 ledger writer/迁移策略继续落到类型、测试和实现里。
-- CLI 还缺 command snapshot、stdout/stderr、exit code 细粒度测试。
+- V1 需要把具体 ledger writer/迁移策略继续落到类型、测试和实现里。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
 - Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
 
@@ -392,6 +391,19 @@
   - 完成记录：新增 `packages/runtime/src/financial-consent-spend-gate.ts` 和 `financial-consent-spend-gate.test.ts`，导出 `evaluateFinancialConsentSpendGate()`。helper 对非 financial risk 直接 allow；financial risk 在没有 approved consent 时返回 `ask`，即使 trust/quality 很高也不能自动放行；approved consent 后仍复用本地 budget gate 检查 spend cap，超额 deny 会在 pre-secret 阶段阻断。`evaluateQuotaBudgetGate()` 同步补齐 budget warn evidence。Runtime 测试数从 231 增至 235。
 
 ### 模块 M3：CLI、MCP 和 Host 互操作
+
+- [x] T282 P1：实现 `opencap card` Capability Card 输出命令。
+  - 验收标准：
+    - CLI 提供 `opencap card <id> --state-dir <path> --json`，从本地已安装 Capability 生成 `opencap.card.v1` Capability Card JSON。
+    - 命令必须复用 Runtime Card schema，不输出 secret 原文，不读取 provider secret，也不执行 Capability。
+    - 未安装 Capability 返回用户错误 exit `1`，stderr 给出清晰错误，不打印 stack。
+    - 输出包含 capability identity、risk、permissions、auth redaction summary、install summary 和 generatedFrom evidence。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- card-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+    - `pnpm lint`
+  - 完成记录：新增 `packages/cli/src/card-command.test.ts`，覆盖已安装 Capability 输出脱敏 `opencap.card.v1` JSON，以及未安装 Capability 作为用户错误 exit `1`。`packages/cli/src/index.ts` 新增 `opencap card <id> --state-dir <path> --json`，从本地 installed manifest 生成 Runtime Capability Card，包含 identity、risk、permissions、auth redaction summary、install summary 和 manifest digest evidence；命令不读取 provider secret、不执行 Capability、不写审计。CLI 包测试数从 5 增至 7。
 
 - [x] T125 P1：在 `opencap list` 输出 Capability lifecycle/trust card 基础字段。
   - 验收标准：
