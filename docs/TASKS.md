@@ -1495,6 +1495,41 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap metrics capabilities --state-dir <path> [--json]` 和 `opencap metrics security --state-dir <path> [--json]`。Capabilities report 按 Capability 输出 invocation total、status counts、policy decision counts、error rate、duration p50/p95 和 last seen；Security report 输出 denied、confirmation required、outbound blocked、data egress denied、secret missing 和 audit preflight failed 汇总。两个命令只从 SQLite audit metadata 派生，不输出 input/output、credential value、provider raw response、Authorization/Cookie 或 URL query value。`docs/运营/observability-metrics-v1.md`、`docs/TESTING.md` 和 README 已同步已实现边界；`packages/cli/src/metrics-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 22 增至 24。
 
+- [ ] T301 P1：新增 npm publish dry-run workflow。
+  - 验收标准：
+    - 新增 `.github/workflows/npm-publish.yml`，只支持 `workflow_dispatch`，默认 `dry_run: true`，不在 push/pull_request/schedule 自动发布。
+    - Workflow 只允许 alpha 候选包：`@opencap/spec` 和 `@opencap/cli`；默认不发布 runtime/mcp/sdk。
+    - Workflow 使用最小权限：`contents: read`，发布预留 `id-token: write`，不使用长期 `NPM_TOKEN` 或 `secrets.NPM_TOKEN`。
+    - dry-run 路径运行 install、validate、test、build 和 `pnpm --filter <package> publish --dry-run --provenance --access public`；不得存在无 `--dry-run` 的 `npm publish` / `pnpm publish` 步骤。
+    - `docs/运营/npm-trusted-publishing-workflow.md`、`docs/运营/package-publishing-v1.md` 和 release checklist 同步 workflow 边界，明确真实发布仍需要 npm trusted publisher、`npm-production` environment 和人工确认。
+  - 验证方式：
+    - Ruby YAML parser 校验 `.github/workflows/npm-publish.yml`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
+- [ ] T302 P1：为 npm publish workflow 添加安全 lint。
+  - 验收标准：
+    - `@opencap/spec` 新增 workflow lint helper/test，检查 npm publish workflow 只允许 manual dispatch、默认 dry-run、候选 package allowlist、最小权限和禁止长期 npm token。
+    - lint 检查不得要求真实 GitHub environment、npm 账号、OIDC token 或网络。
+    - 测试覆盖真实 `.github/workflows/npm-publish.yml` 通过，以及缺少 dry-run、使用 `NPM_TOKEN`、允许非候选包或自动触发的负向 fixture。
+    - `docs/TESTING.md` 记录该 lint 入口。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- npm-publish-workflow.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T303 P2：把 npm publish dry-run evidence 纳入 release checklist。
+  - 验收标准：
+    - `docs/releases/release-checklist.md` 增加 npm publish dry-run evidence 字段和核对步骤。
+    - V1 alpha evidence bundle 或模板说明如何记录 workflow run、package、version、tarball/provenance dry-run 摘要和不发布边界。
+    - README 和 package publishing docs 不把 dry-run workflow 写成真实 npm 发布已完成。
+    - Handoff 指向下一项 ready 或明确剩余阻塞。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
