@@ -1424,6 +1424,38 @@
     - `git diff --check`
   - 完成记录：新增 `packages/runtime/test/fixtures/conformance/composition-recovery.yml`，并纳入 `packages/spec/src/conformance.test.ts` 校验；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.composition_recovery.v1` checks。该 record 绑定 composition recovery smoke tests、失败恢复手册、Composition Profile RFC 和 compensation review rules，明确只证明 future composition evidence，不表示 OpenCap 已实现 workflow runtime、Agent、自动调度或自动 rollback。
 
+- [ ] T295 P1：实现 conformance summary helper。
+  - 验收标准：
+    - `@opencap/spec` 新增 `buildConformanceSummary(recordsRoot, { generatedAt? })`，递归读取 conformance YAML records，并复用 `validateConformanceRecord()`。
+    - Summary 输出 `opencap.conformance_summary.v1`、suite version、record count、pass/fail/invalid count、profile 列表、每条 record 的 subject/profile/result/check/artifact 摘要。
+    - Summary 明确 `policyEffect: "none"`，只作为 release/conformance evidence，不改变 Runtime policy、trust、consent 或 install decision。
+    - Summary 不包含 token、Authorization header、provider raw response、用户输入原文、数据库日志或本地私有状态内容。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- conformance-summary.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T296 P1：实现 `opencap conformance report --records <path> --json`。
+  - 验收标准：
+    - CLI 新增 `conformance report` 子命令，支持 `--records <path>` 和 `--json`。
+    - JSON 输出复用 `buildConformanceSummary()`，人类输出展示 profile、result、checks、artifacts 和 invalid record 摘要。
+    - 命令不读取/写入 state dir，不调用 provider，不输出 token、Authorization、provider raw response、用户输入原文或本地数据库日志。
+    - 测试覆盖 JSON、人类输出、invalid record 和临时 cwd 不创建 `opencap.local`。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- conformance-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T297 P2：把 conformance report 纳入 release evidence 文档路径。
+  - 验收标准：
+    - `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 或后续 evidence 模板说明如何引用 conformance summary。
+    - `docs/releases/release-checklist.md` 和 `docs/TESTING.md` 记录 `opencap conformance report` 的用途和边界。
+    - 文档明确 conformance report 只是 evidence，不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
