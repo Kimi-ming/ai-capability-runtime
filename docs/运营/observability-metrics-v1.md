@@ -25,9 +25,9 @@
 
 ## 本地指标命令草案
 
-本节是未来 CLI 命令草案，当前不表示命令已经实现。V1 仍以 `opencap logs` 和 `opencap decision-log export` 为已实现入口；`opencap metrics` 后续只允许从本地 SQLite audit log 的脱敏字段派生汇总。
+本节定义本地 metrics CLI 的实现边界。当前已实现 `opencap metrics summary`；`opencap metrics capabilities` 和 `opencap metrics security` 仍是后续命令草案。所有 metrics 命令都只能从本地 SQLite audit log 的脱敏字段派生汇总。
 
-建议命令：
+命令：
 
 ```bash
 opencap metrics summary --state-dir opencap.local --since 2026-05-14T00:00:00.000Z --until 2026-05-14T23:59:59.999Z

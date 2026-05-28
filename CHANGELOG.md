@@ -65,6 +65,7 @@
 - CLI 新增 `opencap ledger export`，可导出本地 Runtime Ledger 的脱敏 JSON，并支持 kind、capability 和 limit 筛选。
 - CLI 新增 `opencap registry report`，可输出本地 Registry quality summary，JSON 可用于 release evidence，人类输出展示 lifecycle/advisory、quality band 和 blocking reasons。
 - CLI 新增 `opencap conformance report`，可输出本地 conformance records 汇总 evidence，JSON/人类输出均不读取 state dir、不调用 provider、不输出 secret 或 provider raw data。
+- CLI 新增 `opencap metrics summary`，可从本地 SQLite audit log 输出脱敏 metrics summary，支持 since/until/capability 过滤、JSON 和人类输出。
 - 新增 V1 alpha/local runtime release evidence bundle，记录本地验证命令、测试计数、known gaps、blocked external evidence 和 release decision，明确不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。
 - MCP `tools/list` projection builder，支持 installed Capability 到 MCP tool payload，并保留 tool name collision 检测。

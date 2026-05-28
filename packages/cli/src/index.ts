@@ -20,6 +20,7 @@ import {
   FileRuntimeLedgerStore,
   SqliteAuditLogger,
   RuntimeLedgerAuditLogger,
+  buildLocalMetricsSummary,
   type AuditInvocationStatus,
   CliConfirmationHandler,
   blockedResultEnvelope,
@@ -53,6 +54,7 @@ import {
   type InstalledCapabilityRecord,
   type LedgerRecordKind,
   type LedgerRecordV1,
+  type LocalMetricsSummary,
   type TrustSummary,
   type PolicyDecision,
   type PolicySimulationScenario,
@@ -237,6 +239,38 @@ function formatLedgerLine(record: LedgerRecordV1): string {
   ].join(" ");
 }
 
+function formatDurationMetric(value: number | null): string {
+  return value === null ? "n/a" : String(value);
+}
+
+function printLocalMetricsSummary(summary: LocalMetricsSummary): void {
+  console.log("OpenCap local metrics");
+  console.log(`window: ${summary.window.since ?? "*"}..${summary.window.until ?? "*"}`);
+  if (summary.capabilityId !== undefined) {
+    console.log(`capability: ${summary.capabilityId}`);
+  }
+  console.log(`invocations: ${summary.invocationsTotal}`);
+  console.log([
+    "status:",
+    `executed=${summary.statusCounts.executed}`,
+    `dry_run=${summary.statusCounts.dry_run}`,
+    `blocked=${summary.statusCounts.blocked}`,
+    `denied=${summary.statusCounts.denied}`,
+  ].join(" "));
+  console.log([
+    "policy decisions:",
+    `allow=${summary.policyDecisionCounts.allow}`,
+    `ask=${summary.policyDecisionCounts.ask}`,
+    `deny=${summary.policyDecisionCounts.deny}`,
+  ].join(" "));
+  console.log(`confirmation required: ${summary.confirmationRequiredTotal}`);
+  console.log(`outbound blocked: ${summary.outboundBlockedTotal}`);
+  console.log(`data egress denied: ${summary.dataEgressDeniedTotal}`);
+  console.log(`secret missing: ${summary.secretMissingTotal}`);
+  console.log(`audit preflight failed: ${summary.auditPreflightFailedTotal}`);
+  console.log(`duration_ms: p50=${formatDurationMetric(summary.durationMs.p50)} p95=${formatDurationMetric(summary.durationMs.p95)}`);
+}
+
 function parseAuditStatus(value: string | undefined): AuditInvocationStatus | undefined {
   if (value === undefined) {
     return undefined;
@@ -250,13 +284,21 @@ function parseAuditStatus(value: string | undefined): AuditInvocationStatus | un
 }
 
 function parseSince(value: string | undefined): string | undefined {
+  return parseIsoTimeOption("--since", value);
+}
+
+function parseUntil(value: string | undefined): string | undefined {
+  return parseIsoTimeOption("--until", value);
+}
+
+function parseIsoTimeOption(optionName: "--since" | "--until", value: string | undefined): string | undefined {
   if (value === undefined) {
     return undefined;
   }
 
   const timestamp = new Date(value);
   if (Number.isNaN(timestamp.getTime())) {
-    throw new CliUserInputError(`Invalid --since value: ${value}`);
+    throw new CliUserInputError(`Invalid ${optionName} value: ${value}`);
   }
 
   return timestamp.toISOString();
@@ -1009,6 +1051,10 @@ const registryCommand = program
   .command("registry")
   .description("Inspect local Registry evidence.");
 
+const metricsCommand = program
+  .command("metrics")
+  .description("Inspect local audit metrics.");
+
 conformanceCommand
   .command("report")
   .requiredOption("--records <path>", "Conformance records root directory")
@@ -1130,6 +1176,43 @@ ledgerCommand
       console.log(formatLedgerLine(record));
     }
   }, "Failed to export ledger records"));
+
+metricsCommand
+  .command("summary")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .option("--since <iso-time>", "Filter metrics at or after an ISO timestamp")
+  .option("--until <iso-time>", "Filter metrics at or before an ISO timestamp")
+  .option("--capability <id>", "Filter metrics by Capability id")
+  .description("Summarize local audit metrics.")
+  .action((options: { stateDir?: string; json?: boolean; since?: string; until?: string; capability?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const since = parseSince(options.since);
+    const until = parseUntil(options.until);
+    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+
+    try {
+      const events = await logger.recent(10_000, {
+        since,
+        until,
+        capabilityId: options.capability,
+      });
+      const summary = buildLocalMetricsSummary(events, {
+        since,
+        until,
+        capabilityId: options.capability,
+      });
+
+      if (options.json) {
+        console.log(JSON.stringify(summary, null, 2));
+        return;
+      }
+
+      printLocalMetricsSummary(summary);
+    } finally {
+      logger.close();
+    }
+  }, "Failed to summarize local audit metrics"));
 
 program
   .command("logs")

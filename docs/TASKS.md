@@ -624,7 +624,7 @@
     - `pnpm build`
     - `pnpm lint`
     - `pnpm test`
-  - 完成记录：`docs/运营/observability-metrics-v1.md` 新增本地指标命令草案，定义未来 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security` 的参数、输出示例、JSON shape、字段来源与隐私边界。文档明确当前已实现入口仍是 `opencap logs` 和 `opencap decision-log export`，metrics 命令尚未实现。
+  - 完成记录：`docs/运营/observability-metrics-v1.md` 新增本地指标命令草案，定义 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security` 的参数、输出示例、JSON shape、字段来源与隐私边界。T299 已实现 `opencap metrics summary`；capabilities/security 仍是后续命令。
 - [x] T154 P2：维护 Host compatibility evidence records。
   - 验收标准：
     - `docs/生态/interoperability-profiles.md` 定义 `opencap.host.evidence.v1` 的最小记录字段和使用边界。
@@ -1471,7 +1471,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/runtime` 新增 `LOCAL_METRICS_SCHEMA_VERSION`、`buildLocalMetricsSummary()` 和本地 metrics summary 类型，可从 `AuditEvent[]` 的脱敏 operational metadata 派生 invocation/status/policy/security counts、duration p50/p95、window 和 capability filter，并固定 `policyEffect: "none"`。新增 `packages/runtime/src/metrics.test.ts` 覆盖 since/until/capability 过滤、confirmation/outbound/data egress/secret/audit preflight 计数、duration 分位数、空窗口和不复制 input/egress preview/secret 字段；Runtime 包测试数从 293 增至 295。
 
-- [ ] T299 P1：实现 `opencap metrics summary` CLI。
+- [x] T299 P1：实现 `opencap metrics summary` CLI。
   - 验收标准：
     - CLI 新增 `opencap metrics summary --state-dir <path> [--since <iso>] [--until <iso>] [--capability <id>] [--json]`。
     - JSON 输出复用 `buildLocalMetricsSummary()`；人类输出包含 window、invocations、status、policy decisions、confirmation required、outbound blocked 和 duration。
@@ -1481,6 +1481,7 @@
     - `pnpm --filter @opencap/cli test -- metrics-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap metrics summary --state-dir <path> [--since <iso>] [--until <iso>] [--capability <id>] [--json]`，复用 `buildLocalMetricsSummary()` 从本地 SQLite audit log 输出脱敏 metrics summary。JSON 输出稳定 `opencap.local_metrics.v1`；人类输出包含 window、invocations、status、policy decisions、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration。命令不读取 provider secret、不执行 Capability、不输出 input/output/egress preview 原文；非法 since/until 在打开 SQLite 前作为用户错误 exit `1`。新增 `packages/cli/src/metrics-command.test.ts` 覆盖 JSON、人类输出、secret redaction 和非法时间参数，CLI 包测试数从 19 增至 22。
 
 - [ ] T300 P2：实现 `opencap metrics capabilities` 和 `opencap metrics security`。
   - 验收标准：

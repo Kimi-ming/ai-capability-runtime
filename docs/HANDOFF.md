@@ -34,11 +34,13 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T298：`@opencap/runtime` 新增 `buildLocalMetricsSummary()`、`LOCAL_METRICS_SCHEMA_VERSION` 和 summary 类型。Helper 从脱敏 `AuditEvent[]` 派生 invocation/status/policy counts、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration p50/p95；支持 since/until/capability filter，固定 `policyEffect: "none"`，不复制 input/output/egress preview、secret、Authorization、provider raw body 或用户输入原文。`packages/runtime/src/metrics.test.ts` 覆盖上述行为，Runtime 包测试数从 293 增至 295。
 
+本轮继续完成 T299：CLI 新增 `opencap metrics summary --state-dir <path> [--since <iso>] [--until <iso>] [--capability <id>] [--json]`，复用 `buildLocalMetricsSummary()` 从本地 SQLite audit log 输出脱敏 metrics summary。JSON 输出为 `opencap.local_metrics.v1`；人类输出包含 window、invocations、status、policy decisions、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration。命令不读取 provider secret、不执行 Capability、不输出 input/output/egress preview 原文；非法 since/until 在打开 SQLite 前作为用户错误 exit `1`，避免无效参数触发 SQLite warning 或 state side effect。`packages/cli/src/metrics-command.test.ts` 覆盖 JSON、人类输出、secret redaction 和非法时间参数，CLI 包测试数从 19 增至 22。
+
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready：T299 P1：实现 `opencap metrics summary` CLI。
+下一项 ready：T300 P2：实现 `opencap metrics capabilities` 和 `opencap metrics security`。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -117,9 +119,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297 和 T298 均已完成；T299-T300 是下一批本地 observability/metrics ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298 和 T299 均已完成；T300 是下一批本地 observability/metrics ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T299，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T300，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
@@ -232,7 +234,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - T136 已完成：新增 `packages/mcp/src/tool-mapping-contract.test.ts`，覆盖 deterministic id 映射、冲突诊断、tools/list projection mapping 和 tools/call reverse lookup。测试确认原始 capability id 不能作为 tool name 直接调用，只有映射后的 tool name 会进入 executor；MCP 包测试数从 18 增至 21。
 - T137 已完成：新增 `packages/cli/src/error-exit-code.test.ts`，覆盖 missing capability、invalid `--input-json` 和 invalid `--limit` 的用户错误 exit `1`。`packages/cli/src/index.ts` 新增 `CliUserInputError`，把用户输入错误和未安装 capability 从内部错误 exit `2` 改为用户错误 exit `1`，stderr 不输出 stack；CLI 包测试数从 3 增至 5。
 - T142 已完成：`docs/生态/host-compatibility-matrix.md` 新增 Host Compatibility Test Records，记录 custom MCP client 对 `opencap.mcp.tools.v1` 与 `opencap.mcp.result.v1` 的自动化 pass 证据，并为 Claude Desktop/Cursor 保持 `pending-smoke` 记录。记录绑定 2026-05-14、OpenCap commit `0f819cb`、profile、capability、checks、evidence 和 known gaps，明确自动化 helper tests 不等同真实 Host UI smoke。
-- T143 已完成：`docs/运营/observability-metrics-v1.md` 新增本地指标命令草案，定义未来 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security` 的参数、输出示例、JSON shape、字段来源与隐私边界。文档明确当前已实现入口仍是 `opencap logs` 和 `opencap decision-log export`，metrics 命令尚未实现。
+- T143 已完成：`docs/运营/observability-metrics-v1.md` 新增本地指标命令草案，定义 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security` 的参数、输出示例、JSON shape、字段来源与隐私边界。T299 已实现 `opencap metrics summary`；capabilities/security 仍是后续命令。
 - T154 已完成：`docs/生态/interoperability-profiles.md` 新增 `opencap.host.evidence.v1` 最小字段和边界，`docs/生态/host-compatibility-matrix.md` 新增 custom MCP client tools/result 自动化 evidence records，以及 Claude Desktop/Cursor version-detection + pending-smoke evidence records。记录明确证据类型、来源、隐私边界和限制，不把自动化 adapter 证据或 Host version detection 写成第三方 Host 兼容通过。
 - T156 已完成：新增 `rfcs/0010-mcp-elicitation-profile-v1.md`，定义 `opencap.mcp.elicitation.v1` 草案，覆盖 MCP Host capability negotiation、Runtime `ConsentRequest` 到 `elicitation/create` form 的映射、Host response 到 consent receipt 的映射、URL mode future 边界、安全不变量、result/evidence 和测试计划。现有 MCP interface、consent、interoperability 和文档入口已同步链接，且继续保持当前 V1 无 elicitation Host 返回 `confirmation_required`。
 - T157 已完成：新增 `rfcs/0011-a2a-agent-card-mapping-v1.md`，定义 `opencap.a2a.agent_card_mapping.v1` 草案，覆盖 A2A Agent Card/AgentSkill 字段映射、OpenCap extension、A2A request 到 Runtime invocation 的边界、Result Envelope 到 A2A task/artifact 的映射、安全不变量、evidence 和测试计划。RFC 明确 OpenCap Capability 不是 Agent，V1 不实现 A2A server，Agent Card/Skill 只用于发现和受控调用入口。
