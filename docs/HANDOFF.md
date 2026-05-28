@@ -36,11 +36,13 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T299：CLI 新增 `opencap metrics summary --state-dir <path> [--since <iso>] [--until <iso>] [--capability <id>] [--json]`，复用 `buildLocalMetricsSummary()` 从本地 SQLite audit log 输出脱敏 metrics summary。JSON 输出为 `opencap.local_metrics.v1`；人类输出包含 window、invocations、status、policy decisions、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration。命令不读取 provider secret、不执行 Capability、不输出 input/output/egress preview 原文；非法 since/until 在打开 SQLite 前作为用户错误 exit `1`，避免无效参数触发 SQLite warning 或 state side effect。`packages/cli/src/metrics-command.test.ts` 覆盖 JSON、人类输出、secret redaction 和非法时间参数，CLI 包测试数从 19 增至 22。
 
+本轮继续完成 T300：CLI 新增 `opencap metrics capabilities --state-dir <path> [--json]` 和 `opencap metrics security --state-dir <path> [--json]`。Capabilities report 按 Capability 输出 invocation total、status counts、policy decision counts、error rate、duration p50/p95 和 last seen；Security report 输出 denied、confirmation required、outbound blocked、data egress denied、secret missing 和 audit preflight failed 汇总。两个命令只从 SQLite audit metadata 派生，不输出 input/output、credential value、provider raw response、Authorization/Cookie 或 URL query value。`docs/运营/observability-metrics-v1.md`、`docs/TESTING.md` 和 README 已同步已实现边界；`packages/cli/src/metrics-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 22 增至 24。
+
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready：T300 P2：实现 `opencap metrics capabilities` 和 `opencap metrics security`。
+下一项 ready：当前没有未阻塞 ready 任务；T291 仍因真实 Claude Desktop/Cursor Host UI smoke 证据缺口阻塞。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -119,9 +121,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298 和 T299 均已完成；T300 是下一批本地 observability/metrics ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299 和 T300 均已完成；`next_task.py` 当前应返回没有未阻塞 ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T300，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：重新规划下一批 ready 任务，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

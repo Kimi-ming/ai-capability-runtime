@@ -169,4 +169,95 @@ describe("OpenCap CLI metrics summary command", () => {
       await rm(stateDir, { recursive: true, force: true });
     }
   }, 60_000);
+
+  it("prints per-capability metrics as redacted JSON", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-metrics-state-"));
+
+    try {
+      await seedAuditEvents(stateDir);
+
+      const result = await runOpenCapCli([
+        "metrics",
+        "capabilities",
+        "--state-dir",
+        stateDir,
+        "--json",
+      ]);
+      const report = JSON.parse(result.stdout);
+
+      expect(result.exitCode).toBe(0);
+      expect(report).toMatchObject({
+        schemaVersion: "opencap.local_metrics_capabilities.v1",
+        policyEffect: "none",
+      });
+      expect(report.capabilities).toEqual([
+        expect.objectContaining({
+          capabilityId: "github.create_issue",
+          invocationsTotal: 2,
+          statusCounts: {
+            dry_run: 1,
+            blocked: 1,
+            executed: 0,
+            denied: 0,
+          },
+          policyDecisionCounts: {
+            allow: expect.any(Number),
+            ask: expect.any(Number),
+            deny: 0,
+          },
+          errorRate: 0.5,
+          lastSeenAt: expect.any(String),
+        }),
+      ]);
+      expect(result.stdout).not.toContain("secret customer text");
+      expect(result.stdout).not.toContain("super-secret-token");
+      expect(result.stdout).not.toContain("inputRedactedJson");
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("prints security metrics as JSON and human-readable output", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-metrics-state-"));
+
+    try {
+      await seedAuditEvents(stateDir);
+
+      const jsonResult = await runOpenCapCli([
+        "metrics",
+        "security",
+        "--state-dir",
+        stateDir,
+        "--json",
+      ]);
+      const report = JSON.parse(jsonResult.stdout);
+
+      expect(jsonResult.exitCode).toBe(0);
+      expect(report).toMatchObject({
+        schemaVersion: "opencap.local_metrics_security.v1",
+        deniedTotal: 0,
+        outboundBlockedTotal: 0,
+        dataEgressDeniedTotal: 0,
+        secretMissingTotal: 1,
+        auditPreflightFailedTotal: 0,
+        policyEffect: "none",
+      });
+      expect(jsonResult.stdout).not.toContain("secret customer text");
+      expect(jsonResult.stdout).not.toContain("super-secret-token");
+
+      const humanResult = await runOpenCapCli([
+        "metrics",
+        "security",
+        "--state-dir",
+        stateDir,
+      ]);
+      expect(humanResult.exitCode).toBe(0);
+      expect(humanResult.stdout).toContain("OpenCap security metrics");
+      expect(humanResult.stdout).toContain("secret missing: 1");
+      expect(humanResult.stdout).not.toContain("secret customer text");
+      expect(humanResult.stdout).not.toContain("super-secret-token");
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
 });

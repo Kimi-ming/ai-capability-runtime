@@ -1483,7 +1483,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap metrics summary --state-dir <path> [--since <iso>] [--until <iso>] [--capability <id>] [--json]`，复用 `buildLocalMetricsSummary()` 从本地 SQLite audit log 输出脱敏 metrics summary。JSON 输出稳定 `opencap.local_metrics.v1`；人类输出包含 window、invocations、status、policy decisions、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration。命令不读取 provider secret、不执行 Capability、不输出 input/output/egress preview 原文；非法 since/until 在打开 SQLite 前作为用户错误 exit `1`。新增 `packages/cli/src/metrics-command.test.ts` 覆盖 JSON、人类输出、secret redaction 和非法时间参数，CLI 包测试数从 19 增至 22。
 
-- [ ] T300 P2：实现 `opencap metrics capabilities` 和 `opencap metrics security`。
+- [x] T300 P2：实现 `opencap metrics capabilities` 和 `opencap metrics security`。
   - 验收标准：
     - CLI 新增 `opencap metrics capabilities --state-dir <path> [--json]`，按 Capability 输出 invocation total、status counts、policy decision counts、error rate、duration p50/p95 和 last seen。
     - CLI 新增 `opencap metrics security --state-dir <path> [--json]`，输出 denied、confirmation required、outbound blocked、data egress denied、secret missing 和 audit preflight failed 汇总。
@@ -1493,6 +1493,7 @@
     - `pnpm --filter @opencap/cli test -- metrics-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap metrics capabilities --state-dir <path> [--json]` 和 `opencap metrics security --state-dir <path> [--json]`。Capabilities report 按 Capability 输出 invocation total、status counts、policy decision counts、error rate、duration p50/p95 和 last seen；Security report 输出 denied、confirmation required、outbound blocked、data egress denied、secret missing 和 audit preflight failed 汇总。两个命令只从 SQLite audit metadata 派生，不输出 input/output、credential value、provider raw response、Authorization/Cookie 或 URL query value。`docs/运营/observability-metrics-v1.md`、`docs/TESTING.md` 和 README 已同步已实现边界；`packages/cli/src/metrics-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 22 增至 24。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

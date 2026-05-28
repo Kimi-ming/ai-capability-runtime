@@ -21,6 +21,7 @@ import {
   SqliteAuditLogger,
   RuntimeLedgerAuditLogger,
   buildLocalMetricsSummary,
+  type AuditEvent,
   type AuditInvocationStatus,
   CliConfirmationHandler,
   blockedResultEnvelope,
@@ -66,6 +67,33 @@ const program = new Command();
 const cliModuleDir = dirname(fileURLToPath(import.meta.url));
 
 type CliExitCode = 1 | 2;
+
+interface LocalMetricsCapabilityRow {
+  capabilityId: string;
+  invocationsTotal: number;
+  statusCounts: LocalMetricsSummary["statusCounts"];
+  policyDecisionCounts: LocalMetricsSummary["policyDecisionCounts"];
+  errorRate: number;
+  durationMs: LocalMetricsSummary["durationMs"];
+  lastSeenAt: string;
+}
+
+interface LocalMetricsCapabilitiesReport {
+  schemaVersion: "opencap.local_metrics_capabilities.v1";
+  capabilities: LocalMetricsCapabilityRow[];
+  policyEffect: "none";
+}
+
+interface LocalMetricsSecurityReport {
+  schemaVersion: "opencap.local_metrics_security.v1";
+  deniedTotal: number;
+  confirmationRequiredTotal: number;
+  outboundBlockedTotal: number;
+  dataEgressDeniedTotal: number;
+  secretMissingTotal: number;
+  auditPreflightFailedTotal: number;
+  policyEffect: "none";
+}
 
 interface NodeError extends Error {
   code?: string;
@@ -269,6 +297,90 @@ function printLocalMetricsSummary(summary: LocalMetricsSummary): void {
   console.log(`secret missing: ${summary.secretMissingTotal}`);
   console.log(`audit preflight failed: ${summary.auditPreflightFailedTotal}`);
   console.log(`duration_ms: p50=${formatDurationMetric(summary.durationMs.p50)} p95=${formatDurationMetric(summary.durationMs.p95)}`);
+}
+
+function localMetricsErrorRate(summary: LocalMetricsSummary): number {
+  if (summary.invocationsTotal === 0) {
+    return 0;
+  }
+
+  const errorLike = summary.statusCounts.blocked + summary.statusCounts.denied;
+  return Number((errorLike / summary.invocationsTotal).toFixed(4));
+}
+
+function buildLocalMetricsCapabilitiesReport(events: AuditEvent[]): LocalMetricsCapabilitiesReport {
+  const grouped = new Map<string, AuditEvent[]>();
+  for (const event of events) {
+    grouped.set(event.capabilityId, [...(grouped.get(event.capabilityId) ?? []), event]);
+  }
+
+  const capabilities = [...grouped.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([capabilityId, capabilityEvents]) => {
+      const summary = buildLocalMetricsSummary(capabilityEvents, { capabilityId });
+      const lastSeenAt = capabilityEvents
+        .map((event) => event.timestamp)
+        .sort((left, right) => right.localeCompare(left))[0];
+
+      return {
+        capabilityId,
+        invocationsTotal: summary.invocationsTotal,
+        statusCounts: summary.statusCounts,
+        policyDecisionCounts: summary.policyDecisionCounts,
+        errorRate: localMetricsErrorRate(summary),
+        durationMs: summary.durationMs,
+        lastSeenAt,
+      };
+    });
+
+  return {
+    schemaVersion: "opencap.local_metrics_capabilities.v1",
+    capabilities,
+    policyEffect: "none",
+  };
+}
+
+function buildLocalMetricsSecurityReport(events: AuditEvent[]): LocalMetricsSecurityReport {
+  const summary = buildLocalMetricsSummary(events);
+  const deniedTotal = events.filter((event) => event.status === "denied" || event.policyDecision === "deny").length;
+
+  return {
+    schemaVersion: "opencap.local_metrics_security.v1",
+    deniedTotal,
+    confirmationRequiredTotal: summary.confirmationRequiredTotal,
+    outboundBlockedTotal: summary.outboundBlockedTotal,
+    dataEgressDeniedTotal: summary.dataEgressDeniedTotal,
+    secretMissingTotal: summary.secretMissingTotal,
+    auditPreflightFailedTotal: summary.auditPreflightFailedTotal,
+    policyEffect: "none",
+  };
+}
+
+function printLocalMetricsCapabilitiesReport(report: LocalMetricsCapabilitiesReport): void {
+  if (report.capabilities.length === 0) {
+    console.log("No capability metrics found.");
+    return;
+  }
+
+  console.log("capability invocations error_rate last_seen");
+  for (const capability of report.capabilities) {
+    console.log([
+      capability.capabilityId,
+      capability.invocationsTotal,
+      capability.errorRate,
+      capability.lastSeenAt,
+    ].join(" "));
+  }
+}
+
+function printLocalMetricsSecurityReport(report: LocalMetricsSecurityReport): void {
+  console.log("OpenCap security metrics");
+  console.log(`denied: ${report.deniedTotal}`);
+  console.log(`confirmation required: ${report.confirmationRequiredTotal}`);
+  console.log(`outbound blocked: ${report.outboundBlockedTotal}`);
+  console.log(`data egress denied: ${report.dataEgressDeniedTotal}`);
+  console.log(`secret missing: ${report.secretMissingTotal}`);
+  console.log(`audit preflight failed: ${report.auditPreflightFailedTotal}`);
 }
 
 function parseAuditStatus(value: string | undefined): AuditInvocationStatus | undefined {
@@ -1213,6 +1325,62 @@ metricsCommand
       logger.close();
     }
   }, "Failed to summarize local audit metrics"));
+
+metricsCommand
+  .command("capabilities")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .option("--since <iso-time>", "Filter metrics at or after an ISO timestamp")
+  .option("--until <iso-time>", "Filter metrics at or before an ISO timestamp")
+  .description("Summarize local audit metrics by Capability.")
+  .action((options: { stateDir?: string; json?: boolean; since?: string; until?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const since = parseSince(options.since);
+    const until = parseUntil(options.until);
+    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+
+    try {
+      const events = await logger.recent(10_000, { since, until });
+      const report = buildLocalMetricsCapabilitiesReport(events);
+
+      if (options.json) {
+        console.log(JSON.stringify(report, null, 2));
+        return;
+      }
+
+      printLocalMetricsCapabilitiesReport(report);
+    } finally {
+      logger.close();
+    }
+  }, "Failed to summarize capability metrics"));
+
+metricsCommand
+  .command("security")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .option("--since <iso-time>", "Filter metrics at or after an ISO timestamp")
+  .option("--until <iso-time>", "Filter metrics at or before an ISO timestamp")
+  .description("Summarize local security audit metrics.")
+  .action((options: { stateDir?: string; json?: boolean; since?: string; until?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const since = parseSince(options.since);
+    const until = parseUntil(options.until);
+    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+
+    try {
+      const events = await logger.recent(10_000, { since, until });
+      const report = buildLocalMetricsSecurityReport(events);
+
+      if (options.json) {
+        console.log(JSON.stringify(report, null, 2));
+        return;
+      }
+
+      printLocalMetricsSecurityReport(report);
+    } finally {
+      logger.close();
+    }
+  }, "Failed to summarize security metrics"));
 
 program
   .command("logs")

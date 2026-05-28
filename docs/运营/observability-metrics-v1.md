@@ -25,7 +25,7 @@
 
 ## 本地指标命令草案
 
-本节定义本地 metrics CLI 的实现边界。当前已实现 `opencap metrics summary`；`opencap metrics capabilities` 和 `opencap metrics security` 仍是后续命令草案。所有 metrics 命令都只能从本地 SQLite audit log 的脱敏字段派生汇总。
+本节定义本地 metrics CLI 的实现边界。当前已实现 `opencap metrics summary`、`opencap metrics capabilities` 和 `opencap metrics security`。所有 metrics 命令都只能从本地 SQLite audit log 的脱敏字段派生汇总。
 
 命令：
 
@@ -40,7 +40,7 @@ opencap metrics security --state-dir opencap.local --json
 
 目标：输出当前筛选窗口内的整体健康度。
 
-输入参数草案：
+输入参数：
 
 | 参数 | 含义 |
 | --- | --- |
@@ -50,7 +50,7 @@ opencap metrics security --state-dir opencap.local --json
 | `--capability <id>` | 限定 Capability id |
 | `--json` | 输出机器可读 JSON |
 
-人类输出草案：
+人类输出：
 
 ```text
 OpenCap local metrics
@@ -63,7 +63,7 @@ outbound blocked: 2
 duration_ms: p50=128 p95=940
 ```
 
-JSON 输出草案：
+JSON 输出：
 
 ```json
 {
@@ -96,7 +96,7 @@ JSON 输出草案：
 
 目标：按 Capability 聚合调用质量，不输出 input/output 原文。
 
-建议字段：
+输出字段：
 
 | 字段 | 来源 | 说明 |
 | --- | --- | --- |
@@ -112,7 +112,7 @@ JSON 输出草案：
 
 目标：给本地用户和安全工程师快速查看安全相关事件密度。
 
-建议字段：
+输出字段：
 
 | 字段 | 来源 | 说明 |
 | --- | --- | --- |
