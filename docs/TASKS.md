@@ -1436,7 +1436,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增 `CONFORMANCE_SUMMARY_SCHEMA_VERSION`、`buildConformanceSummary()` 和相关 summary 类型，递归读取 conformance YAML records 并复用 `validateConformanceRecord()`。新增 `packages/spec/src/conformance-summary.test.ts` 覆盖当前 6 个 runtime conformance records、profile 列表、pass/fail/invalid 计数、artifact/check 摘要、`policyEffect: "none"` 和 invalid record 不复制 raw secret。Spec 包测试数从 75 增至 77。
 
-- [ ] T296 P1：实现 `opencap conformance report --records <path> --json`。
+- [x] T296 P1：实现 `opencap conformance report --records <path> --json`。
   - 验收标准：
     - CLI 新增 `conformance report` 子命令，支持 `--records <path>` 和 `--json`。
     - JSON 输出复用 `buildConformanceSummary()`，人类输出展示 profile、result、checks、artifacts 和 invalid record 摘要。
@@ -1446,6 +1446,7 @@
     - `pnpm --filter @opencap/cli test -- conformance-report-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap conformance report --records <path> [--json]`，复用 `buildConformanceSummary()` 输出本地 conformance evidence summary。JSON 输出稳定 summary；人类输出包含 profile、result、checks、artifacts 和 record path；invalid 或 failed record 返回 exit `1`。命令不读取/写入 state dir、不调用 provider、不输出 secret、provider raw response、用户输入原文或本地数据库日志。新增 `packages/cli/src/conformance-report-command.test.ts` 覆盖 JSON、人类输出、invalid record 和临时 cwd 不创建 `opencap.local`，CLI 包测试数从 16 增至 19。
 
 - [ ] T297 P2：把 conformance report 纳入 release evidence 文档路径。
   - 验收标准：

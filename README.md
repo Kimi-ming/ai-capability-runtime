@@ -114,6 +114,7 @@ pnpm --filter @opencap/cli dev -- card github.create_issue --state-dir "$SMOKE_S
 pnpm --filter @opencap/cli dev -- card github.create_issue --state-dir "$SMOKE_STATE_DIR" --kind trust --json
 pnpm --filter @opencap/cli dev -- doctor --state-dir "$SMOKE_STATE_DIR" --registry registry --json
 pnpm --filter @opencap/cli dev -- registry report --registry registry --json
+pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --json
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run
 

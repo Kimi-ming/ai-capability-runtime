@@ -7,7 +7,13 @@ import { Command } from "commander";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
-import { buildRegistryQualitySummary, formatManifestValidationIssue, validateManifestPath, type CapabilityManifest } from "@opencap/spec";
+import {
+  buildConformanceSummary,
+  buildRegistryQualitySummary,
+  formatManifestValidationIssue,
+  validateManifestPath,
+  type CapabilityManifest,
+} from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
   InstallCapabilityError,
@@ -995,9 +1001,56 @@ const ledgerCommand = program
   .command("ledger")
   .description("Inspect local Runtime Ledger records.");
 
+const conformanceCommand = program
+  .command("conformance")
+  .description("Inspect conformance evidence records.");
+
 const registryCommand = program
   .command("registry")
   .description("Inspect local Registry evidence.");
+
+conformanceCommand
+  .command("report")
+  .requiredOption("--records <path>", "Conformance records root directory")
+  .option("--json", "Output JSON")
+  .description("Generate a conformance evidence summary report.")
+  .action((options: { records: string; json?: boolean }) => runCliAction(async () => {
+    const recordsRoot = resolveCliPath(options.records);
+    const summary = await buildConformanceSummary(recordsRoot);
+
+    if (options.json) {
+      console.log(JSON.stringify(summary, null, 2));
+      if (summary.invalidRecords > 0 || summary.failedRecords > 0) {
+        process.exitCode = 1;
+      }
+      return;
+    }
+
+    console.log("profile result checks artifacts path");
+    for (const record of summary.records) {
+      console.log([
+        record.profile,
+        record.result,
+        record.checks.total,
+        record.artifacts.count,
+        record.path,
+      ].join(" "));
+    }
+
+    for (const invalid of summary.invalid) {
+      console.log([
+        "invalid",
+        "invalid",
+        invalid.issues.length,
+        "-",
+        invalid.path,
+      ].join(" "));
+    }
+
+    if (summary.invalidRecords > 0 || summary.failedRecords > 0) {
+      process.exitCode = 1;
+    }
+  }, "Failed to generate conformance report"));
 
 registryCommand
   .command("report")
