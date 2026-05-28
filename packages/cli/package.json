@@ -4,6 +4,10 @@
   "type": "module",
   "private": true,
   "description": "OpenCap developer CLI.",
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "bin": {
     "opencap": "dist/index.js"
   },

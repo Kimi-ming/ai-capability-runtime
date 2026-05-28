@@ -74,6 +74,13 @@ opencap release package report --package <package> --pack-json <pack-json> --jso
 
 该 report 只检查 package metadata 和本地 pack file 摘要，固定 `policyEffect: none`。如果 report 包含 `NPM_PACKAGE_PRIVATE`、forbidden pack file 或其他 blocker，不能进入 npm publish dry-run 或真实发布。
 
+Alpha 候选 package 必须声明 `files` allowlist，先收窄 npm pack 输入范围，再运行 pack dry-run。当前 allowlist：
+
+| Package | `files` allowlist | 发布状态 |
+| --- | --- | --- |
+| `@opencap/spec` | `dist`, `schema`, `package.json` | 仍为 `private: true`，不得发布 |
+| `@opencap/cli` | `dist`, `package.json` | 仍为 `private: true`，不得发布 |
+
 ## 不发布条件
 
 - CLI 命令和 README 不一致。

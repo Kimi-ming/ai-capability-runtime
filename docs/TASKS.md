@@ -1570,7 +1570,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已增加 `opencap release package report` 和 `npm pack --dry-run --json` 的执行/记录步骤，release evidence YAML 模板新增 `package_readiness_report`、`npm_pack_dry_run` 和 `package_readiness` 字段。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Package Readiness Evidence 段落，明确当前样例为 `not-run`，后续 report 只能证明本地 metadata/tarball 摘要审查，不能替代 npm publish dry-run、trusted publisher、正式 provenance、release tag 或 GitHub required checks。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 readiness/tarball review 边界。
 
-- [ ] T307 P1：为 alpha npm 候选包定义 package `files` allowlist。
+- [x] T307 P1：为 alpha npm 候选包定义 package `files` allowlist。
   - 验收标准：
     - `@opencap/spec` 和 `@opencap/cli` 的 `package.json` 明确声明 `files` allowlist，只包含发布所需的 build artifacts、schema/bin/package metadata，不包含 `src/`、tests、fixtures、`.env`、`opencap.local/`、数据库、日志或私有 evidence。
     - `@opencap/spec` package readiness helper/test 增加 `files` allowlist 检查，缺失 allowlist 或包含危险路径时输出 blocker。
@@ -1580,6 +1580,7 @@
     - `pnpm --filter @opencap/spec test -- npm-package-readiness.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 和 `@opencap/cli` 的 `package.json` 已声明最小 `files` allowlist：spec 发布 `dist`、`schema`、`package.json`，CLI 发布 `dist`、`package.json`；两个 package 仍保留 `private: true` 发布 blocker。`@opencap/spec` package readiness helper/test 已增加 `files` allowlist metadata 和 blocker：缺失 allowlist 会输出 `NPM_PACKAGE_FILES_ALLOWLIST_MISSING`，包含 `src`、tests、fixtures、`.env`、`opencap.local/`、DB/log 或 token/secret-shaped entry 会输出 `NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE`。Spec 包测试数从 81 增至 82。
 
 - [ ] T308 P1：新增本地 npm pack dry-run smoke。
   - 验收标准：

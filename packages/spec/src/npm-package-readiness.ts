@@ -7,6 +7,8 @@ export type NpmPackageReadinessBlockerCode =
   | "NPM_PACKAGE_VERSION_MISSING"
   | "NPM_PACKAGE_NOT_ALPHA_CANDIDATE"
   | "NPM_PACKAGE_PRIVATE"
+  | "NPM_PACKAGE_FILES_ALLOWLIST_MISSING"
+  | "NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE"
   | "NPM_PACKAGE_MISSING_PUBLIC_ENTRY"
   | "NPM_PACKAGE_MISSING_TYPES"
   | "NPM_PACKAGE_FORBIDDEN_PACK_FILE";
@@ -41,6 +43,8 @@ export interface NpmPackageReadinessMetadata {
   hasMain: boolean;
   hasTypes: boolean;
   hasBin: boolean;
+  hasFilesAllowlist: boolean;
+  files: string[];
   exportKeys: string[];
 }
 
@@ -95,6 +99,10 @@ function hasBin(value: unknown): boolean {
   return isRecord(value) && Object.keys(value).length > 0;
 }
 
+function packageFiles(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string" && entry.length > 0) : [];
+}
+
 function normalizedPath(path: string): string {
   return path.replace(/\\/g, "/").replace(/^\.\/+/, "");
 }
@@ -124,6 +132,21 @@ function forbiddenFileReasons(path: string): NpmPackageForbiddenFileReasonCode[]
   }
 
   return reasons;
+}
+
+function filesAllowlistUnsafeEntries(files: string[]): string[] {
+  return files.filter((entry) => {
+    const normalized = normalizedPath(entry);
+    const lower = normalized.toLowerCase();
+    const firstSegment = lower.split("/")[0] ?? lower;
+    return (
+      firstSegment === "src" ||
+      firstSegment === "test" ||
+      firstSegment === "tests" ||
+      firstSegment === "fixtures" ||
+      forbiddenFileReasons(normalized).length > 0
+    );
+  });
 }
 
 function addBlocker(blockers: NpmPackageReadinessFinding[], finding: NpmPackageReadinessFinding): void {
@@ -170,6 +193,8 @@ export function buildNpmPackageReadinessReport(
     hasMain: typeof packageJson.main === "string" && packageJson.main.length > 0,
     hasTypes: typeof packageJson.types === "string" && packageJson.types.length > 0,
     hasBin: hasBin(packageJson.bin),
+    hasFilesAllowlist: packageFiles(packageJson.files).length > 0,
+    files: packageFiles(packageJson.files),
     exportKeys: exportKeys(packageJson.exports),
   };
   const pack = packSummary(options.packFiles);
@@ -209,6 +234,25 @@ export function buildNpmPackageReadinessReport(
       severity: "blocker",
       path: "/private",
       message: "package is still marked private; keep this blocker until maintainers intentionally prepare an npm alpha release.",
+    });
+  }
+
+  if (!metadata.hasFilesAllowlist) {
+    addBlocker(blockers, {
+      code: "NPM_PACKAGE_FILES_ALLOWLIST_MISSING",
+      severity: "blocker",
+      path: "/files",
+      message: "package must define a files allowlist before npm publish readiness can be accepted.",
+    });
+  }
+
+  const unsafeFiles = filesAllowlistUnsafeEntries(metadata.files);
+  if (unsafeFiles.length > 0) {
+    addBlocker(blockers, {
+      code: "NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE",
+      severity: "blocker",
+      path: "/files",
+      message: `package files allowlist contains unsafe entries: ${unsafeFiles.join(", ")}`,
     });
   }
 

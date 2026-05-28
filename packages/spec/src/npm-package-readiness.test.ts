@@ -18,14 +18,50 @@ describe("npm package readiness report", () => {
     expect(specReport.metadata.private).toBe(true);
     expect(specReport.metadata.hasMain).toBe(true);
     expect(specReport.metadata.hasTypes).toBe(true);
+    expect(specReport.metadata.hasFilesAllowlist).toBe(true);
+    expect(specReport.metadata.files).toEqual(["dist", "package.json", "schema"]);
     expect(specReport.blockers.map((blocker) => blocker.code)).toContain("NPM_PACKAGE_PRIVATE");
+    expect(specReport.blockers.map((blocker) => blocker.code)).not.toContain("NPM_PACKAGE_FILES_ALLOWLIST_MISSING");
+    expect(specReport.blockers.map((blocker) => blocker.code)).not.toContain("NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE");
     expect(specReport.pack.evidence).toBe("not-run");
     expect(specReport.policyEffect).toBe("none");
 
     expect(cliReport.packageName).toBe("@opencap/cli");
     expect(cliReport.metadata.hasBin).toBe(true);
+    expect(cliReport.metadata.hasFilesAllowlist).toBe(true);
+    expect(cliReport.metadata.files).toEqual(["dist", "package.json"]);
     expect(cliReport.blockers.map((blocker) => blocker.code)).not.toContain("NPM_PACKAGE_MISSING_PUBLIC_ENTRY");
     expect(cliReport.policyEffect).toBe("none");
+  });
+
+  it("requires a safe package files allowlist before publish readiness", () => {
+    const missing = buildNpmPackageReadinessReport({
+      name: "@opencap/spec",
+      version: "0.1.0",
+      private: false,
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
+      exports: {
+        ".": "./dist/index.js",
+      },
+    });
+
+    expect(missing.blockers.map((blocker) => blocker.code)).toContain("NPM_PACKAGE_FILES_ALLOWLIST_MISSING");
+
+    const unsafe = buildNpmPackageReadinessReport({
+      name: "@opencap/spec",
+      version: "0.1.0",
+      private: false,
+      main: "dist/index.js",
+      types: "dist/index.d.ts",
+      files: ["dist", "src", ".env", "opencap.local", "logs/token.log"],
+      exports: {
+        ".": "./dist/index.js",
+      },
+    });
+
+    expect(unsafe.blockers.map((blocker) => blocker.code)).toContain("NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE");
+    expect(unsafe.metadata.files).toEqual(["dist", "src", ".env", "opencap.local", "logs/token.log"]);
   });
 
   it("reports forbidden tarball files from an npm pack dry-run summary", () => {
