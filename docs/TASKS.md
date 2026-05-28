@@ -1533,6 +1533,40 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已补齐 npm publish dry-run evidence 字段和核对步骤，包括 workflow file/run id、dry-run command、tarball/provenance 摘要、package exports review 和 `real_publish: false`。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 npm publish dry-run evidence 模板，并明确当前样例为 `not-run`、不能宣称 package 已发布、trusted publisher 已配置或正式 provenance 已生成。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 dry-run evidence 边界；README 未声明 npm 发布已完成。
 
+- [ ] T304 P1：新增 npm package readiness report helper。
+  - 验收标准：
+    - `@opencap/spec` 新增本地 package readiness helper/test，输出 `opencap.npm_package_readiness.v1`，用于评估 alpha npm package 发布前的 package metadata 和 tarball 文件清单。
+    - Helper 只读取传入的 package manifest / pack file summary，不调用 npm、GitHub、网络或真实 registry。
+    - Report 覆盖 package name/version/private 状态、候选包 allowlist、main/types/bin/exports 基础字段、pack files 摘要，以及 forbidden files：`.env`、`opencap.local/`、SQLite/DB 日志、token/secret-shaped 文件名和未脱敏私有日志。
+    - Report 必须固定 `policyEffect: "none"`，只作为 release evidence，不改变 package 发布权限、trust、policy 或 install decision。
+    - 测试覆盖真实 `@opencap/spec` / `@opencap/cli` package manifest 的当前 readiness（可报告 blocker，不要求改成可发布），以及包含 secret/log/db 文件的负向 pack fixture。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- npm-package-readiness.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T305 P1：新增 CLI release package report 命令。
+  - 验收标准：
+    - CLI 新增 `opencap release package report --package <workspace-name> [--pack-json <path>] [--json]`，复用 T304 helper 输出本地 package readiness report。
+    - 未提供 `--pack-json` 时，报告 tarball evidence 为 `not-run`，不得伪造 tarball/provenance 证据。
+    - 命令不运行 npm publish、不触网、不读取 npm token；非法 package、非法 pack JSON 或不在 workspace 的路径作为用户错误 exit `1`，不打印 stack。
+    - JSON 输出可直接贴入 release evidence；人类输出显示 blockers/warnings、metadata、pack file count 和 forbidden file summary。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-package-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T306 P2：把 package readiness report 纳入 release evidence。
+  - 验收标准：
+    - `docs/releases/release-checklist.md` 增加 `opencap release package report` 和 `npm pack --dry-run --json` 的执行/记录步骤。
+    - V1 alpha evidence 样例说明 package readiness 当前可作为 `not-run` 或 blocker evidence，不能替代真实 npm publish dry-run、trusted publishing 或 provenance。
+    - `docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 同步 package readiness 与 tarball review 的边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
