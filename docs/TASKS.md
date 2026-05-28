@@ -1606,6 +1606,39 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已说明 package `files` allowlist、本地 `npm pack --dry-run --json`、`opencap release package report`、GitHub workflow npm publish dry-run 和真实发布审批的顺序，且前一步存在 blocker 时不得进入后一步。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 已说明当前 release evidence 中 package readiness 仍为 `not-run`，仓库已有 automated pack smoke 但不等于某次 release evidence 已采集；当前 `@opencap/spec` / `@opencap/cli` 保留 `private: true`，因此 package publish 仍被预期 blocker 阻断。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 package files allowlist、pack smoke 和 readiness report 边界。
 
+- [ ] T310 P1：新增 release evidence bundle helper。
+  - 验收标准：
+    - `@opencap/spec` 新增 `opencap.release_evidence.v1` bundle helper/test，可把 registry quality summary、conformance summary、package readiness report 和本地验证结果收敛成一个 release evidence 摘要。
+    - Helper 只接受调用方传入的本地 report/metadata，不触网、不读取 GitHub/npm/CI、不创建 tag、不发布 package。
+    - Bundle 必须保留 `policyEffect: "none"`，并把 `block-release-tag` / `candidate` / `release` decision 与 blockers 分离；package `private: true`、failed conformance、invalid registry evidence 等应进入 blockers。
+    - 输出不得包含 token、provider raw response、input/output 原文、`opencap.local/` 内容、数据库日志或私有路径。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- release-evidence.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T311 P1：新增 CLI release evidence 命令。
+  - 验收标准：
+    - CLI 新增 `opencap release evidence --registry <path> --records <path> [--package <name> --pack-json <path>] [--json]`，复用 T310 helper 输出本地 release evidence bundle。
+    - 缺少 package/pack evidence 时必须标记 `not-run`，不能伪造 npm dry-run、trusted publishing、provenance 或 publish evidence。
+    - 命令不写 state dir、不调用 provider、不触网、不发布 package；invalid registry/conformance/package evidence 作为 bundle blocker，不打印 stack。
+    - JSON 输出可直接作为 release notes/handoff evidence；人类输出展示 decision、blockers、commands/report 状态和 known gaps。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T312 P2：把 release evidence bundle 纳入发布文档。
+  - 验收标准：
+    - `docs/releases/release-checklist.md` 增加 `opencap release evidence` 的执行顺序和 YAML 摘要字段。
+    - V1 alpha evidence 样例说明 bundle 是本地 evidence 汇总，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing 或 release approval。
+    - `docs/TESTING.md` 记录 release evidence 命令测试入口。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
