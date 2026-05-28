@@ -203,9 +203,10 @@ pnpm --filter <package> publish --dry-run --provenance --access public --no-git-
 
 如果手动把 `dry_run` 设为 `false`，workflow 会在第一步失败，并提示真实 npm 发布仍被阻断。真实 npm 发布仍需要先配置 npm trusted publisher、受保护的 `npm-production` environment、发布审批和 release evidence。
 
+Dry-run run 完成后，release evidence 必须记录 package、version、workflow run URL、run id、tarball 摘要、provenance/dry-run 摘要和 `real_publish: false`。不得把 dry-run evidence 写成 npm package 已发布、trusted publisher 已启用或正式 provenance 已生成。
+
 ## 后续实现任务
 
 - 创建受保护的 `npm-production` environment。
 - 为 alpha 候选 package 配置 npm trusted publisher。
 - 添加 package tarball content check。
-- 在 release checklist 中记录 npm publish evidence。

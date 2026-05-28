@@ -1521,7 +1521,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增 `lintNpmPublishWorkflow()` / `lintNpmPublishWorkflowFile()`，可本地检查 `.github/workflows/npm-publish.yml` 是否保持 manual dispatch、默认 dry-run、候选 package allowlist、最小权限、禁止 `NPM_TOKEN` 和禁止无 `--dry-run` 的 publish 命令。新增 `packages/spec/src/npm-publish-workflow.test.ts` 覆盖真实 workflow 通过，以及自动触发、非候选包、长期 token、非 dry-run publish 和宽权限的负向 fixture；该 lint 不需要 GitHub environment、npm 账号、OIDC token 或网络。Spec 包测试数从 77 增至 79。
 
-- [ ] T303 P2：把 npm publish dry-run evidence 纳入 release checklist。
+- [x] T303 P2：把 npm publish dry-run evidence 纳入 release checklist。
   - 验收标准：
     - `docs/releases/release-checklist.md` 增加 npm publish dry-run evidence 字段和核对步骤。
     - V1 alpha evidence bundle 或模板说明如何记录 workflow run、package、version、tarball/provenance dry-run 摘要和不发布边界。
@@ -1531,6 +1531,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已补齐 npm publish dry-run evidence 字段和核对步骤，包括 workflow file/run id、dry-run command、tarball/provenance 摘要、package exports review 和 `real_publish: false`。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 npm publish dry-run evidence 模板，并明确当前样例为 `not-run`、不能宣称 package 已发布、trusted publisher 已配置或正式 provenance 已生成。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 dry-run evidence 边界；README 未声明 npm 发布已完成。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

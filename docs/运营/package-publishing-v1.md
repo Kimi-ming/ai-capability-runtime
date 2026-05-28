@@ -63,6 +63,8 @@ pnpm build
 - docs/HANDOFF。
 - release checklist。
 
+如果准备 npm alpha package，必须先运行 `.github/workflows/npm-publish.yml` 的 manual dry-run，并把 package、version、workflow run、tarball/provenance dry-run 摘要和 `real_publish: false` 写入 release evidence。该 dry-run 只是发布前证据，不代表 package 已发布、npm trusted publisher 已配置或 provenance 已正式生成。
+
 ## 不发布条件
 
 - CLI 命令和 README 不一致。

@@ -165,8 +165,14 @@ release_evidence:
   npm_publish:
     package: <package-name-or-not-applicable>
     version: <version-or-not-applicable>
+    workflow_file: .github/workflows/npm-publish.yml
     workflow_run: <url-or-not-run>
+    workflow_run_id: <id-or-not-run>
     dry_run: true
+    dry_run_command: pnpm --filter <package> publish --dry-run --provenance --access public --no-git-checks
+    tarball_summary: <files-and-size-summary-or-not-run>
+    provenance_summary: <provenance-dry-run-summary-or-not-run>
+    package_exports_review: pass | fail | not-run
     real_publish: false
   hard_gates:
     runtime: pass
@@ -184,6 +190,15 @@ release_evidence:
 发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 生成本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 
 如果 release 涉及 npm package，发布者应先手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，记录 package、version、workflow run URL、dry-run 结果和 `real_publish: false` 边界。真实 npm 发布仍需要 npm trusted publisher、受保护的 `npm-production` environment 和人工批准；dry-run evidence 不能写成 npm package 已发布。
+
+npm publish dry-run evidence 核对步骤：
+
+- [ ] Workflow run 来自 `.github/workflows/npm-publish.yml`，触发方式是 `workflow_dispatch`。
+- [ ] `dry_run` 输入为 `true`，且 run 日志中没有无 `--dry-run` 的 `npm publish` / `pnpm publish` 命令。
+- [ ] `package` 是当前允许的 alpha 候选包：`@opencap/spec` 或 `@opencap/cli`。
+- [ ] Run 完成 install、validate、test、build 和 publish dry-run。
+- [ ] Evidence 记录 package、version、workflow run URL、run id、tarball 摘要、provenance/dry-run 摘要和 `real_publish: false`。
+- [ ] Evidence 不包含 token、`NPM_TOKEN`、`NODE_AUTH_TOKEN`、provider raw response、私有日志、`.env`、`opencap.local/` 或数据库文件。
 
 当前 V1 alpha/local runtime evidence 样例见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`。该样例只证明本地 Runtime/CLI/Registry/MCP automated stdio smoke，不得扩展解读为 Cloud、Console、OAuth、marketplace、payment、真实 Host UI 或 npm provenance 已完成。
 
