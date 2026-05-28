@@ -1167,7 +1167,7 @@
     - `git diff --check`
   - 完成记录：新增 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`，记录 `dcf7e19` 的 alpha/local runtime evidence、`pnpm validate/build/lint/test` 结果、spec/runtime/mcp/cli 测试计数、known gaps、blocked external evidence 和 `block-release-tag` decision。`docs/releases/release-checklist.md`、`docs/TESTING.md`、`docs/HANDOFF.md` 和 `CHANGELOG.md` 已链接该 evidence，并明确不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
 
-- [ ] T293 P2：实现 `opencap doctor --json`。
+- [x] T293 P2：实现 `opencap doctor --json`。
   - 验收标准：
     - CLI `doctor` 支持 `--json`，输出 machine-readable environment、registry、state dir、installed count、invalid count、policy status 和 package versions。
     - JSON 输出不包含 env secret 值、token、Authorization header、用户输入或 provider raw data。
@@ -1176,6 +1176,7 @@
     - `pnpm --filter @opencap/cli test -- doctor-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：`packages/cli/src/index.ts` 为 `opencap doctor` 新增 `--json`，输出 `opencap.doctor.v1` diagnostics，包含 environment、registry、state dir、installed valid/invalid count、policy status 和 workspace package versions；人类输出复用同一 report，保持原格式兼容。新增 `packages/cli/src/doctor-command.test.ts` 覆盖空 state、已安装 state、invalid installed entry、secret redaction 和人类输出兼容，CLI 包测试数从 14 增至 16。
 
 - [x] T116 P1：维护术语表和文档索引。
   - 验收标准：

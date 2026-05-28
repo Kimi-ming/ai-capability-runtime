@@ -57,6 +57,7 @@
 - 真实 `opencap invoke` 接入 CLI confirmation 和 HTTP executor，支持 `--yes`、`--json`、secret missing 错误和 read-only policy allow 执行。
 - CLI `opencap invoke` 输出 Result Envelope 子集：默认人类输出只显示 summary/status/warnings，`--json` 输出结构化 envelope，`--verbose` 仅追加脱敏 evidence。
 - CLI `opencap card <id> --json` 输出已安装 Capability 的脱敏 `opencap.card.v1` Capability Card，不读取 provider secret、不执行外部请求；`opencap card <id> --kind trust --json` 输出 Trust Card，包含 trust level、maintainer、advisory summary、provenance、limitations 和固定 disclaimer。
+- CLI `opencap doctor --json` 输出 machine-readable 本地诊断报告，包含 environment、registry、state dir、installed/invalid 计数、policy 状态和 package versions，且不输出 env secret、Authorization header、用户输入或 provider raw data。
 - Runtime 新增本地 JSONL `FileRuntimeLedgerStore`，按 ledger family 分文件 append/query Capability、Policy、Invocation 和 Compatibility records。
 - install/invoke 关键事件写入 Runtime Ledger：install 写 Capability record，CLI/MCP invoke 从 audit event 派生脱敏 Invocation record，并显式暴露 ledger 写失败。
 - CLI 新增 `opencap ledger export`，可导出本地 Runtime Ledger 的脱敏 JSON，并支持 kind、capability 和 limit 筛选。

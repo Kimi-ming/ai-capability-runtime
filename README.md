@@ -99,7 +99,7 @@ V1 只支持 `type: http` 的 Capability。`mcp` 和 `local` 类型留到后续 
 
 ## 快速开始
 
-当前仓库已经可以跑通 CLI 到 Runtime 的最小本地闭环：validate、install、list、card、invoke dry-run 和 logs。示例命令使用临时 state dir，不会污染仓库根目录或用户真实项目下的 `opencap.local/`。
+当前仓库已经可以跑通 CLI 到 Runtime 的最小本地闭环：validate、install、list、card、doctor、invoke dry-run 和 logs。示例命令使用临时 state dir，不会污染仓库根目录或用户真实项目下的 `opencap.local/`。
 
 ```bash
 pnpm install
@@ -112,6 +112,7 @@ pnpm --filter @opencap/cli dev -- install github.create_issue --state-dir "$SMOK
 pnpm --filter @opencap/cli dev -- list --state-dir "$SMOKE_STATE_DIR"
 pnpm --filter @opencap/cli dev -- card github.create_issue --state-dir "$SMOKE_STATE_DIR" --json
 pnpm --filter @opencap/cli dev -- card github.create_issue --state-dir "$SMOKE_STATE_DIR" --kind trust --json
+pnpm --filter @opencap/cli dev -- doctor --state-dir "$SMOKE_STATE_DIR" --registry registry --json
 pnpm --filter @opencap/cli dev -- registry report --registry registry --json
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run

@@ -4,7 +4,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { access, readFile, stat } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { Command } from "commander";
-import { isAbsolute, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import { buildRegistryQualitySummary, formatManifestValidationIssue, validateManifestPath, type CapabilityManifest } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
@@ -54,6 +55,7 @@ import {
 } from "@opencap/runtime";
 
 const program = new Command();
+const cliModuleDir = dirname(fileURLToPath(import.meta.url));
 
 type CliExitCode = 1 | 2;
 
@@ -126,6 +128,25 @@ function pnpmVersion(): string {
     return "missing";
   }
   return result.stdout.trim() || "unknown";
+}
+
+async function packageVersion(relativePackageJsonPath: string): Promise<string> {
+  try {
+    const parsed = JSON.parse(await readFile(join(cliModuleDir, relativePackageJsonPath), "utf8")) as { version?: unknown };
+    return typeof parsed.version === "string" ? parsed.version : "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+async function workspacePackageVersions(): Promise<Record<string, string>> {
+  return {
+    cli: await packageVersion("../package.json"),
+    spec: await packageVersion("../../spec/package.json"),
+    runtime: await packageVersion("../../runtime/package.json"),
+    mcp: await packageVersion("../../mcp/package.json"),
+    sdkJs: await packageVersion("../../sdk-js/package.json"),
+  };
 }
 
 function parseLimit(value: string | undefined, fallback: number): number {
@@ -772,22 +793,55 @@ program
   .command("doctor")
   .option("--state-dir <path>", "Local OpenCap state directory")
   .option("--registry <path>", "Registry root directory")
+  .option("--json", "Output JSON")
   .description("Check local OpenCap development environment health.")
-  .action((options: { stateDir?: string; registry?: string }) => runCliAction(async () => {
+  .action((options: { stateDir?: string; registry?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const registryDir = resolveRegistryDir({ cwd, env: process.env, registryDir: options.registry });
     const statePaths = getLocalStatePaths({ cwd, env: process.env, stateDir: options.stateDir });
     const installed = await listInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
     const invalidInstalled = installed.filter((capability) => capability.status === "invalid");
+    const policy = await policyStatus(statePaths.policiesFile);
+    const report = {
+      schemaVersion: "opencap.doctor.v1",
+      environment: {
+        node: process.version,
+        pnpm: pnpmVersion(),
+      },
+      registry: {
+        path: registryDir,
+        status: await pathStatus(registryDir),
+      },
+      stateDir: {
+        path: statePaths.root,
+        status: await pathStatus(statePaths.root),
+        writable: await writableStatus(statePaths.root),
+      },
+      installed: {
+        total: installed.length,
+        valid: installed.length - invalidInstalled.length,
+        invalid: invalidInstalled.length,
+      },
+      policy: {
+        path: statePaths.policiesFile,
+        status: policy,
+      },
+      packages: await workspacePackageVersions(),
+    };
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
 
     console.log("OpenCap doctor");
-    console.log(`node: ${process.version}`);
-    console.log(`pnpm: ${pnpmVersion()}`);
-    console.log(`registry: ${await pathStatus(registryDir)} ${registryDir}`);
-    console.log(`state_dir: ${await pathStatus(statePaths.root)} ${statePaths.root}`);
-    console.log(`state_dir_writable: ${await writableStatus(statePaths.root)}`);
-    console.log(`installed: ${installed.length} total, ${invalidInstalled.length} invalid`);
-    console.log(`policy: ${await policyStatus(statePaths.policiesFile)} ${statePaths.policiesFile}`);
+    console.log(`node: ${report.environment.node}`);
+    console.log(`pnpm: ${report.environment.pnpm}`);
+    console.log(`registry: ${report.registry.status} ${report.registry.path}`);
+    console.log(`state_dir: ${report.stateDir.status} ${report.stateDir.path}`);
+    console.log(`state_dir_writable: ${report.stateDir.writable}`);
+    console.log(`installed: ${report.installed.total} total, ${report.installed.invalid} invalid`);
+    console.log(`policy: ${report.policy.status} ${report.policy.path}`);
   }, "Failed to run doctor"));
 
 program
