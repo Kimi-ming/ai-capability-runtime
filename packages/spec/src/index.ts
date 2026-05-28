@@ -1,7 +1,19 @@
 export { lintModelVisibleMetadata } from "./metadata-lint.js";
 export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
-export { CONFORMANCE_SUITE_VERSION, CORE_CONFORMANCE_GROUPS, validateConformanceRecord } from "./conformance.js";
-export type { ConformanceRecordValidationIssue } from "./conformance.js";
+export {
+  CONFORMANCE_SUMMARY_SCHEMA_VERSION,
+  CONFORMANCE_SUITE_VERSION,
+  CORE_CONFORMANCE_GROUPS,
+  buildConformanceSummary,
+  validateConformanceRecord,
+} from "./conformance.js";
+export type {
+  BuildConformanceSummaryOptions,
+  ConformanceRecordSummary,
+  ConformanceRecordValidationIssue,
+  ConformanceSummary,
+  InvalidConformanceRecordSummary,
+} from "./conformance.js";
 export { lintPrivacyRetentionDoc } from "./privacy-retention-doc-lint.js";
 export type { PrivacyRetentionDocFinding, PrivacyRetentionDocLintRule } from "./privacy-retention-doc-lint.js";
 export { lintCredentialLifecycleRunbook } from "./credential-lifecycle-doc-lint.js";

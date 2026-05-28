@@ -1424,7 +1424,7 @@
     - `git diff --check`
   - 完成记录：新增 `packages/runtime/test/fixtures/conformance/composition-recovery.yml`，并纳入 `packages/spec/src/conformance.test.ts` 校验；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.composition_recovery.v1` checks。该 record 绑定 composition recovery smoke tests、失败恢复手册、Composition Profile RFC 和 compensation review rules，明确只证明 future composition evidence，不表示 OpenCap 已实现 workflow runtime、Agent、自动调度或自动 rollback。
 
-- [ ] T295 P1：实现 conformance summary helper。
+- [x] T295 P1：实现 conformance summary helper。
   - 验收标准：
     - `@opencap/spec` 新增 `buildConformanceSummary(recordsRoot, { generatedAt? })`，递归读取 conformance YAML records，并复用 `validateConformanceRecord()`。
     - Summary 输出 `opencap.conformance_summary.v1`、suite version、record count、pass/fail/invalid count、profile 列表、每条 record 的 subject/profile/result/check/artifact 摘要。
@@ -1434,6 +1434,7 @@
     - `pnpm --filter @opencap/spec test -- conformance-summary.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增 `CONFORMANCE_SUMMARY_SCHEMA_VERSION`、`buildConformanceSummary()` 和相关 summary 类型，递归读取 conformance YAML records 并复用 `validateConformanceRecord()`。新增 `packages/spec/src/conformance-summary.test.ts` 覆盖当前 6 个 runtime conformance records、profile 列表、pass/fail/invalid 计数、artifact/check 摘要、`policyEffect: "none"` 和 invalid record 不复制 raw secret。Spec 包测试数从 75 增至 77。
 
 - [ ] T296 P1：实现 `opencap conformance report --records <path> --json`。
   - 验收标准：
