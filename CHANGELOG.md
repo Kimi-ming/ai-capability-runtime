@@ -59,6 +59,7 @@
 - CLI `opencap card <id> --json` 输出已安装 Capability 的脱敏 `opencap.card.v1` Capability Card，不读取 provider secret、不执行外部请求；`opencap card <id> --kind trust --json` 输出 Trust Card，包含 trust level、maintainer、advisory summary、provenance、limitations 和固定 disclaimer。
 - CLI `opencap doctor --json` 输出 machine-readable 本地诊断报告，包含 environment、registry、state dir、installed/invalid 计数、policy 状态和 package versions，且不输出 env secret、Authorization header、用户输入或 provider raw data。
 - `@opencap/spec` 新增 conformance summary helper，可递归读取 conformance YAML records，输出 `opencap.conformance_summary.v1` 汇总 evidence，固定 `policyEffect: "none"`，不改变 Runtime policy、trust、consent 或 install decision。
+- `@opencap/runtime` 新增 `buildLocalMetricsSummary()`，可从脱敏 audit events 派生本地 metrics summary，输出 invocation/status/policy/security counts 和 duration p50/p95，固定 `policyEffect: "none"`。
 - Runtime 新增本地 JSONL `FileRuntimeLedgerStore`，按 ledger family 分文件 append/query Capability、Policy、Invocation 和 Compatibility records。
 - install/invoke 关键事件写入 Runtime Ledger：install 写 Capability record，CLI/MCP invoke 从 audit event 派生脱敏 Invocation record，并显式暴露 ledger 写失败。
 - CLI 新增 `opencap ledger export`，可导出本地 Runtime Ledger 的脱敏 JSON，并支持 kind、capability 和 limit 筛选。

@@ -1459,7 +1459,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Conformance Summary 段落，说明如何运行 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 并引用 `opencap.conformance_summary.v1`。`docs/releases/release-checklist.md` 和 `docs/TESTING.md` 已同步该命令用途和边界，明确 conformance report 只汇总本地 evidence records，不宣称 Cloud、Console、OAuth、marketplace、payment、真实 Host UI、npm provenance 或 provider API end-to-end 已完成。
 
-- [ ] T298 P1：实现本地 audit metrics summary helper。
+- [x] T298 P1：实现本地 audit metrics summary helper。
   - 验收标准：
     - `@opencap/runtime` 导出 `buildLocalMetricsSummary(events, options?)`、`LOCAL_METRICS_SCHEMA_VERSION` 和 summary 类型。
     - Summary 从 `AuditEvent[]` 的脱敏字段派生 `invocationsTotal`、status counts、policy decision counts、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration p50/p95。
@@ -1469,6 +1469,7 @@
     - `pnpm --filter @opencap/runtime test -- metrics.test.ts`
     - `pnpm --filter @opencap/runtime build`
     - `pnpm validate`
+  - 完成记录：`@opencap/runtime` 新增 `LOCAL_METRICS_SCHEMA_VERSION`、`buildLocalMetricsSummary()` 和本地 metrics summary 类型，可从 `AuditEvent[]` 的脱敏 operational metadata 派生 invocation/status/policy/security counts、duration p50/p95、window 和 capability filter，并固定 `policyEffect: "none"`。新增 `packages/runtime/src/metrics.test.ts` 覆盖 since/until/capability 过滤、confirmation/outbound/data egress/secret/audit preflight 计数、duration 分位数、空窗口和不复制 input/egress preview/secret 字段；Runtime 包测试数从 293 增至 295。
 
 - [ ] T299 P1：实现 `opencap metrics summary` CLI。
   - 验收标准：
