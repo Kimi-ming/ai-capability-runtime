@@ -6,7 +6,7 @@ import { constants as fsConstants } from "node:fs";
 import { Command } from "commander";
 import { isAbsolute, resolve } from "node:path";
 import YAML from "yaml";
-import { formatManifestValidationIssue, validateManifestPath, type CapabilityManifest } from "@opencap/spec";
+import { buildRegistryQualitySummary, formatManifestValidationIssue, validateManifestPath, type CapabilityManifest } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
   InstallCapabilityError,
@@ -940,6 +940,41 @@ program
 const ledgerCommand = program
   .command("ledger")
   .description("Inspect local Runtime Ledger records.");
+
+const registryCommand = program
+  .command("registry")
+  .description("Inspect local Registry evidence.");
+
+registryCommand
+  .command("report")
+  .option("--registry <path>", "Registry root directory", "registry")
+  .option("--json", "Output JSON")
+  .description("Generate a local Registry quality summary report.")
+  .action((options: { registry?: string; json?: boolean }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const registryRoot = isAbsolute(options.registry ?? "registry")
+      ? options.registry ?? "registry"
+      : resolve(cwd, options.registry ?? "registry");
+    const summary = await buildRegistryQualitySummary(registryRoot);
+
+    if (options.json) {
+      console.log(JSON.stringify(summary, null, 2));
+      return;
+    }
+
+    console.log("id category lifecycle advisory quality default_install blocking_reasons");
+    for (const capability of summary.capabilities) {
+      console.log([
+        capability.id,
+        capability.category,
+        capability.lifecycle.status,
+        capability.advisory.status,
+        capability.qualityScore.band,
+        capability.defaultInstallTrusted ? "yes" : "no",
+        capability.blockingReasons.length > 0 ? capability.blockingReasons.join(",") : "-",
+      ].join(" "));
+    }
+  }, "Failed to generate Registry report"));
 
 ledgerCommand
   .command("export")

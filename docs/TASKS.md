@@ -724,7 +724,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增 `buildRegistryQualitySummary()` 和 `opencap.registry_quality_summary.v1` 输出类型，读取 registry manifests、Capability package lint、registry tests、least-privilege auth lint 和 Capability advisories，为每个 Capability 输出 manifest/package/test/auth/lifecycle/advisory/quality evidence summary。Summary 固定 `policyEffect: "none"`，只产生 evidence，不改变 trust level、policy decision 或 install allow/deny；`http.request_demo` 会因 `OCAP-2026-0001` revoked advisory 和 `unsafe_by_default` metadata 被标记为 `defaultInstallTrusted: false`。新增 `packages/spec/src/registry-quality-summary.test.ts` 覆盖现有 5 个 registry Capability，spec 包测试数从 74 增至 75。
 
-- [ ] T290 P2：新增 `opencap registry report` 本地报告命令。
+- [x] T290 P2：新增 `opencap registry report` 本地报告命令。
   - 验收标准：
     - CLI 提供 `opencap registry report --registry <path> --json`，输出 registry quality summary。
     - 人类输出给出 capability id、category、lifecycle/advisory、quality band、阻断原因摘要。
@@ -734,6 +734,7 @@
     - `pnpm --filter @opencap/cli test -- registry-report-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap registry report --registry <path> [--json]`，复用 `@opencap/spec` 的 Registry quality summary helper。JSON 输出稳定的脱敏 summary，可作为 release evidence；人类输出包含 capability id、category、lifecycle/advisory、quality band、默认安装可信判断和 blocking reasons。命令不安装 Capability、不读取/写入 state dir、不输出 secret、provider raw response 或 registry test input/output 原文。新增 `packages/cli/src/registry-report-command.test.ts` 覆盖 JSON、人类输出和临时 cwd 不创建 `opencap.local`，CLI 包测试数从 12 增至 14。
 
 - [x] T126 P1：把发布门禁整理成可执行 release checklist。
   - 验收标准：

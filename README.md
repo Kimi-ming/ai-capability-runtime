@@ -112,6 +112,7 @@ pnpm --filter @opencap/cli dev -- install github.create_issue --state-dir "$SMOK
 pnpm --filter @opencap/cli dev -- list --state-dir "$SMOKE_STATE_DIR"
 pnpm --filter @opencap/cli dev -- card github.create_issue --state-dir "$SMOKE_STATE_DIR" --json
 pnpm --filter @opencap/cli dev -- card github.create_issue --state-dir "$SMOKE_STATE_DIR" --kind trust --json
+pnpm --filter @opencap/cli dev -- registry report --registry registry --json
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run
 
