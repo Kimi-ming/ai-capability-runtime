@@ -70,6 +70,7 @@
 - Release checklist 和 V1 alpha evidence 样例新增 npm publish dry-run evidence 字段、核对步骤和 `real_publish: false` 边界，避免把 dry-run workflow 误写成真实 npm 发布。
 - `@opencap/spec` 新增 npm package readiness report helper，可本地评估 alpha package metadata、候选包 allowlist、pack file 摘要和 forbidden tarball files，固定 `policyEffect: "none"`。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。
+- Release checklist、V1 alpha evidence 样例和 npm 发布文档已纳入 package readiness report 与 `npm pack --dry-run --json` 记录步骤，明确它不能替代 npm publish dry-run、trusted publishing 或正式 provenance。
 - 新增 V1 alpha/local runtime release evidence bundle，记录本地验证命令、测试计数、known gaps、blocked external evidence 和 release decision，明确不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。
 - MCP `tools/list` projection builder，支持 installed Capability 到 MCP tool payload，并保留 tool name collision 检测。

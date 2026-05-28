@@ -62,6 +62,31 @@ npm_publish:
 
 该 evidence 只能证明 dry-run 路径完成；不能写成 npm package 已发布、npm trusted publisher 已配置、provenance 已正式生成或 release artifact 已 attested。
 
+## Package Readiness Evidence
+
+当前 evidence bundle 未运行 package readiness report 或 npm pack dry-run，因此 package readiness 记录为 `not-run`。发布者准备 npm alpha package 时，应先运行：
+
+```bash
+pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
+opencap release package report --package <package> --pack-json <pack-json> --json
+```
+
+新的 release evidence 应记录：
+
+```yaml
+package_readiness:
+  schemaVersion: opencap.npm_package_readiness.v1
+  package: "@opencap/spec | @opencap/cli"
+  version: "<package-version>"
+  blockers: []
+  warnings: []
+  pack_evidence: provided
+  forbidden_files: []
+  policy_effect: none
+```
+
+如果当前 package 仍有 blocker，例如 `NPM_PACKAGE_PRIVATE` 或 forbidden pack file，发布者必须把 report 作为 blocker evidence，而不能创建 npm release。该 report 只证明本地 metadata/tarball 摘要审查，不替代 npm publish dry-run、trusted publisher、正式 provenance、release tag 或 GitHub required checks。
+
 ## 测试计数
 
 | 包 | 文件数 | 测试数 | 当前覆盖摘要 |
@@ -89,6 +114,7 @@ npm_publish:
 - Cloud、团队/多租户、远程 Runtime、完整 OAuth flow、marketplace、payment、billing、settlement、refund 和 payout 不在当前 alpha 证据范围。
 - 真实 Claude Desktop/Cursor Host UI smoke evidence 仍阻塞于本机 Host 应用、人工配置和录屏/截图记录；当前只有自动化 MCP SDK stdio smoke。
 - npm publish dry-run 当前为 `not-run`；npm trusted publishing、Sigstore/SLSA provenance、package signing 和 release artifact attestation 仍是规划/预留，不是已执行发布证据。
+- Package readiness report 和 npm pack dry-run 当前为 `not-run`；若后续运行发现 blocker，应阻断 npm package 发布。
 - `http.request_demo` 是 unsafe-by-default 示例 Capability，带 revoked advisory，不应作为默认可信安装能力宣传。
 - Registry report 和 quality score 只作为 evidence，不改变 Runtime policy、trust level、consent 或 install decision。
 - Conformance report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
@@ -99,6 +125,7 @@ npm_publish:
 | --- | --- | --- |
 | T291 真实 Claude Desktop/Cursor Host smoke | blocked | 需要用户确认本机 Host 应用可用，并提供可复现配置、截图/录屏或日志。 |
 | GitHub Actions required checks | pending-external | 发布者在 tag/PR 前需检查远端 CI。 |
+| Package readiness / npm pack dry-run | pending-external | 发布者需运行 `opencap release package report` 和 `npm pack --dry-run --json`，并记录 blockers、warnings、forbidden files 和 `policyEffect: none`。 |
 | npm publish dry-run evidence | pending-external | 发布者需手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，并记录 package、version、workflow run、tarball/provenance 摘要和 `real_publish: false`。 |
 | npm trusted publishing/provenance | pending-external | 需要 npm/GitHub 发布配置，当前不得声明已发布或已 attested。 |
 | 真实 provider API end-to-end | not-in-scope | 当前证据避免调用真实 provider，不记录 raw response 或用户数据。 |

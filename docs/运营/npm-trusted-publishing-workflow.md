@@ -205,8 +205,16 @@ pnpm --filter <package> publish --dry-run --provenance --access public --no-git-
 
 Dry-run run 完成后，release evidence 必须记录 package、version、workflow run URL、run id、tarball 摘要、provenance/dry-run 摘要和 `real_publish: false`。不得把 dry-run evidence 写成 npm package 已发布、trusted publisher 已启用或正式 provenance 已生成。
 
+在触发 workflow dry-run 前，发布者应先运行本地 package readiness report：
+
+```bash
+pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
+opencap release package report --package <package> --pack-json <pack-json> --json
+```
+
+该 report 用于确认 package metadata、候选包 allowlist、tarball file count/size 和 forbidden files。它不发布 package、不读取 npm token、不替代 workflow dry-run 或 trusted publishing；如果存在 blocker，应先修复或在 release evidence 中记录为阻断。
+
 ## 后续实现任务
 
 - 创建受保护的 `npm-production` environment。
 - 为 alpha 候选 package 配置 npm trusted publisher。
-- 添加 package tarball content check。

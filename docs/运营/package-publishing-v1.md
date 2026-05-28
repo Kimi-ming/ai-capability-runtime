@@ -65,6 +65,15 @@ pnpm build
 
 如果准备 npm alpha package，必须先运行 `.github/workflows/npm-publish.yml` 的 manual dry-run，并把 package、version、workflow run、tarball/provenance dry-run 摘要和 `real_publish: false` 写入 release evidence。该 dry-run 只是发布前证据，不代表 package 已发布、npm trusted publisher 已配置或 provenance 已正式生成。
 
+在运行 publish dry-run 前，应先生成 package readiness evidence：
+
+```bash
+pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
+opencap release package report --package <package> --pack-json <pack-json> --json
+```
+
+该 report 只检查 package metadata 和本地 pack file 摘要，固定 `policyEffect: none`。如果 report 包含 `NPM_PACKAGE_PRIVATE`、forbidden pack file 或其他 blocker，不能进入 npm publish dry-run 或真实发布。
+
 ## 不发布条件
 
 - CLI 命令和 README 不一致。

@@ -1558,7 +1558,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap release package report --package <workspace-name> [--pack-json <path>] [--json]`，复用 T304 helper 输出本地 `opencap.npm_package_readiness.v1` report。未提供 `--pack-json` 时，报告 tarball evidence 为 `not-run`；提供 `npm pack --dry-run --json` 摘要时会记录 file count/size 和 forbidden file summary。命令不运行 npm publish、不触网、不读取 npm token；非候选 package 和非法 pack JSON 作为用户错误 exit `1` 且不打印 stack。新增 `packages/cli/src/release-package-report-command.test.ts` 覆盖 JSON、人类输出、pack JSON、unsupported package 和 invalid pack JSON；CLI 包测试数从 24 增至 28。
 
-- [ ] T306 P2：把 package readiness report 纳入 release evidence。
+- [x] T306 P2：把 package readiness report 纳入 release evidence。
   - 验收标准：
     - `docs/releases/release-checklist.md` 增加 `opencap release package report` 和 `npm pack --dry-run --json` 的执行/记录步骤。
     - V1 alpha evidence 样例说明 package readiness 当前可作为 `not-run` 或 blocker evidence，不能替代真实 npm publish dry-run、trusted publishing 或 provenance。
@@ -1568,6 +1568,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已增加 `opencap release package report` 和 `npm pack --dry-run --json` 的执行/记录步骤，release evidence YAML 模板新增 `package_readiness_report`、`npm_pack_dry_run` 和 `package_readiness` 字段。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Package Readiness Evidence 段落，明确当前样例为 `not-run`，后续 report 只能证明本地 metadata/tarball 摘要审查，不能替代 npm publish dry-run、trusted publisher、正式 provenance、release tag 或 GitHub required checks。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 readiness/tarball review 边界。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

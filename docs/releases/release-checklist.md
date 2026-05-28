@@ -161,7 +161,18 @@ release_evidence:
     pnpm_lint: pass
     pnpm_test: pass
     conformance_report: pass | fail | not-run
+    package_readiness_report: pass | fail | not-run
+    npm_pack_dry_run: pass | fail | not-run
     npm_publish_dry_run: pass | fail | not-run
+  package_readiness:
+    command: opencap release package report --package <package> --pack-json <pack-json> --json
+    package: <package-name-or-not-applicable>
+    version: <version-or-not-applicable>
+    blockers: []
+    warnings: []
+    pack_evidence: provided | not-run
+    forbidden_files: []
+    policy_effect: none
   npm_publish:
     package: <package-name-or-not-applicable>
     version: <version-or-not-applicable>
@@ -188,6 +199,15 @@ release_evidence:
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
 
 发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 生成本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
+
+npm package readiness evidence 核对步骤：
+
+- [ ] 运行 `pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>`，只生成本地 pack 摘要，不发布 package。
+- [ ] 运行 `opencap release package report --package <package> --pack-json <pack-json> --json`。
+- [ ] Evidence 记录 `opencap.npm_package_readiness.v1` 的 package、version、blockers、warnings、pack evidence、forbidden files 和 `policyEffect: none`。
+- [ ] 如果 `blockers` 非空，不能发布该 npm package；可把 report 作为 blocker evidence 写入 release notes/handoff。
+- [ ] 如果没有运行 pack dry-run，必须把 `pack_evidence: not-run` 写入 evidence，不能伪造 tarball 内容审查已完成。
+- [ ] Report 不包含 token、`NPM_TOKEN`、`NODE_AUTH_TOKEN`、`.env` 内容、`opencap.local/` 内容、数据库内容、provider raw response 或私有日志正文。
 
 如果 release 涉及 npm package，发布者应先手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，记录 package、version、workflow run URL、dry-run 结果和 `real_publish: false` 边界。真实 npm 发布仍需要 npm trusted publisher、受保护的 `npm-production` environment 和人工批准；dry-run evidence 不能写成 npm package 已发布。
 
