@@ -161,7 +161,7 @@
 
 ### 模块 M2：执行安全、审计和可靠性
 
-- [ ] T283 P1：实现本地 JSONL Runtime Ledger Store。
+- [x] T283 P1：实现本地 JSONL Runtime Ledger Store。
   - 验收标准：
     - `@opencap/runtime` 提供一个实现 `RuntimeLedgerStore` 的本地 JSONL append-only store，默认写入 resolved state dir 下的 `ledger/`。
     - Store 支持四类 ledger record：Capability、Policy、Invocation、Compatibility，文件按 record kind 分离，append 后可按 kind、capability id、时间范围查询。
@@ -172,6 +172,7 @@
     - `pnpm --filter @opencap/runtime build`
     - `pnpm validate`
     - `pnpm lint`
+  - 完成记录：`packages/runtime/src/ledger.ts` 新增 `FileRuntimeLedgerStore`，实现 `RuntimeLedgerStore` 的本地 JSONL append-only store，默认写入 resolved state dir 下的 `ledger/`，按 `capability.jsonl`、`policy.jsonl`、`invocation.jsonl`、`compatibility.jsonl` 分文件保存。Store 支持 append、kind-specific list query、latest capability、active policy、request lookup 和 compatibility lookup；写入前会拒绝明显 raw input/output、provider raw body、secret/token/Authorization 类 metadata。新增 `packages/runtime/src/ledger-store.test.ts` 覆盖文件布局、过滤、cursor/limit、latest lookup、root export 和脱敏拒绝边界；Runtime 测试数从 284 增至 289。
 
 - [ ] T284 P1：把 install/invoke 关键事件写入 Runtime Ledger。
   - 验收标准：

@@ -11,7 +11,7 @@ export { createProblemDetailsFromProviderRateLimit, createProblemDetailsFromQuot
 export { evaluateFinancialConsentSpendGate } from "./financial-consent-spend-gate.js";
 export { defaultExternalSendAbuseThrottleRule, evaluateAbuseThrottleGate } from "./abuse-throttle.js";
 export { POLICY_TRACE_VERSION } from "./policy-trace.js";
-export { LEDGER_RECORD_VERSION, createLedgerRecordId } from "./ledger.js";
+export { FileRuntimeLedgerStore, LEDGER_RECORD_VERSION, createLedgerRecordId } from "./ledger.js";
 export { CARD_SCHEMA_VERSION, TRUST_CARD_DISCLAIMER, createCapabilityCard, createCardId, createCompatibilityCard, createConsentCard, createTrustCard, createTrustCardFromInstalledCapability } from "./card.js";
 export { CAPABILITY_IDENTITY_VERSION, capabilityIdentityKey, capabilityLifecycleSemantics, createCapabilityIdentity, createCapabilityIdentityRef, validateCapabilityIdentity } from "./identity.js";
 export { FilePolicyLedger } from "./policy-ledger.js";
