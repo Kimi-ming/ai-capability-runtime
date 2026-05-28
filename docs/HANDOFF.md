@@ -8,9 +8,11 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮在任务队列清空后新增并完成 T282：`opencap card <id> --json`。CLI 现在可以从本地已安装 Capability 生成脱敏 `opencap.card.v1` Capability Card JSON，复用 Runtime Card schema，包含 capability identity、risk、permissions、auth redaction summary、install summary 和 manifest digest evidence；该命令不读取 provider secret、不执行 Capability、不写审计。新增 `packages/cli/src/card-command.test.ts` 覆盖已安装输出和未安装用户错误，CLI 包测试数从 5 增至 7。
 
-本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store 和 T284 install/invoke ledger 写入均已完成；后续依次推进 ledger export、自动化 MCP stdio smoke、Host evidence 文档、Trust Card CLI、Registry quality report、release evidence、doctor JSON 和 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
+本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入和 T285 ledger export 均已完成；后续依次推进自动化 MCP stdio smoke、Host evidence 文档、Trust Card CLI、Registry quality report、release evidence、doctor JSON 和 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
 
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。下一步进入 T285：新增 `opencap ledger export` 脱敏导出命令。
+
+本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。`next_task.py` 当前返回的下一项 ready 是 T287：把自动化 MCP smoke evidence 写入 Host compatibility matrix。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。下一步应先评审该设计，再进入实施计划；实施顺序建议为 T070 MCP server 闭环、T198 Usage event schema、T206 quota/rate problem details、T205 usage export format、T207 usage evidence conformance tests。
 
@@ -89,15 +91,15 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283 和 T284 均已完成；当前首个 ready 任务是 T285：新增 `opencap ledger export` 脱敏导出命令。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284 和 T285 均已完成；`next_task.py` 当前返回的下一项 ready 是 T287：把自动化 MCP smoke evidence 写入 Host compatibility matrix。
 
-下一步推荐：T285 P2：新增 `opencap ledger export` 脱敏导出命令。T291 真实 Claude Desktop/Cursor Host smoke evidence 仍为阻塞任务，只有在用户确认本机 Host 环境可用后再做。
+下一步推荐：T287 P2：把自动化 MCP smoke evidence 写入 Host compatibility matrix。T291 真实 Claude Desktop/Cursor Host smoke evidence 仍为阻塞任务，只有在用户确认本机 Host 环境可用后再做。
 
 当前阻塞：
 
 - T001/T002/T003/T004/T005/T010/T011/T012/T013/T014/T015/T020/T021/T022/T030/T031/T032/T033/T034/T040/T041/T042/T043/T050/T051/T052/T053/T054/T055/T060/T061/T062/T071/T072/T073/T074/T080/T081/T082/T083/T084/T090/T091/T092/T093/T100/T101/T102/T103/T104/T112/T113/T114/T120/T121/T122/T123/T124/T125/T126/T127/T128/T129/T130/T131/T132/T133/T134/T135/T136/T137/T138/T139/T140/T141/T142/T143/T144/T145/T147/T148/T151/T152/T153/T154/T155/T156/T157/T158/T159/T160/T161/T162/T163/T164/T165/T167/T168/T170/T173/T185/T186/T187/T188/T189/T190/T191/T192/T193/T194/T195/T196/T199/T200/T201/T204/T209/T210/T211/T212/T213/T214/T215/T216/T217/T218/T220/T221/T222/T223/T224/T225/T226/T227/T228/T229/T230/T231/T232/T234/T235/T236/T237/T238/T239/T240/T241/T242/T243/T244/T245/T246/T247/T249/T250/T251/T252/T253/T254/T255/T256/T257/T258/T259/T260/T268/T269/T270/T116/T271/T272/T273/T274/T275/T276 已完成
 - Runtime/CLI 已能初始化 state dir、安装能力、列出能力、加载合法 installed capabilities、解析 policy、计算 allow/ask/deny、处理确认、支持 CLI `--yes`、生成审计事件、脱敏输入、持久化 SQLite、查询筛选日志，渲染 HTTP URL 模板、生成 HTTP dry-run plan、执行真实 HTTP 请求，并通过 MCP tools/call 返回稳定的确认阻断结果
-- 当前状态：T070、T146、T169、T171、T172、T175、T176、T177、T198、T205、T206、T207、T282、T283 和 T284 已完成并验证；当前 ready 队列从 T285 开始。
+- 当前状态：T070、T146、T169、T171、T172、T175、T176、T177、T198、T205、T206、T207、T282、T283、T284 和 T285 已完成并验证；`next_task.py` 当前返回 T287。
 
 ## 最近验证
 
@@ -168,7 +170,7 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 - `next_task.py`
 - RFC 0016 草案文本扫描：无待补全文案命中。
 
-当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 74 个、runtime 293 个、mcp 25 个、cli 7 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。CLI smoke/snapshot/error tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
+当前已知：上述验证均通过。`pnpm test` 当前覆盖 spec 74 个、runtime 293 个、mcp 25 个、cli 10 个测试。运行环境使用 conda `ai-capability-runtime` 中的 Node 22 和 pnpm 9.15.3。`node:sqlite` ExperimentalWarning 仍是已知环境提示。CLI smoke/snapshot/error/ledger tests 仍会通过 `tsx` 创建本地 IPC pipe，普通 Codex 沙箱会以 `listen EPERM` 阻断，需要脱沙箱验证。
 
 ## 本轮文档和后续收敛
 

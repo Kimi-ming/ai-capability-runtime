@@ -187,7 +187,7 @@
     - `pnpm validate`
   - 完成记录：`installCapability()` 成功安装后会写入 Capability ledger record，包含 `CapabilityIdentity`、manifest digest、registry source ref 和 install evidence；默认写入 resolved state dir 下的 JSONL ledger，也支持注入 `RuntimeLedgerStore` 并在 ledger 写失败时显式报错。Runtime 新增 `RuntimeLedgerAuditLogger` 和 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout 状态；CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger。CLI smoke 验证 install、dry-run invoke 和 secret-missing blocked invoke 写入脱敏 ledger，且 JSONL 中不包含 input 原文、secret、Authorization 或 provider raw body；Runtime index 测试数从 98 增至 102，Runtime 包测试数从 289 增至 293。
 
-- [ ] T285 P2：新增 `opencap ledger export` 脱敏导出命令。
+- [x] T285 P2：新增 `opencap ledger export` 脱敏导出命令。
   - 验收标准：
     - CLI 提供 `opencap ledger export --state-dir <path> --json`，读取本地 ledger records 并输出脱敏 JSON。
     - 支持 `--kind capability|policy|invocation|compatibility`、`--capability <id>`、`--limit <number>` 基础筛选。
@@ -197,6 +197,7 @@
     - `pnpm --filter @opencap/cli test -- ledger-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap ledger export` 子命令，默认从 resolved state dir 的 JSONL Runtime Ledger 读取四类 records 并输出脱敏记录；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 的非 JSON 输出为 `No ledger records found.`；非法 kind/limit 作为用户错误 exit `1`，不打印 stack。新增 `packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、kind/capability/limit 筛选、secret-missing blocked invocation redaction 和非法参数错误；CLI 包测试数从 7 增至 10。
 
 - [x] T131 P1：实现 `execution.body.fields` 渲染测试。
   - 验收标准：

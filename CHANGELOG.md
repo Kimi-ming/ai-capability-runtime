@@ -59,6 +59,7 @@
 - CLI `opencap card <id> --json` 输出已安装 Capability 的脱敏 `opencap.card.v1` Capability Card，不读取 provider secret、不执行外部请求。
 - Runtime 新增本地 JSONL `FileRuntimeLedgerStore`，按 ledger family 分文件 append/query Capability、Policy、Invocation 和 Compatibility records。
 - install/invoke 关键事件写入 Runtime Ledger：install 写 Capability record，CLI/MCP invoke 从 audit event 派生脱敏 Invocation record，并显式暴露 ledger 写失败。
+- CLI 新增 `opencap ledger export`，可导出本地 Runtime Ledger 的脱敏 JSON，并支持 kind、capability 和 limit 筛选。
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。
 - MCP `tools/list` projection builder，支持 installed Capability 到 MCP tool payload，并保留 tool name collision 检测。
 - MCP Tool Projection builder，统一生成 `projectionVersion`、capability id、tool name、title、description、input/output schema 等模型可见 metadata。

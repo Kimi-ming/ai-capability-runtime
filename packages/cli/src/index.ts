@@ -42,6 +42,8 @@ import {
   type CapabilityLifecycleWarning,
   type CapabilityLifecycleState,
   type InstalledCapability,
+  type LedgerRecordKind,
+  type LedgerRecordV1,
   type TrustSummary,
   type PolicyDecision,
   type PolicySimulationScenario,
@@ -140,6 +142,19 @@ function parseLimit(value: string | undefined, fallback: number): number {
 const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "denied", "executed", "dry_run"]);
 
 const POLICY_DECISION_VALUES = new Set<PolicyDecision>(["allow", "ask", "deny"]);
+const LEDGER_RECORD_KINDS = new Set<LedgerRecordKind>(["capability", "policy", "invocation", "compatibility"]);
+
+function parseLedgerKind(value: string | undefined): LedgerRecordKind | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!LEDGER_RECORD_KINDS.has(value as LedgerRecordKind)) {
+    throw new CliUserInputError(`Invalid --kind value: ${value}`);
+  }
+
+  return value as LedgerRecordKind;
+}
 
 function parsePolicyDecision(value: string | undefined): PolicyDecision | undefined {
   if (value === undefined) {
@@ -172,6 +187,24 @@ function formatDecisionLogLine(record: {
     record.policyRevision ?? "-",
     record.traceId ?? "-",
     record.reasonCode ?? "-",
+  ].join(" ");
+}
+
+function ledgerRecordCapabilityId(record: LedgerRecordV1): string | undefined {
+  if (record.recordKind === "policy") {
+    return undefined;
+  }
+
+  return record.capability?.id;
+}
+
+function formatLedgerLine(record: LedgerRecordV1): string {
+  return [
+    record.recordedAt,
+    record.recordKind,
+    ledgerRecordCapabilityId(record) ?? "-",
+    "status" in record ? record.status : "event" in record ? record.event : "result" in record ? record.result : "-",
+    record.recordId,
   ].join(" ");
 }
 
@@ -865,6 +898,58 @@ program
 
     console.log("runtime is not implemented yet");
   }, "Failed to start runtime"));
+
+const ledgerCommand = program
+  .command("ledger")
+  .description("Inspect local Runtime Ledger records.");
+
+ledgerCommand
+  .command("export")
+  .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--json", "Output JSON")
+  .option("--kind <kind>", "Filter by ledger kind: capability, policy, invocation, compatibility")
+  .option("--capability <id>", "Filter by Capability id")
+  .option("--limit <number>", "Number of ledger records to export", "100")
+  .description("Export redacted Runtime Ledger records.")
+  .action((options: { stateDir?: string; json?: boolean; kind?: string; capability?: string; limit?: string }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const kind = parseLedgerKind(options.kind);
+    const limit = parseLimit(options.limit, 100);
+    const store = new FileRuntimeLedgerStore({ cwd, env: process.env, stateDir: options.stateDir });
+    const records: LedgerRecordV1[] = [];
+
+    if (kind === undefined || kind === "capability") {
+      records.push(...(await store.listCapabilityRecords({ capabilityId: options.capability })).records);
+    }
+    if ((kind === undefined || kind === "policy") && options.capability === undefined) {
+      records.push(...(await store.listPolicyRecords()).records);
+    }
+    if (kind === undefined || kind === "invocation") {
+      records.push(...(await store.listInvocationRecords({ capabilityId: options.capability })).records);
+    }
+    if (kind === undefined || kind === "compatibility") {
+      records.push(...(await store.listCompatibilityRecords({ capabilityId: options.capability })).records);
+    }
+
+    const limited = records
+      .sort((left, right) => left.recordedAt.localeCompare(right.recordedAt) || left.recordId.localeCompare(right.recordId))
+      .slice(0, limit);
+
+    if (options.json) {
+      console.log(JSON.stringify(limited, null, 2));
+      return;
+    }
+
+    if (limited.length === 0) {
+      console.log("No ledger records found.");
+      return;
+    }
+
+    console.log("recorded_at kind capability_id status record_id");
+    for (const record of limited) {
+      console.log(formatLedgerLine(record));
+    }
+  }, "Failed to export ledger records"));
 
 program
   .command("logs")
