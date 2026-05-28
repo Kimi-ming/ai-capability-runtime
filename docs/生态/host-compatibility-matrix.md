@@ -2,7 +2,7 @@
 
 本文定义 OpenCap 如何跟踪 MCP Host 兼容性。不同 Host 对 MCP tools、output schema、elicitation、STDIO 行为的支持可能不同，不能靠假设推进。
 
-维护状态：2026-05-14 已重新校准。当前矩阵只声明已有证据：自定义 MCP client 由自动化测试覆盖；Claude Desktop 和 Cursor 仍是已识别目标 Host，但真实 Host smoke 结果保持 `pending-smoke`。在完成手动 smoke 前，OpenCap 不能宣称兼容所有 MCP Host。
+维护状态：2026-05-28 已补充自动化 MCP stdio smoke evidence。当前矩阵只声明已有证据：自定义 MCP client/helper tests 覆盖 adapter contract，custom MCP stdio client 覆盖真实 `opencap serve --mcp` stdio 启动、`tools/list` 和 `tools/call` 基础路径；Claude Desktop 和 Cursor 仍是已识别目标 Host，但真实 Host smoke 结果保持 `pending-smoke`。在完成手动 smoke 前，OpenCap 不能宣称兼容所有 MCP Host。
 
 ## 目标 Host
 
@@ -30,8 +30,8 @@
 
 | Profile | 范围 | 自动化证据 | Claude Desktop | Cursor | 当前结论 |
 | --- | --- | --- | --- | --- | --- |
-| `opencap.mcp.tools.v1` | tools/list、tools/call、tool name、input schema、confirmation_required | `packages/mcp/src/index.test.ts`、`tool-projection.test.ts` | pending-smoke | pending-smoke | Runtime/MCP adapter 行为已测；真实 Host 展示和调用仍需手动记录。 |
-| `opencap.mcp.consent.v1` | ask 无确认通道时返回 confirmation_required，不 prompt，不解析 secret | `packages/mcp/src/index.test.ts`、`packages/runtime/src/index.test.ts` consent receipt tests | pending-smoke | pending-smoke | 安全边界由 Runtime 保证；Host 原生确认能力不作为 V1 依赖。 |
+| `opencap.mcp.tools.v1` | tools/list、tools/call、tool name、input schema、confirmation_required | `packages/mcp/src/index.test.ts`、`packages/mcp/src/tool-projection.test.ts`、`packages/mcp/src/sdk-stdio-smoke.test.ts` | pending-smoke | pending-smoke | Runtime/MCP adapter 行为已测；SDK stdio smoke 已覆盖真实 server 启动和基础调用；真实 Host 展示和调用仍需手动记录。 |
+| `opencap.mcp.consent.v1` | ask 无确认通道时返回 confirmation_required，不 prompt，不解析 secret | `packages/mcp/src/index.test.ts`、`packages/mcp/src/sdk-stdio-smoke.test.ts`、`packages/runtime/src/index.test.ts` consent receipt tests | pending-smoke | pending-smoke | 安全边界由 Runtime 保证；SDK stdio smoke 已验证无 elicitation Host 的 write ask 返回 `CONFIRMATION_REQUIRED`；Host 原生确认能力不作为 V1 依赖。 |
 | `opencap.mcp.result.v1` | structuredContent、content text、isError、outputSchema result behavior | `packages/mcp/src/result-adapter.test.ts`、Runtime Result Envelope tests | pending-smoke | pending-smoke | 结果 envelope 和 sanitizer 已测；Host 展示行为仍需 smoke。 |
 | `opencap.host.record.v1` | Host version、OpenCap commit、test date、checks、known gaps | `packages/runtime/src/ledger.test.ts`、`card.test.ts` compatibility record/card tests | pending-record | pending-record | record/card schema 已测；真实 Host record 待补。 |
 
@@ -77,6 +77,45 @@ known_gaps:
   - Not a third-party Host UI smoke.
   - Does not prove Claude Desktop or Cursor display behavior.
 notes: Adapter-level contract for tools/list, tools/call, deterministic tool names, original capabilityId metadata, projection hash, and no-elicitation confirmation_required behavior.
+```
+
+### `hostrec-2026-05-28-custom-mcp-stdio-client-tools-v1`
+
+```yaml
+host: custom-mcp-stdio-client
+host_version: opencap-sdk-stdio-smoke-0.1.0-dev
+opencap_version: 0.1.0-dev
+opencap_commit: 5870301
+profile:
+  - opencap.mcp.tools.v1
+  - opencap.mcp.consent.v1
+capability:
+  - github.search_repo
+  - github.create_issue
+test_date: 2026-05-28
+result: pass
+transport: stdio
+tool_metadata:
+  stable_tool_name: supported
+  input_schema: supported
+  risk_metadata: supported
+  capability_id_meta: supported
+checks:
+  stdio_server_start: pass
+  stdout_jsonrpc_only: pass
+  tools_list: pass
+  tools_list_stable_tool_name: pass
+  tools_list_input_schema: pass
+  tools_list_risk_metadata: pass
+  read_only_allow_secret_boundary: pass
+  write_ask_confirmation_required: pass
+evidence:
+  - packages/mcp/src/sdk-stdio-smoke.test.ts
+known_gaps:
+  - Not a third-party Host UI smoke.
+  - Does not prove Claude Desktop or Cursor display behavior.
+  - Does not validate Host-side rendering, settings UI, retention behavior, or user confirmation UX.
+notes: SDK stdio smoke starts `opencap serve --mcp` through stdio with a temporary state dir. The read-only path is allowed by policy and stops at the expected missing-secret boundary without storing secrets; the write path returns `CONFIRMATION_REQUIRED` because V1 has no MCP elicitation channel.
 ```
 
 ### `hostrec-2026-05-14-custom-mcp-client-result-v1`
@@ -201,6 +240,79 @@ limitations:
   - Not a third-party Host UI smoke.
   - Does not prove Claude Desktop or Cursor display behavior.
 notes: Supports the custom MCP client tools Host record only.
+```
+
+### `evidence-2026-05-28-custom-mcp-stdio-smoke`
+
+```yaml
+schema_version: opencap.interop.evidence.v1
+evidence_id: evidence-2026-05-28-custom-mcp-stdio-smoke
+profile: opencap.mcp.tools.v1
+subject:
+  kind: host
+  id: custom-mcp-stdio-client
+  version: opencap-sdk-stdio-smoke-0.1.0-dev
+  capability_id:
+    - github.search_repo
+    - github.create_issue
+supports:
+  compatibility_records:
+    - hostrec-2026-05-28-custom-mcp-stdio-client-tools-v1
+  rfcs: []
+opencap:
+  version: 0.1.0-dev
+  commit: 5870301
+observed_at: 2026-05-28T00:00:00Z
+evidence_kind: automated-test
+result: pass
+source:
+  commands:
+    - pnpm --filter @opencap/mcp test -- sdk-stdio-smoke.test.ts
+  paths:
+    - packages/mcp/src/sdk-stdio-smoke.test.ts
+  artifacts: []
+checks:
+  - id: stdio_server_start
+    result: pass
+    summary: SDK client starts `opencap serve --mcp` over stdio.
+  - id: stdout_jsonrpc_only
+    result: pass
+    summary: MCP JSON-RPC handshake and requests complete without stdout protocol pollution.
+  - id: tools_list
+    result: pass
+    summary: tools/list exposes installed `github.search_repo` and `github.create_issue` capabilities.
+  - id: tools_list_stable_tool_name
+    result: pass
+    summary: Capability ids project to stable MCP tool names `github_search_repo` and `github_create_issue`.
+  - id: tools_list_input_schema
+    result: pass
+    summary: Tool payload includes manifest-derived object input schema.
+  - id: tools_list_risk_metadata
+    result: pass
+    summary: Tool metadata and description carry Runtime-generated capability/risk information.
+  - id: read_only_allow_secret_boundary
+    result: pass
+    summary: Read-only allow path reaches the expected missing-secret boundary and returns a structured `SECRET_MISSING` error without storing secrets.
+  - id: write_ask_confirmation_required
+    result: pass
+    summary: Write ask path returns structured `CONFIRMATION_REQUIRED` because the stdio client has no elicitation channel.
+privacy:
+  stores_raw_input: false
+  stores_raw_output: false
+  stores_provider_raw_body: false
+  stores_secret: false
+  stores_authorization_header: false
+  redaction_profile: opencap.redaction.v1
+limitations:
+  - Automated SDK/client smoke only.
+  - Not a Claude Desktop or Cursor UI smoke.
+known_gaps:
+  - Does not prove third-party Host display behavior.
+  - Does not validate Host settings UI, retention behavior, or human confirmation UX.
+review:
+  reviewer: maintainer
+  reviewed_at: 2026-05-28T00:00:00Z
+  notes: Supports stdio server startup and baseline MCP tools/consent behavior; real Host records remain pending-smoke.
 ```
 
 ### `evidence-2026-05-14-custom-mcp-client-result-tests`

@@ -462,7 +462,7 @@
     - `pnpm validate`
   - 完成记录：新增 `packages/mcp/src/sdk-stdio-smoke.test.ts`，使用官方 MCP TypeScript SDK `Client` + stdio transport 启动 `opencap serve --mcp`。测试在临时 state dir 安装 `github.search_repo` 和 `github.create_issue`，验证 `tools/list` 暴露稳定 tool name、input schema 和 capability/risk metadata；read-only allow 路径会继续执行到 secret boundary 并返回脱敏 `SECRET_MISSING`，write/ask 在无 elicitation Host 下返回 `CONFIRMATION_REQUIRED`。测试通过 SDK stdio 协议握手和 JSON-RPC request 证明 stdout 未被普通日志污染；由于 `tsx` 本地 IPC 在沙箱内会触发 `listen EPERM`，该 smoke 需要在 conda 环境下以沙箱外权限运行。
 
-- [ ] T287 P2：把自动化 MCP smoke evidence 写入 Host compatibility matrix。
+- [x] T287 P2：把自动化 MCP smoke evidence 写入 Host compatibility matrix。
   - 验收标准：
     - `docs/生态/host-compatibility-matrix.md` 增加 automated MCP stdio smoke evidence record，绑定测试文件、OpenCap commit、profiles 和 known gaps。
     - 记录明确 automated SDK/client smoke 不等同 Claude Desktop/Cursor UI smoke。
@@ -471,6 +471,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/生态/host-compatibility-matrix.md` 新增 `hostrec-2026-05-28-custom-mcp-stdio-client-tools-v1` 和 `evidence-2026-05-28-custom-mcp-stdio-smoke`，绑定 T286 测试文件、OpenCap commit `5870301`、`opencap.mcp.tools.v1` / `opencap.mcp.consent.v1` profile、检查项、隐私边界和 known gaps。记录明确 automated SDK/client stdio smoke 只证明本地 stdio server 与 SDK client 行为，不等同 Claude Desktop/Cursor UI smoke。`docs/教程/connect-mcp-host.md` 已链接该 evidence，并继续保留真实 Host smoke 的 `pending-smoke` 状态。
 
 - [ ] T288 P2：扩展 `opencap card` 支持 Trust Card 输出。
   - 验收标准：

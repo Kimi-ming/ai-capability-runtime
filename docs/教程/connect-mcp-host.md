@@ -2,7 +2,7 @@
 
 本文说明如何把 OpenCap Runtime 作为本地 MCP stdio server 接入 Claude Desktop、Claude Code、Cursor 或其他 MCP Host，并手动验证 `tools/list`、`tools/call`、策略阻断和审计日志。
 
-> 当前实现状态：截至 T070，`opencap serve --mcp` 已接入官方 MCP TypeScript SDK 并启动最小 stdio server。本文用于真实 Host smoke；未完成 smoke 前，Claude Desktop/Cursor 兼容结论仍保持 `pending-smoke`。
+> 当前实现状态：截至 T286，`opencap serve --mcp` 已接入官方 MCP TypeScript SDK 并通过自动化 stdio smoke 验证。证据见 `docs/生态/host-compatibility-matrix.md` 的 [`evidence-2026-05-28-custom-mcp-stdio-smoke`](../生态/host-compatibility-matrix.md#evidence-2026-05-28-custom-mcp-stdio-smoke)。该 evidence 只证明 SDK/client stdio 启动、`tools/list`、read-only allow 到 secret boundary 和 write ask 的 `CONFIRMATION_REQUIRED`，不等同 Claude Desktop/Cursor UI smoke；未完成真实 Host smoke 前，Claude Desktop/Cursor 兼容结论仍保持 `pending-smoke`。
 
 ## 适用范围
 
@@ -58,6 +58,8 @@ pnpm --filter @opencap/cli dev -- serve --mcp --state-dir /tmp/opencap-mcp-smoke
 ```
 
 stdio server 的 stdout 只能承载 MCP JSON-RPC 消息。启动日志、warning 和 debug 必须写 stderr；如果 Host 报 JSON 解析错误，先检查是否有普通文本写入 stdout。
+
+自动化 smoke 已验证 SDK stdio client 可以完成 MCP JSON-RPC 握手，且未发现 stdout 协议污染；真实 Host 仍需按本文后续步骤手动验证展示和调用行为。
 
 ## 配置 Claude Desktop
 

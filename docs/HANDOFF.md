@@ -8,15 +8,17 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T286：新增 `packages/mcp/src/sdk-stdio-smoke.test.ts`，使用官方 MCP TypeScript SDK client 通过 stdio 启动 `opencap serve --mcp`。Smoke 在临时 state dir 安装 `github.search_repo` 和 `github.create_issue`，验证 `tools/list` 暴露稳定 tool name、input schema 和 capability/risk metadata；read-only allow 路径会执行到 secret boundary 并返回脱敏 `SECRET_MISSING`，write/ask 在无 elicitation Host 下返回 `CONFIRMATION_REQUIRED`。该测试通过 SDK JSON-RPC 握手证明 stdout 未被普通日志污染；由于 `tsx` 本地 IPC 在 Codex 沙箱内会触发 `listen EPERM`，本轮以沙箱外权限在 conda 环境运行该 smoke。
 
-本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入、T285 ledger export 和 T286 自动化 MCP stdio smoke 均已完成；后续依次推进 Host evidence 文档、Trust Card CLI、Registry quality report、release evidence、doctor JSON 和 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
+本轮继续完成 T287：`docs/生态/host-compatibility-matrix.md` 新增 `hostrec-2026-05-28-custom-mcp-stdio-client-tools-v1` 和 `evidence-2026-05-28-custom-mcp-stdio-smoke`，绑定 T286 测试文件、OpenCap commit `5870301`、`opencap.mcp.tools.v1` / `opencap.mcp.consent.v1` profile、检查项、隐私边界和 known gaps。`docs/教程/connect-mcp-host.md` 已链接该 automated smoke，并明确它不等同 Claude Desktop/Cursor UI smoke；真实 Host smoke 仍保持 `pending-smoke`。
+
+本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入、T285 ledger export、T286 自动化 MCP stdio smoke 和 T287 Host evidence 文档均已完成；后续依次推进 Trust Card CLI、Registry quality report、release evidence、doctor JSON 和 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
 
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready 是 T287：把 T286 的自动化 MCP stdio smoke evidence 写入 `docs/生态/host-compatibility-matrix.md`，并在 `docs/教程/connect-mcp-host.md` 链接该 evidence，同时明确 automated SDK/client smoke 不等同 Claude Desktop/Cursor UI smoke。
+下一项 ready 是 T288 P2：扩展 `opencap card` 支持 Trust Card 输出。
 
-已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。对应早期实施任务已陆续完成；当前连续开发队列以 `docs/TASKS.md` 中 T287 及后续 ready 任务为准。
+已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。对应早期实施任务已陆续完成；当前连续开发队列以 `docs/TASKS.md` 中 T288 及后续 ready 任务为准。
 
 本轮已把产品定位和架构完善方向同步到正式架构文档：`docs/ARCHITECTURE.md` 明确 OpenCap 是 AI Host 和真实 API 之间的本地优先 Capability Runtime，不是 Agent、聊天入口、模型路由或 marketplace；`docs/规划/v1-architecture.md` 已补充产品分层、Runtime Kernel 边界、gate 顺序、Result Envelope 边界和 Architecture Convergence 实施顺序。
 
