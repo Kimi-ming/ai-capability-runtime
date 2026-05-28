@@ -1459,6 +1459,39 @@
     - `git diff --check`
   - 完成记录：`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Conformance Summary 段落，说明如何运行 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 并引用 `opencap.conformance_summary.v1`。`docs/releases/release-checklist.md` 和 `docs/TESTING.md` 已同步该命令用途和边界，明确 conformance report 只汇总本地 evidence records，不宣称 Cloud、Console、OAuth、marketplace、payment、真实 Host UI、npm provenance 或 provider API end-to-end 已完成。
 
+- [ ] T298 P1：实现本地 audit metrics summary helper。
+  - 验收标准：
+    - `@opencap/runtime` 导出 `buildLocalMetricsSummary(events, options?)`、`LOCAL_METRICS_SCHEMA_VERSION` 和 summary 类型。
+    - Summary 从 `AuditEvent[]` 的脱敏字段派生 `invocationsTotal`、status counts、policy decision counts、confirmation required、outbound blocked、data egress denied、secret missing、audit preflight failed 和 duration p50/p95。
+    - 支持 `since`、`until`、`capabilityId` 过滤，并返回 window、capability filter 和 `policyEffect: "none"`。
+    - Summary 不复制 `inputRedactedJson`、`outputRedactedJson`、`egressRedactedPreviewJson`、secret、Authorization、provider raw body、URL query value 或用户输入原文。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- metrics.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm validate`
+
+- [ ] T299 P1：实现 `opencap metrics summary` CLI。
+  - 验收标准：
+    - CLI 新增 `opencap metrics summary --state-dir <path> [--since <iso>] [--until <iso>] [--capability <id>] [--json]`。
+    - JSON 输出复用 `buildLocalMetricsSummary()`；人类输出包含 window、invocations、status、policy decisions、confirmation required、outbound blocked 和 duration。
+    - 命令只读取本地 SQLite audit log，不读取 provider secret、不执行 Capability、不写 state dir 之外内容，不输出 input/output/egress preview 原文。
+    - 非法 `--since` / `--until` 作为用户错误 exit `1`，不打印 stack。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- metrics-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T300 P2：实现 `opencap metrics capabilities` 和 `opencap metrics security`。
+  - 验收标准：
+    - CLI 新增 `opencap metrics capabilities --state-dir <path> [--json]`，按 Capability 输出 invocation total、status counts、policy decision counts、error rate、duration p50/p95 和 last seen。
+    - CLI 新增 `opencap metrics security --state-dir <path> [--json]`，输出 denied、confirmation required、outbound blocked、data egress denied、secret missing 和 audit preflight failed 汇总。
+    - 两个命令只从脱敏 audit metadata 派生，不输出 input/output、credential value、provider raw response、Authorization/Cookie 或 URL query value。
+    - `docs/运营/observability-metrics-v1.md`、`docs/TESTING.md` 和 README/使用入口同步已实现边界。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- metrics-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
