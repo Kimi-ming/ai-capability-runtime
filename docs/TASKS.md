@@ -1570,6 +1570,39 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已增加 `opencap release package report` 和 `npm pack --dry-run --json` 的执行/记录步骤，release evidence YAML 模板新增 `package_readiness_report`、`npm_pack_dry_run` 和 `package_readiness` 字段。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Package Readiness Evidence 段落，明确当前样例为 `not-run`，后续 report 只能证明本地 metadata/tarball 摘要审查，不能替代 npm publish dry-run、trusted publisher、正式 provenance、release tag 或 GitHub required checks。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 readiness/tarball review 边界。
 
+- [ ] T307 P1：为 alpha npm 候选包定义 package `files` allowlist。
+  - 验收标准：
+    - `@opencap/spec` 和 `@opencap/cli` 的 `package.json` 明确声明 `files` allowlist，只包含发布所需的 build artifacts、schema/bin/package metadata，不包含 `src/`、tests、fixtures、`.env`、`opencap.local/`、数据库、日志或私有 evidence。
+    - `@opencap/spec` package readiness helper/test 增加 `files` allowlist 检查，缺失 allowlist 或包含危险路径时输出 blocker。
+    - 不把 package 改成真实发布状态；`private: true` blocker 仍保留，直到发布者明确解除。
+    - 更新发布策略文档，说明 `files` allowlist 是 pack content review 的前置条件。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- npm-package-readiness.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T308 P1：新增本地 npm pack dry-run smoke。
+  - 验收标准：
+    - 增加本地可运行的测试或脚本，针对 `@opencap/spec` 和 `@opencap/cli` 运行 `npm pack --dry-run --json` 或等价 dry-run，并把输出喂给 `opencap release package report` / readiness helper。
+    - Smoke 不发布 package、不触网、不读取 npm token，失败时输出可修正的 blocker summary。
+    - Smoke 验证 pack file list 不包含 forbidden files，并确认当前 `private: true` 仍作为发布 blocker 记录。
+    - `docs/TESTING.md` 记录 smoke 入口和沙箱/环境注意事项。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-package-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T309 P2：把 package files/pack smoke 纳入 release evidence 文档。
+  - 验收标准：
+    - `docs/releases/release-checklist.md` 说明 package `files` allowlist、pack dry-run smoke 和 readiness report 三者的顺序。
+    - V1 alpha evidence 样例说明当前 package publish 仍 blocked by `private: true`，但 pack content allowlist/smoke 可作为后续 release evidence。
+    - `docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 同步 package files allowlist 和 pack smoke 的边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
