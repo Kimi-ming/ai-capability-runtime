@@ -96,7 +96,7 @@ Maintainer: opencap
 Audit required: yes
 ```
 
-当前 `opencap list` 已在 JSON 和人类表格中暴露基础字段：lifecycle、trust level、maintainer、license 和 status。后续再做完整 Trust Card 命令。
+当前 `opencap list` 已在 JSON 和人类表格中暴露基础字段：lifecycle、trust level、maintainer、license 和 status；`opencap card <id> --kind trust --json` 可从本地已安装 Capability 生成 Runtime Trust Card。Trust Card 只展示 evidence summary，不改变本地 policy、consent、outbound policy 或 audit。
 
 ## 生命周期和命令映射
 

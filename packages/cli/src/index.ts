@@ -18,6 +18,7 @@ import {
   blockedResultEnvelope,
   buildHttpDryRunPlan,
   createCapabilityCard,
+  createTrustCardFromInstalledCapability,
   createCapabilityLedgerIdentity,
   createCapabilityIdentity,
   createCapabilityLifecycleWarning,
@@ -42,6 +43,7 @@ import {
   type CapabilityLifecycleWarning,
   type CapabilityLifecycleState,
   type InstalledCapability,
+  type InstalledCapabilityRecord,
   type LedgerRecordKind,
   type LedgerRecordV1,
   type TrustSummary,
@@ -496,30 +498,53 @@ async function manifestDigest(manifestPath: string): Promise<string> {
 }
 
 async function createCapabilityCardForInstalled(capability: InstalledCapability) {
+  return createCapabilityCard({
+    capability: await createCardInstalledCapabilityRecord(capability),
+  });
+}
+
+async function createTrustCardForInstalled(capability: InstalledCapability) {
+  return createTrustCardFromInstalledCapability({
+    capability: await createCardInstalledCapabilityRecord(capability),
+  });
+}
+
+async function createCardInstalledCapabilityRecord(capability: InstalledCapability): Promise<InstalledCapabilityRecord> {
   const installPathStatus = await stat(capability.installPath);
 
-  return createCapabilityCard({
-    capability: {
-      identity: createCapabilityIdentity({
-        manifest: capability.manifest,
-        packagePath: capability.installPath,
-        manifestPath: capability.manifestPath,
-        manifestDigest: await manifestDigest(capability.manifestPath),
-        lifecycle: capability.manifest.lifecycle?.status as CapabilityLifecycleState | undefined,
-      }),
+  return {
+    identity: createCapabilityIdentity({
       manifest: capability.manifest,
-      install: {
-        installedAt: installPathStatus.mtime.toISOString(),
-        source: "registry",
-        sourceRef: capability.id,
-      },
-      trust: trustSummaryFromManifest(capability.manifest),
-      derived: {
-        riskSummary: riskSummaryFromManifest(capability.manifest),
-        modelVisibleSummary: capability.manifest.description,
-      },
+      packagePath: capability.installPath,
+      manifestPath: capability.manifestPath,
+      manifestDigest: await manifestDigest(capability.manifestPath),
+      lifecycle: capability.manifest.lifecycle?.status as CapabilityLifecycleState | undefined,
+    }),
+    manifest: capability.manifest,
+    install: {
+      installedAt: installPathStatus.mtime.toISOString(),
+      source: "registry",
+      sourceRef: capability.id,
     },
-  });
+    trust: trustSummaryFromManifest(capability.manifest),
+    derived: {
+      riskSummary: riskSummaryFromManifest(capability.manifest),
+      modelVisibleSummary: capability.manifest.description,
+    },
+  };
+}
+
+type CliCardKind = "capability" | "trust";
+
+function parseCardKind(value: string | undefined): CliCardKind {
+  if (value === undefined || value === "capability") {
+    return "capability";
+  }
+  if (value === "trust") {
+    return "trust";
+  }
+
+  throw new CliUserInputError(`Invalid --kind value: ${value}`);
 }
 
 async function runCliAction(action: () => Promise<void>, fallbackMessage: string): Promise<void> {
@@ -642,10 +667,12 @@ program
   .command("card")
   .argument("<id>", "Installed Capability id")
   .option("--state-dir <path>", "Local OpenCap state directory")
+  .option("--kind <kind>", "Card kind: capability or trust", "capability")
   .option("--json", "Output JSON")
   .description("Generate a local Capability Card for an installed Capability.")
-  .action((id: string, options: { stateDir?: string; json?: boolean }) => runCliAction(async () => {
+  .action((id: string, options: { stateDir?: string; kind?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
+    const cardKind = parseCardKind(options.kind);
     const loaded = await loadInstalledCapabilities({ cwd, env: process.env, stateDir: options.stateDir });
     const capability = loaded.capabilities.find((installed) => installed.id === id);
 
@@ -653,10 +680,21 @@ program
       throw new CliUserInputError(`Installed capability not found: ${id}`);
     }
 
-    const card = await createCapabilityCardForInstalled(capability);
+    const card = cardKind === "trust"
+      ? await createTrustCardForInstalled(capability)
+      : await createCapabilityCardForInstalled(capability);
 
     if (options.json) {
       console.log(JSON.stringify(card, null, 2));
+      return;
+    }
+
+    if (card.cardKind === "trust") {
+      console.log(`Trust Card ${card.capability.id}@${card.capability.version}`);
+      console.log(`schema: ${card.schemaVersion}`);
+      console.log(`trust: ${card.trustLevel}`);
+      console.log(`maintainer: ${card.maintainer.name ?? card.maintainer.status}`);
+      console.log(`disclaimer: ${card.disclaimer}`);
       return;
     }
 

@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,6 +16,24 @@ type CliResult = {
   stderr: string;
   exitCode: number | string;
 };
+
+async function snapshotStateFiles(root: string, prefix = ""): Promise<string[]> {
+  const entries = await readdir(join(root, prefix), { withFileTypes: true });
+  const snapshots: string[] = [];
+
+  for (const entry of entries) {
+    const relativePath = join(prefix, entry.name);
+    if (entry.isDirectory()) {
+      snapshots.push(...await snapshotStateFiles(root, relativePath));
+      continue;
+    }
+
+    const fileStat = await stat(join(root, relativePath));
+    snapshots.push(`${relativePath}:${fileStat.size}:${fileStat.mtimeMs}`);
+  }
+
+  return snapshots.sort();
+}
 
 async function runOpenCapCli(args: string[], options: { allowFailure?: boolean } = {}): Promise<CliResult> {
   try {
@@ -113,6 +131,77 @@ describe("OpenCap CLI card command", () => {
       expect(result.exitCode).toBe(1);
       expect(result.stdout).toBe("");
       expect(result.stderr).toContain("Installed capability not found: github.create_issue");
+      expect(result.stderr).not.toContain("Error:");
+      expect(result.stderr).not.toContain("at ");
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("prints a Trust Card JSON document for an installed Capability without mutating state", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-card-state-"));
+
+    try {
+      await runOpenCapCli(["install", "github.create_issue", "--state-dir", stateDir]);
+      const before = await snapshotStateFiles(stateDir);
+
+      const result = await runOpenCapCli(["card", "github.create_issue", "--state-dir", stateDir, "--kind", "trust", "--json"]);
+      const card = JSON.parse(result.stdout) as {
+        schemaVersion: string;
+        cardKind: string;
+        generatedBy: string;
+        capability: { id: string; version: string; manifestDigest?: string };
+        trustLevel: string;
+        advisories: { open: number; refs: string[] };
+        maintainer: { status: string; name?: string };
+        provenance: { manifestDigest?: string; packageDigest?: string; registryCommit?: string };
+        limitations: string[];
+        disclaimer: string;
+      };
+
+      expect(result.exitCode).toBe(0);
+      expect(await snapshotStateFiles(stateDir)).toEqual(before);
+      expect(card).toMatchObject({
+        schemaVersion: "opencap.card.v1",
+        cardKind: "trust",
+        generatedBy: "opencap.runtime",
+        capability: {
+          id: "github.create_issue",
+          version: "0.1.0",
+        },
+        trustLevel: "unverified",
+        advisories: {
+          open: 0,
+          refs: [],
+        },
+        maintainer: {
+          status: "unknown",
+          name: "opencap",
+        },
+      });
+      expect(card.provenance.manifestDigest).toMatch(/^sha256:/);
+      expect(card.capability.manifestDigest).toBe(card.provenance.manifestDigest);
+      expect(card.limitations).toContain("Trust level does not override local policy, consent, outbound policy, or audit.");
+      expect(card.disclaimer).toContain("not a security guarantee");
+      expect(card.disclaimer).toContain("not an authorization decision");
+      expect(result.stdout).not.toContain("GITHUB_TOKEN");
+      expect(result.stdout).not.toContain("Authorization");
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("returns a user error for an unsupported card kind", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-card-state-"));
+
+    try {
+      const result = await runOpenCapCli(["card", "github.create_issue", "--state-dir", stateDir, "--kind", "consent", "--json"], {
+        allowFailure: true,
+      });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Invalid --kind value: consent");
       expect(result.stderr).not.toContain("Error:");
       expect(result.stderr).not.toContain("at ");
     } finally {

@@ -473,7 +473,7 @@
     - `git diff --check`
   - 完成记录：`docs/生态/host-compatibility-matrix.md` 新增 `hostrec-2026-05-28-custom-mcp-stdio-client-tools-v1` 和 `evidence-2026-05-28-custom-mcp-stdio-smoke`，绑定 T286 测试文件、OpenCap commit `5870301`、`opencap.mcp.tools.v1` / `opencap.mcp.consent.v1` profile、检查项、隐私边界和 known gaps。记录明确 automated SDK/client stdio smoke 只证明本地 stdio server 与 SDK client 行为，不等同 Claude Desktop/Cursor UI smoke。`docs/教程/connect-mcp-host.md` 已链接该 evidence，并继续保留真实 Host smoke 的 `pending-smoke` 状态。
 
-- [ ] T288 P2：扩展 `opencap card` 支持 Trust Card 输出。
+- [x] T288 P2：扩展 `opencap card` 支持 Trust Card 输出。
   - 验收标准：
     - CLI 支持 `opencap card <id> --kind trust --json`，从已安装 Capability 生成 `cardKind: "trust"` 的 Trust Card。
     - Trust Card 输出包含 trust level、maintainer、advisory summary、provenance、limitations 和固定 disclaimer。
@@ -483,6 +483,7 @@
     - `pnpm --filter @opencap/cli test -- card-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：`packages/cli/src/index.ts` 为 `opencap card` 新增 `--kind capability|trust`，默认保持 Capability Card 兼容；`--kind trust --json` 从本地已安装 Capability 派生 Runtime Trust Card，包含 trust level、maintainer、advisory summary、provenance、limitations 和固定 disclaimer，不读取 secret、不执行 Capability、不修改 state。非法 `--kind` 返回用户错误 exit `1` 且不打印 stack。`packages/cli/src/card-command.test.ts` 新增 Trust Card 输出和非法 kind 测试，CLI 包测试数从 10 增至 12。
 
 - [x] T282 P1：实现 `opencap card` Capability Card 输出命令。
   - 验收标准：
