@@ -1413,7 +1413,7 @@
 
 ### 模块 M6：Composition、Capability Graph 和 Agentic Commerce
 
-- [ ] T294 P3：新增 composition recovery evidence conformance record。
+- [x] T294 P3：新增 composition recovery evidence conformance record。
   - 验收标准：
     - 新增 `opencap.composition_recovery.v1` conformance record，绑定 `composition-recovery.test.ts`、composition failure runbook 和 composition profile RFC。
     - Record 覆盖 unknown_after_timeout reconcile、blocked step 停止后续、partial failure、不自动补偿和 manual review。
@@ -1422,6 +1422,7 @@
     - `pnpm --filter @opencap/spec test -- conformance.test.ts`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `git diff --check`
+  - 完成记录：新增 `packages/runtime/test/fixtures/conformance/composition-recovery.yml`，并纳入 `packages/spec/src/conformance.test.ts` 校验；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.composition_recovery.v1` checks。该 record 绑定 composition recovery smoke tests、失败恢复手册、Composition Profile RFC 和 compensation review rules，明确只证明 future composition evidence，不表示 OpenCap 已实现 workflow runtime、Agent、自动调度或自动 rollback。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

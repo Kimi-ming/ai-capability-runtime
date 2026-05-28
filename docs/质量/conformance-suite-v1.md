@@ -98,7 +98,7 @@ T153 已在 `@opencap/spec` 中新增最小 conformance suite skeleton：
 - `CORE_CONFORMANCE_GROUPS` 固定声明 V1 核心组：`C-MAN`、`C-PKG`、`C-RUN`、`C-POL`、`C-PG`、`C-CON`、`C-AUD`、`C-HTTP`、`C-MCP`、`C-REG`、`C-SEC`。
 - `validateConformanceRecord()` 校验 record 的 subject、profile、suite_version、result、checks 和 artifacts。
 - artifacts 必须是仓库相对路径，不能使用绝对路径或 `..` 上跳。
-- 当前被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/execution-evidence.yml` 和 `packages/runtime/test/fixtures/conformance/usage-evidence.yml`。
+- 当前被 skeleton 校验的 record 是 `packages/runtime/test/fixtures/conformance/policy-governance.yml`、`packages/runtime/test/fixtures/conformance/threat-model-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/agentic-abuse-cases.yml`、`packages/runtime/test/fixtures/conformance/execution-evidence.yml`、`packages/runtime/test/fixtures/conformance/usage-evidence.yml` 和 `packages/runtime/test/fixtures/conformance/composition-recovery.yml`。
 
 ## 非目标
 
@@ -165,6 +165,18 @@ T207 已新增 `packages/runtime/test/fixtures/conformance/usage-evidence.yml`�
 - UE-007：financial spend cap 在 secret resolution 前阻断。
 
 该组只证明 non-billing usage evidence，不代表 billable event、计费规则或商业结算。
+
+## Composition Recovery Evidence 实现状态
+
+T294 已新增 `packages/runtime/test/fixtures/conformance/composition-recovery.yml`。当前 `opencap.composition_recovery.v1` record 绑定 `packages/runtime/src/composition-recovery.test.ts`、`docs/运营/composition-failure-runbook.md` 和 `rfcs/0017-composition-profile-v1.md`，包含：
+
+- CR-001：required write step 出现 `unknown_after_timeout` 时，必须先 reconcile，再 retry 或 compensation。
+- CR-002：required blocked step 会停止后续执行。
+- CR-003：partial failure 保留已完成 work，不自动补偿。
+- CR-004：compensation step 失败后进入 manual review。
+- CR-005：该 profile 是 future composition evidence，不表示 OpenCap 已实现 workflow runtime、Agent、自动调度或自动 rollback。
+
+该组只证明 composition failure recovery evidence 和 runbook 口径已可追踪，不代表 OpenCap 提供 workflow runtime 或 Agent 能力。
 
 ## Policy Governance V1 实现状态
 

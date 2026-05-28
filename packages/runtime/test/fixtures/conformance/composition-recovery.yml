@@ -1,0 +1,21 @@
+subject:
+  type: runtime
+  name: opencap-runtime
+  version: 0.1.0-dev
+profile: opencap.composition_recovery.v1
+suite_version: 0.1.0
+result: pass
+source:
+  path: docs/运营/composition-failure-runbook.md
+  section: 恢复原则
+checks:
+  CR-001-unknown-after-timeout-requires-reconcile: pass
+  CR-002-blocked-required-step-stops-downstream: pass
+  CR-003-partial-failure-does-not-auto-compensate: pass
+  CR-004-compensation-failure-requires-manual-review: pass
+  CR-005-future-profile-not-workflow-runtime-or-agent: pass
+artifacts:
+  - path: packages/runtime/src/composition-recovery.test.ts
+  - path: docs/运营/composition-failure-runbook.md
+  - path: rfcs/0017-composition-profile-v1.md
+  - path: docs/社区/compensation-capability-review-rules.md

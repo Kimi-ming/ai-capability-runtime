@@ -135,6 +135,7 @@
 - Policy 事故响应手册，覆盖撤销 override、激活 deny policy、审查 audit、rollback policy、breakglass 边界和 advisory/revocation 联动。
 - Decision log export，新增脱敏 policy decision summary 导出，支持 capability、decision、since/until 过滤，并关联 invocation id、policy revision 和 trace id。
 - Policy governance conformance tests，新增 C-PG 一致性测试组和 record fixture，覆盖 decision trace、policy ledger、broad allow simulation、breakglass 硬边界和 audit redaction export。
+- Composition recovery conformance record，绑定 composition recovery smoke tests、失败恢复手册和 Composition Profile RFC，覆盖 unknown reconcile、blocked step stop、partial failure、不自动补偿和 manual review，并明确不代表 workflow runtime 或 Agent。
 - Policy bundle manifest/signing RFC，定义 policy bundle digest、optional signature、activation record、failed activation 和 local-first 边界。
 - Runtime Data Egress audit fields，记录 egress decision、data classes、target origin、matched rule、redacted preview 和 `requestStarted=false`，SQLite 查询不包含 secret 原文。
 - Runtime confirmation egress summary，CLI prompt 与 MCP `confirmation_required` reason 展示 target origin、data classes、fields sent 和 redacted preview。

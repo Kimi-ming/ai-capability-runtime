@@ -20,15 +20,17 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T293：`opencap doctor` 新增 `--json`，输出 `opencap.doctor.v1` machine-readable diagnostics，包含 environment、registry、state dir、installed valid/invalid count、policy status 和 workspace package versions。JSON 输出不包含 env secret、Authorization header、用户输入或 provider raw data；人类输出保持原格式兼容。`packages/cli/src/doctor-command.test.ts` 覆盖空 state、已安装 state、invalid installed entry、secret redaction 和人类输出兼容，CLI 包测试数从 14 增至 16。
 
-本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入、T285 ledger export、T286 自动化 MCP stdio smoke、T287 Host evidence 文档、T288 Trust Card CLI、T289 Registry quality summary helper、T290 Registry report CLI、T292 release evidence bundle 和 T293 doctor JSON 均已完成；后续推进 composition recovery conformance。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
+本轮继续完成 T294：新增 `packages/runtime/test/fixtures/conformance/composition-recovery.yml`，并纳入 `packages/spec/src/conformance.test.ts` skeleton 校验。该 `opencap.composition_recovery.v1` record 绑定 `packages/runtime/src/composition-recovery.test.ts`、`docs/运营/composition-failure-runbook.md`、`rfcs/0017-composition-profile-v1.md` 和 compensation review rules，覆盖 unknown_after_timeout reconcile、blocked step stop、partial failure、不自动补偿和 manual review。`docs/质量/conformance-suite-v1.md` 已同步实现状态，并明确该 record 只证明 future composition evidence，不代表 OpenCap 已实现 workflow runtime、Agent、自动调度或自动 rollback。
+
+本轮重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T283-T294。规划原则是先做本地可验证的 V1 alpha 发布化能力，不把需要真实第三方 Host UI 或外部账号的任务混入 ready 队列。T283 本地 JSONL Runtime Ledger Store、T284 install/invoke ledger 写入、T285 ledger export、T286 自动化 MCP stdio smoke、T287 Host evidence 文档、T288 Trust Card CLI、T289 Registry quality summary helper、T290 Registry report CLI、T292 release evidence bundle、T293 doctor JSON 和 T294 composition recovery conformance 均已完成。真实 Claude Desktop/Cursor smoke 已列为 T291 `[!]`，阻塞于本机 Host 应用和人工 evidence。
 
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready 是 T294 P3：新增 composition recovery evidence conformance record。
+下一项 ready：当前没有未阻塞 ready 任务；T291 仍因真实 Claude Desktop/Cursor Host UI smoke 证据缺口阻塞。
 
-已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。对应早期实施任务已陆续完成；当前连续开发队列以 `docs/TASKS.md` 中 T294 及后续 ready 任务为准。
+已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。对应 ready 实施任务已完成；当前连续开发队列需要先解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
 本轮已把产品定位和架构完善方向同步到正式架构文档：`docs/ARCHITECTURE.md` 明确 OpenCap 是 AI Host 和真实 API 之间的本地优先 Capability Runtime，不是 Agent、聊天入口、模型路由或 marketplace；`docs/规划/v1-architecture.md` 已补充产品分层、Runtime Kernel 边界、gate 顺序、Result Envelope 边界和 Architecture Convergence 实施顺序。
 
@@ -105,9 +107,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292 和 T293 均已完成；`next_task.py` 当前返回的下一项 ready 是 T294：新增 composition recovery evidence conformance record。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293 和 T294 均已完成；`next_task.py` 当前应返回没有未阻塞 ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：T294 P3：新增 composition recovery evidence conformance record。T291 真实 Claude Desktop/Cursor Host smoke evidence 仍为阻塞任务，只有在用户确认本机 Host 环境可用后再做。
+下一步推荐：重新规划下一批 ready 任务，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
