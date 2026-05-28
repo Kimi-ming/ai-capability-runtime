@@ -44,7 +44,7 @@ pnpm lint
 
 如果因为网络或依赖未安装不能运行，需要在交接文档中记录。
 
-最近全量验证：2026-05-28 在项目 conda 环境中通过 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。当前 `pnpm validate` 覆盖 5 个 registry manifest、5 个 manifest 的 model-visible metadata lint、5 个 manifest 的 least-privilege auth lint、5 个 Capability package lint、5 个 registry test 和 1 个 Capability advisory/revocation metadata 文件；`pnpm test` 覆盖 spec 75 个、runtime 293 个、mcp 26 个、cli 14 个测试。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+最近全量验证：2026-05-28 在项目 conda 环境中通过 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。当前 `pnpm validate` 覆盖 5 个 registry manifest、5 个 manifest 的 model-visible metadata lint、5 个 manifest 的 least-privilege auth lint、5 个 Capability package lint、5 个 registry test 和 1 个 Capability advisory/revocation metadata 文件；`pnpm test` 覆盖 spec 75 个、runtime 293 个、mcp 26 个、cli 14 个测试。V1 alpha/local runtime evidence bundle 见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`；该证据不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
 
 ## 当前单元测试基础设施
 

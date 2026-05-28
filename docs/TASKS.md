@@ -1155,7 +1155,7 @@
 
 ### 模块 M5：Conformance、Abuse Cases、隐私和运维
 
-- [ ] T292 P1：生成 V1 alpha release evidence bundle。
+- [x] T292 P1：生成 V1 alpha release evidence bundle。
   - 验收标准：
     - 新增 `docs/releases/evidence/` 下的 V1 alpha evidence 模板或样例，记录 commit、验证命令、测试计数、known gaps、blocked external evidence 和 release decision。
     - Evidence 明确当前是 alpha/local runtime evidence，不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
@@ -1165,6 +1165,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：新增 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`，记录 `dcf7e19` 的 alpha/local runtime evidence、`pnpm validate/build/lint/test` 结果、spec/runtime/mcp/cli 测试计数、known gaps、blocked external evidence 和 `block-release-tag` decision。`docs/releases/release-checklist.md`、`docs/TESTING.md`、`docs/HANDOFF.md` 和 `CHANGELOG.md` 已链接该 evidence，并明确不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
 
 - [ ] T293 P2：实现 `opencap doctor --json`。
   - 验收标准：

@@ -173,6 +173,8 @@ release_evidence:
 
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
 
+当前 V1 alpha/local runtime evidence 样例见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`。该样例只证明本地 Runtime/CLI/Registry/MCP automated stdio smoke，不得扩展解读为 Cloud、Console、OAuth、marketplace、payment、真实 Host UI 或 npm provenance 已完成。
+
 ## 7. 发布或阻断
 
 发布：
@@ -193,6 +195,7 @@ release_evidence:
 
 - `docs/运营/release-readiness.md`
 - `docs/releases/alpha-checklist.md`
+- `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`
 - `docs/规范/versioning-and-compatibility.md`
 - `docs/运营/package-publishing-v1.md`
 - `docs/质量/quality-gates.md`
