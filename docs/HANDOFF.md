@@ -50,11 +50,13 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T304：`@opencap/spec` 新增 `buildNpmPackageReadinessReport()` / `buildNpmPackageReadinessReportFromFile()` 和 `opencap.npm_package_readiness.v1` report。Helper 从传入的 package manifest 和可选 pack file summary 派生 package name/version/private 状态、候选包 allowlist、main/types/bin/exports 基础字段、tarball file count/size、forbidden files 和 blockers/warnings；固定 `policyEffect: "none"`，不调用 npm/GitHub/网络，也不改变 package 发布权限、trust、policy 或 install decision。`packages/spec/src/npm-package-readiness.test.ts` 覆盖真实 `@opencap/spec` / `@opencap/cli` 当前 readiness 和包含 `.env`、`opencap.local/`、SQLite/log、token-shaped 文件名的负向 pack fixture；spec 包测试数从 79 增至 81。
 
+本轮继续完成 T305：CLI 新增 `opencap release package report --package <workspace-name> [--pack-json <path>] [--json]`，复用 T304 helper 输出本地 `opencap.npm_package_readiness.v1` report。未提供 `--pack-json` 时，报告 tarball evidence 为 `not-run`；提供 `npm pack --dry-run --json` 摘要时会记录 file count/size 和 forbidden file summary。命令不运行 npm publish、不触网、不读取 npm token；非候选 package 和非法 pack JSON 作为用户错误 exit `1` 且不打印 stack。`packages/cli/src/release-package-report-command.test.ts` 覆盖 JSON、人类输出、pack JSON、unsupported package 和 invalid pack JSON；CLI 包测试数从 24 增至 28。
+
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready：T305 P1：新增 CLI release package report 命令。T291 仍是外部 Host UI smoke evidence 限制项。
+下一项 ready：T306 P2：把 package readiness report 纳入 release evidence。T291 仍是外部 Host UI smoke evidence 限制项。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -133,9 +135,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303 和 T304 均已完成；T305-T306 是下一批本地 release supply-chain ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304 和 T305 均已完成；T306 是下一批本地 release supply-chain ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T305，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T306，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

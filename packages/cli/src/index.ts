@@ -9,10 +9,13 @@ import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import {
   buildConformanceSummary,
+  buildNpmPackageReadinessReportFromFile,
   buildRegistryQualitySummary,
   formatManifestValidationIssue,
   validateManifestPath,
   type CapabilityManifest,
+  type NpmPackagePackFile,
+  type NpmPackageReadinessReport,
 } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
@@ -94,6 +97,11 @@ interface LocalMetricsSecurityReport {
   auditPreflightFailedTotal: number;
   policyEffect: "none";
 }
+
+const RELEASE_PACKAGE_PATHS = new Map([
+  ["@opencap/spec", "packages/spec/package.json"],
+  ["@opencap/cli", "packages/cli/package.json"],
+]);
 
 interface NodeError extends Error {
   code?: string;
@@ -381,6 +389,78 @@ function printLocalMetricsSecurityReport(report: LocalMetricsSecurityReport): vo
   console.log(`data egress denied: ${report.dataEgressDeniedTotal}`);
   console.log(`secret missing: ${report.secretMissingTotal}`);
   console.log(`audit preflight failed: ${report.auditPreflightFailedTotal}`);
+}
+
+function releasePackageJsonPath(packageName: string, cwd: string): string {
+  const relativePath = RELEASE_PACKAGE_PATHS.get(packageName);
+  if (relativePath === undefined) {
+    throw new CliUserInputError(`Unsupported --package value: ${packageName}`);
+  }
+
+  return resolve(cwd, relativePath);
+}
+
+async function readNpmPackJsonFiles(packJsonPath: string): Promise<NpmPackagePackFile[]> {
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(await readFile(packJsonPath, "utf8"));
+  } catch {
+    throw new CliUserInputError(`Invalid --pack-json: expected npm pack --dry-run --json output at ${packJsonPath}`);
+  }
+
+  const packRecord = Array.isArray(parsed) ? parsed[0] : parsed;
+  if (!isRecord(packRecord) || !Array.isArray(packRecord.files)) {
+    throw new CliUserInputError("Invalid --pack-json: expected an object with a files array.");
+  }
+
+  return packRecord.files.map((file, index) => {
+    if (!isRecord(file) || typeof file.path !== "string") {
+      throw new CliUserInputError(`Invalid --pack-json: files[${index}] must include a path.`);
+    }
+
+    return {
+      path: file.path,
+      size: typeof file.size === "number" && Number.isFinite(file.size) ? file.size : undefined,
+    };
+  });
+}
+
+function printNpmPackageReadinessReport(report: NpmPackageReadinessReport): void {
+  console.log("OpenCap package readiness");
+  console.log(`package: ${report.packageName ?? "<missing>"}`);
+  console.log(`version: ${report.version ?? "<missing>"}`);
+  console.log(`candidate: ${report.candidate ? "yes" : "no"}`);
+  console.log(`private: ${report.metadata.private ? "yes" : "no"}`);
+  console.log(`entrypoints: main=${report.metadata.hasMain ? "yes" : "no"} types=${report.metadata.hasTypes ? "yes" : "no"} bin=${report.metadata.hasBin ? "yes" : "no"} exports=${report.metadata.exportKeys.length > 0 ? report.metadata.exportKeys.join(",") : "none"}`);
+  console.log(`pack evidence: ${report.pack.evidence}`);
+  console.log(`pack files: ${report.pack.fileCount}`);
+  console.log(`forbidden files: ${report.pack.forbiddenFiles.length}`);
+
+  if (report.blockers.length === 0) {
+    console.log("blockers: none");
+  } else {
+    console.log("blockers:");
+    for (const blocker of report.blockers) {
+      console.log(`- ${blocker.code}: ${blocker.message}`);
+    }
+  }
+
+  if (report.warnings.length === 0) {
+    console.log("warnings: none");
+  } else {
+    console.log("warnings:");
+    for (const warning of report.warnings) {
+      console.log(`- ${warning.code}: ${warning.message}`);
+    }
+  }
+
+  if (report.pack.forbiddenFiles.length > 0) {
+    console.log("forbidden file details:");
+    for (const file of report.pack.forbiddenFiles) {
+      console.log(`- ${file.reasonCode}: ${file.path}`);
+    }
+  }
 }
 
 function parseAuditStatus(value: string | undefined): AuditInvocationStatus | undefined {
@@ -1167,6 +1247,14 @@ const metricsCommand = program
   .command("metrics")
   .description("Inspect local audit metrics.");
 
+const releaseCommand = program
+  .command("release")
+  .description("Inspect local release evidence.");
+
+const releasePackageCommand = releaseCommand
+  .command("package")
+  .description("Inspect npm package release readiness.");
+
 conformanceCommand
   .command("report")
   .requiredOption("--records <path>", "Conformance records root directory")
@@ -1240,6 +1328,28 @@ registryCommand
       ].join(" "));
     }
   }, "Failed to generate Registry report"));
+
+releasePackageCommand
+  .command("report")
+  .requiredOption("--package <workspace-name>", "Workspace package name to inspect")
+  .option("--pack-json <path>", "Path to npm pack --dry-run --json output")
+  .option("--json", "Output JSON")
+  .description("Generate a local npm package readiness report.")
+  .action((options: { package: string; packJson?: string; json?: boolean }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const packageJsonPath = releasePackageJsonPath(options.package, cwd);
+    const packFiles = options.packJson === undefined
+      ? undefined
+      : await readNpmPackJsonFiles(resolveCliPath(options.packJson));
+    const report = await buildNpmPackageReadinessReportFromFile(packageJsonPath, { packFiles });
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
+
+    printNpmPackageReadinessReport(report);
+  }, "Failed to generate release package report"));
 
 ledgerCommand
   .command("export")

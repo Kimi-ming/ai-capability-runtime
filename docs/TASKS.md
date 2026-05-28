@@ -1546,7 +1546,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增 `buildNpmPackageReadinessReport()` / `buildNpmPackageReadinessReportFromFile()` 和 `opencap.npm_package_readiness.v1` report。Helper 从传入的 package manifest 和可选 pack file summary 派生 package name/version/private 状态、候选包 allowlist、main/types/bin/exports 基础字段、tarball file count/size、forbidden files 和 blockers/warnings；固定 `policyEffect: "none"`，不调用 npm/GitHub/网络，也不改变 package 发布权限、trust、policy 或 install decision。新增 `packages/spec/src/npm-package-readiness.test.ts` 覆盖真实 `@opencap/spec` / `@opencap/cli` 当前 readiness 和包含 `.env`、`opencap.local/`、SQLite/log、token-shaped 文件名的负向 pack fixture。Spec 包测试数从 79 增至 81。
 
-- [ ] T305 P1：新增 CLI release package report 命令。
+- [x] T305 P1：新增 CLI release package report 命令。
   - 验收标准：
     - CLI 新增 `opencap release package report --package <workspace-name> [--pack-json <path>] [--json]`，复用 T304 helper 输出本地 package readiness report。
     - 未提供 `--pack-json` 时，报告 tarball evidence 为 `not-run`，不得伪造 tarball/provenance 证据。
@@ -1556,6 +1556,7 @@
     - `pnpm --filter @opencap/cli test -- release-package-report-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap release package report --package <workspace-name> [--pack-json <path>] [--json]`，复用 T304 helper 输出本地 `opencap.npm_package_readiness.v1` report。未提供 `--pack-json` 时，报告 tarball evidence 为 `not-run`；提供 `npm pack --dry-run --json` 摘要时会记录 file count/size 和 forbidden file summary。命令不运行 npm publish、不触网、不读取 npm token；非候选 package 和非法 pack JSON 作为用户错误 exit `1` 且不打印 stack。新增 `packages/cli/src/release-package-report-command.test.ts` 覆盖 JSON、人类输出、pack JSON、unsupported package 和 invalid pack JSON；CLI 包测试数从 24 增至 28。
 
 - [ ] T306 P2：把 package readiness report 纳入 release evidence。
   - 验收标准：
