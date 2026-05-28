@@ -1509,7 +1509,7 @@
     - `git diff --check`
   - 完成记录：新增 `.github/workflows/npm-publish.yml`，只支持 `workflow_dispatch`，默认 `dry_run: true`，候选包限制为 `@opencap/spec` 和 `@opencap/cli`。Workflow 使用 `contents: read` 和 `id-token: write`，不使用长期 `NPM_TOKEN` 或 `secrets.NPM_TOKEN`；非 dry-run dispatch 会在第一步失败。Dry-run 路径运行 install、validate、test、build 和 `pnpm --filter <package> publish --dry-run --provenance --access public --no-git-checks`。`docs/运营/npm-trusted-publishing-workflow.md`、`docs/运营/package-publishing-v1.md` 和 `docs/releases/release-checklist.md` 已同步 workflow 边界和真实发布前置条件。
 
-- [ ] T302 P1：为 npm publish workflow 添加安全 lint。
+- [x] T302 P1：为 npm publish workflow 添加安全 lint。
   - 验收标准：
     - `@opencap/spec` 新增 workflow lint helper/test，检查 npm publish workflow 只允许 manual dispatch、默认 dry-run、候选 package allowlist、最小权限和禁止长期 npm token。
     - lint 检查不得要求真实 GitHub environment、npm 账号、OIDC token 或网络。
@@ -1519,13 +1519,14 @@
     - `pnpm --filter @opencap/spec test -- npm-publish-workflow.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增 `lintNpmPublishWorkflow()` / `lintNpmPublishWorkflowFile()`，可本地检查 `.github/workflows/npm-publish.yml` 是否保持 manual dispatch、默认 dry-run、候选 package allowlist、最小权限、禁止 `NPM_TOKEN` 和禁止无 `--dry-run` 的 publish 命令。新增 `packages/spec/src/npm-publish-workflow.test.ts` 覆盖真实 workflow 通过，以及自动触发、非候选包、长期 token、非 dry-run publish 和宽权限的负向 fixture；该 lint 不需要 GitHub environment、npm 账号、OIDC token 或网络。Spec 包测试数从 77 增至 79。
 
 - [ ] T303 P2：把 npm publish dry-run evidence 纳入 release checklist。
   - 验收标准：
     - `docs/releases/release-checklist.md` 增加 npm publish dry-run evidence 字段和核对步骤。
     - V1 alpha evidence bundle 或模板说明如何记录 workflow run、package、version、tarball/provenance dry-run 摘要和不发布边界。
     - README 和 package publishing docs 不把 dry-run workflow 写成真实 npm 发布已完成。
-    - Handoff 指向下一项 ready 或明确剩余阻塞。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`

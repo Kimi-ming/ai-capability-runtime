@@ -42,11 +42,13 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T301：新增 `.github/workflows/npm-publish.yml`，只支持 `workflow_dispatch`，默认 `dry_run: true`，候选包限制为 `@opencap/spec` 和 `@opencap/cli`。Workflow 使用 `contents: read` 和 `id-token: write`，不使用长期 `NPM_TOKEN` 或 `secrets.NPM_TOKEN`；非 dry-run dispatch 会在第一步失败。Dry-run 路径运行 install、validate、test、build 和 `pnpm --filter <package> publish --dry-run --provenance --access public --no-git-checks`。`docs/运营/npm-trusted-publishing-workflow.md`、`docs/运营/package-publishing-v1.md` 和 `docs/releases/release-checklist.md` 已同步 workflow 边界和真实发布前置条件。
 
+本轮继续完成 T302：`@opencap/spec` 新增 `lintNpmPublishWorkflow()` / `lintNpmPublishWorkflowFile()`，本地检查 `.github/workflows/npm-publish.yml` 是否保持 manual dispatch、默认 dry-run、候选 package allowlist、最小权限、禁止长期 `NPM_TOKEN` 和禁止无 `--dry-run` 的 publish 命令。新增 `packages/spec/src/npm-publish-workflow.test.ts` 覆盖真实 workflow 通过，以及自动触发、非候选包、长期 token、非 dry-run publish 和宽权限的负向 fixture；该 lint 不需要 GitHub environment、npm 账号、OIDC token 或网络。`docs/TESTING.md` 已同步 spec 包测试数从 77 增至 79。
+
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready：T302 P1：为 npm publish workflow 添加安全 lint。
+下一项 ready：T303 P2：把 npm publish dry-run evidence 纳入 release checklist。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -125,9 +127,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300 和 T301 均已完成；T302-T303 是下一批本地 release supply-chain ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301 和 T302 均已完成；T303 是下一批本地 release supply-chain ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T302，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T303，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

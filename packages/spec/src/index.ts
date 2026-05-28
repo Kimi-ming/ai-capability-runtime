@@ -22,6 +22,8 @@ export { lintGithubFineGrainedTokenGuide } from "./github-token-guide-doc-lint.j
 export type { GithubFineGrainedTokenGuideFinding, GithubFineGrainedTokenGuideLintRule } from "./github-token-guide-doc-lint.js";
 export { lintSecurityPolicyDoc } from "./security-policy-doc-lint.js";
 export type { SecurityPolicyDocFinding, SecurityPolicyDocLintRule } from "./security-policy-doc-lint.js";
+export { lintNpmPublishWorkflow, lintNpmPublishWorkflowFile } from "./npm-publish-workflow-lint.js";
+export type { NpmPublishWorkflowFinding, NpmPublishWorkflowLintResult, NpmPublishWorkflowLintRule } from "./npm-publish-workflow-lint.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";
