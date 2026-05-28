@@ -1,6 +1,6 @@
-# npm Trusted Publishing Workflow 草案
+# npm Trusted Publishing Workflow
 
-本文定义 OpenCap 未来发布 npm packages 时的 trusted publishing workflow 草案。它是发布前审查材料，不是当前可直接执行的发布工作流。
+本文定义 OpenCap 发布 npm packages 时的 trusted publishing workflow。当前仓库已提供 manual-only dry-run workflow：`.github/workflows/npm-publish.yml`。它是发布前审查材料和 dry-run 证据入口，不是当前真实 npm 发布工作流。
 
 截至 2026-05-14，npm Trusted Publishing 支持通过 CI/CD OIDC 发布，官方文档列出的 provider 包括 GitHub Actions、GitLab CI/CD 和 CircleCI。OpenCap 首选 GitHub Actions trusted publishing，因为仓库、CI、release checklist 和安全基线已经在 GitHub 上收敛。
 
@@ -12,7 +12,7 @@
 
 ## 发布边界
 
-当前草案只覆盖 npm package 发布，不覆盖 Registry Capability 分发、Registry index signing、GitHub Release artifact、Docker/OCI artifact 或 Cloud 服务发布。
+当前 workflow 只覆盖 npm package dry-run，不覆盖 Registry Capability 分发、Registry index signing、GitHub Release artifact、Docker/OCI artifact 或 Cloud 服务发布。
 
 Alpha 候选包仍以 `docs/运营/package-publishing-v1.md` 为准：
 
@@ -187,10 +187,25 @@ Provenance 和 registry signatures 不能替代代码审查、测试、release g
 4. 更新 CHANGELOG、release notes 和 `docs/HANDOFF.md`。
 5. 若涉及 secret 或恶意包，按 `SECURITY.md` 和 `docs/安全/capability-advisory-process.md` 处理。
 
+## 当前 dry-run workflow
+
+`.github/workflows/npm-publish.yml` 当前只支持 `workflow_dispatch`，默认 `dry_run: true`，候选包限制为 `@opencap/spec` 和 `@opencap/cli`。Workflow 使用 `contents: read` 和 `id-token: write`，不读取 `NPM_TOKEN` 或 `secrets.NPM_TOKEN`。
+
+Dry-run 路径会运行：
+
+```bash
+pnpm install --frozen-lockfile
+pnpm validate
+pnpm test
+pnpm build
+pnpm --filter <package> publish --dry-run --provenance --access public --no-git-checks
+```
+
+如果手动把 `dry_run` 设为 `false`，workflow 会在第一步失败，并提示真实 npm 发布仍被阻断。真实 npm 发布仍需要先配置 npm trusted publisher、受保护的 `npm-production` environment、发布审批和 release evidence。
+
 ## 后续实现任务
 
 - 创建受保护的 `npm-production` environment。
 - 为 alpha 候选 package 配置 npm trusted publisher。
-- 将草案 workflow 转成 `.github/workflows/npm-publish.yml`，默认保留 manual dispatch 和 dry-run。
 - 添加 package tarball content check。
 - 在 release checklist 中记录 npm publish evidence。

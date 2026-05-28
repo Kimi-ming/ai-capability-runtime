@@ -1495,7 +1495,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap metrics capabilities --state-dir <path> [--json]` 和 `opencap metrics security --state-dir <path> [--json]`。Capabilities report 按 Capability 输出 invocation total、status counts、policy decision counts、error rate、duration p50/p95 和 last seen；Security report 输出 denied、confirmation required、outbound blocked、data egress denied、secret missing 和 audit preflight failed 汇总。两个命令只从 SQLite audit metadata 派生，不输出 input/output、credential value、provider raw response、Authorization/Cookie 或 URL query value。`docs/运营/observability-metrics-v1.md`、`docs/TESTING.md` 和 README 已同步已实现边界；`packages/cli/src/metrics-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 22 增至 24。
 
-- [ ] T301 P1：新增 npm publish dry-run workflow。
+- [x] T301 P1：新增 npm publish dry-run workflow。
   - 验收标准：
     - 新增 `.github/workflows/npm-publish.yml`，只支持 `workflow_dispatch`，默认 `dry_run: true`，不在 push/pull_request/schedule 自动发布。
     - Workflow 只允许 alpha 候选包：`@opencap/spec` 和 `@opencap/cli`；默认不发布 runtime/mcp/sdk。
@@ -1507,6 +1507,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：新增 `.github/workflows/npm-publish.yml`，只支持 `workflow_dispatch`，默认 `dry_run: true`，候选包限制为 `@opencap/spec` 和 `@opencap/cli`。Workflow 使用 `contents: read` 和 `id-token: write`，不使用长期 `NPM_TOKEN` 或 `secrets.NPM_TOKEN`；非 dry-run dispatch 会在第一步失败。Dry-run 路径运行 install、validate、test、build 和 `pnpm --filter <package> publish --dry-run --provenance --access public --no-git-checks`。`docs/运营/npm-trusted-publishing-workflow.md`、`docs/运营/package-publishing-v1.md` 和 `docs/releases/release-checklist.md` 已同步 workflow 边界和真实发布前置条件。
 
 - [ ] T302 P1：为 npm publish workflow 添加安全 lint。
   - 验收标准：

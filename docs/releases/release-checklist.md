@@ -161,6 +161,13 @@ release_evidence:
     pnpm_lint: pass
     pnpm_test: pass
     conformance_report: pass | fail | not-run
+    npm_publish_dry_run: pass | fail | not-run
+  npm_publish:
+    package: <package-name-or-not-applicable>
+    version: <version-or-not-applicable>
+    workflow_run: <url-or-not-run>
+    dry_run: true
+    real_publish: false
   hard_gates:
     runtime: pass
     registry_trust: pass | not-applicable
@@ -175,6 +182,8 @@ release_evidence:
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
 
 发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 生成本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
+
+如果 release 涉及 npm package，发布者应先手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，记录 package、version、workflow run URL、dry-run 结果和 `real_publish: false` 边界。真实 npm 发布仍需要 npm trusted publisher、受保护的 `npm-production` environment 和人工批准；dry-run evidence 不能写成 npm package 已发布。
 
 当前 V1 alpha/local runtime evidence 样例见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`。该样例只证明本地 Runtime/CLI/Registry/MCP automated stdio smoke，不得扩展解读为 Cloud、Console、OAuth、marketplace、payment、真实 Host UI 或 npm provenance 已完成。
 

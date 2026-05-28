@@ -1,0 +1,63 @@
+name: npm Publish Dry Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Alpha candidate package to dry-run publish."
+        required: true
+        default: "@opencap/spec"
+        type: choice
+        options:
+          - "@opencap/spec"
+          - "@opencap/cli"
+      dry_run:
+        description: "Must remain true until npm trusted publishing is configured and release approval is complete."
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  npm-publish-dry-run:
+    name: npm publish dry-run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse non-dry-run dispatches
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          echo "Real npm publish is blocked until npm trusted publisher, npm-production environment, and release evidence are configured."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js for npm provenance
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies with frozen lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate registry and packages
+        run: pnpm validate
+
+      - name: Run workspace tests
+        run: pnpm test
+
+      - name: Run workspace build
+        run: pnpm build
+
+      - name: Dry-run npm publish
+        run: pnpm --filter "${{ inputs.package }}" publish --dry-run --provenance --access public --no-git-checks
