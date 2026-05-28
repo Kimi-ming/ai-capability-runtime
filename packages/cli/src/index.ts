@@ -10,12 +10,15 @@ import { formatManifestValidationIssue, validateManifestPath, type CapabilityMan
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
   InstallCapabilityError,
+  FileRuntimeLedgerStore,
   SqliteAuditLogger,
+  RuntimeLedgerAuditLogger,
   type AuditInvocationStatus,
   CliConfirmationHandler,
   blockedResultEnvelope,
   buildHttpDryRunPlan,
   createCapabilityCard,
+  createCapabilityLedgerIdentity,
   createCapabilityIdentity,
   createCapabilityLifecycleWarning,
   createConfirmationAuditEvent,
@@ -749,7 +752,17 @@ program
       channel: "cli",
       trustLevel: trustLevelFromMetadata(capability.manifest.metadata),
     });
-    const logger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+    const sqliteLogger = new SqliteAuditLogger({ cwd, env: process.env, stateDir: options.stateDir });
+    const capabilityIdentities = new Map(loaded.capabilities.map((installed) => [installed.id, createCapabilityLedgerIdentity({
+      manifest: installed.manifest,
+      packagePath: installed.installPath,
+      manifestPath: installed.manifestPath,
+    })]));
+    const logger = new RuntimeLedgerAuditLogger(
+      sqliteLogger,
+      new FileRuntimeLedgerStore({ cwd, env: process.env, stateDir: options.stateDir }),
+      { capabilityIdentityResolver: (capabilityId) => capabilityIdentities.get(capabilityId) },
+    );
 
     try {
       if (options.dryRun) {
@@ -768,6 +781,7 @@ program
           inputRedactedJson: stableJsonStringify(redactInput(input)),
           resolvedUrl: plan.url,
           requestStarted: false,
+          executionHttpMethod: plan.method,
           egressDataClasses: plan.egressPreview?.dataClasses,
           egressTargetOrigin: plan.egressPreview?.targetOrigin,
           egressRedactedPreviewJson: plan.egressPreview === undefined ? undefined : stableJsonStringify(plan.egressPreview),
@@ -830,7 +844,7 @@ program
       }
       printInvokeResult(envelope, { json: options.json, verbose: options.verbose });
     } finally {
-      logger.close();
+      sqliteLogger.close();
     }
   }, `Failed to invoke ${id}`));
 

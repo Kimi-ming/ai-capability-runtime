@@ -11,9 +11,11 @@ import {
   evaluateDataEgressPolicy,
   CliConfirmationHandler,
   DEFAULT_POLICIES_YML,
+  FileRuntimeLedgerStore,
   confirmWithAudit,
   confirmationSummaryFromDataEgress,
   createConfirmationAuditEvent,
+  createCapabilityLedgerIdentity,
   createCompositionContextEvidence,
   createConsentReceiptAuditEvidence,
   createDataEgressAuditEvent,
@@ -44,8 +46,10 @@ import {
   redactInput,
   resolveStateDir,
   stableJsonStringify,
+  RuntimeLedgerAuditLogger,
   type AuditEvent,
   type AuditLogger,
+  type RuntimeLedgerStore,
 } from "./index.js";
 
 class FailingAuditPreflightLogger implements AuditLogger {
@@ -60,6 +64,31 @@ class FailingAuditPreflightLogger implements AuditLogger {
   async record(event: AuditEvent): Promise<void> {
     this.events.push(event);
   }
+}
+
+function failingLedgerStore(error = new Error("ledger unavailable")): RuntimeLedgerStore {
+  return {
+    appendCapabilityRecord: async () => {
+      throw error;
+    },
+    listCapabilityRecords: async () => ({ records: [] }),
+    getLatestCapabilityRecord: async () => undefined,
+    appendPolicyRecord: async () => {
+      throw error;
+    },
+    listPolicyRecords: async () => ({ records: [] }),
+    getActivePolicyRecord: async () => undefined,
+    appendInvocationRecord: async () => {
+      throw error;
+    },
+    listInvocationRecords: async () => ({ records: [] }),
+    getInvocationRecord: async () => undefined,
+    appendCompatibilityRecord: async () => {
+      throw error;
+    },
+    listCompatibilityRecords: async () => ({ records: [] }),
+    getLatestCompatibilityRecord: async () => undefined,
+  };
 }
 
 async function writeCapability(root: string, category: string, id: string, manifestId = id, lifecycle = ""): Promise<string> {
@@ -2130,6 +2159,164 @@ describe("SQLite audit logger", () => {
   });
 });
 
+describe("Runtime ledger audit logger", () => {
+  it("derives invocation ledger records from dry-run, blocked, executed, failed, and unknown audit events", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-invocation-ledger-"));
+    const auditLogger = new InMemoryAuditLogger();
+    const ledger = new FileRuntimeLedgerStore({ stateDir, env: {} });
+    const manifest = dryRunManifest();
+    const capability = createCapabilityLedgerIdentity({
+      manifest,
+      packagePath: join(stateDir, "installed", manifest.id),
+      manifestPath: join(stateDir, "installed", manifest.id, "manifest.yml"),
+    });
+    const logger = new RuntimeLedgerAuditLogger(auditLogger, ledger, {
+      capabilityIdentityResolver: () => capability,
+    });
+    const policy = evaluatePolicy(defaultPolicySet(join(stateDir, "policies.yml")), {
+      capabilityId: manifest.id,
+      permissions: manifest.permissions,
+      channel: "cli",
+    });
+
+    await logger.record({
+      id: "audit_dry_run",
+      timestamp: "2026-05-28T01:00:00.000Z",
+      channel: "cli",
+      capabilityId: manifest.id,
+      status: "dry_run",
+      policyDecision: policy.decision,
+      confirmationStatus: "approved",
+      reason: "Dry run plan generated.",
+      inputHash: "sha256:input-dry-run",
+      inputRedactedJson: "{\"token\":\"[REDACTED]\"}",
+      resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+      requestStarted: false,
+      policyTrace: policy.decisionTrace,
+    });
+    await logger.record(createConfirmationAuditEvent(
+      { capabilityId: manifest.id, policy, channel: "cli", operationSummary: manifest.id, input: { title: "Bug", token: "input-secret" } },
+      { status: "confirmation_required", reason: "Needs confirmation.", channel: "cli", policyDecision: "ask", prompted: false },
+      new Date("2026-05-28T01:01:00.000Z"),
+    ));
+    await logger.record({
+      id: "audit_success",
+      timestamp: "2026-05-28T01:02:00.000Z",
+      channel: "cli",
+      capabilityId: manifest.id,
+      status: "executed",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      reason: "HTTP execution succeeded.",
+      inputHash: "sha256:input-success",
+      resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+      requestStarted: true,
+      executionOutcome: "success",
+      executionHttpStatus: 201,
+      executionSideEffectKind: "write",
+    });
+    await logger.record({
+      id: "audit_failed",
+      timestamp: "2026-05-28T01:03:00.000Z",
+      channel: "cli",
+      capabilityId: manifest.id,
+      status: "executed",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      reason: "HTTP request failed with status 500.",
+      inputHash: "sha256:input-failed",
+      resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+      requestStarted: true,
+      executionOutcome: "failed_after_request",
+      executionHttpStatus: 500,
+      executionSideEffectKind: "write",
+    });
+    await logger.record({
+      id: "audit_unknown",
+      timestamp: "2026-05-28T01:04:00.000Z",
+      channel: "cli",
+      capabilityId: manifest.id,
+      status: "executed",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      reason: "HTTP request timed out.",
+      inputHash: "sha256:input-unknown",
+      resolvedUrl: "https://api.github.com/repos/opencap/runtime/issues",
+      requestStarted: true,
+      executionOutcome: "unknown_after_timeout",
+      executionSideEffectKind: "write",
+    });
+
+    const records = (await ledger.listInvocationRecords({ capabilityId: manifest.id })).records;
+
+    expect(records.map((record) => record.status)).toEqual([
+      "dry_run",
+      "confirmation_required",
+      "success",
+      "failed",
+      "unknown_after_timeout",
+    ]);
+    expect(records[0]).toMatchObject({
+      requestId: "audit_dry_run",
+      auditId: "audit_dry_run",
+      inputHash: "sha256:input-dry-run",
+      execution: {
+        requestStarted: false,
+        targetOrigin: "https://api.github.com",
+      },
+      gateDecisions: [
+        expect.objectContaining({
+          gateId: "risk_policy",
+          decision: "ask",
+          reasonCode: "RISK_POLICY_DEFAULT_ASK",
+        }),
+      ],
+    });
+    expect(records[2]).toMatchObject({
+      execution: {
+        requestStarted: true,
+        targetOrigin: "https://api.github.com",
+        httpStatus: 201,
+      },
+    });
+    expect(JSON.stringify(records)).not.toContain("input-secret");
+    expect(JSON.stringify(records)).not.toContain("token");
+    expect(auditLogger.events.map((event) => event.id)).toEqual([
+      "audit_dry_run",
+      records[1].auditId,
+      "audit_success",
+      "audit_failed",
+      "audit_unknown",
+    ]);
+  });
+
+  it("surfaces invocation ledger write failures after audit is recorded", async () => {
+    const auditLogger = new InMemoryAuditLogger();
+    const manifest = dryRunManifest();
+    const capability = createCapabilityLedgerIdentity({
+      manifest,
+      packagePath: "/tmp/state/installed/github.create_issue",
+      manifestPath: "/tmp/state/installed/github.create_issue/manifest.yml",
+    });
+    const logger = new RuntimeLedgerAuditLogger(auditLogger, failingLedgerStore(), {
+      capabilityIdentityResolver: () => capability,
+    });
+
+    await expect(logger.record({
+      id: "audit_ledger_failure",
+      timestamp: "2026-05-28T01:05:00.000Z",
+      channel: "cli",
+      capabilityId: manifest.id,
+      status: "dry_run",
+      policyDecision: "allow",
+      confirmationStatus: "approved",
+      reason: "Dry run plan generated.",
+      requestStarted: false,
+    })).rejects.toThrow("ledger unavailable");
+    expect(auditLogger.events).toHaveLength(1);
+  });
+});
+
 describe("audit log filtering", () => {
   it("filters recent audit events by capability, status, and since", async () => {
     const cwd = await mkdtemp(join(tmpdir(), "opencap-audit-filter-"));
@@ -2282,6 +2469,46 @@ describe("installCapability", () => {
     await installCapability({ cwd, id: "github.create_issue", force: true, env: {} });
 
     await expect(readFile(join(first.destinationDir, "README.md"), "utf8")).resolves.toBe("# github.create_issue\n");
+  });
+
+  it("writes a capability ledger record after a successful install", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-install-ledger-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+
+    const result = await installCapability({ cwd, id: "github.create_issue", env: {} });
+    const ledger = new FileRuntimeLedgerStore({ cwd, env: {} });
+
+    const record = await ledger.getLatestCapabilityRecord("github.create_issue");
+
+    expect(record).toMatchObject({
+      recordKind: "capability",
+      event: "installed",
+      capability: {
+        id: "github.create_issue",
+        version: "0.1.0",
+        packagePath: result.destinationDir,
+        manifestPath: join(result.destinationDir, "manifest.yml"),
+        manifestDigest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+      },
+      install: {
+        source: "registry",
+        sourceRef: expect.stringContaining("registry/developer-tools/github.create_issue"),
+      },
+      manifestDigest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+    });
+    expect(JSON.stringify(record)).not.toContain("Test Capability.");
+  });
+
+  it("surfaces capability ledger write failures instead of silently swallowing them", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-install-ledger-fail-"));
+    await writeCapability(cwd, "developer-tools", "github.create_issue");
+
+    await expect(installCapability({
+      cwd,
+      id: "github.create_issue",
+      env: {},
+      ledgerStore: failingLedgerStore(),
+    })).rejects.toThrow("ledger unavailable");
   });
 });
 

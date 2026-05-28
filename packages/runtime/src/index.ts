@@ -80,7 +80,16 @@ import { POLICY_TRACE_VERSION, type PolicyDecisionTraceV1 } from "./policy-trace
 import { sanitizeToolResult, type ResultSanitizerFinding, type ToolResultSanitizerOptions } from "./result-sanitizer.js";
 import type { DataEgressContext, DataEgressDecision, DataEgressDecisionResult } from "./data-egress-policy.js";
 import { SecretMissingError, credentialAuditEvidence, resolveEnvCredential, type CredentialAuditEvidence } from "./secret-resolver.js";
-import type { ExecutionEvidence, ExecutionOutcome, ExecutionSideEffectKind } from "./domain.js";
+import {
+  FileRuntimeLedgerStore,
+  LEDGER_RECORD_VERSION,
+  createLedgerRecordId,
+  type CapabilityLedgerRecordV1,
+  type InvocationLedgerRecordV1,
+  type RuntimeLedgerStore,
+} from "./ledger.js";
+import { createCapabilityIdentity } from "./identity.js";
+import type { CapabilityIdentity, ExecutionEvidence, ExecutionOutcome, ExecutionSideEffectKind, GateDecision, RuntimeResultStatus } from "./domain.js";
 
 export const DEFAULT_STATE_DIR_NAME = "opencap.local";
 export const OPENCAP_STATE_DIR_ENV = "OPENCAP_STATE_DIR";
@@ -116,6 +125,7 @@ export interface RuntimeOptions extends ResolveStateDirOptions {}
 export interface InstallCapabilityOptions extends ResolveStateDirOptions, ResolveRegistryDirOptions {
   id: string;
   force?: boolean;
+  ledgerStore?: RuntimeLedgerStore;
 }
 
 export interface InstallCapabilityResult {
@@ -1409,6 +1419,7 @@ function executionAuditEvent(
     requestStarted,
     executionOutcome: execution.outcome,
     executionSideEffectKind: execution.sideEffectKind,
+    executionHttpMethod: result.method,
     executionRequestStartedAt: execution.requestStartedAt,
     executionResponseReceivedAt: execution.responseReceivedAt,
     executionHttpStatus: execution.httpStatus,
@@ -2433,6 +2444,7 @@ export interface AuditEvent {
   requestStarted?: boolean;
   executionOutcome?: ExecutionOutcome;
   executionSideEffectKind?: ExecutionSideEffectKind;
+  executionHttpMethod?: string;
   executionRequestStartedAt?: string;
   executionResponseReceivedAt?: string;
   executionHttpStatus?: number;
@@ -2486,6 +2498,185 @@ export class InMemoryAuditLogger implements AuditLogger {
 
   async record(event: AuditEvent): Promise<void> {
     this.events.push(event);
+  }
+}
+
+export interface CreateCapabilityLedgerIdentityInput {
+  manifest: Pick<CapabilityManifest, "id" | "version" | "lifecycle">;
+  packagePath: string;
+  manifestPath: string;
+  manifestDigest?: string;
+  packageDigest?: string;
+  registryCommit?: string;
+}
+
+function manifestDigest(manifest: unknown): string {
+  return digestEvidenceValue(manifest);
+}
+
+function manifestLifecycleForIdentity(manifest: Pick<CapabilityManifest, "lifecycle">): CapabilityIdentity["lifecycle"] | undefined {
+  const status = manifest.lifecycle?.status;
+  if (status === "deprecated" || status === "yanked" || status === "revoked") {
+    return status;
+  }
+  return undefined;
+}
+
+export function createCapabilityLedgerIdentity(input: CreateCapabilityLedgerIdentityInput): CapabilityIdentity {
+  return createCapabilityIdentity({
+    manifest: input.manifest,
+    packagePath: input.packagePath,
+    manifestPath: input.manifestPath,
+    manifestDigest: input.manifestDigest ?? manifestDigest(input.manifest),
+    packageDigest: input.packageDigest,
+    registryCommit: input.registryCommit,
+    lifecycle: manifestLifecycleForIdentity(input.manifest),
+  });
+}
+
+export interface CreateInvocationLedgerRecordFromAuditEventOptions {
+  capability: CapabilityIdentity;
+  recordId?: string;
+}
+
+function policyTraceId(trace: PolicyDecisionTraceV1): string {
+  return digestEvidenceValue(trace);
+}
+
+function gateDecisionFromPolicyTrace(trace: PolicyDecisionTraceV1): GateDecision {
+  const traceId = policyTraceId(trace);
+  return {
+    gateId: trace.gate,
+    stage: "pre_secret",
+    decision: trace.decision,
+    reasonCode: trace.reasonCode,
+    summary: trace.humanReadableSummary,
+    evidence: {
+      policySetId: trace.policySetId,
+      policyRevision: trace.policyRevision,
+      matchedRuleId: trace.matchedRuleId,
+      defaultDecisionUsed: trace.defaultDecisionUsed,
+      secretResolutionAllowed: trace.secretResolutionAllowed,
+      executionAllowed: trace.executionAllowed,
+    },
+    hardBoundary: trace.decision === "deny" || trace.decision === "block",
+    traceId,
+  };
+}
+
+function invocationLedgerStatusFromAuditEvent(event: AuditEvent): RuntimeResultStatus {
+  if (event.status === "dry_run") {
+    return "dry_run";
+  }
+  if (event.status === "denied") {
+    return "denied";
+  }
+  if (event.status === "blocked") {
+    return event.confirmationStatus === "confirmation_required" ? "confirmation_required" : "blocked";
+  }
+  if (event.executionOutcome === "unknown_after_timeout") {
+    return "unknown_after_timeout";
+  }
+  if (event.executionOutcome === "failed_before_request" || event.executionOutcome === "failed_after_request" || event.executionOutcome === "partial") {
+    return "failed";
+  }
+  return "success";
+}
+
+function errorCodeFromAuditEvent(event: AuditEvent): string | undefined {
+  if (event.status === "denied") {
+    return "POLICY_DENIED";
+  }
+  if (event.confirmationStatus === "confirmation_required") {
+    return "CONFIRMATION_REQUIRED";
+  }
+  if (event.executionOutcome === "unknown_after_timeout") {
+    return "HTTP_TIMEOUT";
+  }
+  if (event.executionOutcome === "failed_before_request") {
+    return "SECRET_MISSING";
+  }
+  if (event.executionOutcome === "failed_after_request" || event.executionOutcome === "partial") {
+    return "HTTP_EXECUTION_FAILED";
+  }
+  if (event.status === "blocked") {
+    return "BLOCKED";
+  }
+  return undefined;
+}
+
+function targetOriginFromResolvedUrl(resolvedUrl: string | undefined): string | undefined {
+  if (resolvedUrl === undefined) {
+    return undefined;
+  }
+  try {
+    return new URL(resolvedUrl).origin;
+  } catch {
+    return undefined;
+  }
+}
+
+export function createInvocationLedgerRecordFromAuditEvent(
+  event: AuditEvent,
+  options: CreateInvocationLedgerRecordFromAuditEventOptions,
+): InvocationLedgerRecordV1 {
+  const gateDecisions = event.policyTrace === undefined ? [] : [gateDecisionFromPolicyTrace(event.policyTrace)];
+  const policyTraceIds = event.policyTrace === undefined ? [] : [policyTraceId(event.policyTrace)];
+
+  return {
+    ledgerVersion: LEDGER_RECORD_VERSION,
+    recordKind: "invocation",
+    recordId: options.recordId ?? createLedgerRecordId("invocation"),
+    recordedAt: event.timestamp,
+    requestId: event.id,
+    invocationId: event.id,
+    capability: options.capability,
+    channel: event.channel,
+    status: invocationLedgerStatusFromAuditEvent(event),
+    inputHash: event.inputHash,
+    gateDecisions,
+    policyTraceIds,
+    auditId: event.id,
+    consent: event.consentId === undefined ? undefined : {
+      consentId: event.consentId,
+      decision: event.consentDecision ?? "unavailable",
+      decidedAt: event.consentDecidedAt,
+      channel: event.consentChannel,
+    },
+    execution: {
+      requestStarted: event.requestStarted ?? false,
+      targetOrigin: targetOriginFromResolvedUrl(event.resolvedUrl),
+      httpMethod: event.executionHttpMethod,
+      httpStatus: event.executionHttpStatus,
+      providerRequestId: event.executionProviderRequestId,
+      retryAttempt: event.executionRetryAttempt,
+    },
+    errorCode: errorCodeFromAuditEvent(event),
+  };
+}
+
+export interface RuntimeLedgerAuditLoggerOptions {
+  capabilityIdentityResolver: (capabilityId: string) => CapabilityIdentity | undefined;
+}
+
+export class RuntimeLedgerAuditLogger implements AuditLogger {
+  constructor(
+    private readonly delegate: AuditLogger,
+    private readonly ledgerStore: RuntimeLedgerStore,
+    private readonly options: RuntimeLedgerAuditLoggerOptions,
+  ) {}
+
+  async preflight(check: AuditPreflightCheck): Promise<void> {
+    await this.delegate.preflight(check);
+  }
+
+  async record(event: AuditEvent): Promise<void> {
+    await this.delegate.record(event);
+    const capability = this.options.capabilityIdentityResolver(event.capabilityId);
+    if (capability === undefined) {
+      return;
+    }
+    await this.ledgerStore.appendInvocationRecord(createInvocationLedgerRecordFromAuditEvent(event, { capability }));
   }
 }
 
@@ -3305,6 +3496,31 @@ export async function installCapability(options: InstallCapabilityOptions): Prom
     await rm(tmpInstallDir, { recursive: true, force: true });
     throw error;
   }
+
+  const recordedAt = new Date().toISOString();
+  const installedManifestPath = join(destinationDir, "manifest.yml");
+  const digest = manifestDigest(validation.manifest);
+  const ledgerStore = options.ledgerStore ?? new FileRuntimeLedgerStore({ cwd, env, stateDir: options.stateDir });
+  const capabilityRecord: CapabilityLedgerRecordV1 = {
+    ledgerVersion: LEDGER_RECORD_VERSION,
+    recordKind: "capability",
+    recordId: createLedgerRecordId("capability"),
+    recordedAt,
+    event: alreadyInstalled ? "updated" : "installed",
+    capability: createCapabilityLedgerIdentity({
+      manifest: validation.manifest,
+      packagePath: destinationDir,
+      manifestPath: installedManifestPath,
+      manifestDigest: digest,
+    }),
+    install: {
+      installedAt: recordedAt,
+      source: "registry",
+      sourceRef: sourceDir,
+    },
+    manifestDigest: digest,
+  };
+  await ledgerStore.appendCapabilityRecord(capabilityRecord);
 
   return {
     id: options.id,

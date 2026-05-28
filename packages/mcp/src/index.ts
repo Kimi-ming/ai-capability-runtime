@@ -12,8 +12,11 @@ import {
 import { buildMcpToolProjection, capabilityIdToMcpToolName } from "./tool-projection.js";
 import {
   McpNoElicitationConfirmationHandler,
+  FileRuntimeLedgerStore,
   SqliteAuditLogger,
+  RuntimeLedgerAuditLogger,
   confirmWithAudit,
+  createCapabilityLedgerIdentity,
   evaluatePolicy,
   executeHttpCapability,
   loadInstalledCapabilities,
@@ -314,7 +317,17 @@ export async function createOpenCapMcpServerFromState(options: OpenCapMcpServerF
   const env = options.env ?? process.env;
   const loaded = await loadInstalledCapabilities({ cwd: options.cwd, stateDir: options.stateDir, env });
   const policySet = await loadPolicySet({ cwd: options.cwd, stateDir: options.stateDir, env });
-  const auditLogger = new SqliteAuditLogger({ cwd: options.cwd, stateDir: options.stateDir, env });
+  const sqliteAuditLogger = new SqliteAuditLogger({ cwd: options.cwd, stateDir: options.stateDir, env });
+  const capabilityIdentities = new Map(loaded.capabilities.map((installed) => [installed.id, createCapabilityLedgerIdentity({
+    manifest: installed.manifest,
+    packagePath: installed.installPath,
+    manifestPath: installed.manifestPath,
+  })]));
+  const auditLogger = new RuntimeLedgerAuditLogger(
+    sqliteAuditLogger,
+    new FileRuntimeLedgerStore({ cwd: options.cwd, stateDir: options.stateDir, env }),
+    { capabilityIdentityResolver: (capabilityId) => capabilityIdentities.get(capabilityId) },
+  );
 
   return createOpenCapMcpServer({
     manifests: loaded.capabilities.map((capability) => capability.manifest),

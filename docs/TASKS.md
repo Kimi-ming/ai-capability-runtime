@@ -174,7 +174,7 @@
     - `pnpm lint`
   - 完成记录：`packages/runtime/src/ledger.ts` 新增 `FileRuntimeLedgerStore`，实现 `RuntimeLedgerStore` 的本地 JSONL append-only store，默认写入 resolved state dir 下的 `ledger/`，按 `capability.jsonl`、`policy.jsonl`、`invocation.jsonl`、`compatibility.jsonl` 分文件保存。Store 支持 append、kind-specific list query、latest capability、active policy、request lookup 和 compatibility lookup；写入前会拒绝明显 raw input/output、provider raw body、secret/token/Authorization 类 metadata。新增 `packages/runtime/src/ledger-store.test.ts` 覆盖文件布局、过滤、cursor/limit、latest lookup、root export 和脱敏拒绝边界；Runtime 测试数从 284 增至 289。
 
-- [ ] T284 P1：把 install/invoke 关键事件写入 Runtime Ledger。
+- [x] T284 P1：把 install/invoke 关键事件写入 Runtime Ledger。
   - 验收标准：
     - `installCapability()` 成功安装时写入 Capability ledger record，包含 capability identity、manifest digest、source ref 和 install evidence。
     - CLI / Runtime invoke dry-run、blocked、executed、failed、unknown 路径能从 audit event 派生 Invocation ledger record。
@@ -185,6 +185,7 @@
     - `pnpm --filter @opencap/cli test -- smoke.test.ts`
     - `pnpm --filter @opencap/runtime build`
     - `pnpm validate`
+  - 完成记录：`installCapability()` 成功安装后会写入 Capability ledger record，包含 `CapabilityIdentity`、manifest digest、registry source ref 和 install evidence；默认写入 resolved state dir 下的 JSONL ledger，也支持注入 `RuntimeLedgerStore` 并在 ledger 写失败时显式报错。Runtime 新增 `RuntimeLedgerAuditLogger` 和 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout 状态；CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger。CLI smoke 验证 install、dry-run invoke 和 secret-missing blocked invoke 写入脱敏 ledger，且 JSONL 中不包含 input 原文、secret、Authorization 或 provider raw body；Runtime index 测试数从 98 增至 102，Runtime 包测试数从 289 增至 293。
 
 - [ ] T285 P2：新增 `opencap ledger export` 脱敏导出命令。
   - 验收标准：

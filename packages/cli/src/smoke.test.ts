@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -117,6 +117,24 @@ rules:
       expect(policySimulation.stdout).not.toContain("alice@example.com");
 
       await runOpenCapSmokeStage("install", ["install", "github.create_issue", "--state-dir", stateDir]);
+      const capabilityLedgerLines = (await readFile(join(stateDir, "ledger", "capability.jsonl"), "utf8"))
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line));
+      expect(capabilityLedgerLines).toEqual([
+        expect.objectContaining({
+          recordKind: "capability",
+          event: "installed",
+          capability: expect.objectContaining({
+            id: "github.create_issue",
+            version: "0.1.0",
+            manifestDigest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+          }),
+          install: expect.objectContaining({
+            source: "registry",
+          }),
+        }),
+      ]);
 
       const list = await runOpenCapSmokeStage("list", ["list", "--state-dir", stateDir, "--json"]);
       expect(JSON.parse(list.stdout)).toMatchObject([
@@ -221,6 +239,40 @@ rules:
       });
       expect(failedEnvelope.evidence).toBeDefined();
       expect(JSON.stringify(failedEnvelope)).not.toContain("input-secret");
+
+      const invocationLedgerLines = (await readFile(join(stateDir, "ledger", "invocation.jsonl"), "utf8"))
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line));
+      expect(invocationLedgerLines).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          recordKind: "invocation",
+          capability: expect.objectContaining({ id: "github.create_issue" }),
+          channel: "cli",
+          status: "dry_run",
+          inputHash: expect.stringMatching(/^sha256:/),
+          execution: expect.objectContaining({
+            requestStarted: false,
+            targetOrigin: "https://api.github.com",
+            httpMethod: "POST",
+          }),
+        }),
+        expect.objectContaining({
+          recordKind: "invocation",
+          capability: expect.objectContaining({ id: "github.create_issue" }),
+          channel: "cli",
+          status: "blocked",
+          errorCode: "SECRET_MISSING",
+          inputHash: expect.stringMatching(/^sha256:/),
+          execution: expect.objectContaining({
+            requestStarted: false,
+            targetOrigin: "https://api.github.com",
+            httpMethod: "POST",
+          }),
+        }),
+      ]));
+      expect(JSON.stringify(invocationLedgerLines)).not.toContain("input-secret");
+      expect(JSON.stringify(invocationLedgerLines)).not.toContain("broken");
 
       const logs = await runOpenCapSmokeStage("logs", ["logs", "--state-dir", stateDir, "--status", "dry_run", "--json"]);
       expect(JSON.parse(logs.stdout)).toEqual(expect.arrayContaining([
