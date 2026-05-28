@@ -23,10 +23,16 @@
 
 当前主要缺口：
 
-- `opencap serve --mcp` 已接入最小 stdio server；真实 Host smoke 仍需按 `docs/教程/connect-mcp-host.md` 记录。
+- `opencap serve --mcp` 已接入最小 stdio server；真实 Claude Desktop/Cursor Host smoke 需要本机 Host 应用和人工证据，先列为外部证据任务。
 - V1 需要把具体 ledger writer/迁移策略继续落到类型、测试和实现里。
 - Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
 - Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
+
+下一批 ready 任务规划原则：
+
+- 优先补齐 V1 alpha 发布前的本地可验证能力：ledger、release evidence、automated MCP smoke、CLI/文档证据。
+- Ready 任务不得依赖真实第三方账号、真实 Host UI、外部支付或生产凭据。
+- 需要人工或外部应用的任务必须显式标记为 `[!]`，避免阻断连续开发循环。
 
 ## 模块划分
 
@@ -34,17 +40,31 @@
 
 | 模块 | 名称 | 目标 | 当前判断 |
 | --- | --- | --- | --- |
-| M0 | 阻塞和外部依赖 | 跟踪需要用户确认、网络、凭据或外部 SDK 的任务 | 当前无 ready 阻塞 |
+| M0 | 阻塞和外部依赖 | 跟踪需要用户确认、网络、凭据或外部 SDK 的任务 | 真实 Host smoke 等外部证据阻塞 |
 | M1 | 核心契约和 Runtime Kernel | 把设计对象落成 public types、接口和稳定包导出 | 基础契约已完成 |
-| M2 | 执行安全、审计和可靠性 | 补齐调用前门禁、审计失败保护、状态路径、重试和限流 | 下一步优先 |
-| M3 | CLI、MCP 和 Host 互操作 | 补齐 CLI 细粒度测试、MCP 映射、Host evidence 和 profile | 下一步补真实 Host smoke |
-| M4 | Registry、Trust、Lifecycle 和供应链 | 建立能力包、信任卡、生命周期、安全公告和供应链闭环 | V1 生态根基 |
-| M5 | Conformance、Abuse Cases、隐私和运维 | 把设计风险转为一致性测试、smoke、runbook 和文档门禁 | 质量增强 |
-| M6 | Composition、Capability Graph 和 Agentic Commerce | 规划多步组合、能力图、用量计费和商业边界 | V1 后续扩展 |
+| M2 | 执行安全、审计和可靠性 | 补齐调用前门禁、审计失败保护、状态路径、重试和限流 | 下一批 ready 起点 |
+| M3 | CLI、MCP 和 Host 互操作 | 补齐 CLI 细粒度测试、MCP 映射、Host evidence 和 profile | 自动化 smoke ready，真实 Host smoke 阻塞 |
+| M4 | Registry、Trust、Lifecycle 和供应链 | 建立能力包、信任卡、生命周期、安全公告和供应链闭环 | 下一批 ready |
+| M5 | Conformance、Abuse Cases、隐私和运维 | 把设计风险转为一致性测试、smoke、runbook 和文档门禁 | 下一批 ready |
+| M6 | Composition、Capability Graph 和 Agentic Commerce | 规划多步组合、能力图、用量计费和商业边界 | V1 后续扩展 ready |
 
 ## 可执行任务队列
 
 ### 模块 M0：阻塞和外部依赖
+
+- [!] T291 P1：记录 Claude Desktop / Cursor 真实 Host smoke evidence。
+  - 阻塞原因：
+    - 需要本机安装并可操作 Claude Desktop 或 Cursor，并需要人工确认 Host UI 中的 tool list / tool call 行为。
+    - 当前可自动化验证的是 MCP SDK/custom client smoke，不能替代第三方 Host UI evidence。
+  - 解除阻塞条件：
+    - 用户确认本机 Host 可用，或提供可执行的 Host smoke 环境和允许写入对应用户级/项目级 MCP 配置。
+  - 验收标准：
+    - `docs/生态/host-compatibility-matrix.md` 增加 Claude Desktop 和 Cursor 的真实 smoke evidence records。
+    - Evidence 记录 Host version、OpenCap commit、state dir、capability、checks、result、known gaps 和隐私边界。
+    - 不保存 prompt 原文、provider raw response、token、私有 URL 或用户真实数据。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `git diff --check`
 
 - [x] T070 P0：选择 MCP TypeScript SDK 并接入。
 
@@ -140,6 +160,41 @@
   - 完成记录：`docs/运营/release-readiness.md` 已新增 v0.1 Local Runtime、v0.2 Evidence Registry、v0.3 Interop Profiles、v0.4 Adapter Layer、v0.5 Policy Operations、v1.0 Capability Network 的 maturity gate matrix；每个阶段列出发布承诺、hard gates、证据、允许缺口和不得宣称项。`docs/releases/alpha-checklist.md`、`docs/规范/versioning-and-compatibility.md`、`docs/README.md`、`docs/INDEX.md` 和 `docs/SYSTEM.md` 已同步 release maturity 入口和口径。
 
 ### 模块 M2：执行安全、审计和可靠性
+
+- [ ] T283 P1：实现本地 JSONL Runtime Ledger Store。
+  - 验收标准：
+    - `@opencap/runtime` 提供一个实现 `RuntimeLedgerStore` 的本地 JSONL append-only store，默认写入 resolved state dir 下的 `ledger/`。
+    - Store 支持四类 ledger record：Capability、Policy、Invocation、Compatibility，文件按 record kind 分离，append 后可按 kind、capability id、时间范围查询。
+    - 写入只保存 digest、summary、evidence ref 和脱敏 metadata，不保存 manifest/policy/input/output/secret/provider raw body 原文。
+    - 读写测试使用临时 state dir，不污染仓库或用户真实 `opencap.local/`。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- ledger-store.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm validate`
+    - `pnpm lint`
+
+- [ ] T284 P1：把 install/invoke 关键事件写入 Runtime Ledger。
+  - 验收标准：
+    - `installCapability()` 成功安装时写入 Capability ledger record，包含 capability identity、manifest digest、source ref 和 install evidence。
+    - CLI / Runtime invoke dry-run、blocked、executed、failed、unknown 路径能从 audit event 派生 Invocation ledger record。
+    - Ledger 写入失败不得静默吞掉；写操作失败应返回结构化错误或在 handoff 中明确边界，不能绕过 audit 模型。
+    - Ledger record 不包含 input 原文、output 原文、secret、Authorization、provider raw body。
+  - 验证方式：
+    - `pnpm --filter @opencap/runtime test -- ledger-store.test.ts index.test.ts`
+    - `pnpm --filter @opencap/cli test -- smoke.test.ts`
+    - `pnpm --filter @opencap/runtime build`
+    - `pnpm validate`
+
+- [ ] T285 P2：新增 `opencap ledger export` 脱敏导出命令。
+  - 验收标准：
+    - CLI 提供 `opencap ledger export --state-dir <path> --json`，读取本地 ledger records 并输出脱敏 JSON。
+    - 支持 `--kind capability|policy|invocation|compatibility`、`--capability <id>`、`--limit <number>` 基础筛选。
+    - 空 ledger 输出友好提示；非法参数作为用户错误 exit `1`，不打印 stack。
+    - 输出不得包含 input/output/secret/provider raw body 原文。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- ledger-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
 
 - [x] T131 P1：实现 `execution.body.fields` 渲染测试。
   - 验收标准：
@@ -392,6 +447,38 @@
 
 ### 模块 M3：CLI、MCP 和 Host 互操作
 
+- [ ] T286 P1：新增自动化 MCP stdio smoke 测试。
+  - 验收标准：
+    - 新增测试通过官方 MCP SDK client 或等价 stdio JSON-RPC client 启动 `opencap serve --mcp`，不依赖 Claude/Cursor UI。
+    - Smoke 使用临时 state dir 安装 `github.search_repo` 和 `github.create_issue`，验证 `tools/list` 暴露稳定 tool name、input schema、risk metadata。
+    - Smoke 验证 read-only allow 或 dry-run 路径，以及 write ask 在无 elicitation Host 下返回 `confirmation_required`。
+    - stdout 只承载 MCP JSON-RPC；普通日志必须在 stderr 或被测试确认不会污染协议流。
+  - 验证方式：
+    - `pnpm --filter @opencap/mcp test -- sdk-stdio-smoke.test.ts`
+    - `pnpm --filter @opencap/mcp build`
+    - `pnpm validate`
+
+- [ ] T287 P2：把自动化 MCP smoke evidence 写入 Host compatibility matrix。
+  - 验收标准：
+    - `docs/生态/host-compatibility-matrix.md` 增加 automated MCP stdio smoke evidence record，绑定测试文件、OpenCap commit、profiles 和 known gaps。
+    - 记录明确 automated SDK/client smoke 不等同 Claude Desktop/Cursor UI smoke。
+    - `docs/教程/connect-mcp-host.md` 链接该 automated smoke，并保留真实 Host smoke 的 pending/blocked 状态。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
+- [ ] T288 P2：扩展 `opencap card` 支持 Trust Card 输出。
+  - 验收标准：
+    - CLI 支持 `opencap card <id> --kind trust --json`，从已安装 Capability 生成 `cardKind: "trust"` 的 Trust Card。
+    - Trust Card 输出包含 trust level、maintainer、advisory summary、provenance、limitations 和固定 disclaimer。
+    - Capability Card 默认行为保持兼容；非法 `--kind` 返回用户错误 exit `1`。
+    - 输出不读取 secret、不执行 Capability、不修改 state。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- card-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
 - [x] T282 P1：实现 `opencap card` Capability Card 输出命令。
   - 验收标准：
     - CLI 提供 `opencap card <id> --state-dir <path> --json`，从本地已安装 Capability 生成 `opencap.card.v1` Capability Card JSON。
@@ -618,6 +705,28 @@
   - 完成记录：新增 `docs/生态/interoperability-evidence-record-schema.md`，定义统一 `opencap.interop.evidence.v1` schema，包含 record shape、字段定义、subject/evidence/result/check 枚举、隐私规则、profile 等级映射、compatibility record 关系、Host 自动化证据示例、RFC 草案证据示例和迁移要求。`docs/生态/interoperability-profiles.md` 和 `docs/生态/host-compatibility-matrix.md` 已把 `opencap.host.evidence.v1` 标记为早期 Host alias；`rfcs/0010/0011/0012` 已改为引用统一 schema；`docs/README.md`、`docs/INDEX.md`、`docs/SYSTEM.md` 和 `docs/规划/traceability-matrix.md` 已同步入口与追踪。
 
 ### 模块 M4：Registry、Trust、Lifecycle 和供应链
+
+- [ ] T289 P2：实现 Registry quality summary report。
+  - 验收标准：
+    - `@opencap/spec` 或 `@opencap/runtime` 提供 registry quality summary helper，读取 registry manifests/tests/advisories 并输出每个 Capability 的 quality evidence summary。
+    - Summary 至少包含 manifest validation、package lint、registry tests、auth least-privilege lint、lifecycle/advisory status 和 quality score。
+    - Helper 只输出 evidence，不改变 trust level、policy decision 或 install allow/deny。
+    - 测试覆盖现有 5 个 registry Capability，确保 revoked `http.request_demo` 不被误判为可信默认安装能力。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- registry-quality-summary.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T290 P2：新增 `opencap registry report` 本地报告命令。
+  - 验收标准：
+    - CLI 提供 `opencap registry report --registry <path> --json`，输出 registry quality summary。
+    - 人类输出给出 capability id、category、lifecycle/advisory、quality band、阻断原因摘要。
+    - JSON 输出稳定、脱敏、可用于 release evidence；不包含 secret、provider raw response 或测试 input/output 原文。
+    - 命令不安装 Capability、不修改 state dir。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
 
 - [x] T126 P1：把发布门禁整理成可执行 release checklist。
   - 验收标准：
@@ -1038,6 +1147,27 @@
 
 ### 模块 M5：Conformance、Abuse Cases、隐私和运维
 
+- [ ] T292 P1：生成 V1 alpha release evidence bundle。
+  - 验收标准：
+    - 新增 `docs/releases/evidence/` 下的 V1 alpha evidence 模板或样例，记录 commit、验证命令、测试计数、known gaps、blocked external evidence 和 release decision。
+    - Evidence 明确当前是 alpha/local runtime evidence，不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+    - Release checklist、testing doc、handoff 链接到该 evidence bundle。
+    - Evidence 不包含 token、真实 provider raw response、用户数据或本地私有路径。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
+- [ ] T293 P2：实现 `opencap doctor --json`。
+  - 验收标准：
+    - CLI `doctor` 支持 `--json`，输出 machine-readable environment、registry、state dir、installed count、invalid count、policy status 和 package versions。
+    - JSON 输出不包含 env secret 值、token、Authorization header、用户输入或 provider raw data。
+    - 现有人类输出保持兼容；测试覆盖空 state、已安装 state 和 invalid installed entry。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- doctor-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
 - [x] T116 P1：维护术语表和文档索引。
   - 验收标准：
     - 新增或更新中文术语表，覆盖 Capability、Runtime、Registry、policy、audit、Trust Card、Quality Score、provenance、SLSA/Sigstore、MCP 和 Result Envelope 等高频术语。
@@ -1272,6 +1402,16 @@
   - 完成记录：新增 `packages/runtime/test/fixtures/conformance/usage-evidence.yml`，并把该 record 纳入 `packages/spec/src/conformance.test.ts` 的 skeleton 校验；`docs/质量/conformance-suite-v1.md` 已同步 `opencap.usage_evidence.v1` check 列表。该 conformance 只证明 non-billing usage evidence，不代表 billable event、计费规则或商业结算。
 
 ### 模块 M6：Composition、Capability Graph 和 Agentic Commerce
+
+- [ ] T294 P3：新增 composition recovery evidence conformance record。
+  - 验收标准：
+    - 新增 `opencap.composition_recovery.v1` conformance record，绑定 `composition-recovery.test.ts`、composition failure runbook 和 composition profile RFC。
+    - Record 覆盖 unknown_after_timeout reconcile、blocked step 停止后续、partial failure、不自动补偿和 manual review。
+    - Conformance 明确该 profile 是 future composition evidence，不表示 OpenCap 已实现 workflow runtime 或 Agent。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- conformance.test.ts`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `git diff --check`
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
