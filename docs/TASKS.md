@@ -450,7 +450,7 @@
 
 ### 模块 M3：CLI、MCP 和 Host 互操作
 
-- [ ] T286 P1：新增自动化 MCP stdio smoke 测试。
+- [x] T286 P1：新增自动化 MCP stdio smoke 测试。
   - 验收标准：
     - 新增测试通过官方 MCP SDK client 或等价 stdio JSON-RPC client 启动 `opencap serve --mcp`，不依赖 Claude/Cursor UI。
     - Smoke 使用临时 state dir 安装 `github.search_repo` 和 `github.create_issue`，验证 `tools/list` 暴露稳定 tool name、input schema、risk metadata。
@@ -460,6 +460,7 @@
     - `pnpm --filter @opencap/mcp test -- sdk-stdio-smoke.test.ts`
     - `pnpm --filter @opencap/mcp build`
     - `pnpm validate`
+  - 完成记录：新增 `packages/mcp/src/sdk-stdio-smoke.test.ts`，使用官方 MCP TypeScript SDK `Client` + stdio transport 启动 `opencap serve --mcp`。测试在临时 state dir 安装 `github.search_repo` 和 `github.create_issue`，验证 `tools/list` 暴露稳定 tool name、input schema 和 capability/risk metadata；read-only allow 路径会继续执行到 secret boundary 并返回脱敏 `SECRET_MISSING`，write/ask 在无 elicitation Host 下返回 `CONFIRMATION_REQUIRED`。测试通过 SDK stdio 协议握手和 JSON-RPC request 证明 stdout 未被普通日志污染；由于 `tsx` 本地 IPC 在沙箱内会触发 `listen EPERM`，该 smoke 需要在 conda 环境下以沙箱外权限运行。
 
 - [ ] T287 P2：把自动化 MCP smoke evidence 写入 Host compatibility matrix。
   - 验收标准：

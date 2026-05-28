@@ -70,6 +70,7 @@
 - MCP `tools/call` 核心路由，支持 allow 执行、deny 结构化错误、ask 无 elicitation 返回 `CONFIRMATION_REQUIRED`，并写入 confirmation audit。
 - MCP `confirmation_required` 结果格式稳定，包含 content 文案、`CONFIRMATION_REQUIRED` code、capability id、policy decision 和 V1 retry hint。
 - MCP tool name 映射表，支持 Capability id 稳定投影、冲突检测和原始 id metadata。
+- 自动化 MCP stdio smoke 测试，使用官方 MCP SDK client 启动 `opencap serve --mcp`，覆盖临时 state dir、`tools/list` 稳定投影、read-only allow 到 secret boundary、write ask 的 `CONFIRMATION_REQUIRED` 和 stdout JSON-RPC 协议边界。
 - Runtime Kernel 公共契约 V1，统一 CLI、MCP 和未来入口的 request/result/error/evidence 语言。
 - 项目 conda 开发环境定义和开发环境文档。
 - 整体设计二次审查，补齐工程缺口、成熟度评分和 T267-T276 补强任务。
