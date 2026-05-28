@@ -43,6 +43,22 @@ async function writePackJson(files: Array<{ path: string; size: number }>): Prom
   return { dir, file };
 }
 
+async function writeNpmPackDryRunJson(packageDir: string): Promise<{ dir: string; file: string }> {
+  const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-pack-smoke-"));
+  const result = await execFileAsync("npm", ["pack", "--dry-run", "--json"], {
+    cwd: packageDir,
+    env: {
+      ...process.env,
+      npm_config_cache: join(dir, "npm-cache"),
+    },
+    timeout: 30_000,
+    maxBuffer: 1024 * 1024,
+  });
+  const file = join(dir, "pack.json");
+  await writeFile(file, result.stdout, "utf8");
+  return { dir, file };
+}
+
 describe("OpenCap CLI release package report command", () => {
   it("prints package readiness as JSON without running npm publish", async () => {
     const result = await runOpenCapCli(["release", "package", "report", "--package", "@opencap/spec", "--json"]);
@@ -113,6 +129,40 @@ describe("OpenCap CLI release package report command", () => {
     expect(result.stdout).toContain("pack evidence: not-run");
     expect(result.stdout).toContain("blockers:");
     expect(result.stdout).toContain("NPM_PACKAGE_PRIVATE");
+  }, 60_000);
+
+  it("runs local npm pack dry-run smoke for alpha candidate packages", async () => {
+    for (const candidate of [
+      { packageName: "@opencap/spec", packageDir: resolve(repoRoot, "packages/spec") },
+      { packageName: "@opencap/cli", packageDir: resolve(repoRoot, "packages/cli") },
+    ]) {
+      const fixture = await writeNpmPackDryRunJson(candidate.packageDir);
+
+      try {
+        const result = await runOpenCapCli([
+          "release",
+          "package",
+          "report",
+          "--package",
+          candidate.packageName,
+          "--pack-json",
+          fixture.file,
+          "--json",
+        ]);
+        const report = JSON.parse(result.stdout);
+
+        expect(result.exitCode).toBe(0);
+        expect(report.packageName).toBe(candidate.packageName);
+        expect(report.pack.evidence).toBe("provided");
+        expect(report.pack.fileCount).toBeGreaterThan(0);
+        expect(report.pack.forbiddenFiles).toEqual([]);
+        expect(report.blockers.map((blocker: { code: string }) => blocker.code)).toContain("NPM_PACKAGE_PRIVATE");
+        expect(result.stdout).not.toContain("NPM_TOKEN");
+        expect(result.stdout).not.toContain("NODE_AUTH_TOKEN");
+      } finally {
+        await rm(fixture.dir, { recursive: true, force: true });
+      }
+    }
   }, 60_000);
 
   it("returns user errors for unsupported package and invalid pack JSON", async () => {

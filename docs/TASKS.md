@@ -1582,7 +1582,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 和 `@opencap/cli` 的 `package.json` 已声明最小 `files` allowlist：spec 发布 `dist`、`schema`、`package.json`，CLI 发布 `dist`、`package.json`；两个 package 仍保留 `private: true` 发布 blocker。`@opencap/spec` package readiness helper/test 已增加 `files` allowlist metadata 和 blocker：缺失 allowlist 会输出 `NPM_PACKAGE_FILES_ALLOWLIST_MISSING`，包含 `src`、tests、fixtures、`.env`、`opencap.local/`、DB/log 或 token/secret-shaped entry 会输出 `NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE`。Spec 包测试数从 81 增至 82。
 
-- [ ] T308 P1：新增本地 npm pack dry-run smoke。
+- [x] T308 P1：新增本地 npm pack dry-run smoke。
   - 验收标准：
     - 增加本地可运行的测试或脚本，针对 `@opencap/spec` 和 `@opencap/cli` 运行 `npm pack --dry-run --json` 或等价 dry-run，并把输出喂给 `opencap release package report` / readiness helper。
     - Smoke 不发布 package、不触网、不读取 npm token，失败时输出可修正的 blocker summary。
@@ -1592,6 +1592,7 @@
     - `pnpm --filter @opencap/cli test -- release-package-report-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：`packages/cli/src/release-package-report-command.test.ts` 新增本地 `npm pack --dry-run --json` smoke，针对 `@opencap/spec` 和 `@opencap/cli` 使用临时 npm cache 生成 pack 摘要，再喂给 `opencap release package report --pack-json`。Smoke 验证 pack evidence 为 `provided`、file count 大于 0、forbidden files 为空，并确认当前 `private: true` 仍作为发布 blocker 记录；不发布 package、不触网、不读取 npm token。Pack smoke 发现 spec 的 `dist` 曾包含测试产物，本轮已将 `packages/spec/tsconfig.json` 排除 `src/**/*.test.ts`，并新增 `packages/spec/.npmignore` 兜底排除 stale `dist/**/*.test.*`。CLI 包测试数从 28 增至 29。
 
 - [ ] T309 P2：把 package files/pack smoke 纳入 release evidence 文档。
   - 验收标准：

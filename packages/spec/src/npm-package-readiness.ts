@@ -127,7 +127,9 @@ function forbiddenFileReasons(path: string): NpmPackageForbiddenFileReasonCode[]
     reasons.push("DATABASE_OR_LOG");
   }
 
-  if (/(^|[-_.])(secret|token|credential|private-key|apikey|api-key|authorization|cookie)([-_.]|$)/i.test(basenameLower)) {
+  const secretShapedName = /(^|[-_.])(secret|token|credential|private-key|apikey|api-key|authorization|cookie)([-_.]|$)/i.test(basenameLower);
+  const codeArtifact = /\.(js|d\.ts|js\.map)$/i.test(basenameLower);
+  if (secretShapedName && !codeArtifact) {
     reasons.push("SECRET_SHAPED_FILE");
   }
 
