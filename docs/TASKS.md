@@ -1533,7 +1533,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已补齐 npm publish dry-run evidence 字段和核对步骤，包括 workflow file/run id、dry-run command、tarball/provenance 摘要、package exports review 和 `real_publish: false`。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 npm publish dry-run evidence 模板，并明确当前样例为 `not-run`、不能宣称 package 已发布、trusted publisher 已配置或正式 provenance 已生成。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 dry-run evidence 边界；README 未声明 npm 发布已完成。
 
-- [ ] T304 P1：新增 npm package readiness report helper。
+- [x] T304 P1：新增 npm package readiness report helper。
   - 验收标准：
     - `@opencap/spec` 新增本地 package readiness helper/test，输出 `opencap.npm_package_readiness.v1`，用于评估 alpha npm package 发布前的 package metadata 和 tarball 文件清单。
     - Helper 只读取传入的 package manifest / pack file summary，不调用 npm、GitHub、网络或真实 registry。
@@ -1544,6 +1544,7 @@
     - `pnpm --filter @opencap/spec test -- npm-package-readiness.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增 `buildNpmPackageReadinessReport()` / `buildNpmPackageReadinessReportFromFile()` 和 `opencap.npm_package_readiness.v1` report。Helper 从传入的 package manifest 和可选 pack file summary 派生 package name/version/private 状态、候选包 allowlist、main/types/bin/exports 基础字段、tarball file count/size、forbidden files 和 blockers/warnings；固定 `policyEffect: "none"`，不调用 npm/GitHub/网络，也不改变 package 发布权限、trust、policy 或 install decision。新增 `packages/spec/src/npm-package-readiness.test.ts` 覆盖真实 `@opencap/spec` / `@opencap/cli` 当前 readiness 和包含 `.env`、`opencap.local/`、SQLite/log、token-shaped 文件名的负向 pack fixture。Spec 包测试数从 79 增至 81。
 
 - [ ] T305 P1：新增 CLI release package report 命令。
   - 验收标准：

@@ -24,6 +24,19 @@ export { lintSecurityPolicyDoc } from "./security-policy-doc-lint.js";
 export type { SecurityPolicyDocFinding, SecurityPolicyDocLintRule } from "./security-policy-doc-lint.js";
 export { lintNpmPublishWorkflow, lintNpmPublishWorkflowFile } from "./npm-publish-workflow-lint.js";
 export type { NpmPublishWorkflowFinding, NpmPublishWorkflowLintResult, NpmPublishWorkflowLintRule } from "./npm-publish-workflow-lint.js";
+export { NPM_PACKAGE_READINESS_SCHEMA_VERSION, buildNpmPackageReadinessReport, buildNpmPackageReadinessReportFromFile } from "./npm-package-readiness.js";
+export type {
+  BuildNpmPackageReadinessReportOptions,
+  NpmPackageForbiddenFile,
+  NpmPackageForbiddenFileReasonCode,
+  NpmPackagePackFile,
+  NpmPackageReadinessBlockerCode,
+  NpmPackageReadinessFinding,
+  NpmPackageReadinessMetadata,
+  NpmPackageReadinessPackSummary,
+  NpmPackageReadinessReport,
+  NpmPackageReadinessWarningCode,
+} from "./npm-package-readiness.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";
