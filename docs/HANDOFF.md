@@ -28,13 +28,15 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T296：CLI 新增 `opencap conformance report --records <path> [--json]`，复用 `buildConformanceSummary()` 输出本地 conformance evidence summary。JSON 输出可用于 release evidence；人类输出包含 profile、result、checks、artifacts 和 record path；invalid 或 failed record 返回 exit `1`。命令不读取/写入 state dir、不调用 provider、不输出 secret、provider raw response、用户输入原文或本地数据库日志；`conformance-report-command.test.ts` 覆盖 JSON、人类输出、invalid record 和临时 cwd 不创建 `opencap.local`，CLI 包测试数从 16 增至 19。
 
+本轮继续完成 T297：`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Conformance Summary 段落，说明后续 release evidence 可运行 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 并引用 `opencap.conformance_summary.v1`。`docs/releases/release-checklist.md` 和 `docs/TESTING.md` 已同步该命令用途和边界，明确 conformance report 只汇总本地 evidence records，不宣称 Cloud、Console、OAuth、marketplace、payment、真实 Host UI、npm provenance 或 provider API end-to-end 已完成。
+
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready 是 T297 P2：把 conformance report 纳入 release evidence 文档路径。
+下一项 ready：当前没有未阻塞 ready 任务；T291 仍因真实 Claude Desktop/Cursor Host UI smoke 证据缺口阻塞。
 
-已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前连续开发队列以 `docs/TASKS.md` 中 T297 及后续 ready 任务为准。
+已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
 本轮已把产品定位和架构完善方向同步到正式架构文档：`docs/ARCHITECTURE.md` 明确 OpenCap 是 AI Host 和真实 API 之间的本地优先 Capability Runtime，不是 Agent、聊天入口、模型路由或 marketplace；`docs/规划/v1-architecture.md` 已补充产品分层、Runtime Kernel 边界、gate 顺序、Result Envelope 边界和 Architecture Convergence 实施顺序。
 
@@ -111,9 +113,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295 和 T296 均已完成；`next_task.py` 当前应返回 T297。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296 和 T297 均已完成；`next_task.py` 当前应返回没有未阻塞 ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：T297 P2：把 conformance report 纳入 release evidence 文档路径。T291 真实 Claude Desktop/Cursor Host smoke evidence 仍为阻塞任务，只有在用户确认本机 Host 环境可用后再做。
+下一步推荐：重新规划下一批 ready 任务，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

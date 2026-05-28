@@ -1448,7 +1448,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap conformance report --records <path> [--json]`，复用 `buildConformanceSummary()` 输出本地 conformance evidence summary。JSON 输出稳定 summary；人类输出包含 profile、result、checks、artifacts 和 record path；invalid 或 failed record 返回 exit `1`。命令不读取/写入 state dir、不调用 provider、不输出 secret、provider raw response、用户输入原文或本地数据库日志。新增 `packages/cli/src/conformance-report-command.test.ts` 覆盖 JSON、人类输出、invalid record 和临时 cwd 不创建 `opencap.local`，CLI 包测试数从 16 增至 19。
 
-- [ ] T297 P2：把 conformance report 纳入 release evidence 文档路径。
+- [x] T297 P2：把 conformance report 纳入 release evidence 文档路径。
   - 验收标准：
     - `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 或后续 evidence 模板说明如何引用 conformance summary。
     - `docs/releases/release-checklist.md` 和 `docs/TESTING.md` 记录 `opencap conformance report` 的用途和边界。
@@ -1457,6 +1457,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 新增 Conformance Summary 段落，说明如何运行 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 并引用 `opencap.conformance_summary.v1`。`docs/releases/release-checklist.md` 和 `docs/TESTING.md` 已同步该命令用途和边界，明确 conformance report 只汇总本地 evidence records，不宣称 Cloud、Console、OAuth、marketplace、payment、真实 Host UI、npm provenance 或 provider API end-to-end 已完成。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

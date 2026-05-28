@@ -30,6 +30,14 @@ node -e "for (const f of ['package.json','tsconfig.base.json','packages/spec/pac
 ruby -e "require 'yaml'; Dir['**/*.yml','.github/**/*.yml','.github/**/*.yaml'].each { |f| YAML.load_file(f) }; puts 'yaml ok'"
 ```
 
+### Conformance evidence summary
+
+```bash
+pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --json
+```
+
+该命令只汇总本地 conformance YAML records，用于 release/conformance evidence；它不读取/写入 state dir，不调用 provider，不代表 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+
 ## Workspace 校验
 
 依赖安装后，当前应支持：

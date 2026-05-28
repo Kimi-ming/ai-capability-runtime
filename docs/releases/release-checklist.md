@@ -160,6 +160,7 @@ release_evidence:
     pnpm_build: pass
     pnpm_lint: pass
     pnpm_test: pass
+    conformance_report: pass | fail | not-run
   hard_gates:
     runtime: pass
     registry_trust: pass | not-applicable
@@ -172,6 +173,8 @@ release_evidence:
 ```
 
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
+
+发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 生成本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 
 当前 V1 alpha/local runtime evidence 样例见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`。该样例只证明本地 Runtime/CLI/Registry/MCP automated stdio smoke，不得扩展解读为 Cloud、Console、OAuth、marketplace、payment、真实 Host UI 或 npm provenance 已完成。
 

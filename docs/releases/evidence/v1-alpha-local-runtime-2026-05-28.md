@@ -31,6 +31,16 @@
 
 `pnpm test` 中的 MCP stdio smoke 使用官方 MCP SDK client 启动 `opencap serve --mcp`，验证 `tools/list`、read-only allow 到 secret boundary、write ask 的 `CONFIRMATION_REQUIRED` 和 stdout JSON-RPC 协议边界。该自动化 smoke 不等同 Claude Desktop 或 Cursor 的真实 UI smoke。
 
+## Conformance Summary
+
+后续刷新本 evidence 或准备新的 release evidence 时，可以运行：
+
+```bash
+opencap conformance report --records packages/runtime/test/fixtures/conformance --json
+```
+
+该命令输出 `opencap.conformance_summary.v1`，汇总本地 conformance YAML records 的 suite version、profile、pass/fail/invalid count、checks 和 artifacts。它只作为 release/conformance evidence，不改变 Runtime policy、trust、consent、install decision 或 Host compatibility claim；也不得扩展解读为 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+
 ## 测试计数
 
 | 包 | 文件数 | 测试数 | 当前覆盖摘要 |
@@ -60,6 +70,7 @@
 - npm trusted publishing、Sigstore/SLSA provenance、package signing 和 release artifact attestation 仍是规划/预留，不是已执行发布证据。
 - `http.request_demo` 是 unsafe-by-default 示例 Capability，带 revoked advisory，不应作为默认可信安装能力宣传。
 - Registry report 和 quality score 只作为 evidence，不改变 Runtime policy、trust level、consent 或 install decision。
+- Conformance report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 
 ## Blocked External Evidence
 
