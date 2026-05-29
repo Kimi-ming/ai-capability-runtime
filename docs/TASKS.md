@@ -2150,11 +2150,45 @@
     - `pnpm validate`
   - 完成记录：CLI 已新增 `opencap registry index build --registry <path> [--output <file>] [--json]`，复用 T353 `buildRegistryIndex()` 输出本地 Registry index artifact。`--json` 输出完整脱敏 JSON；非 JSON 输出 capability count、invalid manifest count、digest、signature status 和 blocking summary；`--output` 复用安全 JSON 原子写文件逻辑，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径且不留下半截文件。命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网、不改变 trust、policy、authorization 或 Runtime execution。新增 `packages/cli/src/registry-index-command.test.ts` 覆盖 JSON、人类输出、安全写文件、危险输出拒绝和不创建 `opencap.local`；已验证 `pnpm --filter @opencap/cli test -- registry-index-command.test.ts`、`pnpm --filter @opencap/cli build` 和 `pnpm validate`。
 
-- [ ] T355 P2：把 Registry index artifact 纳入 Registry 分发和测试文档。
+- [x] T355 P2：把 Registry index artifact 纳入 Registry 分发和测试文档。
   - 验收标准：
     - Registry distribution、README/中文文档中心、testing docs 和 release evidence 文档说明 `opencap registry index build` 的本地发现索引用途。
     - 文档明确 unsigned Registry index 只是 discovery/cache input，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计。
     - 文档说明 index 不包含 manifest 原文、auth env、secret、provider raw response、input/output 原文、`opencap.local/`、DB/log 或私有绝对路径。
+    - Handoff 指向下一项 ready 或明确外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：`docs/生态/registry-distribution.md` 已新增本地 Registry index artifact 段落，README、中文文档中心、release checklist、V1 alpha evidence 样例和测试策略已补充 `opencap registry index build --registry registry --output <file> --json` 的本地发现索引用途。文档明确 unsigned Registry index 只是 discovery/cache input，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计；index 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。测试策略已记录 Registry index evidence 命令和 `packages/spec/src/registry-index.test.ts` / `packages/cli/src/registry-index-command.test.ts` 覆盖边界，并同步当前 spec 98、CLI 93 测试计数。
+
+- [ ] T356 P2：新增 Registry index artifact validation helper。
+  - 验收标准：
+    - `@opencap/spec` 导出 `validateRegistryIndexArtifact()`、`REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION` 和 validation report 类型，输出 `opencap.registry_index_validation.v1`。
+    - Helper 校验保存后的 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` JSON artifact：schema/profile、generatedAt、capabilityCount、invalidManifestCount、capabilities、relative manifest path、manifest digest、quality score 摘要、advisory refs、`signatureStatus: "none"`、`policyEffect: "none"` 和 `indexDigest` 一致性。
+    - Helper 拒绝明显 secret/token/password、Authorization/Cookie、manifest 原文、auth env、provider raw response、input/output/execution 原文、`opencap.local/`、SQLite/DB/log 和私有绝对路径文本；invalid report 本身也必须脱敏。
+    - Helper 只校验本地 JSON 对象，不读取 Registry checkout、不触网、不签名、不安装、不执行 Capability、不改变 trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- registry-index-artifact.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T357 P2：新增 CLI registry index validate 安全验证命令。
+  - 验收标准：
+    - CLI 提供 `opencap registry index validate --file <path> [--output <file>] [--json]`，复用 T356 helper 验证保存后的 Registry index artifact。
+    - JSON 输出 validation report；非 JSON 输出 valid、finding count、digest、schema/profile 和 policy effect 摘要；invalid artifact 返回 exit `1` 且不打印 stack。
+    - `--output` 原子写出 validation report JSON，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；非法 JSON 或读取失败不得写半截 output。
+    - 命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网、不改变 trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-index-validate-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T358 P2：把 Registry index validation 纳入分发和 release evidence 文档。
+  - 验收标准：
+    - Registry distribution、README/中文文档中心、testing docs、release checklist 和 alpha evidence 样例说明 `opencap registry index validate` 的用途。
+    - 文档明确 validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计。
+    - 文档说明 validation 不签名、不触网、不读取 provider secret、不安装、不执行 Capability、不写 state dir，也不改变 trust、policy、authorization 或 Runtime execution。
     - Handoff 指向下一项 ready 或明确外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`

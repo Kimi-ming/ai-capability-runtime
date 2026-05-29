@@ -55,6 +55,17 @@ opencap registry report \
 
 该命令输出并保存 `opencap.registry_quality_summary.v1`，只汇总本地 Registry manifest、package lint、tests、auth、lifecycle、advisory 和 quality evidence。它不安装或执行 Capability、不读取 secret、不写 state dir、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
+后续也可以保存 Registry index discovery/cache artifact：
+
+```bash
+opencap registry index build \
+  --registry registry \
+  --output docs/releases/evidence/<release-id>-registry-index.json \
+  --json
+```
+
+该命令输出并保存 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` unsigned index，包含 manifest digest、relative manifest path、quality/advisory/trust 摘要、default install trust、blocking reasons、`signatureStatus: none`、`policyEffect: none` 和稳定 `indexDigest`。该 artifact 只用于本地发现、离线查看和未来 cache/sync 输入，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证、install audit 或 execute audit；也不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。
+
 ## Release Evidence Bundle
 
 后续刷新本 evidence 或准备新的 release evidence 时，可以运行：
@@ -74,7 +85,7 @@ opencap release artifact validate \
 
 该命令输出 `opencap.release_evidence.v1`，把 Registry quality summary、conformance summary、可选 package readiness report 和本地命令状态汇总为一个脱敏 bundle。Bundle 中的 `decision` 只表达本地 evidence 判断；如果包含 registry advisory、package `private: true`、failed conformance 或 failed command 等 blocker，应保持 `block-release-tag`。该 bundle 不替代 GitHub required checks、真实 Claude Desktop/Cursor Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
-当前样例没有生成持久 registry quality、conformance summary、release evidence JSON artifact，也没有生成 validation report JSON artifact；它只在本文中记录 2026-05-28 本地 evidence 摘要。后续准备具体 release 时，发布者应保存 `opencap registry report --output <registry-quality-json>`、`opencap conformance report --output <conformance-summary-json>`、`opencap release evidence --output <release-evidence-json>` 生成的 JSON artifact，运行 `opencap release artifact validate --file <artifact> --output <validation-report-json> --json`，并在 release notes 或 handoff 中记录 evidence path、validation report path、commit、date、`generatedAt`、decision、blockers、validation `valid`、finding count 和 `policyEffect: none`。
+当前样例没有生成持久 registry index、registry quality、conformance summary、release evidence JSON artifact，也没有生成 validation report JSON artifact；它只在本文中记录 2026-05-28 本地 evidence 摘要。后续准备具体 release 时，发布者应保存 `opencap registry index build --output <registry-index-json>`、`opencap registry report --output <registry-quality-json>`、`opencap conformance report --output <conformance-summary-json>`、`opencap release evidence --output <release-evidence-json>` 生成的 JSON artifact，运行 `opencap release artifact validate --file <artifact> --output <validation-report-json> --json`，并在 release notes 或 handoff 中记录 evidence path、validation report path、commit、date、`generatedAt`、decision、blockers、validation `valid`、finding count 和 `policyEffect: none`。
 
 ## npm Publish Dry-run Evidence
 
@@ -181,6 +192,7 @@ package_readiness_reports:
 - npm publish dry-run 当前为 `not-run`；npm trusted publishing、Sigstore/SLSA provenance、package signing 和 release artifact attestation 仍是规划/预留，不是已执行发布证据。
 - Package readiness release evidence 当前为 `not-run`；候选包已具备 `files` allowlist 和 automated pack smoke，但 package publish 仍 blocked by `private: true`，若后续运行 report 发现其他 blocker，也应阻断 npm package 发布。
 - `http.request_demo` 是 unsafe-by-default 示例 Capability，带 revoked advisory，不应作为默认可信安装能力宣传。
+- Registry index 只作为 unsigned discovery/cache input，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、签名验证、install audit 或 execute audit。
 - Registry report 和 quality score 只作为 evidence，不改变 Runtime policy、trust level、consent 或 install decision。
 - Conformance report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 

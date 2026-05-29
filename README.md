@@ -134,6 +134,8 @@ pnpm --filter @opencap/cli dev -- registry search github --registry registry
 pnpm --filter @opencap/cli dev -- registry show github.search_repo --registry registry --json
 pnpm --filter @opencap/cli dev -- registry report --registry registry --json
 pnpm --filter @opencap/cli dev -- registry report --registry registry --output "$SMOKE_OUTPUT_DIR/registry-quality.json"
+pnpm --filter @opencap/cli dev -- registry index build --registry registry --json
+pnpm --filter @opencap/cli dev -- registry index build --registry registry --output "$SMOKE_OUTPUT_DIR/registry-index.json"
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --json
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --output "$SMOKE_OUTPUT_DIR/registry-advisory-list.json"
@@ -152,6 +154,8 @@ pnpm --filter @opencap/cli dev -- metrics security --state-dir "$SMOKE_STATE_DIR
 
 rm -rf "$SMOKE_STATE_DIR" "$SMOKE_OUTPUT_DIR"
 ```
+
+`opencap registry index build` 生成的是未签名的本地 discovery/cache artifact。它不安装或执行 Capability、不写 state dir、不读取 secret、不触网，也不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计。
 
 常用验证命令：
 

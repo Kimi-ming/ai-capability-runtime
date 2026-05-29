@@ -50,6 +50,16 @@ pnpm --filter @opencap/cli dev -- registry report --registry registry --output "
 
 该命令只汇总本地 Registry manifest、package lint、tests、auth、lifecycle、advisory 和 quality evidence；`--output` 会安全写出 `opencap.registry_quality_summary.v1` JSON evidence report，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。对应测试入口是 `packages/cli/src/registry-report-command.test.ts`，当前覆盖 JSON、人类输出、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不写 state dir 边界，共 4 个测试。该 artifact 只是本地 evidence，不替代 GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布；命令不安装或执行 Capability、不读取 secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
+### Registry index evidence
+
+```bash
+pnpm --filter @opencap/cli dev -- registry index build --registry registry --json
+REGISTRY_INDEX_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-registry-index.XXXXXX")"
+pnpm --filter @opencap/cli dev -- registry index build --registry registry --output "$REGISTRY_INDEX_OUTPUT"
+```
+
+该命令从本地 Registry checkout 生成 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` discovery/cache artifact；`--output` 会安全写出 JSON，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。对应测试入口是 `packages/spec/src/registry-index.test.ts` 和 `packages/cli/src/registry-index-command.test.ts`，覆盖 schema/profile、相对 manifest path、manifest digest、quality/advisory/trust 摘要、`signatureStatus: none`、`policyEffect: none`、稳定 `indexDigest`、JSON/人类输出、安全 output 和危险 output 用户错误。该 unsigned artifact 只是本地发现和 cache/sync input，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计；输出不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+
 ### Package readiness evidence
 
 ```bash
@@ -119,7 +129,7 @@ ADVISORY_CHECK_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-advisory-check.XXXXXX")
 pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --output "$ADVISORY_CHECK_OUTPUT"
 ```
 
-对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts`、`packages/cli/src/registry-advisory-show-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 22 个 CLI 测试，CLI 包总数为 89 个测试。`registry-advisory-list-command.test.ts` 覆盖 `--output` 安全 JSON evidence 写入、invalid advisory report 写入和非法 output 用户错误；`registry-advisory-show-command.test.ts` 覆盖 `--output` 安全 JSON evidence 写入、not found/duplicate/invalid 不写 output 和非法 output 用户错误；`advisory-check-command.test.ts` 覆盖 `--capability`、`--severity`、`--status`、`--output`、raw/filtered match counts、安全 JSON evidence 写入、人类摘要 filters/match counts、非法 filter/output 用户错误、invalid advisory summary 和不写 audit logs 边界。`--output` 会拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径，失败时不留下半截文件。`registry advisory list/show --output` 只生成本地 Registry evidence artifacts，不读取 installed state、不写 state dir 或 audit logs；`advisory check --output` 只读取本地 installed capability metadata 和 Registry advisory metadata，不写 audit logs。这些命令不执行 Capability、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
+对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts`、`packages/cli/src/registry-advisory-show-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 22 个 CLI 测试，CLI 包总数为 93 个测试。`registry-advisory-list-command.test.ts` 覆盖 `--output` 安全 JSON evidence 写入、invalid advisory report 写入和非法 output 用户错误；`registry-advisory-show-command.test.ts` 覆盖 `--output` 安全 JSON evidence 写入、not found/duplicate/invalid 不写 output 和非法 output 用户错误；`advisory-check-command.test.ts` 覆盖 `--capability`、`--severity`、`--status`、`--output`、raw/filtered match counts、安全 JSON evidence 写入、人类摘要 filters/match counts、非法 filter/output 用户错误、invalid advisory summary 和不写 audit logs 边界。`--output` 会拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径，失败时不留下半截文件。`registry advisory list/show --output` 只生成本地 Registry evidence artifacts，不读取 installed state、不写 state dir 或 audit logs；`advisory check --output` 只读取本地 installed capability metadata 和 Registry advisory metadata，不写 audit logs。这些命令不执行 Capability、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
 
 ## Workspace 校验
 
@@ -135,7 +145,7 @@ pnpm lint
 
 如果因为网络或依赖未安装不能运行，需要在交接文档中记录。
 
-最近全量验证：2026-05-28 在项目 conda 环境中通过 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。当前 `pnpm validate` 覆盖 5 个 registry manifest、5 个 manifest 的 model-visible metadata lint、5 个 manifest 的 least-privilege auth lint、5 个 Capability package lint、5 个 registry test 和 1 个 Capability advisory/revocation metadata 文件；当前测试清单登记 spec 96 个、runtime 295 个、mcp 26 个、cli 89 个测试。V1 alpha/local runtime evidence bundle 见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`；该证据不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
+最近全量验证：2026-05-28 在项目 conda 环境中通过 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。当前 `pnpm validate` 覆盖 5 个 registry manifest、5 个 manifest 的 model-visible metadata lint、5 个 manifest 的 least-privilege auth lint、5 个 Capability package lint、5 个 registry test 和 1 个 Capability advisory/revocation metadata 文件；当前测试清单登记 spec 98 个、runtime 295 个、mcp 26 个、cli 93 个测试。V1 alpha/local runtime evidence bundle 见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`；该证据不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
 
 ## 当前单元测试基础设施
 

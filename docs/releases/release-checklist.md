@@ -161,6 +161,7 @@ release_evidence:
     pnpm_lint: pass
     pnpm_test: pass
     release_evidence_bundle: pass | fail | not-run
+    registry_index_build: pass | fail | not-run
     conformance_report: pass | fail | not-run
     package_readiness_report: pass | fail | not-run
     npm_pack_dry_run: pass | fail | not-run
@@ -190,6 +191,13 @@ release_evidence:
     package_exports_review: pass | fail | not-run
     real_publish: false
   artifacts:
+    registry_index:
+      path: <registry-index-json-path-or-not-generated>
+      schema: opencap.registry.index.v1
+      profile: opencap.registry.index_cache_sync.v1
+      signature_status: none
+      digest: <sha256-digest-or-not-generated>
+      policy_effect: none
     release_evidence_bundle:
       path: <release-evidence-json-path-or-not-generated>
       schema: opencap.release_evidence.v1
@@ -223,6 +231,8 @@ release_evidence:
 
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
 
+发布者可以用 `opencap registry index build --registry registry --output <registry-index-json> --json` 保存 unsigned Registry index artifact，用于本地发现、离线查看和未来 cache/sync 输入。该 artifact 不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证、install audit 或 execute audit；它也不得被写成 package 已发布、Capability 已可信、policy 已允许或签名供应链已完成。Index 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。
+
 发布者可以用以下命令生成本地 release evidence bundle，同时保存 release evidence JSON 和 validation report JSON 两类 artifact：
 
 ```bash
@@ -241,11 +251,16 @@ opencap release artifact validate \
   --json
 ```
 
-发布者也可以先保存 Registry quality summary 和 conformance summary 两类输入 evidence，便于 release notes、PR 描述或 handoff 引用：
+发布者也可以先保存 Registry index、Registry quality summary 和 conformance summary 输入 evidence，便于 release notes、PR 描述或 handoff 引用：
 
 ```bash
+REGISTRY_INDEX_PATH="docs/releases/evidence/<release-id>-registry-index.json"
 REGISTRY_QUALITY_PATH="docs/releases/evidence/<release-id>-registry-quality.json"
 CONFORMANCE_SUMMARY_PATH="docs/releases/evidence/<release-id>-conformance-summary.json"
+opencap registry index build \
+  --registry registry \
+  --output "$REGISTRY_INDEX_PATH" \
+  --json
 opencap registry report \
   --registry registry \
   --output "$REGISTRY_QUALITY_PATH" \
@@ -256,7 +271,7 @@ opencap conformance report \
   --json
 ```
 
-这两类 artifact 只是本地 evidence input，不替代 `opencap release evidence` bundle、`opencap release artifact validate` validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。它们不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+这些 artifact 只是本地 evidence/discovery input，不替代 `opencap release evidence` bundle、`opencap release artifact validate` validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。它们不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
 如果 release 涉及 npm package，可先为每个 package 生成 pack JSON 和 package readiness JSON artifact，再把所有 package readiness artifacts 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录每个 package readiness artifact path、release evidence path、validation report path、commit、date、`generatedAt`、validation `valid`、finding count 和 `policyEffect: none`：
 
