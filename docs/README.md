@@ -99,7 +99,7 @@
 
 - 先用 `opencap init <capability-id> --category <name> --output <dir>` 生成本地 V1 HTTP Capability 初稿，再按作者教程检查 manifest、README、registry test 和安全边界。
 - 用 `opencap registry search <query> --registry registry` 和 `opencap registry show <capability-id> --registry registry` 做本地发现与审查；这两个命令不安装、不授权、不改变 policy，也不会把未安装 Capability 暴露给 MCP Host。
-- 用 `opencap registry advisory list --registry registry` 查看本地 Registry 公告，可加 `--capability`、`--severity`、`--status` 做本地筛选；用 `opencap registry advisory show <advisory-id> --registry registry` 查看单条公告详情；用 `opencap advisory check --state-dir <path> --registry registry --capability <id> --severity <level> --status <status> --output <file>` 检查本地已安装能力是否命中公告并保存 JSON evidence。非 JSON 摘要会显示 checked count、filters 和 raw/filtered match counts。这些命令只产生 evidence/告警，不自动卸载、不授权、不修改 policy。
+- 用 `opencap registry advisory list --registry registry --output <file>` 查看本地 Registry 公告并保存 `opencap.registry_advisory_list.v1` evidence，可加 `--capability`、`--severity`、`--status` 做本地筛选；用 `opencap registry advisory show <advisory-id> --registry registry --output <file>` 查看单条公告详情并保存 `opencap.registry_advisory_detail.v1` evidence；用 `opencap advisory check --state-dir <path> --registry registry --capability <id> --severity <level> --status <status> --output <file>` 检查本地已安装能力是否命中公告并保存 JSON evidence。非 JSON 摘要会显示 checked count、filters 和 raw/filtered match counts。这些命令只产生本地 evidence/告警，不自动卸载、不授权、不修改 policy。
 - [编写一个 Capability](教程/write-a-capability.md)
 - [GitHub fine-grained token 设置指南](教程/github-fine-grained-token-setup.md)
 - [评审一个 Capability PR](教程/review-a-capability.md)

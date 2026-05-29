@@ -105,13 +105,15 @@ Revoked capability 的目录和历史记录必须保留，不能通过删除目�
 ```bash
 opencap registry advisory list --registry registry --json
 opencap registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
+opencap registry advisory list --registry registry --output /tmp/opencap-registry-advisory-list.json
 opencap registry advisory show OCAP-2026-0001 --registry registry --json
+opencap registry advisory show OCAP-2026-0001 --registry registry --output /tmp/opencap-registry-advisory-detail.json
 opencap advisory check --state-dir opencap.local --registry registry --json
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --json
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --output /tmp/opencap-advisory-check.json
 ```
 
-这些命令只读取本地 Registry 和本地 state evidence，不执行 Capability、不读取 secret、不调用 provider、不触网；它们不会自动卸载、自动授权、自动修改 policy、提升 trust 或改变 Runtime execution。`registry advisory list` 可按 capability、severity 和 status 做本地筛选；`registry advisory show` 用于查看单条公告详情；`advisory check` 可用 `--capability`、`--severity` 和 `--status` 收敛本地 installed capability evidence，非 JSON 摘要会展示 filters 和 raw/filtered match counts，`--output` 可保存 JSON evidence artifact；这些都不会改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
+这些命令只读取本地 Registry 和本地 state evidence，不执行 Capability、不读取 secret、不调用 provider、不触网；它们不会自动卸载、自动授权、自动修改 policy、提升 trust 或改变 Runtime execution。`registry advisory list` 可按 capability、severity 和 status 做本地筛选，`--output` 可保存 `opencap.registry_advisory_list.v1` JSON evidence artifact；`registry advisory show` 用于查看单条公告详情，`--output` 可保存 `opencap.registry_advisory_detail.v1` JSON evidence artifact；`advisory check` 可用 `--capability`、`--severity` 和 `--status` 收敛本地 installed capability evidence，非 JSON 摘要会展示 filters 和 raw/filtered match counts，`--output` 可保存 `opencap.advisory_check.v1` JSON evidence artifact。Registry advisory output artifacts 只是本地 Registry evidence，不写 state dir 或 audit logs；这些都不会改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
 
 ## 提交流程
 

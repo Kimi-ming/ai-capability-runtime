@@ -136,7 +136,9 @@ Registry advisory metadata 放在 `registry/advisories/`，用于记录安全公
 ```bash
 opencap registry advisory list --registry registry --json
 opencap registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
+opencap registry advisory list --registry registry --output /tmp/opencap-registry-advisory-list.json
 opencap registry advisory show OCAP-2026-0001 --registry registry --json
+opencap registry advisory show OCAP-2026-0001 --registry registry --output /tmp/opencap-registry-advisory-detail.json
 opencap advisory check --state-dir opencap.local --registry registry --json
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --json
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --output /tmp/opencap-advisory-check.json
@@ -144,8 +146,8 @@ opencap advisory check --state-dir opencap.local --registry registry --capabilit
 
 这些命令只读取本地文件并输出 evidence：
 
-- `registry advisory list` 列出 valid/invalid advisory metadata，并可用 capability、severity 和 status 做本地筛选。
-- `registry advisory show` 显示单条 advisory detail，便于 review/incident 记录引用。
+- `registry advisory list` 列出 valid/invalid advisory metadata，并可用 capability、severity 和 status 做本地筛选；`--output` 可保存 `opencap.registry_advisory_list.v1` JSON evidence artifact。
+- `registry advisory show` 显示单条 advisory detail，便于 review/incident 记录引用；`--output` 可保存 `opencap.registry_advisory_detail.v1` JSON evidence artifact。
 - `advisory check` 比对本地已安装能力与 advisory metadata，并可用 capability、severity 和 status 收敛本地 evidence；非 JSON 摘要展示 filters 和 raw/filtered match counts，`--output` 可保存 JSON evidence artifact。
-- 命令不安装或执行 Capability，不读取 secret，不调用 provider，不触网。
+- 命令不安装或执行 Capability，不读取 secret，不调用 provider，不触网；Registry advisory output artifacts 只是本地 Registry evidence，不写 state dir 或 audit logs。
 - 命令不自动卸载、不自动授权、不自动修改 policy，不改变 installed state、trust、authorization 或 Runtime execution；后续处置仍由维护者按 review/incident 流程完成。

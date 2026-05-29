@@ -122,6 +122,7 @@ pnpm install
 pnpm validate
 
 SMOKE_STATE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/opencap-readme-state.XXXXXX")"
+SMOKE_OUTPUT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/opencap-readme-evidence.XXXXXX")"
 
 pnpm --filter @opencap/cli dev -- validate registry/developer-tools/github.create_issue
 pnpm --filter @opencap/cli dev -- install github.create_issue --state-dir "$SMOKE_STATE_DIR"
@@ -134,10 +135,12 @@ pnpm --filter @opencap/cli dev -- registry show github.search_repo --registry re
 pnpm --filter @opencap/cli dev -- registry report --registry registry --json
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --json
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
+pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --output "$SMOKE_OUTPUT_DIR/registry-advisory-list.json"
 pnpm --filter @opencap/cli dev -- registry advisory show OCAP-2026-0001 --registry registry --json
+pnpm --filter @opencap/cli dev -- registry advisory show OCAP-2026-0001 --registry registry --output "$SMOKE_OUTPUT_DIR/registry-advisory-detail.json"
 pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --json
-pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --output "$SMOKE_STATE_DIR/advisory-check.json"
+pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --output "$SMOKE_OUTPUT_DIR/advisory-check.json"
 pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --json
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run
@@ -145,7 +148,7 @@ pnpm --filter @opencap/cli dev -- metrics summary --state-dir "$SMOKE_STATE_DIR"
 pnpm --filter @opencap/cli dev -- metrics capabilities --state-dir "$SMOKE_STATE_DIR" --json
 pnpm --filter @opencap/cli dev -- metrics security --state-dir "$SMOKE_STATE_DIR" --json
 
-rm -rf "$SMOKE_STATE_DIR"
+rm -rf "$SMOKE_STATE_DIR" "$SMOKE_OUTPUT_DIR"
 ```
 
 常用验证命令：

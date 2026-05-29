@@ -90,13 +90,15 @@ V1 CLI 提供两个本地 advisory 检查入口：
 ```bash
 opencap registry advisory list --registry registry
 opencap registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked
+opencap registry advisory list --registry registry --output /tmp/opencap-registry-advisory-list.json
 opencap registry advisory show OCAP-2026-0001 --registry registry
+opencap registry advisory show OCAP-2026-0001 --registry registry --output /tmp/opencap-registry-advisory-detail.json
 opencap advisory check --state-dir opencap.local --registry registry
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --output /tmp/opencap-advisory-check.json
 ```
 
-`registry advisory list` 用于审查 Registry 中的 advisory/revocation metadata，并可按 capability、severity 和 status 做本地筛选；`registry advisory show` 用于查看单条公告详情；`advisory check` 用于把本地已安装能力和 Registry advisory metadata 做匹配，也可按 capability、severity 和 status 收敛本地 evidence。非 JSON 摘要会展示 checked count、filters 和 raw/filtered match counts；`--output` 可把 `opencap.advisory_check.v1` report 保存为本地 JSON evidence artifact。它们只输出 evidence、计数和告警，不会删除 installed capability，不会把 revoked capability 自动加入 deny policy，也不会因为没有命中本地缓存就授予 trust 或授权执行；check filters、output artifact 和 human summary 不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
+`registry advisory list` 用于审查 Registry 中的 advisory/revocation metadata，并可按 capability、severity 和 status 做本地筛选；`--output` 可把 `opencap.registry_advisory_list.v1` report 保存为本地 JSON evidence artifact。`registry advisory show` 用于查看单条公告详情；`--output` 可把 `opencap.registry_advisory_detail.v1` report 保存为本地 JSON evidence artifact。`advisory check` 用于把本地已安装能力和 Registry advisory metadata 做匹配，也可按 capability、severity 和 status 收敛本地 evidence。非 JSON 摘要会展示 checked count、filters 和 raw/filtered match counts；`--output` 可把 `opencap.advisory_check.v1` report 保存为本地 JSON evidence artifact。Registry advisory output artifacts 只是本地 Registry evidence；它们只输出 evidence、计数和告警，不写 state dir 或 audit logs，不会删除 installed capability，不会把 revoked capability 自动加入 deny policy，也不会因为没有命中本地缓存就授予 trust 或授权执行；check filters、output artifact 和 human summary 不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
 
 ## Registry 行为
 
@@ -107,6 +109,7 @@ opencap advisory check --state-dir opencap.local --registry registry --capabilit
 - `pnpm validate` 会校验已有 advisory/revocation metadata 的 schema。
 - `opencap registry advisory list --registry registry` 可列出本地 advisory metadata、filter metadata 和 invalid advisory summary。
 - `opencap registry advisory show <advisory-id> --registry registry` 可审查单条 advisory detail。
+- `opencap registry advisory list/show --output <file>` 可保存本地 Registry advisory JSON evidence artifact，输出路径不得指向 `.env`、secret-shaped 名称、`opencap.local/` 或数据库/日志文件。
 - `opencap advisory check --state-dir <path> --registry registry --capability <id> --severity <level> --status <status>` 可审查本地 installed capability 命中的 advisory matches。
 - `opencap advisory check --output <file>` 可保存本地 JSON evidence artifact，输出路径不得指向 `.env`、secret-shaped 名称、`opencap.local/` 或数据库/日志文件。
 

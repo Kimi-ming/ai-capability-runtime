@@ -158,7 +158,11 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T341：CLI `opencap registry advisory show <advisory-id> --registry <path>` 新增 `--output <file>`，可把当前 `opencap.registry_advisory_detail.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。not found、重复 id 和 invalid advisory 用户错误保持 exit `1` 且不打印 stack；这些无法形成 detail report 的错误不会写 output 文件。输出路径使用 Registry advisory evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。`packages/cli/src/registry-advisory-show-command.test.ts` 从 3 个测试增至 5 个，CLI 包合计从 77 个测试增至 79 个。
 
-下一项 ready：T342 P2：把 registry advisory output artifacts 纳入安全和 Registry 文档。
+本轮继续完成 T342：README、中文文档中心、`docs/安全/capability-advisory-process.md`、`registry/README.md`、`docs/社区/registry-guidelines.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/运营/policy-incident-runbook.md` 和 `docs/TESTING.md` 已补充 `opencap registry advisory list/show --output <file>`。文档明确 Registry advisory output artifacts 只是本地 Registry evidence，`list/show --output` 不读取 installed state、不写 state dir 或 audit logs；这些 artifact 不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。`docs/TESTING.md` 已记录相关 CLI 测试入口、22 个 advisory CLI 测试、CLI 包 79 个测试、安全输出路径和不触网/不读取 secret/不写 state dir 边界。
+
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T343-T345，把 Registry quality summary 和 Conformance summary 从 stdout 推进到可安全保存的本地 JSON artifact，并把这些 artifact 纳入 release evidence 文档路径。该批任务只汇总本地 Registry/conformance metadata，不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 installed state、trust、policy、authorization 或 Runtime execution。T291 真实 Claude Desktop/Cursor Host UI smoke 仍是外部环境限制项。
+
+下一项 ready：T343 P2：为 `opencap registry report` 增加安全 JSON evidence 输出文件。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -237,9 +241,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340 和 T341 均已完成；T342 是下一项 registry advisory output artifacts 文档闭环 ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341 和 T342 均已完成；T343 是下一项 Registry quality summary JSON evidence output ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T342，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T343，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

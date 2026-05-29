@@ -1991,11 +1991,46 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap registry advisory show <advisory-id> --registry <path>` 新增 `--output <file>`，可把当前 `opencap.registry_advisory_detail.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。not found、重复 id 和 invalid advisory 用户错误保持 exit `1` 且不打印 stack；这些无法形成 detail report 的错误不会写 output 文件。输出路径使用 Registry advisory evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。`packages/cli/src/registry-advisory-show-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 77 增至 79。
 
-- [ ] T342 P2：把 registry advisory output artifacts 纳入安全和 Registry 文档。
+- [x] T342 P2：把 registry advisory output artifacts 纳入安全和 Registry 文档。
   - 验收标准：
     - README 或中文文档中心补充 `opencap registry advisory list/show --output <file>` 的本地 evidence artifact 入口。
     - 安全/Registry/运营文档说明 registry advisory output artifacts 只是本地 Registry evidence，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
     - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数、安全输出路径和不触网/不读取 secret/不写 state dir 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：README、中文文档中心、`docs/安全/capability-advisory-process.md`、`registry/README.md`、`docs/社区/registry-guidelines.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/运营/policy-incident-runbook.md` 和 `docs/TESTING.md` 已补充 `opencap registry advisory list/show --output <file>`。文档明确 Registry advisory output artifacts 只是本地 Registry evidence，`list/show --output` 不读取 installed state、不写 state dir 或 audit logs；这些 artifact 不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。`docs/TESTING.md` 已记录相关 CLI 测试入口、22 个 advisory CLI 测试、CLI 包 79 个测试、安全输出路径和不触网/不读取 secret/不写 state dir 边界。
+
+- [ ] T343 P2：为 `opencap registry report` 增加安全 JSON evidence 输出文件。
+  - 验收标准：
+    - CLI `opencap registry report --registry <path> --output <file> [--json]` 可把当前 `opencap.registry_quality_summary.v1` report 写入本地 JSON 文件。
+    - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
+    - 输出路径拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。
+    - 命令不安装 Capability、不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T344 P2：为 `opencap conformance report` 增加安全 JSON evidence 输出文件。
+  - 验收标准：
+    - CLI `opencap conformance report --records <path> --output <file> [--json]` 可把当前 `opencap.conformance_summary.v1` report 写入本地 JSON 文件。
+    - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
+    - invalid 或 failed record 仍保持 exit `1`；如果能形成 summary report，则安全 output 文件应写出，非法 records 原文、secret、token 或 provider raw body 不进入 stdout/stderr/output。
+    - 输出路径拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。
+    - 命令不读取/写入 state dir、不调用 provider、不触网、不改变 policy、trust、install decision、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- conformance-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T345 P2：把 registry/conformance report output artifacts 纳入 release evidence 文档路径。
+  - 验收标准：
+    - README 或中文文档中心补充 `opencap registry report --output <file>` 和 `opencap conformance report --output <file>` 的本地 evidence artifact 入口。
+    - Release checklist、alpha evidence 样例和 `docs/TESTING.md` 说明这两类 output artifact 只是本地 evidence，不能替代 GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。
+    - 文档说明安全输出路径、不触网、不读取 secret、不写 state dir，以及不改变 trust、policy、authorization 或 Runtime execution。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
