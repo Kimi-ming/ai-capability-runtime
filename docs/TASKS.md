@@ -1667,7 +1667,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap release evidence` 新增 `--output <path>`，可把脱敏 `opencap.release_evidence.v1` JSON 写入指定文件，且 `--json` 仍同时打印 stdout。输出路径基于 `INIT_CWD`/当前工作目录解析，会自动创建父目录；危险路径 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径会作为用户错误 exit `1`，不打印 stack，且不会留下半截 evidence 文件。`packages/cli/src/release-evidence-command.test.ts` 覆盖安全写文件、stdout/file bundle 一致、危险路径拒绝和脱敏边界，CLI 包测试数从 35 增至 37。
 
-- [ ] T315 P2：把 release evidence artifact 输出纳入发布文档。
+- [x] T315 P2：把 release evidence artifact 输出纳入发布文档。
   - 验收标准：
     - `docs/releases/release-checklist.md` 说明 `--generated-at`、`--output` 和 stdout/文件 artifact 的使用顺序。
     - V1 alpha evidence 样例说明当前样例未生成持久 artifact；后续 release 应保存 bundle JSON 并把路径/commit/date 写入 notes 或 handoff。
@@ -1677,6 +1677,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已说明 release evidence artifact 推荐命令：使用 `--generated-at` 固定可复现时间戳、使用 `--output docs/releases/evidence/<release-id>-release-evidence.json` 保存脱敏 JSON，并在 release notes、PR 描述或 handoff 中记录 artifact path、commit、date 和 `generatedAt`。V1 alpha evidence 样例已说明当前样例没有生成持久 JSON artifact，后续 release 应保存 `--output` 产物并核对 decision/blockers。`docs/TESTING.md` 已记录带 `--generated-at` 和临时 `--output` 的验证命令入口。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

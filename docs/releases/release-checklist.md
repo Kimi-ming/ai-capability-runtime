@@ -186,6 +186,11 @@ release_evidence:
     provenance_summary: <provenance-dry-run-summary-or-not-run>
     package_exports_review: pass | fail | not-run
     real_publish: false
+  artifacts:
+    release_evidence_bundle:
+      path: <release-evidence-json-path-or-not-generated>
+      schema: opencap.release_evidence.v1
+      generated_at: <iso-timestamp-or-not-generated>
   hard_gates:
     runtime: pass
     registry_trust: pass | not-applicable
@@ -199,16 +204,19 @@ release_evidence:
 
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
 
-发布者可以用以下命令生成本地 release evidence bundle：
+发布者可以用以下命令生成本地 release evidence bundle，同时保存一份 JSON artifact：
 
 ```bash
+RELEASE_GENERATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 opencap release evidence \
   --registry registry \
   --records packages/runtime/test/fixtures/conformance \
+  --generated-at "$RELEASE_GENERATED_AT" \
+  --output docs/releases/evidence/<release-id>-release-evidence.json \
   --json
 ```
 
-如果 release 涉及 npm package，可先生成 pack JSON，再把 package readiness 纳入 bundle：
+如果 release 涉及 npm package，可先生成 pack JSON，再把 package readiness 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录 artifact path、commit、date 和 `generatedAt`：
 
 ```bash
 pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
@@ -217,8 +225,12 @@ opencap release evidence \
   --records packages/runtime/test/fixtures/conformance \
   --package <package> \
   --pack-json <pack-json> \
+  --generated-at "$RELEASE_GENERATED_AT" \
+  --output docs/releases/evidence/<release-id>-release-evidence.json \
   --json
 ```
+
+`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 release evidence artifact 写入本地状态目录、凭据文件或日志/数据库路径。
 
 `opencap.release_evidence.v1` 只汇总本地 reports 和命令状态；它不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 

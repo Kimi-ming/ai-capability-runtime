@@ -41,7 +41,14 @@ pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/
 ### Release evidence bundle
 
 ```bash
-pnpm --filter @opencap/cli dev -- release evidence --registry registry --records packages/runtime/test/fixtures/conformance --json
+RELEASE_EVIDENCE_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-release-evidence.XXXXXX")"
+pnpm --filter @opencap/cli dev -- release evidence \
+  --registry registry \
+  --records packages/runtime/test/fixtures/conformance \
+  --generated-at 2026-05-29T00:00:00.000Z \
+  --output "$RELEASE_EVIDENCE_OUTPUT" \
+  --json
+rm -f "$RELEASE_EVIDENCE_OUTPUT"
 ```
 
 该命令汇总本地 Registry quality、conformance records、可选 package readiness 和命令状态，用于生成 `opencap.release_evidence.v1`。对应测试入口是 `packages/cli/src/release-evidence-command.test.ts`；测试覆盖默认时间戳、`--generated-at` 可复现输入、人类输出时间字段、`--output` 安全写文件、危险输出路径拒绝和非法时间参数用户错误。Bundle 只作为本地 release evidence，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。

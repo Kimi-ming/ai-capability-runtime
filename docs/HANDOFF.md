@@ -80,7 +80,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T314：CLI `opencap release evidence` 新增 `--output <path>`，可把脱敏 `opencap.release_evidence.v1` JSON 写入指定文件，且 `--json` 仍同时打印 stdout。输出路径基于 `INIT_CWD`/当前工作目录解析，会自动创建父目录；危险路径 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径会作为用户错误 exit `1`，不打印 stack，且不会留下半截 evidence 文件。`packages/cli/src/release-evidence-command.test.ts` 覆盖安全写文件、stdout/file bundle 一致、危险路径拒绝和脱敏边界，CLI 包测试数从 35 增至 37。
 
-下一项 ready：T315 P2：把 release evidence artifact 输出纳入发布文档。
+本轮继续完成 T315：`docs/releases/release-checklist.md` 已说明 release evidence artifact 推荐命令：使用 `--generated-at` 固定可复现时间戳、使用 `--output docs/releases/evidence/<release-id>-release-evidence.json` 保存脱敏 JSON，并在 release notes、PR 描述或 handoff 中记录 artifact path、commit、date 和 `generatedAt`。V1 alpha evidence 样例已说明当前样例没有生成持久 JSON artifact，后续 release 应保存 `--output` 产物并核对 decision/blockers。`docs/TESTING.md` 已记录带 `--generated-at` 和临时 `--output` 的验证命令入口。
+
+当前 release evidence artifact 批次 T313-T315 已闭环；T291 仍是外部 Host UI smoke evidence 限制项。下一步需要重新规划下一批 ready 任务，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -159,9 +161,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313 和 T314 均已完成；T315 是下一项本地 release evidence artifact ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314 和 T315 均已完成；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T315，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：重新规划下一批本地可验证 ready 任务，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
