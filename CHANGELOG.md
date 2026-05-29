@@ -91,6 +91,7 @@
 - README、Registry、安全、生态和运营文档已补充 `opencap registry advisory list/show --output <file>` 本地 evidence artifact 边界。
 - README、Release checklist、alpha evidence 样例和测试文档已补充 Registry quality / Conformance summary output artifacts 的 release evidence 边界。
 - README、中文文档中心、Registry distribution、Release checklist、alpha evidence 样例和测试文档已补充 `opencap registry index build` unsigned discovery/cache artifact 的用途和安全边界。
+- README、中文文档中心、Registry distribution、Release checklist、alpha evidence 样例和测试文档已补充 `opencap registry index validate` validation report 的用途和安全边界。
 - Release checklist、npm 发布文档、alpha evidence 样例和测试文档已补充 `opencap release package report --output <file>` 的 package readiness artifact 边界。
 - Release checklist、npm 发布文档、alpha evidence 样例和测试文档已补充 `opencap release evidence --package-readiness <file>` 的 artifact 输入边界。
 - Release checklist、npm 发布文档、alpha evidence 样例和测试文档已补充重复 `--package-readiness <file>` 的多 package release evidence 边界。

@@ -43,13 +43,19 @@ opencap registry index build \
   --registry registry \
   --output docs/releases/evidence/<release-id>-registry-index.json \
   --json
+opencap registry index validate \
+  --file docs/releases/evidence/<release-id>-registry-index.json \
+  --output docs/releases/evidence/<release-id>-registry-index-validation.json \
+  --json
 ```
 
 输出 artifact 使用 `opencap.registry.index.v1` schema 和 `opencap.registry.index_cache_sync.v1` profile，包含 capability id、version、category、relative manifest path、manifest digest、lifecycle、manifest trust level、quality/advisory 摘要、default install trust、blocking reasons、`signatureStatus: "none"`、`policyEffect: "none"` 和稳定 `indexDigest`。
 
-该 artifact 的用途是本地发现、离线查看和未来 cache/sync 输入。它不替代 manifest validation、Registry review、Capability package lint、registry tests、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证、install audit 或 execute audit。`http.request_demo` 这类 unsafe/revoked 示例即使出现在 index 中，也不能因此成为默认可信安装能力。
+`opencap registry index validate` 输出 `opencap.registry_index_validation.v1` validation report，用于证明保存后的 unsigned index artifact 结构可解析、关键字段脱敏且 `indexDigest` 一致。Invalid artifact 返回 exit `1`；`--output` 会安全写出 report，并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录路径。
 
-Index 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、SQLite/DB/log 或私有绝对路径。生成命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+该 artifact 和 validation report 的用途是本地发现、离线查看、未来 cache/sync 输入和 release evidence 引用。Validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性，不替代 manifest validation、Registry review、Capability package lint、registry tests、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证、install audit 或 execute audit。`http.request_demo` 这类 unsafe/revoked 示例即使出现在 index 中，也不能因此成为默认可信安装能力。
+
+Index 和 validation report 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、SQLite/DB/log 或私有绝对路径。Build/validate 命令不签名、不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
 ## 未来签名、Cache 和 Sync
 

@@ -2186,7 +2186,7 @@
     - `pnpm validate`
   - 完成记录：CLI 已新增 `opencap registry index validate --file <path> [--output <file>] [--json]`，复用 T356 `validateRegistryIndexArtifact()` 校验保存后的 Registry index artifact。JSON 输出 `opencap.registry_index_validation.v1` validation report；非 JSON 输出 valid、finding count、digest、schema/profile 和 policy effect 摘要；invalid artifact 返回 exit `1` 且不打印 stack。`--output` 会安全原子写出 validation report JSON，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；非法 JSON 或读取失败不会写半截 output。命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。新增 `packages/cli/src/registry-index-validate-command.test.ts` 覆盖 JSON、人类输出、invalid report output、危险 output 拒绝、非法 JSON 不写 partial report 和不创建 `opencap.local`；已验证 `pnpm --filter @opencap/cli test -- registry-index-validate-command.test.ts`、`pnpm --filter @opencap/cli build` 和 `pnpm validate`。
 
-- [ ] T358 P2：把 Registry index validation 纳入分发和 release evidence 文档。
+- [x] T358 P2：把 Registry index validation 纳入分发和 release evidence 文档。
   - 验收标准：
     - Registry distribution、README/中文文档中心、testing docs、release checklist 和 alpha evidence 样例说明 `opencap registry index validate` 的用途。
     - 文档明确 validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计。
@@ -2196,6 +2196,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：README、中文文档中心、`docs/生态/registry-distribution.md`、`docs/releases/release-checklist.md`、V1 alpha evidence 样例和测试策略已补充 `opencap registry index validate --file <registry-index-json> --output <registry-index-validation-json> --json` 的用途和边界。文档明确 validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计；validation 不签名、不触网、不读取 provider secret、不安装、不执行 Capability、不写 state dir，也不改变 trust、policy、authorization 或 Runtime execution。已验证 `check_docs.py`、`audit_docs.py` 和 `git diff --check`。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

@@ -162,6 +162,7 @@ release_evidence:
     pnpm_test: pass
     release_evidence_bundle: pass | fail | not-run
     registry_index_build: pass | fail | not-run
+    registry_index_validate: pass | fail | not-run
     conformance_report: pass | fail | not-run
     package_readiness_report: pass | fail | not-run
     npm_pack_dry_run: pass | fail | not-run
@@ -198,6 +199,12 @@ release_evidence:
       signature_status: none
       digest: <sha256-digest-or-not-generated>
       policy_effect: none
+    registry_index_validation_report:
+      path: <registry-index-validation-json-path-or-not-generated>
+      schema: opencap.registry_index_validation.v1
+      valid: true | false | not-run
+      finding_count: <number-or-not-run>
+      policy_effect: none
     release_evidence_bundle:
       path: <release-evidence-json-path-or-not-generated>
       schema: opencap.release_evidence.v1
@@ -231,7 +238,7 @@ release_evidence:
 
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
 
-发布者可以用 `opencap registry index build --registry registry --output <registry-index-json> --json` 保存 unsigned Registry index artifact，用于本地发现、离线查看和未来 cache/sync 输入。该 artifact 不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证、install audit 或 execute audit；它也不得被写成 package 已发布、Capability 已可信、policy 已允许或签名供应链已完成。Index 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。
+发布者可以用 `opencap registry index build --registry registry --output <registry-index-json> --json` 保存 unsigned Registry index artifact，并用 `opencap registry index validate --file <registry-index-json> --output <registry-index-validation-json> --json` 保存 validation report，用于本地发现、离线查看、未来 cache/sync 输入和 release evidence 引用。Validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性；该 artifact/report 不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证、install audit 或 execute audit；它们也不得被写成 package 已发布、Capability 已可信、policy 已允许或签名供应链已完成。Index 和 validation report 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。
 
 发布者可以用以下命令生成本地 release evidence bundle，同时保存 release evidence JSON 和 validation report JSON 两类 artifact：
 
@@ -255,11 +262,16 @@ opencap release artifact validate \
 
 ```bash
 REGISTRY_INDEX_PATH="docs/releases/evidence/<release-id>-registry-index.json"
+REGISTRY_INDEX_VALIDATION_REPORT_PATH="docs/releases/evidence/<release-id>-registry-index-validation.json"
 REGISTRY_QUALITY_PATH="docs/releases/evidence/<release-id>-registry-quality.json"
 CONFORMANCE_SUMMARY_PATH="docs/releases/evidence/<release-id>-conformance-summary.json"
 opencap registry index build \
   --registry registry \
   --output "$REGISTRY_INDEX_PATH" \
+  --json
+opencap registry index validate \
+  --file "$REGISTRY_INDEX_PATH" \
+  --output "$REGISTRY_INDEX_VALIDATION_REPORT_PATH" \
   --json
 opencap registry report \
   --registry registry \
@@ -271,7 +283,7 @@ opencap conformance report \
   --json
 ```
 
-这些 artifact 只是本地 evidence/discovery input，不替代 `opencap release evidence` bundle、`opencap release artifact validate` validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。它们不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+这些 artifact 和 validation reports 只是本地 evidence/discovery input，不替代 `opencap release evidence` bundle、`opencap release artifact validate` validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。Registry index validation 不签名、不触网、不读取 provider secret、不安装、不执行 Capability、不写 state dir，也不改变 trust、policy、authorization 或 Runtime execution。
 
 如果 release 涉及 npm package，可先为每个 package 生成 pack JSON 和 package readiness JSON artifact，再把所有 package readiness artifacts 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录每个 package readiness artifact path、release evidence path、validation report path、commit、date、`generatedAt`、validation `valid`、finding count 和 `policyEffect: none`：
 
@@ -306,7 +318,7 @@ opencap release artifact validate \
   --json
 ```
 
-`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 registry quality、conformance summary、package readiness、release evidence artifact 或 validation report artifact 写入本地状态目录、凭据文件或日志/数据库路径。
+`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 registry index、registry index validation report、registry quality、conformance summary、package readiness、release evidence artifact 或 validation report artifact 写入本地状态目录、凭据文件或日志/数据库路径。
 
 `opencap release artifact validate --file <artifact> --output <report-json> --json` 输出并保存 `opencap.release_artifact_validation.v1`。发布者应把 validation report path、`valid`、finding count、`findings` 摘要和 `policyEffect: none` 写入 release notes、PR 描述或 handoff；如果 validation 为 invalid，不能继续 release/tag/publish。
 
