@@ -1906,7 +1906,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap advisory check --state-dir <path> --registry <path>` 新增 `--capability <id>` 本地筛选。JSON 输出仍使用 `opencap.advisory_check.v1`，新增 `filters.capability` 和 `installedCapabilityCount`，并将 checkedInstalledCapabilities、checkedCapabilityCount 与 matches 收敛到指定 Capability；未安装匹配 Capability 时输出友好空结果并保持 exit `0`。invalid advisory 和 revoked/revoke/deny 匹配仍按既有 exit `1` 语义。命令不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。`packages/cli/src/advisory-check-command.test.ts` 从 4 个测试增至 5 个，CLI 包测试数从 69 增至 70。
 
-- [ ] T335 P2：为 `opencap advisory check` 增加 severity/status 本地筛选参数。
+- [x] T335 P2：为 `opencap advisory check` 增加 severity/status 本地筛选参数。
   - 验收标准：
     - CLI `opencap advisory check --state-dir <path> --registry <path>` 支持 `--severity <low|medium|high|critical>` 和 `--status <status>` 筛选 advisory matches。
     - JSON 输出仍使用 `opencap.advisory_check.v1`，包含 `filters.severity` / `filters.status`、raw match count、filtered match count 和 `policyEffect: none`。
@@ -1916,6 +1916,7 @@
     - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap advisory check --state-dir <path> --registry <path>` 新增 `--severity <low|medium|high|critical>` 和 `--status <status>` 本地筛选。JSON 输出仍使用 `opencap.advisory_check.v1`，新增 `filters.severity` / `filters.status`、`matchCount` 和 `filteredMatchCount`，并保持 `policyEffect: none`；exit code 基于筛选后的 revoked/revoke/deny matches 和 invalid advisory summary。非法 severity/status 作为用户错误 exit `1` 且不打印 stack；筛选不会隐藏 invalid advisory summary，也不会改变 invalid advisory exit `1` 语义。命令不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。`packages/cli/src/advisory-check-command.test.ts` 从 5 个测试增至 7 个，CLI 包测试数从 70 增至 72。
 
 - [ ] T336 P2：把 advisory check filters 纳入安全和运维文档。
   - 验收标准：

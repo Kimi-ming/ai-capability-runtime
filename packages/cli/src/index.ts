@@ -339,6 +339,8 @@ interface AdvisoryCheckInvalidAdvisory {
 
 interface AdvisoryCheckFilters {
   capability?: string;
+  severity?: CapabilityAdvisory["severity"];
+  status?: CapabilityAdvisory["status"];
 }
 
 interface AdvisoryCheckReport {
@@ -349,6 +351,8 @@ interface AdvisoryCheckReport {
   checkedCapabilityCount: number;
   checkedInstalledCapabilities: string[];
   filters: AdvisoryCheckFilters;
+  matchCount: number;
+  filteredMatchCount: number;
   matches: InstalledCapabilityAdvisoryMatch[];
   invalidAdvisoryCount: number;
   invalidAdvisories: AdvisoryCheckInvalidAdvisory[];
@@ -611,6 +615,18 @@ function resolveRegistryAdvisoryListFilters(options: {
   };
 }
 
+function resolveAdvisoryCheckFilters(options: {
+  capability?: string;
+  severity?: string;
+  status?: string;
+}): AdvisoryCheckFilters {
+  return {
+    ...(options.capability === undefined ? {} : { capability: options.capability }),
+    ...(options.severity === undefined ? {} : { severity: parseRegistryAdvisorySeverity(options.severity) }),
+    ...(options.status === undefined ? {} : { status: parseRegistryAdvisoryStatus(options.status) }),
+  };
+}
+
 function registrySearchCategory(result: RegistryCapabilitySearchResult): string {
   const category = result.manifest.metadata.category;
   return typeof category === "string" ? category : "unknown";
@@ -825,8 +841,17 @@ function buildAdvisoryCheckReport(input: {
   const filters = input.filters ?? {};
   const checkedInstalledCapabilities = input.result.checkedInstalledCapabilities
     .filter((capabilityId) => filters.capability === undefined || capabilityId === filters.capability);
-  const matches = input.result.matches
+  const capabilityMatches = input.result.matches
     .filter((match) => filters.capability === undefined || match.capabilityId === filters.capability);
+  const matches = capabilityMatches.filter((match) => {
+    if (filters.severity !== undefined && match.severity !== filters.severity) {
+      return false;
+    }
+    if (filters.status !== undefined && match.status !== filters.status) {
+      return false;
+    }
+    return true;
+  });
 
   return {
     schemaVersion: "opencap.advisory_check.v1",
@@ -836,6 +861,8 @@ function buildAdvisoryCheckReport(input: {
     checkedCapabilityCount: checkedInstalledCapabilities.length,
     checkedInstalledCapabilities,
     filters,
+    matchCount: capabilityMatches.length,
+    filteredMatchCount: matches.length,
     matches: matches.map((match) => ({ ...match, affectedVersions: [...match.affectedVersions] })),
     invalidAdvisoryCount: input.result.invalidAdvisories.length,
     invalidAdvisories: input.result.invalidAdvisories.map(advisoryCheckInvalidAdvisory),
@@ -2292,10 +2319,13 @@ advisoryCommand
   .requiredOption("--state-dir <path>", "Local OpenCap state directory")
   .requiredOption("--registry <path>", "Registry root directory")
   .option("--capability <id>", "Filter checks by installed capability id")
+  .option("--severity <value>", "Filter advisory matches by severity")
+  .option("--status <value>", "Filter advisory matches by status")
   .option("--json", "Output JSON")
   .description("Check installed capabilities against local Registry advisories.")
-  .action((options: { stateDir: string; registry: string; capability?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { stateDir: string; registry: string; capability?: string; severity?: string; status?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
+    const filters = resolveAdvisoryCheckFilters(options);
     const stateDir = getLocalStatePaths({ cwd, env: process.env, stateDir: options.stateDir }).root;
     const registryPath = resolveRegistryDir({ cwd, env: process.env, registryDir: options.registry });
     const result = await checkInstalledCapabilityAdvisories({
@@ -2308,7 +2338,7 @@ advisoryCommand
       stateDir,
       registryPath,
       result,
-      filters: options.capability === undefined ? {} : { capability: options.capability },
+      filters,
     });
     const exitCode = advisoryCheckExitCode(report);
 

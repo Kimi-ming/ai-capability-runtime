@@ -67,6 +67,29 @@ function warningAdvisory(): string {
   ].join("\n");
 }
 
+function revokedAdvisory(): string {
+  return [
+    "schema_version: opencap.capability_advisory.v1",
+    "id: OCAP-2099-0002",
+    "capability: github.create_issue",
+    "affected_versions:",
+    "  - <=0.1.0",
+    "type: maintainer_compromise",
+    "severity: critical",
+    "status: revoked",
+    "summary: GitHub issue capability revoked for incident response.",
+    "published_at: 2026-05-29T00:00:00Z",
+    "modified_at: 2026-05-29T01:00:00Z",
+    "actions:",
+    "  registry: revoke",
+    "  runtime_default: deny",
+    "  fixed_version: null",
+    "references:",
+    "  - docs/安全/capability-advisory-process.md",
+    "",
+  ].join("\n");
+}
+
 describe("OpenCap CLI advisory check command", () => {
   it("reports installed revoked advisories as JSON and exits 1 without reading secrets", async () => {
     const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
@@ -246,6 +269,126 @@ describe("OpenCap CLI advisory check command", () => {
     }
   }, 60_000);
 
+  it("filters advisory check matches by severity and status while preserving raw match counts", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
+    const stateDir = join(dir, "state");
+    const advisoryRegistry = join(dir, "registry");
+
+    try {
+      await runOpenCapCli(["install", "github.create_issue", "--state-dir", stateDir, "--registry", registryRoot]);
+      await writeAdvisory(advisoryRegistry, warningAdvisory(), "OCAP-2099-0001.yml");
+      await writeAdvisory(advisoryRegistry, revokedAdvisory(), "OCAP-2099-0002.yml");
+
+      const warningOnly = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        advisoryRegistry,
+        "--severity",
+        "medium",
+        "--status",
+        "published",
+        "--json",
+      ]);
+      const warningReport = JSON.parse(warningOnly.stdout) as {
+        filters: { severity?: string; status?: string };
+        matchCount: number;
+        filteredMatchCount: number;
+        policyEffect: string;
+        matches: Array<{ advisoryId: string; severity: string; status: string; runtimeDefault: string }>;
+      };
+
+      expect(warningOnly.exitCode).toBe(0);
+      expect(warningReport.filters).toEqual({ severity: "medium", status: "published" });
+      expect(warningReport.matchCount).toBe(2);
+      expect(warningReport.filteredMatchCount).toBe(1);
+      expect(warningReport.policyEffect).toBe("none");
+      expect(warningReport.matches).toEqual([
+        expect.objectContaining({
+          advisoryId: "OCAP-2099-0001",
+          severity: "medium",
+          status: "published",
+          runtimeDefault: "warn",
+        }),
+      ]);
+
+      const revokedOnly = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        advisoryRegistry,
+        "--severity",
+        "critical",
+        "--status",
+        "revoked",
+        "--json",
+      ], { allowFailure: true });
+      const revokedReport = JSON.parse(revokedOnly.stdout) as {
+        filters: { severity?: string; status?: string };
+        matchCount: number;
+        filteredMatchCount: number;
+        matches: Array<{ advisoryId: string; severity: string; status: string; runtimeDefault: string }>;
+      };
+
+      expect(revokedOnly.exitCode).toBe(1);
+      expect(revokedReport.filters).toEqual({ severity: "critical", status: "revoked" });
+      expect(revokedReport.matchCount).toBe(2);
+      expect(revokedReport.filteredMatchCount).toBe(1);
+      expect(revokedReport.matches).toEqual([
+        expect.objectContaining({
+          advisoryId: "OCAP-2099-0002",
+          severity: "critical",
+          status: "revoked",
+          runtimeDefault: "deny",
+        }),
+      ]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects invalid advisory check severity and status filters as user errors", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
+
+    try {
+      const invalidSeverity = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--severity",
+        "urgent",
+      ], { allowFailure: true });
+
+      expect(invalidSeverity.exitCode).toBe(1);
+      expect(invalidSeverity.stderr).toContain("Invalid --severity value: urgent");
+      expect(invalidSeverity.stderr).not.toMatch(/\n\s+at /);
+
+      const invalidStatus = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--status",
+        "closed",
+      ], { allowFailure: true });
+
+      expect(invalidStatus.exitCode).toBe(1);
+      expect(invalidStatus.stderr).toContain("Invalid --status value: closed");
+      expect(invalidStatus.stderr).not.toMatch(/\n\s+at /);
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a friendly empty human summary without writing audit logs", async () => {
     const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
 
@@ -276,6 +419,10 @@ describe("OpenCap CLI advisory check command", () => {
         stateDir,
         "--registry",
         advisoryRegistry,
+        "--severity",
+        "low",
+        "--status",
+        "published",
         "--json",
       ], { allowFailure: true });
       const report = JSON.parse(result.stdout) as { invalidAdvisoryCount: number; invalidAdvisories: Array<{ filePath: string; issues: string[] }> };

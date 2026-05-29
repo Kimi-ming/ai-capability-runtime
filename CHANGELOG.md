@@ -78,6 +78,7 @@
 - CLI `opencap registry advisory list` 新增 `--capability`、`--severity` 和 `--status` 本地筛选参数。
 - CLI 新增 `opencap registry advisory show`，可精确查看单条本地 Registry advisory detail，输出 `opencap.registry_advisory_detail.v1` report。
 - CLI `opencap advisory check` 新增 `--capability <id>` 本地筛选参数，并在 JSON report 中输出 installed/filter counts。
+- CLI `opencap advisory check` 新增 `--severity` 和 `--status` 本地筛选参数，并在 JSON report 中输出 raw/filtered match counts。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。
 - Release checklist、V1 alpha evidence 样例和 npm 发布文档已纳入 package readiness report 与 `npm pack --dry-run --json` 记录步骤，明确它不能替代 npm publish dry-run、trusted publishing 或正式 provenance。
 - `@opencap/spec` 和 `@opencap/cli` 新增 package `files` allowlist；npm package readiness report 会检查缺失或危险 allowlist entry 并作为发布 blocker。
