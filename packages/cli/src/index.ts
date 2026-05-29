@@ -10,11 +10,15 @@ import YAML from "yaml";
 import {
   buildConformanceSummary,
   buildNpmPackageReadinessReportFromFile,
+  buildCapabilityScaffold,
   buildRegistryQualitySummary,
   buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
   validateReleaseEvidenceArtifact,
   validateManifestPath,
+  type CapabilityScaffoldAuth,
+  type CapabilityScaffoldFile,
+  type CapabilityScaffoldHttpMethod,
   type CapabilityManifest,
   type NpmPackagePackFile,
   type NpmPackageReadinessReport,
@@ -213,6 +217,21 @@ const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "de
 
 const POLICY_DECISION_VALUES = new Set<PolicyDecision>(["allow", "ask", "deny"]);
 const LEDGER_RECORD_KINDS = new Set<LedgerRecordKind>(["capability", "policy", "invocation", "compatibility"]);
+const CAPABILITY_SCAFFOLD_METHODS = new Set<CapabilityScaffoldHttpMethod>(["GET", "POST", "PUT", "PATCH", "DELETE"]);
+const CAPABILITY_SCAFFOLD_AUTH_MODES = new Set(["none", "api-key-bearer"]);
+
+interface InitCommandOptions {
+  category: string;
+  output?: string;
+  title?: string;
+  description?: string;
+  method?: string;
+  url?: string;
+  auth?: string;
+  provider?: string;
+  env?: string;
+  scope?: string[];
+}
 
 function parseLedgerKind(value: string | undefined): LedgerRecordKind | undefined {
   if (value === undefined) {
@@ -224,6 +243,144 @@ function parseLedgerKind(value: string | undefined): LedgerRecordKind | undefine
   }
 
   return value as LedgerRecordKind;
+}
+
+function titleFromCapabilityId(id: string): string {
+  return id
+    .split(/[._]/)
+    .filter((part) => part.length > 0)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+}
+
+function providerFromCapabilityId(id: string): string {
+  return id.split(".")[0] ?? id;
+}
+
+function providerHostnameFragment(provider: string): string {
+  return provider.replace(/_/g, "-");
+}
+
+function defaultCredentialEnv(provider: string): string {
+  const normalized = provider.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+  return `${normalized}_API_KEY`;
+}
+
+function parseInitMethod(value: string | undefined): CapabilityScaffoldHttpMethod {
+  const method = (value ?? "GET").toUpperCase();
+  if (!CAPABILITY_SCAFFOLD_METHODS.has(method as CapabilityScaffoldHttpMethod)) {
+    throw new CliUserInputError(`Invalid --method value: ${value}`);
+  }
+
+  return method as CapabilityScaffoldHttpMethod;
+}
+
+function parseInitAuth(id: string, options: InitCommandOptions): CapabilityScaffoldAuth {
+  const mode = options.auth ?? "none";
+  if (!CAPABILITY_SCAFFOLD_AUTH_MODES.has(mode)) {
+    throw new CliUserInputError(`Invalid --auth value: ${mode}`);
+  }
+  if (mode === "none") {
+    return { mode: "none" };
+  }
+
+  const provider = options.provider ?? providerFromCapabilityId(id);
+  return {
+    mode: "api_key_bearer",
+    provider,
+    env: options.env ?? defaultCredentialEnv(provider),
+    scopes: options.scope === undefined || options.scope.length === 0 ? ["read"] : options.scope,
+  };
+}
+
+function unsafePathParts(path: string): string[] {
+  return path.split(/[\\/]+/).filter((part) => part.length > 0);
+}
+
+function assertNoPathTraversal(value: string): void {
+  if (unsafePathParts(value).includes("..")) {
+    throw new CliUserInputError("Unsafe --output path: directory traversal is not allowed.");
+  }
+}
+
+function assertSafeCapabilityScaffoldOutputDir(resolved: string): void {
+  const parts = unsafePathParts(resolved).map((part) => part.toLowerCase());
+
+  if (parts.includes("opencap.local")) {
+    throw new CliUserInputError("Unsafe --output path: scaffold files must not be written under opencap.local.");
+  }
+
+  for (const part of parts) {
+    if (part === ".env" || part.startsWith(".env.")) {
+      throw new CliUserInputError("Unsafe --output path: scaffold files must not target .env paths.");
+    }
+    if (/(token|secret|password)/i.test(part)) {
+      throw new CliUserInputError("Unsafe --output path: scaffold paths must not contain token, secret, or password.");
+    }
+    if (/\.(sqlite|sqlite3|db|log)$/i.test(part)) {
+      throw new CliUserInputError("Unsafe --output path: scaffold files must not target database or log paths.");
+    }
+  }
+}
+
+function resolveCapabilityScaffoldOutputDir(id: string, category: string, output: string | undefined): string {
+  const requested = output ?? join("registry", category, id);
+  assertNoPathTraversal(requested);
+
+  const resolved = resolveCliPath(requested);
+  assertSafeCapabilityScaffoldOutputDir(resolved);
+  return resolved;
+}
+
+async function assertNoExistingScaffoldFiles(outputDir: string, files: CapabilityScaffoldFile[]): Promise<void> {
+  for (const file of files) {
+    const filePath = join(outputDir, file.path);
+    const existing = await stat(filePath).catch((error: unknown) => {
+      if (isNodeError(error) && error.code === "ENOENT") {
+        return undefined;
+      }
+      throw error;
+    });
+
+    if (existing !== undefined) {
+      throw new CliUserInputError(`Refusing to overwrite existing scaffold file: ${filePath}`);
+    }
+  }
+}
+
+async function writeCapabilityScaffoldFiles(outputDir: string, files: CapabilityScaffoldFile[]): Promise<void> {
+  await assertNoExistingScaffoldFiles(outputDir, files);
+
+  for (const file of files) {
+    const filePath = join(outputDir, file.path);
+    await mkdir(dirname(filePath), { recursive: true });
+    try {
+      await writeFile(filePath, file.content, { encoding: "utf8", flag: "wx" });
+    } catch (error) {
+      if (isNodeError(error) && error.code === "EEXIST") {
+        throw new CliUserInputError(`Refusing to overwrite existing scaffold file: ${filePath}`);
+      }
+      throw error;
+    }
+  }
+}
+
+function printCapabilityScaffoldCreated(outputDir: string, files: CapabilityScaffoldFile[]): void {
+  console.log("Created Capability scaffold:");
+  for (const file of files) {
+    console.log(`- ${join(outputDir, file.path)}`);
+  }
+  console.log("Next:");
+  console.log(`  opencap validate ${outputDir}`);
+  console.log("  pnpm validate");
+}
+
+function buildCliCapabilityScaffold(input: Parameters<typeof buildCapabilityScaffold>[0]) {
+  try {
+    return buildCapabilityScaffold(input);
+  } catch (error) {
+    throw new CliUserInputError(error instanceof Error ? error.message : "Invalid Capability scaffold input.");
+  }
 }
 
 function parsePolicyDecision(value: string | undefined): PolicyDecision | undefined {
@@ -967,11 +1124,35 @@ program
 
 program
   .command("init")
-  .argument("[id]", "Capability id, for example github.create_issue")
-  .description("Create a new Capability skeleton.")
-  .action((id?: string) => {
-    console.log(`init is not implemented yet${id ? ` for ${id}` : ""}`);
-  });
+  .argument("<id>", "Capability id, for example github.create_issue")
+  .requiredOption("--category <name>", "Registry category slug for the Capability package")
+  .option("--output <dir>", "Output Capability package directory")
+  .option("--title <title>", "Human-readable Capability name")
+  .option("--description <text>", "Human-readable Capability description")
+  .option("--method <method>", "HTTP method for the scaffold", "GET")
+  .option("--url <template>", "Fixed HTTP URL template for the scaffold")
+  .option("--auth <mode>", "Auth mode: none or api-key-bearer", "none")
+  .option("--provider <slug>", "Credential provider slug for api-key-bearer auth")
+  .option("--env <name>", "Environment variable name for api-key-bearer auth")
+  .option("--scope <scope...>", "Credential scope for api-key-bearer auth")
+  .description("Create a local V1 HTTP Capability scaffold.")
+  .action((id: string, options: InitCommandOptions) => runCliAction(async () => {
+    const category = options.category;
+    const outputDir = resolveCapabilityScaffoldOutputDir(id, category, options.output);
+    const provider = providerFromCapabilityId(id);
+    const scaffold = buildCliCapabilityScaffold({
+      id,
+      title: options.title ?? titleFromCapabilityId(id),
+      description: options.description ?? `Scaffold for ${id}.`,
+      category,
+      method: parseInitMethod(options.method),
+      urlTemplate: options.url ?? `https://api.${providerHostnameFragment(provider)}.example.com/{{message}}`,
+      auth: parseInitAuth(id, options),
+    });
+
+    await writeCapabilityScaffoldFiles(outputDir, scaffold.files);
+    printCapabilityScaffoldCreated(outputDir, scaffold.files);
+  }, "Failed to create Capability scaffold"));
 
 program
   .command("validate")

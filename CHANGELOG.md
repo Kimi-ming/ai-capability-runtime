@@ -70,6 +70,7 @@
 - Release checklist 和 V1 alpha evidence 样例新增 npm publish dry-run evidence 字段、核对步骤和 `real_publish: false` 边界，避免把 dry-run workflow 误写成真实 npm 发布。
 - `@opencap/spec` 新增 npm package readiness report helper，可本地评估 alpha package metadata、候选包 allowlist、pack file 摘要和 forbidden tarball files，固定 `policyEffect: "none"`。
 - `@opencap/spec` 新增 Capability scaffold helper，可生成 V1 HTTP Capability 的 `manifest.yml`、`README.md` 和 `tests/basic.yml` 初始文件，并复用现有 authoring/package/registry test 校验边界。
+- CLI 新增 `opencap init`，可调用 Capability scaffold helper 在本地生成 V1 HTTP Capability package，并拒绝覆盖、危险 output 路径、secret-shaped 路径和本地 state/log/DB 路径。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。
 - Release checklist、V1 alpha evidence 样例和 npm 发布文档已纳入 package readiness report 与 `npm pack --dry-run --json` 记录步骤，明确它不能替代 npm publish dry-run、trusted publishing 或正式 provenance。
 - `@opencap/spec` 和 `@opencap/cli` 新增 package `files` allowlist；npm package readiness report 会检查缺失或危险 allowlist entry 并作为发布 blocker。

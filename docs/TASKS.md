@@ -1763,7 +1763,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增并导出 `buildCapabilityScaffold()`、scaffold 输入/输出类型和 V1 HTTP scaffold 文件模型。Helper 生成 `manifest.yml`、`README.md` 和 `tests/basic.yml`，会从 URL template 提取输入字段，生成 dry-run registry test skeleton，并默认输出 `type: http`、最小 permission、input/output schema、execution、active lifecycle 默认状态对应的 metadata 和 bearer API key 或 no-auth auth block。测试把生成文件写入临时 package 后验证 manifest、authoring manifest、package shape 和 registry test 全部通过，同时覆盖非法 id、非 HTTP type、危险 category/path 片段和空 title 拒绝；输出不包含真实 token、Authorization header、provider raw response、`/Users/...`、`opencap.local` 或数据库日志。`packages/spec/src/capability-scaffold.test.ts` 新增 3 个测试。
 
-- [ ] T323 P1：实现 `opencap init` 本地 Capability scaffold 命令。
+- [x] T323 P1：实现 `opencap init` 本地 Capability scaffold 命令。
   - 验收标准：
     - CLI `opencap init <capability-id> --category <name> --output <dir>` 调用 T322 helper 写入 `manifest.yml`、`README.md` 和 `tests/basic.yml`。
     - 默认 output 基于 `INIT_CWD`/当前工作目录解析；命令自动创建目标目录，但拒绝覆盖已有文件，拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 路径和目录穿越。
@@ -1773,6 +1773,7 @@
     - `pnpm --filter @opencap/cli test -- init-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap init <capability-id> --category <name> --output <dir>` 已接入 T322 `buildCapabilityScaffold()`，生成本地 V1 HTTP Capability package 的 `manifest.yml`、`README.md` 和 `tests/basic.yml`。命令支持 title、description、method、url、no-auth/api-key-bearer auth、provider、env 和 scope 参数；相对 output 基于 `INIT_CWD`/当前工作目录解析，未传 `--output` 时默认写入 `registry/<category>/<id>`。写入前会拒绝覆盖已有 scaffold 文件，并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录穿越路径；成功输出 `opencap validate <dir>` 和 `pnpm validate` 下一步命令，不安装 Capability、不读取 secret、不写 state dir、不触网。`packages/cli/src/init-command.test.ts` 新增 4 个测试，覆盖成功 scaffold、validate 通过、不写 `opencap.local`、覆盖保护、危险 output 拒绝和非法 id 用户错误；CLI 包测试数从 45 增至 49。
 
 - [ ] T324 P2：把 `opencap init` 纳入作者教程和测试文档。
   - 验收标准：
