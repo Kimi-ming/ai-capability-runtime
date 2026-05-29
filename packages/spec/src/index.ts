@@ -32,11 +32,19 @@ export { lintSecurityPolicyDoc } from "./security-policy-doc-lint.js";
 export type { SecurityPolicyDocFinding, SecurityPolicyDocLintRule } from "./security-policy-doc-lint.js";
 export { lintNpmPublishWorkflow, lintNpmPublishWorkflowFile } from "./npm-publish-workflow-lint.js";
 export type { NpmPublishWorkflowFinding, NpmPublishWorkflowLintResult, NpmPublishWorkflowLintRule } from "./npm-publish-workflow-lint.js";
-export { NPM_PACKAGE_READINESS_SCHEMA_VERSION, buildNpmPackageReadinessReport, buildNpmPackageReadinessReportFromFile } from "./npm-package-readiness.js";
+export {
+  NPM_PACKAGE_READINESS_SCHEMA_VERSION,
+  buildNpmPackageReadinessReport,
+  buildNpmPackageReadinessReportFromFile,
+  validateNpmPackageReadinessArtifact,
+} from "./npm-package-readiness.js";
 export type {
   BuildNpmPackageReadinessReportOptions,
   NpmPackageForbiddenFile,
   NpmPackageForbiddenFileReasonCode,
+  NpmPackageReadinessArtifactFinding,
+  NpmPackageReadinessArtifactFindingCode,
+  NpmPackageReadinessArtifactValidationResult,
   NpmPackagePackFile,
   NpmPackageReadinessBlockerCode,
   NpmPackageReadinessFinding,

@@ -74,7 +74,50 @@ export interface BuildNpmPackageReadinessReportOptions {
   packFiles?: NpmPackagePackFile[];
 }
 
+export type NpmPackageReadinessArtifactFindingCode =
+  | "NPM_PACKAGE_READINESS_ARTIFACT_NOT_OBJECT"
+  | "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_SCHEMA_VERSION"
+  | "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_POLICY_EFFECT"
+  | "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD";
+
+export interface NpmPackageReadinessArtifactFinding {
+  code: NpmPackageReadinessArtifactFindingCode;
+  path: string;
+  message: string;
+}
+
+export type NpmPackageReadinessArtifactValidationResult =
+  | {
+      ok: true;
+      artifact: NpmPackageReadinessReport;
+      findings: [];
+    }
+  | {
+      ok: false;
+      findings: NpmPackageReadinessArtifactFinding[];
+    };
+
 const DEFAULT_ALLOWED_PACKAGES = ["@opencap/spec", "@opencap/cli"];
+const READINESS_BLOCKER_CODES = new Set<NpmPackageReadinessBlockerCode>([
+  "NPM_PACKAGE_NAME_MISSING",
+  "NPM_PACKAGE_VERSION_MISSING",
+  "NPM_PACKAGE_NOT_ALPHA_CANDIDATE",
+  "NPM_PACKAGE_PRIVATE",
+  "NPM_PACKAGE_FILES_ALLOWLIST_MISSING",
+  "NPM_PACKAGE_FILES_ALLOWLIST_UNSAFE",
+  "NPM_PACKAGE_MISSING_PUBLIC_ENTRY",
+  "NPM_PACKAGE_MISSING_TYPES",
+  "NPM_PACKAGE_FORBIDDEN_PACK_FILE",
+]);
+const READINESS_WARNING_CODES = new Set<NpmPackageReadinessWarningCode>([
+  "NPM_PACKAGE_PACK_FILES_NOT_RUN",
+]);
+const FORBIDDEN_FILE_REASON_CODES = new Set<NpmPackageForbiddenFileReasonCode>([
+  "ENV_FILE",
+  "LOCAL_STATE",
+  "DATABASE_OR_LOG",
+  "SECRET_SHAPED_FILE",
+]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -82,6 +125,188 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function stringValue(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function addArtifactFinding(
+  findings: NpmPackageReadinessArtifactFinding[],
+  code: NpmPackageReadinessArtifactFindingCode,
+  path: string,
+  message: string,
+): void {
+  findings.push({ code, path, message });
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => typeof entry === "string");
+}
+
+function isNonNegativeFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function validateStringOrNullField(
+  record: Record<string, unknown>,
+  key: string,
+  path: string,
+  findings: NpmPackageReadinessArtifactFinding[],
+): void {
+  const value = record[key];
+  if (value !== null && typeof value !== "string") {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", path, `${path} must be a string or null.`);
+  }
+}
+
+function validateBooleanField(
+  record: Record<string, unknown>,
+  key: string,
+  path: string,
+  findings: NpmPackageReadinessArtifactFinding[],
+): void {
+  if (typeof record[key] !== "boolean") {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", path, `${path} must be a boolean.`);
+  }
+}
+
+function validateMetadataArtifact(value: unknown, findings: NpmPackageReadinessArtifactFinding[]): void {
+  if (!isRecord(value)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/metadata", "/metadata must be an object.");
+    return;
+  }
+
+  for (const key of ["private", "hasMain", "hasTypes", "hasBin", "hasFilesAllowlist"] as const) {
+    validateBooleanField(value, key, `/metadata/${key}`, findings);
+  }
+  if (!isStringArray(value.files)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/metadata/files", "/metadata/files must be an array of strings.");
+  }
+  if (!isStringArray(value.exportKeys)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/metadata/exportKeys", "/metadata/exportKeys must be an array of strings.");
+  }
+}
+
+function validateForbiddenFilesArtifact(value: unknown, findings: NpmPackageReadinessArtifactFinding[]): void {
+  if (!Array.isArray(value)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/pack/forbiddenFiles", "/pack/forbiddenFiles must be an array.");
+    return;
+  }
+
+  value.forEach((entry, index) => {
+    const path = `/pack/forbiddenFiles/${index}`;
+    if (!isRecord(entry)) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", path, `${path} must be an object.`);
+      return;
+    }
+    if (typeof entry.path !== "string" || entry.path.length === 0) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", `${path}/path`, `${path}/path must be a non-empty string.`);
+    }
+    if (typeof entry.reasonCode !== "string" || !FORBIDDEN_FILE_REASON_CODES.has(entry.reasonCode as NpmPackageForbiddenFileReasonCode)) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", `${path}/reasonCode`, `${path}/reasonCode must be a known forbidden file reason.`);
+    }
+  });
+}
+
+function validatePackArtifact(value: unknown, findings: NpmPackageReadinessArtifactFinding[]): void {
+  if (!isRecord(value)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/pack", "/pack must be an object.");
+    return;
+  }
+
+  if (value.evidence !== "provided" && value.evidence !== "not-run") {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/pack/evidence", "/pack/evidence must be provided or not-run.");
+  }
+  if (!isNonNegativeFiniteNumber(value.fileCount)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/pack/fileCount", "/pack/fileCount must be a non-negative number.");
+  }
+  if (!isNonNegativeFiniteNumber(value.totalSize)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/pack/totalSize", "/pack/totalSize must be a non-negative number.");
+  }
+  validateForbiddenFilesArtifact(value.forbiddenFiles, findings);
+}
+
+function validateFindingArtifacts(
+  value: unknown,
+  path: "/blockers" | "/warnings",
+  expectedSeverity: "blocker" | "warning",
+  allowedCodes: Set<NpmPackageReadinessBlockerCode> | Set<NpmPackageReadinessWarningCode>,
+  findings: NpmPackageReadinessArtifactFinding[],
+): void {
+  if (!Array.isArray(value)) {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", path, `${path} must be an array.`);
+    return;
+  }
+
+  value.forEach((entry, index) => {
+    const entryPath = `${path}/${index}`;
+    if (!isRecord(entry)) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", entryPath, `${entryPath} must be an object.`);
+      return;
+    }
+    if (typeof entry.code !== "string" || !allowedCodes.has(entry.code as never)) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", `${entryPath}/code`, `${entryPath}/code must be a known ${expectedSeverity} code.`);
+    }
+    if (entry.severity !== expectedSeverity) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", `${entryPath}/severity`, `${entryPath}/severity must be ${expectedSeverity}.`);
+    }
+    if (typeof entry.message !== "string" || entry.message.length === 0) {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", `${entryPath}/message`, `${entryPath}/message must be a non-empty string.`);
+    }
+    if (entry.path !== undefined && typeof entry.path !== "string") {
+      addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", `${entryPath}/path`, `${entryPath}/path must be a string when present.`);
+    }
+  });
+}
+
+export function validateNpmPackageReadinessArtifact(value: unknown): NpmPackageReadinessArtifactValidationResult {
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      findings: [
+        {
+          code: "NPM_PACKAGE_READINESS_ARTIFACT_NOT_OBJECT",
+          path: "/",
+          message: "Package readiness artifact must be a JSON object.",
+        },
+      ],
+    };
+  }
+
+  const findings: NpmPackageReadinessArtifactFinding[] = [];
+  if (value.schemaVersion !== NPM_PACKAGE_READINESS_SCHEMA_VERSION) {
+    addArtifactFinding(
+      findings,
+      "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_SCHEMA_VERSION",
+      "/schemaVersion",
+      `Package readiness artifact schemaVersion must be ${NPM_PACKAGE_READINESS_SCHEMA_VERSION}.`,
+    );
+  }
+  validateStringOrNullField(value, "packageName", "/packageName", findings);
+  validateStringOrNullField(value, "version", "/version", findings);
+  if (value.packageJsonPath !== undefined && typeof value.packageJsonPath !== "string") {
+    addArtifactFinding(findings, "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_FIELD", "/packageJsonPath", "/packageJsonPath must be a string when present.");
+  }
+  validateBooleanField(value, "candidate", "/candidate", findings);
+  validateMetadataArtifact(value.metadata, findings);
+  validatePackArtifact(value.pack, findings);
+  validateFindingArtifacts(value.blockers, "/blockers", "blocker", READINESS_BLOCKER_CODES, findings);
+  validateFindingArtifacts(value.warnings, "/warnings", "warning", READINESS_WARNING_CODES, findings);
+  if (value.policyEffect !== "none") {
+    addArtifactFinding(
+      findings,
+      "NPM_PACKAGE_READINESS_ARTIFACT_INVALID_POLICY_EFFECT",
+      "/policyEffect",
+      "/policyEffect must be none.",
+    );
+  }
+
+  if (findings.length > 0) {
+    return { ok: false, findings };
+  }
+
+  return {
+    ok: true,
+    artifact: value as unknown as NpmPackageReadinessReport,
+    findings: [],
+  };
 }
 
 function hasRecordOrStringExport(value: unknown): boolean {

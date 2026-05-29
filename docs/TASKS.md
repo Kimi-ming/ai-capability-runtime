@@ -2065,7 +2065,7 @@
     - `git diff --check`
   - 完成记录：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充 `opencap release package report --output <file>`。文档说明该命令可保存 `opencap.npm_package_readiness.v1` JSON artifact，并要求 release evidence 记录 artifact path、schema、package、version、blockers、warnings、pack evidence、forbidden files 和 `policyEffect: none`。文档同时明确该 artifact 只证明本地 package metadata/tarball 摘要审查，不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；输出路径需避开 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径，命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
 
-- [ ] T348 P2：新增 npm package readiness artifact validation helper。
+- [x] T348 P2：新增 npm package readiness artifact validation helper。
   - 验收标准：
     - `@opencap/spec` 导出可验证保存后的 `opencap.npm_package_readiness.v1` JSON artifact 的 helper 和类型。
     - helper 校验 `schemaVersion`、package name/version、candidate/private metadata、pack evidence、blockers、warnings、forbidden files 和 `policyEffect: "none"` 基础结构。
@@ -2075,6 +2075,7 @@
     - `pnpm --filter @opencap/spec test -- npm-package-readiness-artifact.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增并导出 `validateNpmPackageReadinessArtifact()`、`NpmPackageReadinessArtifactFinding`、finding code 和 validation result 类型，用于验证保存后的 `opencap.npm_package_readiness.v1` JSON artifact。Helper 校验 schemaVersion、package name/version、candidate、metadata、pack evidence、forbidden files、blockers、warnings 和 `policyEffect: "none"` 基础结构；invalid artifact 返回结构化 findings，不运行 npm、不触网、不读取 npm token，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。新增 `packages/spec/src/npm-package-readiness-artifact.test.ts` 覆盖有效 artifact、schemaVersion/policyEffect drift、缺失核心字段和非对象输入；spec 包测试数从 92 增至 96。
 
 - [ ] T349 P2：让 release evidence 支持读取 package readiness artifact。
   - 验收标准：
