@@ -1642,6 +1642,40 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已把 `opencap release evidence --registry registry --records packages/runtime/test/fixtures/conformance --json` 纳入 release evidence 执行顺序，YAML 模板新增 `release_evidence_bundle` 状态字段，并说明带 `--package` / `--pack-json` 时可把 package readiness 汇入 bundle。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 已新增 Release Evidence Bundle 段落和 blocked/pending 表项，明确 `opencap.release_evidence.v1` 只汇总本地 Registry quality、conformance、可选 package readiness 和命令状态，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 或真实 npm 发布。`docs/TESTING.md` 已新增 release evidence bundle 命令和对应 CLI 测试入口。
 
+- [ ] T313 P1：修正 release evidence 时间戳默认值和可复现输入。
+  - 验收标准：
+    - CLI `opencap release evidence` 默认 `date` 和 bundle `generatedAt` 使用当前 UTC 时间，不再输出 Unix epoch / `1970-01-01`。
+    - CLI 新增 `--generated-at <iso>`，用于测试和 release 复现；未显式传 `--date` 时，`date` 从 `generatedAt` 的 UTC 日期派生。
+    - 非法 `--generated-at` 或 `--date` 作为用户错误 exit `1`，stderr 不打印 stack。
+    - 人类输出显示 `date` 和 `generatedAt`，方便 release reviewer 核对。
+    - 命令仍只汇总本地 evidence，不写 state dir、不触网、不调用 provider、不发布 package。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T314 P1：支持 release evidence bundle 安全写入文件。
+  - 验收标准：
+    - CLI `opencap release evidence --output <path>` 可把 `opencap.release_evidence.v1` JSON 写入发布者指定文件；`--json` 仍可同时打印到 stdout。
+    - 写入路径默认基于 `INIT_CWD`/当前工作目录解析，自动创建父目录，但拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 路径和目录路径。
+    - 输出文件只包含脱敏 bundle，不包含 token、provider raw response、tool input/output 原文、`opencap.local/` 内容、数据库日志或私有路径。
+    - 非法 `--output` 作为用户错误 exit `1`，stderr 不打印 stack；失败时不留下半截 release evidence 文件。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T315 P2：把 release evidence artifact 输出纳入发布文档。
+  - 验收标准：
+    - `docs/releases/release-checklist.md` 说明 `--generated-at`、`--output` 和 stdout/文件 artifact 的使用顺序。
+    - V1 alpha evidence 样例说明当前样例未生成持久 artifact；后续 release 应保存 bundle JSON 并把路径/commit/date 写入 notes 或 handoff。
+    - `docs/TESTING.md` 记录 `--generated-at` 和 `--output` 的测试入口。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
