@@ -229,6 +229,17 @@ const LEDGER_RECORD_KINDS = new Set<LedgerRecordKind>(["capability", "policy", "
 const CAPABILITY_SCAFFOLD_METHODS = new Set<CapabilityScaffoldHttpMethod>(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const CAPABILITY_SCAFFOLD_AUTH_MODES = new Set(["none", "api-key-bearer"]);
 const REGISTRY_SEARCH_INCLUDE_LIFECYCLES = new Set<CapabilityManifestLifecycleStatus>(["yanked", "revoked"]);
+const CAPABILITY_ADVISORY_SEVERITIES = new Set<CapabilityAdvisory["severity"]>(["low", "medium", "high", "critical"]);
+const CAPABILITY_ADVISORY_STATUSES = new Set<CapabilityAdvisory["status"]>([
+  "reported",
+  "triaged",
+  "investigating",
+  "fixed",
+  "mitigated",
+  "revoked",
+  "not_affected",
+  "published",
+]);
 
 interface InitCommandOptions {
   category: string;
@@ -246,6 +257,14 @@ interface InitCommandOptions {
 interface RegistrySearchCommandOptions {
   registry?: string;
   includeLifecycle?: string;
+  json?: boolean;
+}
+
+interface RegistryAdvisoryListCommandOptions {
+  registry: string;
+  capability?: string;
+  severity?: string;
+  status?: string;
   json?: boolean;
 }
 
@@ -344,10 +363,18 @@ interface RegistryAdvisoryListItem {
   filePath: string;
 }
 
+interface RegistryAdvisoryListFilters {
+  capability?: string;
+  severity?: CapabilityAdvisory["severity"];
+  status?: CapabilityAdvisory["status"];
+}
+
 interface RegistryAdvisoryListReport {
   schemaVersion: "opencap.registry_advisory_list.v1";
   registryPath: string;
   advisoryCount: number;
+  filteredAdvisoryCount: number;
+  filters: RegistryAdvisoryListFilters;
   advisories: RegistryAdvisoryListItem[];
   invalidAdvisoryCount: number;
   invalidAdvisories: AdvisoryCheckInvalidAdvisory[];
@@ -540,6 +567,42 @@ function parseRegistrySearchIncludeLifecycle(value: string | undefined): Capabil
   }
 
   return [...parsed];
+}
+
+function parseRegistryAdvisorySeverity(value: string | undefined): CapabilityAdvisory["severity"] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!CAPABILITY_ADVISORY_SEVERITIES.has(value as CapabilityAdvisory["severity"])) {
+    throw new CliUserInputError(`Invalid --severity value: ${value}`);
+  }
+
+  return value as CapabilityAdvisory["severity"];
+}
+
+function parseRegistryAdvisoryStatus(value: string | undefined): CapabilityAdvisory["status"] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!CAPABILITY_ADVISORY_STATUSES.has(value as CapabilityAdvisory["status"])) {
+    throw new CliUserInputError(`Invalid --status value: ${value}`);
+  }
+
+  return value as CapabilityAdvisory["status"];
+}
+
+function resolveRegistryAdvisoryListFilters(options: {
+  capability?: string;
+  severity?: string;
+  status?: string;
+}): RegistryAdvisoryListFilters {
+  return {
+    ...(options.capability === undefined ? {} : { capability: options.capability }),
+    ...(options.severity === undefined ? {} : { severity: parseRegistryAdvisorySeverity(options.severity) }),
+    ...(options.status === undefined ? {} : { status: parseRegistryAdvisoryStatus(options.status) }),
+  };
 }
 
 function registrySearchCategory(result: RegistryCapabilitySearchResult): string {
@@ -849,15 +912,30 @@ function registryAdvisoryDetail(
 
 function buildRegistryAdvisoryListReport(
   result: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>,
+  filters: RegistryAdvisoryListFilters = {},
 ): RegistryAdvisoryListReport {
-  const advisories = result.valid
+  const allAdvisories = result.valid
     .map(registryAdvisoryListItem)
     .sort((left, right) => left.id.localeCompare(right.id));
+  const advisories = allAdvisories.filter((advisory) => {
+    if (filters.capability !== undefined && advisory.capability !== filters.capability) {
+      return false;
+    }
+    if (filters.severity !== undefined && advisory.severity !== filters.severity) {
+      return false;
+    }
+    if (filters.status !== undefined && advisory.status !== filters.status) {
+      return false;
+    }
+    return true;
+  });
 
   return {
     schemaVersion: "opencap.registry_advisory_list.v1",
     registryPath: result.targetPath,
-    advisoryCount: advisories.length,
+    advisoryCount: allAdvisories.length,
+    filteredAdvisoryCount: advisories.length,
+    filters,
     advisories,
     invalidAdvisoryCount: result.invalid.length,
     invalidAdvisories: result.invalid.map(registryAdvisoryListInvalidAdvisory),
@@ -2250,12 +2328,16 @@ registryAdvisoryCommand
 registryAdvisoryCommand
   .command("list")
   .requiredOption("--registry <path>", "Registry root directory")
+  .option("--capability <id>", "Filter advisories by capability id")
+  .option("--severity <value>", "Filter advisories by severity: low,medium,high,critical")
+  .option("--status <value>", "Filter advisories by advisory status")
   .option("--json", "Output JSON")
   .description("List local Registry Capability advisories.")
-  .action((options: { registry: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: RegistryAdvisoryListCommandOptions) => runCliAction(async () => {
     const registryPath = resolveCliPath(options.registry);
+    const filters = resolveRegistryAdvisoryListFilters(options);
     const result = await validateCapabilityAdvisoryPath(registryPath);
-    const report = buildRegistryAdvisoryListReport(result);
+    const report = buildRegistryAdvisoryListReport(result, filters);
 
     if (options.json) {
       console.log(JSON.stringify(report, null, 2));

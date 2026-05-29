@@ -1870,7 +1870,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap registry advisory show <advisory-id> --registry <path> [--json]`，精确读取本地 Registry advisory metadata 并输出单条 `opencap.registry_advisory_detail.v1` report。JSON 输出包含 advisory id、capability、affectedVersions、type、severity、status、summary、publishedAt、modifiedAt、registryAction、runtimeDefault、fixedVersion、references、filePath 和 `policyEffect: none`；人类输出包含同等审查摘要。not found、重复 id 和 invalid advisory 文件返回用户错误 exit `1` 且不打印 stack。命令不安装、不写 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-advisory-show-command.test.ts` 新增 3 个测试，CLI 包测试数从 64 增至 67。
 
-- [ ] T332 P2：为 `opencap registry advisory list` 增加本地筛选参数。
+- [x] T332 P2：为 `opencap registry advisory list` 增加本地筛选参数。
   - 验收标准：
     - CLI `opencap registry advisory list --registry <path>` 支持 `--capability <id>`、`--severity <low|medium|high|critical>` 和 `--status <status>` 本地筛选。
     - JSON 输出仍使用 `opencap.registry_advisory_list.v1`，包含原始 valid/invalid counts、filter metadata、filtered advisory count 和 `policyEffect: none`。
@@ -1880,6 +1880,7 @@
     - `pnpm --filter @opencap/cli test -- registry-advisory-list-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap registry advisory list --registry <path>` 新增 `--capability <id>`、`--severity <low|medium|high|critical>` 和 `--status <status>` 本地筛选。JSON 输出仍使用 `opencap.registry_advisory_list.v1`，保留原始 `advisoryCount` / `invalidAdvisoryCount`，新增 `filteredAdvisoryCount` 和 `filters` metadata；筛选不隐藏 invalid advisory summary，也不改变 invalid advisory exit `1` 语义。非法 severity/status 返回用户错误 exit `1` 且不打印 stack。命令不安装、不写 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-advisory-list-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 67 增至 69。
 
 - [ ] T333 P2：把 advisory show/list filters 纳入 Registry 审查文档。
   - 验收标准：
