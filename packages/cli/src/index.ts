@@ -354,6 +354,19 @@ interface RegistryAdvisoryListReport {
   policyEffect: "none";
 }
 
+interface RegistryAdvisoryDetail extends RegistryAdvisoryListItem {
+  affectedVersions: string[];
+  publishedAt: string | null;
+  references: string[];
+}
+
+interface RegistryAdvisoryDetailReport {
+  schemaVersion: "opencap.registry_advisory_detail.v1";
+  registryPath: string;
+  advisory: RegistryAdvisoryDetail;
+  policyEffect: "none";
+}
+
 function parseLedgerKind(value: string | undefined): LedgerRecordKind | undefined {
   if (value === undefined) {
     return undefined;
@@ -821,6 +834,19 @@ function registryAdvisoryListInvalidAdvisory(
   };
 }
 
+function registryAdvisoryDetail(
+  valid: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>["valid"][number],
+): RegistryAdvisoryDetail {
+  const item = registryAdvisoryListItem(valid);
+  const advisory = valid.advisory;
+  return {
+    ...item,
+    affectedVersions: [...advisory.affected_versions],
+    publishedAt: advisory.published_at,
+    references: [...(advisory.references ?? [])],
+  };
+}
+
 function buildRegistryAdvisoryListReport(
   result: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>,
 ): RegistryAdvisoryListReport {
@@ -865,6 +891,56 @@ function printRegistryAdvisoryListReport(report: RegistryAdvisoryListReport): vo
   for (const invalid of report.invalidAdvisories) {
     console.error(`- ${invalid.filePath}: ${invalid.issues.join("; ")}`);
   }
+}
+
+function selectRegistryAdvisory(
+  id: string,
+  result: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>,
+): Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>["valid"][number] {
+  if (result.invalid.length > 0) {
+    throw new CliUserInputError(`Invalid capability advisories: ${result.invalid.length}`);
+  }
+
+  const matches = result.valid.filter((valid) => valid.advisory.id === id);
+  if (matches.length === 0) {
+    throw new CliUserInputError(`Capability advisory not found in registry: ${id}`);
+  }
+  if (matches.length > 1) {
+    throw new CliUserInputError(`Multiple registry advisories found for id: ${id}`);
+  }
+
+  return matches[0];
+}
+
+function buildRegistryAdvisoryDetailReport(
+  registryPath: string,
+  valid: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>["valid"][number],
+): RegistryAdvisoryDetailReport {
+  return {
+    schemaVersion: "opencap.registry_advisory_detail.v1",
+    registryPath,
+    advisory: registryAdvisoryDetail(valid),
+    policyEffect: "none",
+  };
+}
+
+function printRegistryAdvisoryDetailReport(report: RegistryAdvisoryDetailReport): void {
+  const advisory = report.advisory;
+  console.log("OpenCap registry advisory");
+  console.log(`id: ${advisory.id}`);
+  console.log(`capability: ${advisory.capability}`);
+  console.log(`affected versions: ${advisory.affectedVersions.join(",")}`);
+  console.log(`type: ${advisory.type}`);
+  console.log(`severity: ${advisory.severity}`);
+  console.log(`status: ${advisory.status}`);
+  console.log(`summary: ${advisory.summary}`);
+  console.log(`published_at: ${advisory.publishedAt ?? "null"}`);
+  console.log(`modified_at: ${advisory.modifiedAt}`);
+  console.log(`registry action: ${advisory.registryAction}`);
+  console.log(`runtime default: ${advisory.runtimeDefault}`);
+  console.log(`fixed version: ${advisory.fixedVersion ?? "null"}`);
+  console.log(`references: ${advisory.references.length > 0 ? advisory.references.join(",") : "none"}`);
+  console.log(`file: ${advisory.filePath}`);
 }
 
 function parsePolicyDecision(value: string | undefined): PolicyDecision | undefined {
@@ -2150,6 +2226,26 @@ advisoryCommand
       process.exitCode = exitCode;
     }
   }, "Failed to check Capability advisories"));
+
+registryAdvisoryCommand
+  .command("show")
+  .argument("<advisory-id>", "Capability advisory id to inspect")
+  .requiredOption("--registry <path>", "Registry root directory")
+  .option("--json", "Output JSON")
+  .description("Show a local Registry Capability advisory detail.")
+  .action((id: string, options: { registry: string; json?: boolean }) => runCliAction(async () => {
+    const registryPath = resolveCliPath(options.registry);
+    const result = await validateCapabilityAdvisoryPath(registryPath);
+    const selected = selectRegistryAdvisory(id, result);
+    const report = buildRegistryAdvisoryDetailReport(result.targetPath, selected);
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
+
+    printRegistryAdvisoryDetailReport(report);
+  }, "Failed to show Registry advisory"));
 
 registryAdvisoryCommand
   .command("list")
