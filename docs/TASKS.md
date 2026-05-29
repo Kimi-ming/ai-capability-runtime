@@ -1715,7 +1715,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已在保存 release evidence JSON artifact 后增加 `opencap release artifact validate --file <artifact> --json` 步骤，并要求 release notes、PR 描述或 handoff 记录 validation report 的 `valid`、`findings` 和 `policyEffect: none`；validation invalid 时不得继续 release/tag/publish。V1 alpha evidence 样例已说明当前样例没有持久 artifact、未运行 artifact validation，后续 release 必须保存 JSON artifact 并记录 validation report。`docs/TESTING.md` 已记录带临时 `--output` 和 `release artifact validate` 的验证命令入口。
 
-- [ ] T319 P1：增强 release artifact decision consistency 校验。
+- [x] T319 P1：增强 release artifact decision consistency 校验。
   - 验收标准：
     - `validateReleaseEvidenceArtifact()` 能发现 artifact 中 `decision` 与 blockers、failed commands、failed components 不一致的情况。
     - 如果 `blockers.length > 0`、任一 command 为 `fail`、任一 component status 为 `fail`，但 `decision` 不是 `block-release-tag`，validation report 必须返回 invalid finding。
@@ -1725,6 +1725,7 @@
     - `pnpm --filter @opencap/spec test -- release-evidence-artifact.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`validateReleaseEvidenceArtifact()` 现在会汇总 artifact 中合法的 command/component status，并在 `decision` 与 blockers、failed commands、failed components 或 `not-run` release evidence 不一致时返回 invalid finding。新增 `RELEASE_ARTIFACT_DECISION_INCONSISTENT` 和 `RELEASE_ARTIFACT_DECISION_INCOMPLETE` finding code，finding 只描述结构化路径与原因，不复制 secret、provider raw response、input/output 原文、`opencap.local/` 内容、数据库日志或私有路径。`packages/spec/src/release-evidence-artifact.test.ts` 从 3 个测试增至 5 个。
 
 - [ ] T320 P1：支持 release artifact validation report 安全写入文件。
   - 验收标准：

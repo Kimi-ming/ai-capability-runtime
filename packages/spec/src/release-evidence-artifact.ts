@@ -13,6 +13,8 @@ export type ReleaseEvidenceArtifactFindingCode =
   | "RELEASE_ARTIFACT_COMMAND_STATUS_INVALID"
   | "RELEASE_ARTIFACT_COMPONENT_STATUS_INVALID"
   | "RELEASE_ARTIFACT_POLICY_EFFECT_INVALID"
+  | "RELEASE_ARTIFACT_DECISION_INCONSISTENT"
+  | "RELEASE_ARTIFACT_DECISION_INCOMPLETE"
   | "RELEASE_ARTIFACT_SENSITIVE_TEXT";
 
 export interface ReleaseEvidenceArtifactFinding {
@@ -88,47 +90,62 @@ function validateGeneratedAt(value: string | undefined, findings: ReleaseEvidenc
   }
 }
 
-function validateCommands(value: unknown, findings: ReleaseEvidenceArtifactFinding[]): void {
+function validateCommands(value: unknown, findings: ReleaseEvidenceArtifactFinding[]): string[] {
   if (!isRecord(value)) {
     addFinding(findings, "RELEASE_ARTIFACT_FIELD_INVALID", "/commands", "Release evidence artifact commands must be an object.");
-    return;
+    return [];
   }
 
+  const statuses: string[] = [];
   for (const [command, status] of Object.entries(value)) {
     if (typeof status !== "string" || !RELEASE_EVIDENCE_COMMAND_STATUSES.has(status)) {
       addFinding(findings, "RELEASE_ARTIFACT_COMMAND_STATUS_INVALID", `/commands/${command}`, "Release evidence command status must be pass, fail, or not-run.");
+      continue;
     }
+    statuses.push(status);
   }
+
+  return statuses;
 }
 
-function validateComponentStatus(value: unknown, path: string, findings: ReleaseEvidenceArtifactFinding[]): void {
+function validateComponentStatus(value: unknown, path: string, findings: ReleaseEvidenceArtifactFinding[]): string | undefined {
   if (!isRecord(value)) {
     addFinding(findings, "RELEASE_ARTIFACT_FIELD_INVALID", path, "Release evidence component must be an object.");
-    return;
+    return undefined;
   }
 
   if (typeof value.status !== "string" || !RELEASE_EVIDENCE_COMPONENT_STATUSES.has(value.status)) {
     addFinding(findings, "RELEASE_ARTIFACT_COMPONENT_STATUS_INVALID", `${path}/status`, "Release evidence component status must be pass, fail, or not-run.");
+    return undefined;
   }
+
+  return value.status;
 }
 
-function validateComponents(value: unknown, findings: ReleaseEvidenceArtifactFinding[]): void {
+function validateComponents(value: unknown, findings: ReleaseEvidenceArtifactFinding[]): string[] {
   if (!isRecord(value)) {
     addFinding(findings, "RELEASE_ARTIFACT_FIELD_INVALID", "/components", "Release evidence artifact components must be an object.");
-    return;
+    return [];
   }
 
-  validateComponentStatus(value.registry, "/components/registry", findings);
-  validateComponentStatus(value.conformance, "/components/conformance", findings);
+  const statuses = [
+    validateComponentStatus(value.registry, "/components/registry", findings),
+    validateComponentStatus(value.conformance, "/components/conformance", findings),
+  ].filter((status): status is string => status !== undefined);
 
   if (!Array.isArray(value.packages)) {
     addFinding(findings, "RELEASE_ARTIFACT_FIELD_INVALID", "/components/packages", "Release evidence artifact packages component must be an array.");
-    return;
+    return statuses;
   }
 
   value.packages.forEach((packageComponent, index) => {
-    validateComponentStatus(packageComponent, `/components/packages/${index}`, findings);
+    const status = validateComponentStatus(packageComponent, `/components/packages/${index}`, findings);
+    if (status !== undefined) {
+      statuses.push(status);
+    }
   });
+
+  return statuses;
 }
 
 function validateBlockers(value: unknown, findings: ReleaseEvidenceArtifactFinding[]): number {
@@ -166,6 +183,38 @@ function hasSensitiveArtifactText(artifact: unknown): boolean {
   ].some((pattern) => pattern.test(text));
 }
 
+function validateDecisionConsistency(
+  decision: ReleaseEvidenceDecision | null,
+  blockerCount: number,
+  commandStatuses: string[],
+  componentStatuses: string[],
+  findings: ReleaseEvidenceArtifactFinding[],
+): void {
+  if (decision === null) {
+    return;
+  }
+
+  const hasFailedEvidence = commandStatuses.includes("fail") || componentStatuses.includes("fail");
+  if (decision !== "block-release-tag" && (blockerCount > 0 || hasFailedEvidence)) {
+    addFinding(
+      findings,
+      "RELEASE_ARTIFACT_DECISION_INCONSISTENT",
+      "/decision",
+      "Release evidence artifact decision must block release tagging when blockers or failed evidence exist.",
+    );
+  }
+
+  const hasIncompleteEvidence = commandStatuses.includes("not-run") || componentStatuses.includes("not-run");
+  if (decision === "release" && hasIncompleteEvidence) {
+    addFinding(
+      findings,
+      "RELEASE_ARTIFACT_DECISION_INCOMPLETE",
+      "/decision",
+      "Release evidence artifact decision cannot be release while required local evidence is not-run.",
+    );
+  }
+}
+
 export function validateReleaseEvidenceArtifact(artifact: unknown): ReleaseEvidenceArtifactValidationReport {
   const findings: ReleaseEvidenceArtifactFinding[] = [];
 
@@ -201,10 +250,11 @@ export function validateReleaseEvidenceArtifact(artifact: unknown): ReleaseEvide
     addFinding(findings, "RELEASE_ARTIFACT_DECISION_INVALID", "/decision", "Release evidence artifact decision must be candidate, block-release-tag, or release.");
   }
 
-  validateCommands(artifact.commands, findings);
-  validateComponents(artifact.components, findings);
+  const commandStatuses = validateCommands(artifact.commands, findings);
+  const componentStatuses = validateComponents(artifact.components, findings);
   const blockerCount = validateBlockers(artifact.blockers, findings);
   validateKnownGaps(artifact.knownGaps, findings);
+  validateDecisionConsistency(decision, blockerCount, commandStatuses, componentStatuses, findings);
 
   if (artifact.policyEffect !== "none") {
     addFinding(findings, "RELEASE_ARTIFACT_POLICY_EFFECT_INVALID", "/policyEffect", "Release evidence artifact policyEffect must be none.");

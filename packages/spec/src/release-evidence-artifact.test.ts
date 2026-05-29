@@ -83,6 +83,57 @@ describe("release evidence artifact validation", () => {
     expect(report.policyEffect).toBe("none");
   });
 
+  it("reports inconsistent release decisions when blockers or failed evidence exist", () => {
+    const base = validArtifact();
+    const report = validateReleaseEvidenceArtifact({
+      ...base,
+      decision: "release",
+      commands: {
+        ...base.commands,
+        pnpm_validate: "fail",
+      },
+      components: {
+        ...base.components,
+        registry: {
+          ...base.components.registry,
+          status: "fail",
+        },
+      },
+      blockers: [
+        {
+          code: "COMMAND_FAILED",
+          source: "command",
+          message: "required release command failed",
+        },
+      ],
+    });
+
+    expect(report.valid).toBe(false);
+    expect(report.findings.map((finding) => finding.code)).toContain("RELEASE_ARTIFACT_DECISION_INCONSISTENT");
+  });
+
+  it("reports release decisions when required local evidence is not run", () => {
+    const base = validArtifact();
+    const report = validateReleaseEvidenceArtifact({
+      ...base,
+      decision: "release",
+      commands: {
+        ...base.commands,
+        package_readiness_report: "not-run",
+      },
+      components: {
+        ...base.components,
+        conformance: {
+          ...base.components.conformance,
+          status: "not-run",
+        },
+      },
+    });
+
+    expect(report.valid).toBe(false);
+    expect(report.findings.map((finding) => finding.code)).toContain("RELEASE_ARTIFACT_DECISION_INCOMPLETE");
+  });
+
   it("rejects non release evidence artifacts", () => {
     const report = validateReleaseEvidenceArtifact({
       schemaVersion: "opencap.other.v1",
