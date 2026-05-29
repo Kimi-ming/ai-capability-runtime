@@ -101,6 +101,22 @@ V1 只支持 `type: http` 的 Capability。`mcp` 和 `local` 类型留到后续 
 
 当前仓库已经可以跑通 CLI 到 Runtime 的最小本地闭环：validate、install、list、card、doctor、invoke dry-run 和 logs。示例命令使用临时 state dir，不会污染仓库根目录或用户真实项目下的 `opencap.local/`。
 
+如果要创建新的 HTTP Capability 初稿，可以先用 `opencap init` 生成本地 scaffold；它只写 `manifest.yml`、`README.md` 和 `tests/basic.yml`，不安装、不读取 secret、不写 state dir、不触网：
+
+```bash
+SCAFFOLD_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/opencap-readme-scaffold.XXXXXX")"
+
+pnpm --filter @opencap/cli dev -- init demo.get_status \
+  --category developer-tools \
+  --output "$SCAFFOLD_ROOT/demo.get_status" \
+  --title "Demo Get Status" \
+  --description "Fetch a public demo endpoint with a name parameter." \
+  --url "https://httpbin.org/anything?name={{name}}"
+
+pnpm --filter @opencap/cli dev -- validate "$SCAFFOLD_ROOT/demo.get_status"
+rm -rf "$SCAFFOLD_ROOT"
+```
+
 ```bash
 pnpm install
 pnpm validate

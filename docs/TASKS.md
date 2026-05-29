@@ -1775,11 +1775,45 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap init <capability-id> --category <name> --output <dir>` 已接入 T322 `buildCapabilityScaffold()`，生成本地 V1 HTTP Capability package 的 `manifest.yml`、`README.md` 和 `tests/basic.yml`。命令支持 title、description、method、url、no-auth/api-key-bearer auth、provider、env 和 scope 参数；相对 output 基于 `INIT_CWD`/当前工作目录解析，未传 `--output` 时默认写入 `registry/<category>/<id>`。写入前会拒绝覆盖已有 scaffold 文件，并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录穿越路径；成功输出 `opencap validate <dir>` 和 `pnpm validate` 下一步命令，不安装 Capability、不读取 secret、不写 state dir、不触网。`packages/cli/src/init-command.test.ts` 新增 4 个测试，覆盖成功 scaffold、validate 通过、不写 `opencap.local`、覆盖保护、危险 output 拒绝和非法 id 用户错误；CLI 包测试数从 45 增至 49。
 
-- [ ] T324 P2：把 `opencap init` 纳入作者教程和测试文档。
+- [x] T324 P2：把 `opencap init` 纳入作者教程和测试文档。
   - 验收标准：
     - 作者教程说明 `opencap init` 的输入、生成文件、后续 validate/authoring loop 和安全边界。
     - README 或中文文档中心补充 `opencap init` 入口，避免继续把 init 写成占位能力。
     - `docs/TESTING.md` 记录 `init-command.test.ts` 和 scaffold helper 测试入口、测试计数和不写 state dir 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：`docs/教程/write-a-capability.md` 已把 `opencap init` 作为推荐作者入口，说明必填输入、可选 auth 参数、生成的 `manifest.yml` / `README.md` / `tests/basic.yml`、后续 `opencap validate <dir>` 和 `pnpm validate`，并记录不安装、不读 secret、不写 `opencap.local/`、不触网、拒绝覆盖和危险路径的安全边界。`README.md` 增加临时目录 scaffold 示例，`docs/README.md` 在 Capability/Registry 贡献入口提示先用 `opencap init` 生成 V1 HTTP 初稿。`docs/TESTING.md` 已记录 `capability-scaffold.test.ts`、`init-command.test.ts`、CLI 49 个测试和不写 state dir 边界。
+
+- [ ] T325 P1：新增 `opencap registry search` 本地发现命令。
+  - 验收标准：
+    - CLI `opencap registry search [query] --registry <path> [--json]` 复用 `@opencap/spec` 的 `searchRegistryCapabilities()`，按 id、name、description 搜索本地 registry。
+    - 默认隐藏 yanked/revoked Capability，并在输出中报告被 lifecycle 过滤的数量；支持显式 `--include-lifecycle yanked,revoked` 纳入不可默认发现的条目。
+    - JSON 输出使用稳定 schema `opencap.registry_search.v1`，包含 query、registry path、results、excludedByLifecycle、invalid count 和 `policyEffect: none`；人类输出至少包含 id、version、lifecycle、category 和 description。
+    - 命令不安装 Capability、不读取/写入 state dir、不读取 secret、不调用 provider、不触网；非法 include lifecycle 和 invalid registry manifest 作为用户错误 exit `1` 且不打印 stack。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-search-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T326 P1：新增 `opencap registry show` 本地详情命令。
+  - 验收标准：
+    - CLI `opencap registry show <capability-id> --registry <path> [--json]` 读取本地 registry 中的精确 Capability，并输出可审查详情。
+    - 输出包含 id、name、description、version、lifecycle、category、maintainer、license、trust level、auth descriptor 摘要、permissions、execution method/origin 和 manifest path；不得输出 secret 值、Authorization header、provider raw response、registry test input/output 原文或用户本地状态。
+    - 默认遵循 registry search lifecycle 过滤，不展示 yanked/revoked；支持显式 `--include-lifecycle yanked,revoked` 审查不可默认发现条目。
+    - 未找到、多重匹配、非法 include lifecycle 和 invalid registry manifest 作为用户错误 exit `1` 且不打印 stack；命令不安装、不写 state dir、不触网。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-show-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T327 P2：把 registry search/show 纳入发现与贡献文档。
+  - 验收标准：
+    - README 或中文文档中心补充 `opencap registry search` 和 `opencap registry show` 的本地发现入口。
+    - Capability/Registry 贡献教程说明 search/show 只用于本地发现和审查，不安装、不授权、不改变 policy，也不把未安装能力暴露到 MCP Host。
+    - `docs/TESTING.md` 记录 `registry-search-command.test.ts`、`registry-show-command.test.ts`、测试计数和不写 state dir 边界。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`

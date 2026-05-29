@@ -1,18 +1,23 @@
 # 编写一个 Capability
 
-本文是一条从空目录开始的教程。完成后，你会得到一个可以通过 `opencap validate <path>` 和 `pnpm validate` 校验的 HTTP Capability。
+本文是一条从空目录开始的教程。完成后，你会得到一个可以通过 `opencap validate <path>` 和 `pnpm validate` 校验的 HTTP Capability。推荐先用 `opencap init` 生成初始文件，再按 authoring loop 检查和调整。
 
 这个教程只覆盖 V1 支持的 `type: http`。它不覆盖 OAuth 登录、真实 API 调用、安装到本地 Runtime 或 MCP Host 调试。
 
-## 1. 创建目录
+## 1. 生成初始目录
 
-在仓库根目录下创建一个临时能力目录：
+在仓库根目录下生成一个临时 Capability package：
 
 ```bash
-mkdir -p registry/developer-tools/demo.get_status/tests
+pnpm --filter @opencap/cli dev -- init demo.get_status \
+  --category developer-tools \
+  --output registry/developer-tools/demo.get_status \
+  --title "Demo Get Status" \
+  --description "Fetch a public demo endpoint with a name parameter." \
+  --url "https://httpbin.org/anything?name={{name}}"
 ```
 
-V1 Registry 条目至少包含：
+命令会创建目标目录并写入：
 
 ```text
 registry/developer-tools/demo.get_status/
@@ -22,9 +27,40 @@ registry/developer-tools/demo.get_status/
     basic.yml
 ```
 
-## 2. 编写 manifest
+成功后，CLI 会提示下一步运行：
 
-创建 `registry/developer-tools/demo.get_status/manifest.yml`：
+```bash
+opencap validate registry/developer-tools/demo.get_status
+pnpm validate
+```
+
+`opencap init` 只生成本地文件，不安装 Capability、不读取 secret、不写 `opencap.local/`，也不触网。它会拒绝覆盖已有 `manifest.yml`、`README.md` 或 `tests/basic.yml`，并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录穿越路径。相对 `--output` 基于 `INIT_CWD` 或当前工作目录解析；未传 `--output` 时默认写入 `registry/<category>/<capability-id>`。
+
+如果要生成需要 bearer API key 的初稿，可以显式声明凭据 descriptor；不要填写真实 token：
+
+```bash
+pnpm --filter @opencap/cli dev -- init github.create_issue \
+  --category developer-tools \
+  --output registry/developer-tools/github.create_issue \
+  --title "GitHub Create Issue" \
+  --description "Create an issue in a GitHub repository." \
+  --method POST \
+  --url "https://api.github.com/repos/{{owner}}/{{repo}}/issues" \
+  --auth api-key-bearer \
+  --provider github \
+  --env GITHUB_TOKEN \
+  --scope issues:write
+```
+
+如果不使用 `opencap init`，也可以手动创建同样的目录结构：
+
+```bash
+mkdir -p registry/developer-tools/demo.get_status/tests
+```
+
+## 2. 检查或编写 manifest
+
+如果使用 `opencap init`，先打开 `registry/developer-tools/demo.get_status/manifest.yml`，确认 id、描述、权限、URL template、auth 和 metadata 都符合真实 API 行为。下面是一个等价的最小 manifest 示例：
 
 ```yaml
 id: demo.get_status

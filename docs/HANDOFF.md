@@ -110,9 +110,13 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T323：CLI `opencap init <capability-id> --category <name> --output <dir>` 已接入 T322 scaffold helper，可生成本地 V1 HTTP Capability package 的 `manifest.yml`、`README.md` 和 `tests/basic.yml`。命令支持 title、description、method、url、no-auth/api-key-bearer auth、provider、env 和 scope 参数；相对 output 基于 `INIT_CWD`/当前工作目录解析，未传 `--output` 时默认写入 `registry/<category>/<id>`。写入前会拒绝覆盖已有 scaffold 文件，并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录穿越路径；成功输出 `opencap validate <dir>` 和 `pnpm validate` 下一步命令，不安装 Capability、不读取 secret、不写 state dir、不触网。`packages/cli/src/init-command.test.ts` 新增 4 个测试，CLI 包合计从 45 个测试增至 49 个。
 
-下一项 ready：T324 P2：把 `opencap init` 纳入作者教程和测试文档。
+本轮继续完成 T324：`docs/教程/write-a-capability.md` 已把 `opencap init` 作为推荐作者入口，说明必填输入、可选 auth 参数、生成文件、后续 `opencap validate <dir>` / `pnpm validate` 和 authoring loop；同时记录命令不安装、不读 secret、不写 `opencap.local/`、不触网、拒绝覆盖和危险路径的安全边界。`README.md` 增加临时目录 scaffold 示例，`docs/README.md` 在 Capability/Registry 贡献入口提示先用 `opencap init` 生成 V1 HTTP 初稿；`docs/TESTING.md` 已记录 scaffold helper、init command 测试入口、CLI 49 个测试和不写 state dir 边界。
 
-已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前本地 ready 队列已推进到 T324；T291 真实 Host UI smoke 仍需要外部环境 evidence。
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T325-T327，把本地 Registry discovery 从 spec helper 推进到 CLI search/show 和文档闭环。规划顺序为先实现 `opencap registry search`，再实现 `opencap registry show`，最后把本地发现/审查入口写入 README、贡献教程和测试文档。该批任务只读取本地 registry，不安装 Capability、不读取 secret、不写 state dir、不触网，也不改变 Runtime policy 或 MCP tools/list。
+
+下一项 ready：T325 P1：新增 `opencap registry search` 本地发现命令。
+
+已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
 本轮已把产品定位和架构完善方向同步到正式架构文档：`docs/ARCHITECTURE.md` 明确 OpenCap 是 AI Host 和真实 API 之间的本地优先 Capability Runtime，不是 Agent、聊天入口、模型路由或 marketplace；`docs/规划/v1-architecture.md` 已补充产品分层、Runtime Kernel 边界、gate 顺序、Result Envelope 边界和 Architecture Convergence 实施顺序。
 
@@ -189,9 +193,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322 和 T323 均已完成；T324 是下一项本地 Capability authoring ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323 和 T324 均已完成；T325 是下一项本地 Registry discovery ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T324，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T325，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
