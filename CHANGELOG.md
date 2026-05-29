@@ -78,6 +78,7 @@
 - CLI 新增 `opencap release evidence`，可从本地 registry、conformance records 和可选 package readiness 输入生成脱敏 release evidence bundle。
 - CLI `opencap release evidence` 默认使用当前 UTC `generatedAt` 和派生 `date`，支持 `--generated-at <iso>` 复现 release evidence 时间戳，并在人类输出中显示时间字段。
 - CLI `opencap release evidence --output <path>` 可安全写入脱敏 release evidence JSON artifact，并拒绝 `.env`、token/secret/password、`opencap.local/`、DB/log 和目录输出路径。
+- `@opencap/spec` 新增 release evidence artifact validation helper，可校验保存后的 `opencap.release_evidence.v1` JSON 结构、`policyEffect: none` 和 secret/path/log 文本边界。
 - 新增 V1 alpha/local runtime release evidence bundle，记录本地验证命令、测试计数、known gaps、blocked external evidence 和 release decision，明确不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
 - Release checklist、V1 alpha evidence 样例和测试策略已纳入 `opencap release evidence --generated-at ... --output ...` 执行入口，明确该 bundle 不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 或真实 npm 发布。
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。

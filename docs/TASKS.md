@@ -1679,7 +1679,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已说明 release evidence artifact 推荐命令：使用 `--generated-at` 固定可复现时间戳、使用 `--output docs/releases/evidence/<release-id>-release-evidence.json` 保存脱敏 JSON，并在 release notes、PR 描述或 handoff 中记录 artifact path、commit、date 和 `generatedAt`。V1 alpha evidence 样例已说明当前样例没有生成持久 JSON artifact，后续 release 应保存 `--output` 产物并核对 decision/blockers。`docs/TESTING.md` 已记录带 `--generated-at` 和临时 `--output` 的验证命令入口。
 
-- [ ] T316 P1：新增 release evidence artifact 校验 helper。
+- [x] T316 P1：新增 release evidence artifact 校验 helper。
   - 验收标准：
     - `@opencap/spec` 导出 release evidence artifact validation helper，可校验保存后的 `opencap.release_evidence.v1` JSON bundle。
     - Helper 必须校验 schemaVersion、target、commit、date、generatedAt、decision、commands、components、blockers、knownGaps 和 `policyEffect: "none"` 的最小结构。
@@ -1689,6 +1689,7 @@
     - `pnpm --filter @opencap/spec test -- release-evidence-artifact.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增 `validateReleaseEvidenceArtifact()`、`RELEASE_ARTIFACT_VALIDATION_SCHEMA_VERSION` 和 `opencap.release_artifact_validation.v1` validation report。Helper 校验保存后的 `opencap.release_evidence.v1` JSON artifact 的 schemaVersion、target、commit、date、generatedAt、decision、commands、components、blockers、knownGaps 和 `policyEffect: "none"`，并拒绝明显 secret/token/password、Authorization/Cookie、`opencap.local/`、SQLite/DB/log、provider raw response 和 `/Users/...` 私有路径文本。`packages/spec/src/release-evidence-artifact.test.ts` 覆盖合法 artifact、结构/时间/command/policy 错误和敏感文本脱敏 finding；Spec 包测试数从 84 增至 87。
 
 - [ ] T317 P1：新增 CLI release artifact validate 命令。
   - 验收标准：

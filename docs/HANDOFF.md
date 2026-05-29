@@ -86,7 +86,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T316-T318，把 release evidence artifact 从“可保存”推进到“保存后可本地校验”。顺序为先在 `@opencap/spec` 增加 artifact validation helper，再接 CLI `opencap release artifact validate --file <path>`，最后把 validation report 写入 release checklist/evidence/testing 文档。该批任务只读取本地 JSON artifact，不需要 GitHub/npm 凭据、网络发布权限、真实 Host UI 或 provider 调用。
 
-下一项 ready：T316 P1：新增 release evidence artifact 校验 helper。
+本轮继续完成 T316：`@opencap/spec` 新增 `validateReleaseEvidenceArtifact()`、`RELEASE_ARTIFACT_VALIDATION_SCHEMA_VERSION` 和 `opencap.release_artifact_validation.v1` validation report。Helper 校验保存后的 `opencap.release_evidence.v1` JSON artifact 的 schemaVersion、target、commit、date、generatedAt、decision、commands、components、blockers、knownGaps 和 `policyEffect: "none"`，并拒绝明显 secret/token/password、Authorization/Cookie、`opencap.local/`、SQLite/DB/log、provider raw response 和 `/Users/...` 私有路径文本。`packages/spec/src/release-evidence-artifact.test.ts` 覆盖合法 artifact、结构/时间/command/policy 错误和敏感文本脱敏 finding；Spec 包测试数从 84 增至 87。
+
+下一项 ready：T317 P1：新增 CLI release artifact validate 命令。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -165,9 +167,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314 和 T315 均已完成；T316 是下一项本地 release artifact validation ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315 和 T316 均已完成；T317 是下一项本地 release artifact validation ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T316，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T317，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

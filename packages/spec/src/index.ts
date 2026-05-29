@@ -38,6 +38,7 @@ export type {
   NpmPackageReadinessWarningCode,
 } from "./npm-package-readiness.js";
 export { RELEASE_EVIDENCE_SCHEMA_VERSION, buildReleaseEvidenceBundle } from "./release-evidence.js";
+export { RELEASE_ARTIFACT_VALIDATION_SCHEMA_VERSION, validateReleaseEvidenceArtifact } from "./release-evidence-artifact.js";
 export type {
   BuildReleaseEvidenceBundleInput,
   ReleaseEvidenceBlocker,
