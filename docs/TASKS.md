@@ -1691,7 +1691,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增 `validateReleaseEvidenceArtifact()`、`RELEASE_ARTIFACT_VALIDATION_SCHEMA_VERSION` 和 `opencap.release_artifact_validation.v1` validation report。Helper 校验保存后的 `opencap.release_evidence.v1` JSON artifact 的 schemaVersion、target、commit、date、generatedAt、decision、commands、components、blockers、knownGaps 和 `policyEffect: "none"`，并拒绝明显 secret/token/password、Authorization/Cookie、`opencap.local/`、SQLite/DB/log、provider raw response 和 `/Users/...` 私有路径文本。`packages/spec/src/release-evidence-artifact.test.ts` 覆盖合法 artifact、结构/时间/command/policy 错误和敏感文本脱敏 finding；Spec 包测试数从 84 增至 87。
 
-- [ ] T317 P1：新增 CLI release artifact validate 命令。
+- [x] T317 P1：新增 CLI release artifact validate 命令。
   - 验收标准：
     - CLI 新增 `opencap release artifact validate --file <path> [--json]`，读取本地 release evidence JSON artifact 并复用 T316 helper 输出 validation report。
     - JSON 输出可用于 release notes/handoff；人类输出显示 valid/invalid、schemaVersion、decision、blocker count 和 findings。
@@ -1701,6 +1701,7 @@
     - `pnpm --filter @opencap/cli test -- release-artifact-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap release artifact validate --file <path> [--json]`，读取本地 release evidence JSON artifact 并复用 T316 helper 输出 `opencap.release_artifact_validation.v1` validation report。JSON 输出可用于 release notes/handoff；人类输出显示 valid/invalid、schema、decision、blocker count 和 findings。非法 JSON 作为用户错误 exit `1` 且 stderr 不打印 stack；含 secret/path/log 的 artifact 会输出 invalid validation report 并以 exit `1` 结束。命令不写 state dir、不触网、不调用 provider、不发布 package、不读取 npm/GitHub token。`packages/cli/src/release-artifact-command.test.ts` 覆盖 JSON report、人类输出、invalid report 和非法 JSON；CLI 包测试数从 37 增至 41。
 
 - [ ] T318 P2：把 release artifact validation 纳入发布文档。
   - 验收标准：

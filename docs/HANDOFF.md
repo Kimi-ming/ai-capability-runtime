@@ -88,7 +88,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T316：`@opencap/spec` 新增 `validateReleaseEvidenceArtifact()`、`RELEASE_ARTIFACT_VALIDATION_SCHEMA_VERSION` 和 `opencap.release_artifact_validation.v1` validation report。Helper 校验保存后的 `opencap.release_evidence.v1` JSON artifact 的 schemaVersion、target、commit、date、generatedAt、decision、commands、components、blockers、knownGaps 和 `policyEffect: "none"`，并拒绝明显 secret/token/password、Authorization/Cookie、`opencap.local/`、SQLite/DB/log、provider raw response 和 `/Users/...` 私有路径文本。`packages/spec/src/release-evidence-artifact.test.ts` 覆盖合法 artifact、结构/时间/command/policy 错误和敏感文本脱敏 finding；Spec 包测试数从 84 增至 87。
 
-下一项 ready：T317 P1：新增 CLI release artifact validate 命令。
+本轮继续完成 T317：CLI 新增 `opencap release artifact validate --file <path> [--json]`，读取本地 release evidence JSON artifact 并复用 T316 helper 输出 `opencap.release_artifact_validation.v1` validation report。JSON 输出可用于 release notes/handoff；人类输出显示 valid/invalid、schema、decision、blocker count 和 findings。非法 JSON 作为用户错误 exit `1` 且 stderr 不打印 stack；含 secret/path/log 的 artifact 会输出 invalid validation report 并以 exit `1` 结束。命令不写 state dir、不触网、不调用 provider、不发布 package、不读取 npm/GitHub token。`packages/cli/src/release-artifact-command.test.ts` 覆盖 JSON report、人类输出、invalid report 和非法 JSON；CLI 包测试数从 37 增至 41。
+
+下一项 ready：T318 P2：把 release artifact validation 纳入发布文档。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -167,9 +169,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315 和 T316 均已完成；T317 是下一项本地 release artifact validation ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316 和 T317 均已完成；T318 是下一项本地 release artifact validation ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T317，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T318，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

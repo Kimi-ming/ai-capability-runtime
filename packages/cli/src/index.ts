@@ -13,6 +13,7 @@ import {
   buildRegistryQualitySummary,
   buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
+  validateReleaseEvidenceArtifact,
   validateManifestPath,
   type CapabilityManifest,
   type NpmPackagePackFile,
@@ -569,6 +570,35 @@ function printReleaseEvidenceBundle(bundle: ReleaseEvidenceBundle): void {
   console.log("blockers:");
   for (const blocker of bundle.blockers) {
     console.log(`- ${blocker.code} ${blocker.source}${blocker.ref ? ` ${blocker.ref}` : ""}`);
+  }
+}
+
+async function readReleaseArtifactJson(filePath: string): Promise<unknown> {
+  try {
+    return JSON.parse(await readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new CliUserInputError("Invalid release artifact JSON: expected valid JSON.");
+    }
+    throw error;
+  }
+}
+
+function printReleaseArtifactValidationReport(report: ReturnType<typeof validateReleaseEvidenceArtifact>): void {
+  console.log("OpenCap release artifact validation");
+  console.log(`valid: ${report.valid ? "yes" : "no"}`);
+  console.log(`schema: ${report.artifactSchemaVersion ?? "<missing>"}`);
+  console.log(`decision: ${report.decision ?? "<invalid>"}`);
+  console.log(`blockers: ${report.blockerCount}`);
+
+  if (report.findings.length === 0) {
+    console.log("findings: none");
+    return;
+  }
+
+  console.log("findings:");
+  for (const finding of report.findings) {
+    console.log(`- ${finding.code} ${finding.path}: ${finding.message}`);
   }
 }
 
@@ -1364,6 +1394,10 @@ const releasePackageCommand = releaseCommand
   .command("package")
   .description("Inspect npm package release readiness.");
 
+const releaseArtifactCommand = releaseCommand
+  .command("artifact")
+  .description("Inspect saved release evidence artifacts.");
+
 conformanceCommand
   .command("report")
   .requiredOption("--records <path>", "Conformance records root directory")
@@ -1522,6 +1556,26 @@ releaseCommand
 
     printReleaseEvidenceBundle(bundle);
   }, "Failed to generate release evidence"));
+
+releaseArtifactCommand
+  .command("validate")
+  .requiredOption("--file <path>", "Release evidence JSON artifact to validate")
+  .option("--json", "Output JSON")
+  .description("Validate a saved release evidence artifact.")
+  .action((options: { file: string; json?: boolean }) => runCliAction(async () => {
+    const artifact = await readReleaseArtifactJson(resolveCliPath(options.file));
+    const report = validateReleaseEvidenceArtifact(artifact);
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      printReleaseArtifactValidationReport(report);
+    }
+
+    if (!report.valid) {
+      process.exitCode = 1;
+    }
+  }, "Failed to validate release artifact"));
 
 ledgerCommand
   .command("export")
