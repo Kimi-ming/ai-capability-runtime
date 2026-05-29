@@ -11,6 +11,7 @@ import {
   buildConformanceSummary,
   buildNpmPackageReadinessReportFromFile,
   buildCapabilityScaffold,
+  buildRegistryIndex,
   buildRegistryQualitySummary,
   buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
@@ -29,6 +30,7 @@ import {
   type NpmPackagePackFile,
   type NpmPackageReadinessReport,
   type RegistryCapabilitySearchResult,
+  type RegistryIndex,
   type ReleaseEvidenceBundle,
 } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
@@ -1390,6 +1392,13 @@ async function writeRegistryReportJsonOutput(outputPath: string, value: unknown)
   });
 }
 
+async function writeRegistryIndexJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "registry index evidence files",
+    fileName: "registry index evidence file names",
+  });
+}
+
 async function writeConformanceJsonOutput(outputPath: string, value: unknown): Promise<void> {
   await writeSafeJsonOutput(outputPath, value, {
     artifact: "conformance evidence files",
@@ -1442,6 +1451,25 @@ function printNpmPackageReadinessReport(report: NpmPackageReadinessReport): void
     for (const file of report.pack.forbiddenFiles) {
       console.log(`- ${file.reasonCode}: ${file.path}`);
     }
+  }
+}
+
+function printRegistryIndex(index: RegistryIndex): void {
+  console.log("OpenCap registry index");
+  console.log(`capabilities: ${index.capabilityCount}`);
+  console.log(`invalid manifests: ${index.invalidManifestCount}`);
+  console.log(`signature: ${index.signatureStatus}`);
+  console.log(`digest: ${index.indexDigest}`);
+
+  const blocked = index.capabilities.filter((capability) => capability.blockingReasons.length > 0);
+  if (blocked.length === 0) {
+    console.log("blocking: none");
+    return;
+  }
+
+  console.log("blocking:");
+  for (const capability of blocked) {
+    console.log(`- ${capability.id} ${capability.blockingReasons.join(",")}`);
   }
 }
 
@@ -2335,6 +2363,10 @@ const registryCommand = program
   .command("registry")
   .description("Inspect local Registry evidence.");
 
+const registryIndexCommand = registryCommand
+  .command("index")
+  .description("Build local Registry discovery index artifacts.");
+
 const registryAdvisoryCommand = registryCommand
   .command("advisory")
   .description("Inspect local Registry advisory evidence.");
@@ -2596,6 +2628,28 @@ registryCommand
       ].join(" "));
     }
   }, "Failed to generate Registry report"));
+
+registryIndexCommand
+  .command("build")
+  .option("--registry <path>", "Registry root directory", "registry")
+  .option("--output <path>", "Write Registry index JSON artifact to a file")
+  .option("--json", "Output JSON")
+  .description("Build a local Registry discovery index artifact.")
+  .action((options: { registry?: string; output?: string; json?: boolean }) => runCliAction(async () => {
+    const registryRoot = resolveCliPath(options.registry ?? "registry");
+    const index = await buildRegistryIndex(registryRoot);
+
+    if (options.output !== undefined) {
+      await writeRegistryIndexJsonOutput(options.output, index);
+    }
+
+    if (options.json) {
+      console.log(JSON.stringify(index, null, 2));
+      return;
+    }
+
+    printRegistryIndex(index);
+  }, "Failed to build Registry index"));
 
 releasePackageCommand
   .command("report")

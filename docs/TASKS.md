@@ -2138,7 +2138,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 已新增 `buildRegistryIndex()`、`REGISTRY_INDEX_SCHEMA_VERSION`、`REGISTRY_INDEX_PROFILE` 和 Registry index 类型，输出 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` 本地发现索引。Index 从本地 Registry checkout 派生 capability id、name、version、category、relative manifest path、manifest digest、lifecycle、manifest trust level、quality score 摘要、advisory refs、default install trust 和 blocking reasons；固定 `signatureStatus: "none"`、`policyEffect: "none"`，不包含 manifest 原文、auth env、provider raw response、input/output/execution 原文、secret、`opencap.local/`、DB/log 或私有绝对路径。新增 `packages/spec/src/registry-index.test.ts` 覆盖脱敏边界和稳定 `indexDigest`；已验证 `pnpm --filter @opencap/spec test -- registry-index.test.ts`、`pnpm --filter @opencap/spec build` 和 `pnpm validate`。
 
-- [ ] T354 P2：新增 CLI registry index build 安全输出命令。
+- [x] T354 P2：新增 CLI registry index build 安全输出命令。
   - 验收标准：
     - CLI 提供 `opencap registry index build --registry <path> [--output <file>] [--json]`，复用 T353 helper 输出本地 Registry index artifact。
     - `--json` 输出完整脱敏 JSON；非 JSON 输出显示 capability count、digest、signature status、invalid count 和阻断摘要。
@@ -2148,6 +2148,7 @@
     - `pnpm --filter @opencap/cli test -- registry-index-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 已新增 `opencap registry index build --registry <path> [--output <file>] [--json]`，复用 T353 `buildRegistryIndex()` 输出本地 Registry index artifact。`--json` 输出完整脱敏 JSON；非 JSON 输出 capability count、invalid manifest count、digest、signature status 和 blocking summary；`--output` 复用安全 JSON 原子写文件逻辑，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径且不留下半截文件。命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网、不改变 trust、policy、authorization 或 Runtime execution。新增 `packages/cli/src/registry-index-command.test.ts` 覆盖 JSON、人类输出、安全写文件、危险输出拒绝和不创建 `opencap.local`；已验证 `pnpm --filter @opencap/cli test -- registry-index-command.test.ts`、`pnpm --filter @opencap/cli build` 和 `pnpm validate`。
 
 - [ ] T355 P2：把 Registry index artifact 纳入 Registry 分发和测试文档。
   - 验收标准：
