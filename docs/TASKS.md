@@ -2174,7 +2174,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 已新增 `validateRegistryIndexArtifact()`、`REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION` 和 `opencap.registry_index_validation.v1` validation report 类型。Helper 校验保存后的 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` JSON artifact 的 schema/profile、generatedAt、capabilityCount、invalidManifestCount、capabilities、relative manifest path、manifest digest、quality score 摘要、advisory refs、`signatureStatus: "none"`、`policyEffect: "none"` 和 `indexDigest` 一致性；会拒绝明显 secret/token/password、Authorization/Cookie、raw manifest/auth/input/output/execution/provider 字段、`opencap.local/`、SQLite/DB/log 和私有绝对路径文本，且 validation report 不回显原文。新增 `packages/spec/src/registry-index-artifact.test.ts` 覆盖 valid artifact、tampered/unsafe artifact 和 non-object artifact 脱敏报告；已验证 `pnpm --filter @opencap/spec test -- registry-index-artifact.test.ts`、`pnpm --filter @opencap/spec build` 和 `pnpm validate`。
 
-- [ ] T357 P2：新增 CLI registry index validate 安全验证命令。
+- [x] T357 P2：新增 CLI registry index validate 安全验证命令。
   - 验收标准：
     - CLI 提供 `opencap registry index validate --file <path> [--output <file>] [--json]`，复用 T356 helper 验证保存后的 Registry index artifact。
     - JSON 输出 validation report；非 JSON 输出 valid、finding count、digest、schema/profile 和 policy effect 摘要；invalid artifact 返回 exit `1` 且不打印 stack。
@@ -2184,6 +2184,7 @@
     - `pnpm --filter @opencap/cli test -- registry-index-validate-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 已新增 `opencap registry index validate --file <path> [--output <file>] [--json]`，复用 T356 `validateRegistryIndexArtifact()` 校验保存后的 Registry index artifact。JSON 输出 `opencap.registry_index_validation.v1` validation report；非 JSON 输出 valid、finding count、digest、schema/profile 和 policy effect 摘要；invalid artifact 返回 exit `1` 且不打印 stack。`--output` 会安全原子写出 validation report JSON，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；非法 JSON 或读取失败不会写半截 output。命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。新增 `packages/cli/src/registry-index-validate-command.test.ts` 覆盖 JSON、人类输出、invalid report output、危险 output 拒绝、非法 JSON 不写 partial report 和不创建 `opencap.local`；已验证 `pnpm --filter @opencap/cli test -- registry-index-validate-command.test.ts`、`pnpm --filter @opencap/cli build` 和 `pnpm validate`。
 
 - [ ] T358 P2：把 Registry index validation 纳入分发和 release evidence 文档。
   - 验收标准：

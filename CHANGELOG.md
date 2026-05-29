@@ -85,6 +85,7 @@
 - CLI `opencap registry advisory show` 新增 `--output <file>`，可安全写出本地 Registry advisory detail evidence report。
 - CLI `opencap registry report` 新增 `--output <file>`，可安全写出本地 Registry quality summary evidence report。
 - CLI 新增 `opencap registry index build`，可输出本地 Registry discovery/cache index artifact，支持 `--json` 和安全 `--output <file>`，并保持不安装、不执行、不写 state、不触网的边界。
+- CLI 新增 `opencap registry index validate`，可验证保存后的 Registry index artifact，支持 JSON/人类 validation report 和安全 `--output <file>`，invalid artifact 返回 exit `1` 且不打印 stack。
 - CLI `opencap conformance report` 新增 `--output <file>`，可安全写出本地 conformance summary evidence report。
 - CLI `opencap release package report` 新增 `--output <file>`，可安全写出本地 npm package readiness evidence report。
 - README、Registry、安全、生态和运营文档已补充 `opencap registry advisory list/show --output <file>` 本地 evidence artifact 边界。

@@ -16,6 +16,7 @@ import {
   buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
   searchRegistryCapabilities,
+  validateRegistryIndexArtifact,
   validateNpmPackageReadinessArtifact,
   validateReleaseEvidenceArtifact,
   validateCapabilityAdvisoryPath,
@@ -31,6 +32,7 @@ import {
   type NpmPackageReadinessReport,
   type RegistryCapabilitySearchResult,
   type RegistryIndex,
+  type RegistryIndexArtifactValidationReport,
   type ReleaseEvidenceBundle,
 } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
@@ -1338,6 +1340,20 @@ function resolveSafeJsonOutputPath(value: string, labels: SafeJsonOutputLabels):
   return resolved;
 }
 
+async function assertSafeJsonOutputPath(value: string, labels: SafeJsonOutputLabels): Promise<void> {
+  const resolved = resolveSafeJsonOutputPath(value, labels);
+  const existing = await stat(resolved).catch((error: unknown) => {
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  });
+
+  if (existing?.isDirectory()) {
+    throw new CliUserInputError("Unsafe --output path: expected a file path, received a directory.");
+  }
+}
+
 async function writeSafeJsonOutput(outputPath: string, value: unknown, labels: SafeJsonOutputLabels): Promise<void> {
   const resolved = resolveSafeJsonOutputPath(outputPath, labels);
   const existing = await stat(resolved).catch((error: unknown) => {
@@ -1396,6 +1412,13 @@ async function writeRegistryIndexJsonOutput(outputPath: string, value: unknown):
   await writeSafeJsonOutput(outputPath, value, {
     artifact: "registry index evidence files",
     fileName: "registry index evidence file names",
+  });
+}
+
+async function writeRegistryIndexValidationJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "registry index validation reports",
+    fileName: "registry index validation report names",
   });
 }
 
@@ -1473,6 +1496,25 @@ function printRegistryIndex(index: RegistryIndex): void {
   }
 }
 
+function printRegistryIndexValidationReport(report: RegistryIndexArtifactValidationReport): void {
+  console.log("OpenCap registry index validation");
+  console.log(`valid: ${report.valid ? "yes" : "no"}`);
+  console.log(`schema: ${report.artifactSchemaVersion ?? "<missing>"}`);
+  console.log(`profile: ${report.profile ?? "<missing>"}`);
+  console.log(`digest: ${report.indexDigest ?? "<missing>"}`);
+  console.log(`policyEffect: ${report.policyEffect}`);
+
+  if (report.findings.length === 0) {
+    console.log("findings: none");
+    return;
+  }
+
+  console.log("findings:");
+  for (const finding of report.findings) {
+    console.log(`- ${finding.code} ${finding.path}: ${finding.message}`);
+  }
+}
+
 function printReleaseEvidenceBundle(bundle: ReleaseEvidenceBundle): void {
   console.log("OpenCap release evidence");
   console.log(`target: ${bundle.target}`);
@@ -1513,6 +1555,17 @@ async function readReleaseArtifactJson(filePath: string): Promise<unknown> {
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new CliUserInputError("Invalid release artifact JSON: expected valid JSON.");
+    }
+    throw error;
+  }
+}
+
+async function readRegistryIndexArtifactJson(filePath: string): Promise<unknown> {
+  try {
+    return JSON.parse(await readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new CliUserInputError("Invalid Registry index artifact JSON: expected valid JSON.");
     }
     throw error;
   }
@@ -2650,6 +2703,38 @@ registryIndexCommand
 
     printRegistryIndex(index);
   }, "Failed to build Registry index"));
+
+registryIndexCommand
+  .command("validate")
+  .requiredOption("--file <path>", "Registry index JSON artifact to validate")
+  .option("--output <path>", "Write Registry index validation report JSON to a file")
+  .option("--json", "Output JSON")
+  .description("Validate a saved Registry index artifact.")
+  .action((options: { file: string; output?: string; json?: boolean }) => runCliAction(async () => {
+    if (options.output !== undefined) {
+      await assertSafeJsonOutputPath(options.output, {
+        artifact: "registry index validation reports",
+        fileName: "registry index validation report names",
+      });
+    }
+
+    const artifact = await readRegistryIndexArtifactJson(resolveCliPath(options.file));
+    const report = validateRegistryIndexArtifact(artifact);
+
+    if (options.output !== undefined) {
+      await writeRegistryIndexValidationJsonOutput(options.output, report);
+    }
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      printRegistryIndexValidationReport(report);
+    }
+
+    if (!report.valid) {
+      process.exitCode = 1;
+    }
+  }, "Failed to validate Registry index"));
 
 releasePackageCommand
   .command("report")
