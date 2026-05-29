@@ -92,8 +92,9 @@ export type {
   CapabilityAuthoringStageId,
 } from "./authoring.js";
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import { createHash } from "node:crypto";
 import { readFile, readdir, stat } from "node:fs/promises";
-import { basename, dirname, extname, join } from "node:path";
+import { basename, dirname, extname, isAbsolute, join, relative } from "node:path";
 import YAML from "yaml";
 import { lintLeastPrivilegeAuth, type LeastPrivilegeAuthFinding } from "./auth-lint.js";
 import { lintModelVisibleMetadata, type ModelVisibleMetadataFinding } from "./metadata-lint.js";
@@ -244,11 +245,72 @@ export interface RegistryCapabilitySearchResults {
 
 export const REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION = "opencap.registry_quality_summary.v1" as const;
 export const REGISTRY_QUALITY_SCORE_RUBRIC_VERSION = "opencap.quality_score.v1" as const;
+export const REGISTRY_INDEX_SCHEMA_VERSION = "opencap.registry.index.v1" as const;
+export const REGISTRY_INDEX_PROFILE = "opencap.registry.index_cache_sync.v1" as const;
 
 export type RegistryQualitySummarySchemaVersion = typeof REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION;
+export type RegistryIndexSchemaVersion = typeof REGISTRY_INDEX_SCHEMA_VERSION;
+export type RegistryIndexProfile = typeof REGISTRY_INDEX_PROFILE;
+export type RegistryIndexSource = "local" | "git";
+export type RegistryIndexSignatureStatus = "none";
 export type RegistryQualityEvidenceStatus = "pass" | "fail";
 export type RegistryQualityAdvisoryStatus = "none" | CapabilityAdvisoryStatus;
 export type RegistryQualityScoreBand = "incomplete" | "experimental" | "listed" | "tested" | "verified";
+
+export interface RegistryIndexRegistryMetadata {
+  source: RegistryIndexSource;
+  repository?: string;
+  commit?: string;
+}
+
+export interface RegistryIndexGeneratorMetadata {
+  name: string;
+  version: string;
+  commit?: string;
+}
+
+export interface RegistryIndexQualitySummary {
+  rubricVersion: typeof REGISTRY_QUALITY_SCORE_RUBRIC_VERSION;
+  total: number;
+  band: RegistryQualityScoreBand;
+  policyEffect: "none";
+}
+
+export interface RegistryIndexCapability {
+  id: string;
+  name: string;
+  version: string;
+  category: string;
+  path: string;
+  manifestDigest: string;
+  lifecycle: CapabilityManifestLifecycleStatus | "active";
+  trustLevel: string;
+  quality: RegistryIndexQualitySummary;
+  advisoryRefs: string[];
+  defaultInstallTrusted: boolean;
+  blockingReasons: string[];
+  policyEffect: "none";
+}
+
+export interface RegistryIndex {
+  schemaVersion: RegistryIndexSchemaVersion;
+  profile: RegistryIndexProfile;
+  generatedAt: string;
+  registry: RegistryIndexRegistryMetadata;
+  generator: RegistryIndexGeneratorMetadata;
+  capabilityCount: number;
+  invalidManifestCount: number;
+  capabilities: RegistryIndexCapability[];
+  signatureStatus: RegistryIndexSignatureStatus;
+  indexDigest: string;
+  policyEffect: "none";
+}
+
+export interface BuildRegistryIndexOptions {
+  generatedAt?: string;
+  registry?: Partial<RegistryIndexRegistryMetadata> & { source?: RegistryIndexSource };
+  generator?: Partial<RegistryIndexGeneratorMetadata>;
+}
 
 export interface RegistryQualityScoreDimensions {
   manifest: number;
@@ -1091,6 +1153,130 @@ export async function buildRegistryQualitySummary(
     invalidManifests: manifestValidation.invalid,
     invalidAdvisories: advisoryValidation.invalid,
     policyEffect: "none",
+  };
+}
+
+function stableJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => stableJsonValue(item));
+  }
+
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entryValue]) => [key, stableJsonValue(entryValue)]),
+    );
+  }
+
+  return value;
+}
+
+function stableJsonStringify(value: unknown): string {
+  return JSON.stringify(stableJsonValue(value));
+}
+
+function sha256Digest(value: string): string {
+  return `sha256:${createHash("sha256").update(value).digest("hex")}`;
+}
+
+function stableJsonDigest(value: unknown): string {
+  return sha256Digest(stableJsonStringify(value));
+}
+
+function registryIndexManifestPath(registryRoot: string, manifestPath: string): string {
+  const relativePath = relative(registryRoot, manifestPath).split(/[/\\]+/).join("/");
+
+  if (relativePath.length === 0 || relativePath === ".." || relativePath.startsWith("../") || isAbsolute(relativePath)) {
+    throw new Error(`Manifest path is outside the registry root: ${manifestPath}`);
+  }
+
+  return relativePath;
+}
+
+function registryIndexRegistryMetadata(options?: BuildRegistryIndexOptions["registry"]): RegistryIndexRegistryMetadata {
+  const metadata: RegistryIndexRegistryMetadata = {
+    source: options?.source ?? "local",
+  };
+
+  if (options?.repository !== undefined) {
+    metadata.repository = options.repository;
+  }
+  if (options?.commit !== undefined) {
+    metadata.commit = options.commit;
+  }
+
+  return metadata;
+}
+
+function registryIndexGeneratorMetadata(options?: BuildRegistryIndexOptions["generator"]): RegistryIndexGeneratorMetadata {
+  const metadata: RegistryIndexGeneratorMetadata = {
+    name: options?.name ?? "opencap-spec",
+    version: options?.version ?? "0.1.0",
+  };
+
+  if (options?.commit !== undefined) {
+    metadata.commit = options.commit;
+  }
+
+  return metadata;
+}
+
+export async function buildRegistryIndex(
+  registryRoot: string,
+  options: BuildRegistryIndexOptions = {},
+): Promise<RegistryIndex> {
+  const generatedAt = options.generatedAt ?? new Date().toISOString();
+  const [manifestValidation, qualitySummary] = await Promise.all([
+    validateManifestPath(registryRoot),
+    buildRegistryQualitySummary(registryRoot, { generatedAt }),
+  ]);
+  const qualityByCapabilityId = new Map(qualitySummary.capabilities.map((capability) => [capability.id, capability]));
+  const capabilities: RegistryIndexCapability[] = manifestValidation.valid.map((valid): RegistryIndexCapability => {
+    const manifest = valid.manifest;
+    const quality = qualityByCapabilityId.get(manifest.id);
+    const packageDir = dirname(valid.filePath);
+    const category = quality?.category ?? stringMetadata(manifest, "category") ?? basename(dirname(packageDir));
+
+    return {
+      id: manifest.id,
+      name: manifest.name,
+      version: manifest.version,
+      category,
+      path: registryIndexManifestPath(registryRoot, valid.filePath),
+      manifestDigest: stableJsonDigest(manifest),
+      lifecycle: quality?.lifecycle.status ?? manifest.lifecycle?.status ?? "active",
+      trustLevel: stringMetadata(manifest, "trust_level") ?? "unverified",
+      quality: {
+        rubricVersion: REGISTRY_QUALITY_SCORE_RUBRIC_VERSION,
+        total: quality?.qualityScore.total ?? 0,
+        band: quality?.qualityScore.band ?? "incomplete",
+        policyEffect: "none",
+      },
+      advisoryRefs: quality?.advisory.ids ?? [],
+      defaultInstallTrusted: quality?.defaultInstallTrusted ?? false,
+      blockingReasons: quality?.blockingReasons ?? [],
+      policyEffect: "none",
+    };
+  }).sort((left, right) => left.id.localeCompare(right.id));
+
+  const indexWithoutDigest = {
+    schemaVersion: REGISTRY_INDEX_SCHEMA_VERSION,
+    profile: REGISTRY_INDEX_PROFILE,
+    generatedAt,
+    registry: registryIndexRegistryMetadata(options.registry),
+    generator: registryIndexGeneratorMetadata(options.generator),
+    capabilityCount: capabilities.length,
+    invalidManifestCount: manifestValidation.invalid.length,
+    capabilities,
+    signatureStatus: "none" as const,
+    policyEffect: "none" as const,
+  };
+
+  return {
+    ...indexWithoutDigest,
+    indexDigest: stableJsonDigest(indexWithoutDigest),
   };
 }
 

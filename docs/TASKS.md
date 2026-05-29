@@ -2126,6 +2126,40 @@
     - `git diff --check`
   - 完成记录：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充多 package release evidence 口径。文档说明发布者应为每个待发布 package 分别运行 `npm pack --dry-run --json` 和 `opencap release package report --output <file>`，再用 `opencap release evidence` 重复传入多个 `--package-readiness <file>`，按顺序汇入 `opencap.release_evidence.v1`。文档明确多个 artifacts 仍只是本地 package evidence inputs，不替代 pack dry-run 原始输出、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；任一 artifact invalid 应阻断 release evidence 生成，任一 artifact 包含 blocker 应阻断对应 npm package 发布，并记录到 release evidence、release notes 或 handoff。
 
+- [x] T353 P2：新增本地 Registry index artifact helper。
+  - 验收标准：
+    - `@opencap/spec` 导出 `buildRegistryIndex()`、`REGISTRY_INDEX_SCHEMA_VERSION` 和 Registry index 类型，输出 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` 本地发现索引。
+    - Index 从本地 Registry checkout 派生 capability id、version、category、relative manifest path、manifest digest、lifecycle、trust level、quality score 摘要、advisory refs、default install trust 和 blocking reasons。
+    - Index 固定 `signatureStatus: "none"` 和 `policyEffect: "none"`，不包含 manifest 原文、auth env、provider raw response、input/output 原文、secret、`opencap.local/`、DB/log 或私有绝对路径。
+    - `indexDigest` 对同一输入稳定，且不包含签名 bytes；helper 不签名、不同步远端、不写 cache、不安装、不执行 Capability。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- registry-index.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+  - 完成记录：`@opencap/spec` 已新增 `buildRegistryIndex()`、`REGISTRY_INDEX_SCHEMA_VERSION`、`REGISTRY_INDEX_PROFILE` 和 Registry index 类型，输出 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` 本地发现索引。Index 从本地 Registry checkout 派生 capability id、name、version、category、relative manifest path、manifest digest、lifecycle、manifest trust level、quality score 摘要、advisory refs、default install trust 和 blocking reasons；固定 `signatureStatus: "none"`、`policyEffect: "none"`，不包含 manifest 原文、auth env、provider raw response、input/output/execution 原文、secret、`opencap.local/`、DB/log 或私有绝对路径。新增 `packages/spec/src/registry-index.test.ts` 覆盖脱敏边界和稳定 `indexDigest`；已验证 `pnpm --filter @opencap/spec test -- registry-index.test.ts`、`pnpm --filter @opencap/spec build` 和 `pnpm validate`。
+
+- [ ] T354 P2：新增 CLI registry index build 安全输出命令。
+  - 验收标准：
+    - CLI 提供 `opencap registry index build --registry <path> [--output <file>] [--json]`，复用 T353 helper 输出本地 Registry index artifact。
+    - `--json` 输出完整脱敏 JSON；非 JSON 输出显示 capability count、digest、signature status、invalid count 和阻断摘要。
+    - `--output` 原子写出 JSON artifact，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；失败时不留下半截文件。
+    - 命令不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网、不改变 trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-index-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T355 P2：把 Registry index artifact 纳入 Registry 分发和测试文档。
+  - 验收标准：
+    - Registry distribution、README/中文文档中心、testing docs 和 release evidence 文档说明 `opencap registry index build` 的本地发现索引用途。
+    - 文档明确 unsigned Registry index 只是 discovery/cache input，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计。
+    - 文档说明 index 不包含 manifest 原文、auth env、secret、provider raw response、input/output 原文、`opencap.local/`、DB/log 或私有绝对路径。
+    - Handoff 指向下一项 ready 或明确外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
