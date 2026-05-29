@@ -160,6 +160,7 @@ release_evidence:
     pnpm_build: pass
     pnpm_lint: pass
     pnpm_test: pass
+    release_evidence_bundle: pass | fail | not-run
     conformance_report: pass | fail | not-run
     package_readiness_report: pass | fail | not-run
     npm_pack_dry_run: pass | fail | not-run
@@ -197,6 +198,29 @@ release_evidence:
 ```
 
 不得在 evidence 中写入 secret、token、provider raw body、tool input/output 原文或私有日志。
+
+发布者可以用以下命令生成本地 release evidence bundle：
+
+```bash
+opencap release evidence \
+  --registry registry \
+  --records packages/runtime/test/fixtures/conformance \
+  --json
+```
+
+如果 release 涉及 npm package，可先生成 pack JSON，再把 package readiness 纳入 bundle：
+
+```bash
+pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
+opencap release evidence \
+  --registry registry \
+  --records packages/runtime/test/fixtures/conformance \
+  --package <package> \
+  --pack-json <pack-json> \
+  --json
+```
+
+`opencap.release_evidence.v1` 只汇总本地 reports 和命令状态；它不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
 发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 生成本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 

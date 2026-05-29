@@ -77,6 +77,7 @@
 - `@opencap/spec` 新增 release evidence bundle helper，可把 registry quality、conformance、package readiness 和本地命令结果汇总为脱敏 `opencap.release_evidence.v1`。
 - CLI 新增 `opencap release evidence`，可从本地 registry、conformance records 和可选 package readiness 输入生成脱敏 release evidence bundle。
 - 新增 V1 alpha/local runtime release evidence bundle，记录本地验证命令、测试计数、known gaps、blocked external evidence 和 release decision，明确不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+- Release checklist、V1 alpha evidence 样例和测试策略已纳入 `opencap release evidence` 执行入口，明确该 bundle 不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 或真实 npm 发布。
 - 新增 GitHub Issue 和 simple HTTP 的示例 input 文件，并在示例 README 中加入 `opencap invoke --dry-run --input` 命令。
 - MCP `tools/list` projection builder，支持 installed Capability 到 MCP tool payload，并保留 tool name collision 检测。
 - MCP Tool Projection builder，统一生成 `projectionVersion`、capability id、tool name、title、description、input/output schema 等模型可见 metadata。

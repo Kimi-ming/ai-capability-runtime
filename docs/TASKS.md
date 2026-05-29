@@ -1630,7 +1630,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap release evidence --registry <path> --records <path> [--package <name> --pack-json <path>] [--json]`，复用 T310 helper 从本地 Registry quality summary、conformance summary 和可选 package readiness report 生成 `opencap.release_evidence.v1` bundle。缺少 package/pack evidence 时标记 `package_readiness_report: not-run`，不伪造 npm dry-run、trusted publishing、provenance 或 publish evidence。命令不写 state dir、不调用 provider、不触网、不发布 package；registry/package blockers 进入 bundle blockers，命令本身仍成功输出 JSON/人类摘要。新增 `packages/cli/src/release-evidence-command.test.ts` 覆盖 JSON、人类输出、package readiness 输入和用户错误；CLI 包测试数从 29 增至 33。
 
-- [ ] T312 P2：把 release evidence bundle 纳入发布文档。
+- [x] T312 P2：把 release evidence bundle 纳入发布文档。
   - 验收标准：
     - `docs/releases/release-checklist.md` 增加 `opencap release evidence` 的执行顺序和 YAML 摘要字段。
     - V1 alpha evidence 样例说明 bundle 是本地 evidence 汇总，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing 或 release approval。
@@ -1640,6 +1640,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已把 `opencap release evidence --registry registry --records packages/runtime/test/fixtures/conformance --json` 纳入 release evidence 执行顺序，YAML 模板新增 `release_evidence_bundle` 状态字段，并说明带 `--package` / `--pack-json` 时可把 package readiness 汇入 bundle。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 已新增 Release Evidence Bundle 段落和 blocked/pending 表项，明确 `opencap.release_evidence.v1` 只汇总本地 Registry quality、conformance、可选 package readiness 和命令状态，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 或真实 npm 发布。`docs/TESTING.md` 已新增 release evidence bundle 命令和对应 CLI 测试入口。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
