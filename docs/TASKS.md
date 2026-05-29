@@ -1606,7 +1606,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已说明 package `files` allowlist、本地 `npm pack --dry-run --json`、`opencap release package report`、GitHub workflow npm publish dry-run 和真实发布审批的顺序，且前一步存在 blocker 时不得进入后一步。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 已说明当前 release evidence 中 package readiness 仍为 `not-run`，仓库已有 automated pack smoke 但不等于某次 release evidence 已采集；当前 `@opencap/spec` / `@opencap/cli` 保留 `private: true`，因此 package publish 仍被预期 blocker 阻断。`docs/运营/package-publishing-v1.md` 和 `docs/运营/npm-trusted-publishing-workflow.md` 已同步 package files allowlist、pack smoke 和 readiness report 边界。
 
-- [ ] T310 P1：新增 release evidence bundle helper。
+- [x] T310 P1：新增 release evidence bundle helper。
   - 验收标准：
     - `@opencap/spec` 新增 `opencap.release_evidence.v1` bundle helper/test，可把 registry quality summary、conformance summary、package readiness report 和本地验证结果收敛成一个 release evidence 摘要。
     - Helper 只接受调用方传入的本地 report/metadata，不触网、不读取 GitHub/npm/CI、不创建 tag、不发布 package。
@@ -1616,6 +1616,7 @@
     - `pnpm --filter @opencap/spec test -- release-evidence.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增 `buildReleaseEvidenceBundle()`、`RELEASE_EVIDENCE_SCHEMA_VERSION` 和 `opencap.release_evidence.v1` bundle 类型。Helper 只接受调用方传入的 registry quality summary、conformance summary、package readiness report、commands 和 known gaps，本地聚合 status/counts/blocker code，不触网、不读取 GitHub/npm/CI、不创建 tag、不发布 package；输出固定 `policyEffect: "none"`，并将 `candidate` / `block-release-tag` decision 与 blockers 分离。`packages/spec/src/release-evidence.test.ts` 覆盖 candidate bundle、registry/conformance/package/command blockers 和 token/path/secret 文本脱敏。Spec 包测试数从 82 增至 84。
 
 - [ ] T311 P1：新增 CLI release evidence 命令。
   - 验收标准：

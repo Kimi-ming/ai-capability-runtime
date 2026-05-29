@@ -64,11 +64,13 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T310-T312，把分散的 registry/conformance/package readiness evidence 收敛为本地 release evidence bundle helper、CLI 命令和文档闭环。该批任务只汇总本地 report/metadata，不触网、不读取 GitHub/npm/CI、不创建 tag、不发布 package。
 
+本轮继续完成 T310：`@opencap/spec` 新增 `buildReleaseEvidenceBundle()`、`RELEASE_EVIDENCE_SCHEMA_VERSION` 和 `opencap.release_evidence.v1` bundle 类型。Helper 只接受调用方传入的 registry quality summary、conformance summary、package readiness report、commands 和 known gaps，本地聚合 status/counts/blocker code，不触网、不读取 GitHub/npm/CI、不创建 tag、不发布 package；输出固定 `policyEffect: "none"`，并将 `candidate` / `block-release-tag` decision 与 blockers 分离。`packages/spec/src/release-evidence.test.ts` 覆盖 candidate bundle、registry/conformance/package/command blockers 和 token/path/secret 文本脱敏。Spec 包测试数从 82 增至 84。
+
 本轮继续完成 T284：`installCapability()` 成功安装后会写入 Capability ledger record，包含 capability identity、manifest digest、registry source ref 和 install evidence；Runtime 新增 `RuntimeLedgerAuditLogger` 与 `createInvocationLedgerRecordFromAuditEvent()`，可从 audit event 派生 Invocation ledger record，覆盖 dry-run、confirmation_required/blocked、success、failed 和 unknown_after_timeout。CLI invoke 和 MCP state-backed server 已接入 ledger-aware audit logger；ledger 写失败会在 audit 写入后显式向上抛出，不静默吞掉。
 
 本轮继续完成 T285：CLI 新增 `opencap ledger export` 子命令，可读取 resolved state dir 下的 JSONL Runtime Ledger 并输出脱敏 records；支持 `--json`、`--kind capability|policy|invocation|compatibility`、`--capability <id>` 和 `--limit <number>`。空 ledger 非 JSON 输出友好提示，非法 kind/limit 返回用户错误 exit `1` 且不打印 stack；`packages/cli/src/ledger-command.test.ts` 覆盖空状态、JSON 导出、筛选和 secret-missing blocked invocation redaction。
 
-下一项 ready：T310 P1：新增 release evidence bundle helper。T291 仍是外部 Host UI smoke evidence 限制项。
+下一项 ready：T311 P1：新增 CLI release evidence 命令。T291 仍是外部 Host UI smoke evidence 限制项。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -147,9 +149,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308 和 T309 均已完成；T310-T312 是下一批本地 release evidence ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309 和 T310 均已完成；T311-T312 是下一批本地 release evidence ready 任务，剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T310，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T311，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

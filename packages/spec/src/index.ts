@@ -37,6 +37,20 @@ export type {
   NpmPackageReadinessReport,
   NpmPackageReadinessWarningCode,
 } from "./npm-package-readiness.js";
+export { RELEASE_EVIDENCE_SCHEMA_VERSION, buildReleaseEvidenceBundle } from "./release-evidence.js";
+export type {
+  BuildReleaseEvidenceBundleInput,
+  ReleaseEvidenceBlocker,
+  ReleaseEvidenceBlockerCode,
+  ReleaseEvidenceBundle,
+  ReleaseEvidenceCommandStatus,
+  ReleaseEvidenceComponentStatus,
+  ReleaseEvidenceComponents,
+  ReleaseEvidenceConformanceComponent,
+  ReleaseEvidenceDecision,
+  ReleaseEvidencePackageComponent,
+  ReleaseEvidenceRegistryComponent,
+} from "./release-evidence.js";
 export { lintLeastPrivilegeAuth } from "./auth-lint.js";
 export type { LeastPrivilegeAuthFinding, LeastPrivilegeAuthLintRule, LeastPrivilegeAuthLintSeverity } from "./auth-lint.js";
 export { findCapabilityPackageDirs, validateCapabilityPackage, validateCapabilityPackagePath } from "./package-lint.js";
