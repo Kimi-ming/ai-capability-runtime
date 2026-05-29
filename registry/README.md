@@ -100,6 +100,15 @@ V1 当前包含 `OCAP-2026-0001`，用于把 `http.request_demo` 标记为 revok
 
 Revoked capability 的目录和历史记录必须保留，不能通过删除目录来隐藏影响范围。后续 Runtime/CLI 会在安装、列表和调用路径读取这些 advisory/revocation metadata。
 
+本地审查命令：
+
+```bash
+opencap registry advisory list --registry registry --json
+opencap advisory check --state-dir opencap.local --registry registry --json
+```
+
+这两个命令只读取本地 Registry 和本地 state evidence，不执行 Capability、不读取 secret、不调用 provider、不触网；它们不会自动卸载、自动授权或自动修改 policy。
+
 ## 提交流程
 
 1. 选择合适分类，例如 `developer-tools`。

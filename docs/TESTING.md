@@ -68,6 +68,15 @@ pnpm --filter @opencap/cli dev -- metrics security --state-dir opencap.local --j
 
 这些命令只从本地 SQLite audit log 的脱敏 operational metadata 派生 summary、capability quality aggregate 和 security counts；它们不读取 provider secret，不执行 Capability，不输出 input/output/egress preview 原文。
 
+### Local advisory evidence
+
+```bash
+pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --json
+pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --json
+```
+
+对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 7 个 CLI 测试，CLI 包总数为 64 个测试。这两个命令只读取本地 Registry advisory metadata 和本地 installed capability metadata，不执行 Capability、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
+
 ## Workspace 校验
 
 依赖安装后，当前应支持：

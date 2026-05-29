@@ -83,6 +83,17 @@ V1 规则：
 当前 Runtime 也提供 `createCapabilityLifecycleWarning()`，供 install、list 和 invoke 准备阶段生成同一结构化 warning。`installCapability()` 会返回 warnings，`listInstalledCapabilities()` 会暴露 manifest lifecycle status 和 `lifecycleWarning`；CLI 的非 JSON install/list/invoke 输出会把 warning 写到 stderr。Warning 的 `policyEffect` 固定为 `none`，不能改变 policy、confirmation 或 audit 结果。
 - gate evidence 不包含 input/output 原文、secret 或 provider response。
 
+## 本地检查命令
+
+V1 CLI 提供两个本地 advisory 检查入口：
+
+```bash
+opencap registry advisory list --registry registry
+opencap advisory check --state-dir opencap.local --registry registry
+```
+
+`registry advisory list` 用于审查 Registry 中的 advisory/revocation metadata；`advisory check` 用于把本地已安装能力和 Registry advisory metadata 做匹配。它们只输出 evidence、计数和告警，不会删除 installed capability，不会把 revoked capability 自动加入 deny policy，也不会因为没有命中本地缓存就授予 trust 或授权执行。
+
 ## Registry 行为
 
 - deprecated 仍在列表中展示。
@@ -90,6 +101,7 @@ V1 规则：
 - revoked 保留记录，不能直接删除历史。
 - replacement 需要独立 review。
 - `pnpm validate` 会校验已有 advisory/revocation metadata 的 schema。
+- `opencap registry advisory list --registry registry` 可列出本地 advisory metadata 和 invalid advisory summary。
 
 ## 关联任务
 

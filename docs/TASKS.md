@@ -1846,10 +1846,44 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap registry advisory list --registry <path> [--json]`，读取本地 Registry Capability Advisory metadata 并输出 `opencap.registry_advisory_list.v1` report。JSON 输出包含 valid advisories、invalidAdvisoryCount、invalidAdvisories、counts 和 `policyEffect: none`；人类输出包含 advisory id、capability、severity、status、registry action、runtime default 和 modified_at。invalid advisory 会在 JSON 模式输出 invalid summary 后返回 exit `1`；命令不安装 Capability、不写 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-advisory-list-command.test.ts` 新增 3 个测试，CLI 包测试数从 61 增至 64。
 
-- [ ] T330 P2：把 advisory check/list 纳入安全和运维文档。
+- [x] T330 P2：把 advisory check/list 纳入安全和运维文档。
   - 验收标准：
     - README 或中文文档中心补充 `opencap advisory check` 和 `opencap registry advisory list` 的入口。
     - 安全/Registry 相关文档说明 advisory check/list 只产生证据和本地告警，不自动卸载、不自动授权、不自动修改 policy。
+    - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数和不触网/不读取 secret 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：README 快速开始和中文文档中心已加入 `opencap registry advisory list --registry registry --json` 与 `opencap advisory check --state-dir <path> --registry registry --json` 入口；`docs/安全/capability-advisory-process.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/社区/registry-guidelines.md` 和 `registry/README.md` 已明确 advisory check/list 只产生本地 evidence/告警，不自动卸载、不自动授权、不自动修改 policy，也不读取 secret、调用 provider 或触网。`docs/TESTING.md` 已记录两个 CLI 测试入口、CLI 64 个测试和不触网/不读取 secret 边界。Handoff 已指向下一批 ready 任务 T331-T333。
+
+- [ ] T331 P2：新增 `opencap registry advisory show` 本地公告详情命令。
+  - 验收标准：
+    - CLI `opencap registry advisory show <advisory-id> --registry <path> [--json]` 精确读取本地 Registry advisory metadata 并输出单条 Capability Advisory detail。
+    - JSON 输出使用稳定 schema `opencap.registry_advisory_detail.v1`，包含 advisory id、capability、affectedVersions、type、severity、status、summary、publishedAt、modifiedAt、registryAction、runtimeDefault、fixedVersion、references、filePath 和 `policyEffect: none`。
+    - 人类输出包含同等审查摘要；not found、重复 id、invalid advisory 文件作为用户错误 exit `1` 且不打印 stack。
+    - 命令不安装、不写 state dir、不读取 secret、不调用 provider、不触网。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-advisory-show-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T332 P2：为 `opencap registry advisory list` 增加本地筛选参数。
+  - 验收标准：
+    - CLI `opencap registry advisory list --registry <path>` 支持 `--capability <id>`、`--severity <low|medium|high|critical>` 和 `--status <status>` 本地筛选。
+    - JSON 输出仍使用 `opencap.registry_advisory_list.v1`，包含原始 valid/invalid counts、filter metadata、filtered advisory count 和 `policyEffect: none`。
+    - 非法 severity/status 作为用户错误 exit `1` 且不打印 stack；筛选不会隐藏 invalid advisory summary，也不会改变 invalid advisory exit `1` 语义。
+    - 命令不安装、不写 state dir、不读取 secret、不调用 provider、不触网。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-advisory-list-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T333 P2：把 advisory show/list filters 纳入 Registry 审查文档。
+  - 验收标准：
+    - README 或中文文档中心补充 `opencap registry advisory show` 和 list filters 的入口。
+    - 安全/Registry 文档说明 show/filter 只是本地审查和 evidence，不改变 install、trust、policy、authorization 或 Runtime execution。
     - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数和不触网/不读取 secret 边界。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：

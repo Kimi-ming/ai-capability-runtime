@@ -78,6 +78,28 @@ V1 本地 Runtime 不依赖远程 advisory 服务。但当本地 registry metada
 
 当前 Runtime 已提供 `checkInstalledCapabilityAdvisories()` 作为本地检查 helper。它读取已安装能力和本地 Registry advisory metadata，按 capability id 和 affected version 匹配，返回 advisory id、severity、status、registry action、runtime default 和 summary；结果不包含 input/output 原文、secret 或 provider response。
 
+## 本地 CLI 检查
+
+维护者和本地用户可以用两个只读命令检查 advisory metadata：
+
+```bash
+opencap registry advisory list --registry registry --json
+opencap advisory check --state-dir opencap.local --registry registry --json
+```
+
+`opencap registry advisory list` 只读取本地 Registry 的 `registry/advisories/*`，用于列出 valid/invalid Capability Advisory metadata。`opencap advisory check` 只读取本地 installed capabilities 和本地 Registry advisory metadata，用于判断已安装能力是否命中公告。
+
+这两个命令只产生 evidence 和本地告警：
+
+- 不执行 Capability。
+- 不读取 provider secret。
+- 不调用 provider 或远程 advisory 服务。
+- 不自动卸载已安装能力。
+- 不自动授权、放行或拒绝 policy。
+- 不修改 `policies.yml` 或 Runtime state。
+
+如果命中 revoked/revoke/deny 类公告，CLI 会用 exit `1` 提醒调用方处理；这仍然不是自动处置，后续是否卸载、降级、替换或调整 policy 必须由维护者或用户按流程决定。
+
 ## 关联任务
 
 - T187：Capability advisory YAML schema。

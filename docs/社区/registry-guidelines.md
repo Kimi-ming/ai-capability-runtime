@@ -128,3 +128,19 @@ pnpm validate
 该命令会同时校验 manifest 和 registry test case schema。
 
 `pnpm validate` 还会执行 Capability package lint，检查 `manifest.yml`、`README.md`、registry tests、目录 id/category 一致性，以及 `.env`、`opencap.local/`、SQLite/DB 等禁止文件。Package lint 规则见 [能力包结构](../设计/capability-package-v1.md)。
+
+## Advisory 检查
+
+Registry advisory metadata 放在 `registry/advisories/`，用于记录安全公告、freeze/yank/revoke 建议和 Runtime 默认告警行为。维护者可以在本地运行：
+
+```bash
+opencap registry advisory list --registry registry --json
+opencap advisory check --state-dir opencap.local --registry registry --json
+```
+
+这些命令只读取本地文件并输出 evidence：
+
+- `registry advisory list` 列出 valid/invalid advisory metadata。
+- `advisory check` 比对本地已安装能力与 advisory metadata。
+- 命令不安装或执行 Capability，不读取 secret，不调用 provider，不触网。
+- 命令不自动卸载、不自动授权、不自动修改 policy；后续处置仍由维护者按 review/incident 流程完成。

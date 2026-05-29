@@ -132,6 +132,8 @@ pnpm --filter @opencap/cli dev -- doctor --state-dir "$SMOKE_STATE_DIR" --regist
 pnpm --filter @opencap/cli dev -- registry search github --registry registry
 pnpm --filter @opencap/cli dev -- registry show github.search_repo --registry registry --json
 pnpm --filter @opencap/cli dev -- registry report --registry registry --json
+pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --json
+pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --json
 pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --json
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run

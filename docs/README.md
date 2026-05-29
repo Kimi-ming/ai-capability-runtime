@@ -89,6 +89,8 @@
 - [数据外发策略](设计/data-egress-policy-v1.md)
 - [策略决策追踪](设计/policy-decision-trace-v1.md)
 - [策略生命周期与变更控制](运营/policy-lifecycle-and-change-control.md)
+- [能力安全公告流程](安全/capability-advisory-process.md)
+- [能力弃用、下架与撤销](生态/capability-deprecation-and-revocation.md)
 - [包发布策略 V1](运营/package-publishing-v1.md)
 - [签名和来源证明路线图](安全/signing-and-provenance-roadmap.md)
 - [Policy 事故响应手册](运营/policy-incident-runbook.md)
@@ -97,6 +99,7 @@
 
 - 先用 `opencap init <capability-id> --category <name> --output <dir>` 生成本地 V1 HTTP Capability 初稿，再按作者教程检查 manifest、README、registry test 和安全边界。
 - 用 `opencap registry search <query> --registry registry` 和 `opencap registry show <capability-id> --registry registry` 做本地发现与审查；这两个命令不安装、不授权、不改变 policy，也不会把未安装 Capability 暴露给 MCP Host。
+- 用 `opencap registry advisory list --registry registry` 查看本地 Registry 公告，用 `opencap advisory check --state-dir <path> --registry registry` 检查本地已安装能力是否命中公告；这两个命令只产生 evidence/告警，不自动卸载、不授权、不修改 policy。
 - [编写一个 Capability](教程/write-a-capability.md)
 - [GitHub fine-grained token 设置指南](教程/github-fine-grained-token-setup.md)
 - [评审一个 Capability PR](教程/review-a-capability.md)
