@@ -1751,7 +1751,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已明确 release evidence JSON 和 validation report JSON 两类 artifact 的保存、路径、schema、引用字段和安全写入边界；发布者需要记录 release evidence path、validation report path、validation `valid`、finding count 和 `policyEffect: none`，validation invalid 时不得继续 release/tag/publish。V1 alpha evidence 样例已说明当前样例没有生成持久 release evidence JSON 或 validation report JSON artifact，后续 release 必须保存并引用两类 artifact。`docs/TESTING.md` 的 Release evidence bundle 命令已加入 `opencap release artifact validate --output "$RELEASE_VALIDATION_OUTPUT"`。
 
-- [ ] T322 P1：新增 Capability scaffold 生成 helper。
+- [x] T322 P1：新增 Capability scaffold 生成 helper。
   - 验收标准：
     - `@opencap/spec` 导出 V1 HTTP Capability scaffold helper，输入 capability id、title、description、category、method、url template 和 auth mode，输出 `manifest.yml`、`README.md`、`tests/basic.yml` 的文件内容。
     - Scaffold 生成的 manifest 默认 `type: http`，包含最小 permission、input/output schema、execution、lifecycle、metadata 和 registry test skeleton，且能通过现有 manifest/package/authoring validation。
@@ -1761,6 +1761,7 @@
     - `pnpm --filter @opencap/spec test -- capability-scaffold.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 新增并导出 `buildCapabilityScaffold()`、scaffold 输入/输出类型和 V1 HTTP scaffold 文件模型。Helper 生成 `manifest.yml`、`README.md` 和 `tests/basic.yml`，会从 URL template 提取输入字段，生成 dry-run registry test skeleton，并默认输出 `type: http`、最小 permission、input/output schema、execution、active lifecycle 默认状态对应的 metadata 和 bearer API key 或 no-auth auth block。测试把生成文件写入临时 package 后验证 manifest、authoring manifest、package shape 和 registry test 全部通过，同时覆盖非法 id、非 HTTP type、危险 category/path 片段和空 title 拒绝；输出不包含真实 token、Authorization header、provider raw response、`/Users/...`、`opencap.local` 或数据库日志。`packages/spec/src/capability-scaffold.test.ts` 新增 3 个测试。
 
 - [ ] T323 P1：实现 `opencap init` 本地 Capability scaffold 命令。
   - 验收标准：

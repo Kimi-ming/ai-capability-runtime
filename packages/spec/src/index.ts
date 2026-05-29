@@ -1,5 +1,13 @@
 export { lintModelVisibleMetadata } from "./metadata-lint.js";
 export type { ModelVisibleMetadataFinding, ModelVisibleMetadataLintRule, ModelVisibleMetadataLintSeverity } from "./metadata-lint.js";
+export { buildCapabilityScaffold } from "./capability-scaffold.js";
+export type {
+  BuildCapabilityScaffoldInput,
+  CapabilityScaffold,
+  CapabilityScaffoldAuth,
+  CapabilityScaffoldFile,
+  CapabilityScaffoldHttpMethod,
+} from "./capability-scaffold.js";
 export {
   CONFORMANCE_SUMMARY_SCHEMA_VERSION,
   CONFORMANCE_SUITE_VERSION,
