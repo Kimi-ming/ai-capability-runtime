@@ -48,10 +48,13 @@ pnpm --filter @opencap/cli dev -- release evidence \
   --generated-at 2026-05-29T00:00:00.000Z \
   --output "$RELEASE_EVIDENCE_OUTPUT" \
   --json
+pnpm --filter @opencap/cli dev -- release artifact validate \
+  --file "$RELEASE_EVIDENCE_OUTPUT" \
+  --json
 rm -f "$RELEASE_EVIDENCE_OUTPUT"
 ```
 
-该命令汇总本地 Registry quality、conformance records、可选 package readiness 和命令状态，用于生成 `opencap.release_evidence.v1`。对应测试入口是 `packages/cli/src/release-evidence-command.test.ts`；测试覆盖默认时间戳、`--generated-at` 可复现输入、人类输出时间字段、`--output` 安全写文件、危险输出路径拒绝和非法时间参数用户错误。Bundle 只作为本地 release evidence，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
+该命令汇总本地 Registry quality、conformance records、可选 package readiness 和命令状态，用于生成 `opencap.release_evidence.v1`，随后用 `opencap release artifact validate` 生成 `opencap.release_artifact_validation.v1` validation report。对应测试入口是 `packages/cli/src/release-evidence-command.test.ts` 和 `packages/cli/src/release-artifact-command.test.ts`；测试覆盖默认时间戳、`--generated-at` 可复现输入、人类输出时间字段、`--output` 安全写文件、危险输出路径拒绝、artifact valid/invalid report 和非法参数用户错误。Bundle 只作为本地 release evidence，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
 ### Local metrics
 

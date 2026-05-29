@@ -1703,7 +1703,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap release artifact validate --file <path> [--json]`，读取本地 release evidence JSON artifact 并复用 T316 helper 输出 `opencap.release_artifact_validation.v1` validation report。JSON 输出可用于 release notes/handoff；人类输出显示 valid/invalid、schema、decision、blocker count 和 findings。非法 JSON 作为用户错误 exit `1` 且 stderr 不打印 stack；含 secret/path/log 的 artifact 会输出 invalid validation report 并以 exit `1` 结束。命令不写 state dir、不触网、不调用 provider、不发布 package、不读取 npm/GitHub token。`packages/cli/src/release-artifact-command.test.ts` 覆盖 JSON report、人类输出、invalid report 和非法 JSON；CLI 包测试数从 37 增至 41。
 
-- [ ] T318 P2：把 release artifact validation 纳入发布文档。
+- [x] T318 P2：把 release artifact validation 纳入发布文档。
   - 验收标准：
     - `docs/releases/release-checklist.md` 在保存 release evidence JSON 后增加 `opencap release artifact validate --file <artifact> --json` 步骤。
     - V1 alpha evidence 样例说明当前样例未运行 artifact validation，因为没有持久 JSON artifact；后续 release 必须记录 validation report。
@@ -1713,6 +1713,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已在保存 release evidence JSON artifact 后增加 `opencap release artifact validate --file <artifact> --json` 步骤，并要求 release notes、PR 描述或 handoff 记录 validation report 的 `valid`、`findings` 和 `policyEffect: none`；validation invalid 时不得继续 release/tag/publish。V1 alpha evidence 样例已说明当前样例没有持久 artifact、未运行 artifact validation，后续 release 必须保存 JSON artifact 并记录 validation report。`docs/TESTING.md` 已记录带临时 `--output` 和 `release artifact validate` 的验证命令入口。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

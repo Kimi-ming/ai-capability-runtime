@@ -191,6 +191,7 @@ release_evidence:
       path: <release-evidence-json-path-or-not-generated>
       schema: opencap.release_evidence.v1
       generated_at: <iso-timestamp-or-not-generated>
+      validation: pass | fail | not-run
   hard_gates:
     runtime: pass
     registry_trust: pass | not-applicable
@@ -214,6 +215,9 @@ opencap release evidence \
   --generated-at "$RELEASE_GENERATED_AT" \
   --output docs/releases/evidence/<release-id>-release-evidence.json \
   --json
+opencap release artifact validate \
+  --file docs/releases/evidence/<release-id>-release-evidence.json \
+  --json
 ```
 
 如果 release 涉及 npm package，可先生成 pack JSON，再把 package readiness 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录 artifact path、commit、date 和 `generatedAt`：
@@ -228,9 +232,14 @@ opencap release evidence \
   --generated-at "$RELEASE_GENERATED_AT" \
   --output docs/releases/evidence/<release-id>-release-evidence.json \
   --json
+opencap release artifact validate \
+  --file docs/releases/evidence/<release-id>-release-evidence.json \
+  --json
 ```
 
 `--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 release evidence artifact 写入本地状态目录、凭据文件或日志/数据库路径。
+
+`opencap release artifact validate --file <artifact> --json` 输出 `opencap.release_artifact_validation.v1`。发布者应把 validation report 的 `valid`、`findings` 和 `policyEffect: none` 写入 release notes、PR 描述或 handoff；如果 validation 为 invalid，不能继续 release/tag/publish。
 
 `opencap.release_evidence.v1` 只汇总本地 reports 和命令状态；它不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 

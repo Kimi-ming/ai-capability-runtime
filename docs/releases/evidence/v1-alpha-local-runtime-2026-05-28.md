@@ -52,11 +52,14 @@ opencap release evidence \
   --generated-at <iso-timestamp> \
   --output docs/releases/evidence/<release-id>-release-evidence.json \
   --json
+opencap release artifact validate \
+  --file docs/releases/evidence/<release-id>-release-evidence.json \
+  --json
 ```
 
 该命令输出 `opencap.release_evidence.v1`，把 Registry quality summary、conformance summary、可选 package readiness report 和本地命令状态汇总为一个脱敏 bundle。Bundle 中的 `decision` 只表达本地 evidence 判断；如果包含 registry advisory、package `private: true`、failed conformance 或 failed command 等 blocker，应保持 `block-release-tag`。该 bundle 不替代 GitHub required checks、真实 Claude Desktop/Cursor Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
-当前样例没有生成持久 release evidence JSON artifact；它只在本文中记录 2026-05-28 本地 evidence 摘要。后续准备具体 release 时，发布者应保存 `--output` 生成的 JSON artifact，并在 release notes 或 handoff 中记录 artifact path、commit、date、`generatedAt`、decision 和 blockers。
+当前样例没有生成持久 release evidence JSON artifact，也未运行 artifact validation；它只在本文中记录 2026-05-28 本地 evidence 摘要。后续准备具体 release 时，发布者应保存 `--output` 生成的 JSON artifact，运行 `opencap release artifact validate --file <artifact> --json`，并在 release notes 或 handoff 中记录 artifact path、commit、date、`generatedAt`、decision、blockers、validation `valid` 和 findings。
 
 ## npm Publish Dry-run Evidence
 
@@ -145,7 +148,7 @@ package_readiness:
 | T291 真实 Claude Desktop/Cursor Host smoke | blocked | 需要用户确认本机 Host 应用可用，并提供可复现配置、截图/录屏或日志。 |
 | GitHub Actions required checks | pending-external | 发布者在 tag/PR 前需检查远端 CI。 |
 | Package readiness / npm pack dry-run | pending-release | 候选包已具备 `files` allowlist 和 automated pack smoke；发布者仍需为具体 release 运行 `opencap release package report` 和 `npm pack --dry-run --json`，并记录 blockers、warnings、forbidden files 和 `policyEffect: none`。当前 `private: true` 是预期 blocker。 |
-| Release evidence bundle | pending-release | 发布者需运行 `opencap release evidence --registry registry --records packages/runtime/test/fixtures/conformance --generated-at <iso> --output <artifact-json> --json`，保存 JSON artifact，并确认 blocker/decision 与 release notes 一致。 |
+| Release evidence bundle | pending-release | 发布者需运行 `opencap release evidence --registry registry --records packages/runtime/test/fixtures/conformance --generated-at <iso> --output <artifact-json> --json`，保存 JSON artifact，运行 `opencap release artifact validate --file <artifact-json> --json`，并确认 blocker/decision/validation 与 release notes 一致。 |
 | npm publish dry-run evidence | pending-external | 发布者需手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，并记录 package、version、workflow run、tarball/provenance 摘要和 `real_publish: false`。 |
 | npm trusted publishing/provenance | pending-external | 需要 npm/GitHub 发布配置，当前不得声明已发布或已 attested。 |
 | 真实 provider API end-to-end | not-in-scope | 当前证据避免调用真实 provider，不记录 raw response 或用户数据。 |
