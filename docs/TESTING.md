@@ -58,9 +58,14 @@ pnpm --filter @opencap/cli dev -- release package report \
   --package @opencap/spec \
   --output "$PACKAGE_READINESS_OUTPUT" \
   --json
+pnpm --filter @opencap/cli dev -- release evidence \
+  --registry registry \
+  --records packages/runtime/test/fixtures/conformance \
+  --package-readiness "$PACKAGE_READINESS_OUTPUT" \
+  --json
 ```
 
-该命令只汇总本地 package metadata 和可选 `npm pack --dry-run --json` 摘要；`--output` 会安全写出 `opencap.npm_package_readiness.v1` JSON evidence report，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。对应测试入口是 `packages/cli/src/release-package-report-command.test.ts`，当前覆盖 JSON、人类输出、`--pack-json` dry-run 摘要、`--output` 安全 JSON evidence 写入、unsupported package / invalid pack JSON 不写 output、非法 output 用户错误和本地 npm pack dry-run smoke，共 7 个测试。该 artifact 只证明本地 package metadata/tarball 摘要审查，不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+`opencap release package report` 只汇总本地 package metadata 和可选 `npm pack --dry-run --json` 摘要；`--output` 会安全写出 `opencap.npm_package_readiness.v1` JSON evidence report，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。随后 `opencap release evidence --package-readiness <file>` 会复用并校验该 artifact，把它纳入 `opencap.release_evidence.v1` bundle；它不能与 `--package`/`--pack-json` 混用。对应测试入口是 `packages/cli/src/release-package-report-command.test.ts` 和 `packages/cli/src/release-evidence-command.test.ts`，当前覆盖 JSON、人类输出、`--pack-json` dry-run 摘要、`--output` 安全 JSON evidence 写入、`--package-readiness` artifact 输入、invalid artifact 不写 output、unsupported package / invalid pack JSON 不写 output、非法 output 用户错误和本地 npm pack dry-run smoke。该 artifact 只证明本地 package metadata/tarball 摘要审查，不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
 
 ### Release evidence bundle
 

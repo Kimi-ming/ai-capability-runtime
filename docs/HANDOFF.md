@@ -180,7 +180,11 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T349：CLI `opencap release evidence` 新增 `--package-readiness <file>`，可读取 T348 helper 验证后的 `opencap.npm_package_readiness.v1` artifact，并把它纳入 `opencap.release_evidence.v1` bundle 的 package component 和 blocker 汇总。命令禁止 `--package-readiness` 与 `--package`/`--pack-json` 混用；invalid package readiness artifact 作为用户错误 exit `1` 且不打印 stack，并且不会写 release evidence output partial file。命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-evidence-command.test.ts` 从 8 个测试增至 10 个，CLI 包合计从 86 个测试增至 88 个。
 
-下一项 ready：T350 P2：记录 package readiness artifact 输入到 release evidence 的发布文档。
+本轮继续完成 T350：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充 `opencap release evidence --package-readiness <file>`。文档说明发布者应先用 `opencap release package report --output <file>` 保存并校验 `opencap.npm_package_readiness.v1` artifact，再用 `release evidence --package-readiness` 复用该 artifact 汇入 `opencap.release_evidence.v1` bundle；该输入不能与 `--package`/`--pack-json` 混用，invalid artifact 会阻断且不得写半截 output。文档明确该输入只是 release evidence bundle 的本地 evidence source，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T351-T352，把单个 package readiness artifact 输入扩展到多 package release evidence，并补齐对应发布文档。该批任务仍只读取本地 JSON artifacts，不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+
+下一项 ready：T351 P2：支持多个 package readiness artifacts 输入 release evidence。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -259,9 +263,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344、T345、T346、T347、T348 和 T349 均已完成；T350 是下一项 release evidence package readiness artifact input 文档 ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344、T345、T346、T347、T348、T349 和 T350 均已完成；T351 是下一项 multi package readiness artifact input ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T350，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T351，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

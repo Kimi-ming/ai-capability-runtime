@@ -2089,11 +2089,35 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap release evidence` 新增 `--package-readiness <file>`，可读取 T348 helper 验证后的 `opencap.npm_package_readiness.v1` artifact，并把它纳入 `opencap.release_evidence.v1` bundle 的 package component 和 blocker 汇总。命令禁止 `--package-readiness` 与 `--package`/`--pack-json` 混用；invalid package readiness artifact 作为用户错误 exit `1` 且不打印 stack，并且不会写 release evidence output partial file。命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-evidence-command.test.ts` 从 8 个测试增至 10 个，CLI 包合计从 86 个测试增至 88 个。
 
-- [ ] T350 P2：记录 package readiness artifact 输入到 release evidence 的发布文档。
+- [x] T350 P2：记录 package readiness artifact 输入到 release evidence 的发布文档。
   - 验收标准：
     - Release checklist、package publishing 文档、alpha evidence 样例和测试文档说明 `opencap release evidence --package-readiness <file>` 可复用已保存的 package readiness artifact。
     - 文档明确该输入只是 release evidence bundle 的本地 evidence source，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。
     - 文档说明 invalid artifact、危险 output path、不触网、不读取 npm token、不写 state dir 和不改变 package publish state/trust/policy/authorization/Runtime execution 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充 `opencap release evidence --package-readiness <file>`。文档说明发布者应先用 `opencap release package report --output <file>` 保存并校验 `opencap.npm_package_readiness.v1` artifact，再用 `release evidence --package-readiness` 复用该 artifact 汇入 `opencap.release_evidence.v1` bundle；该输入不能与 `--package`/`--pack-json` 混用，invalid artifact 会阻断且不得写半截 output。文档明确该输入只是 release evidence bundle 的本地 evidence source，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+
+- [ ] T351 P2：支持多个 package readiness artifacts 输入 release evidence。
+  - 验收标准：
+    - CLI `opencap release evidence` 支持重复传入 `--package-readiness <file>`，按传入顺序读取多个 `opencap.npm_package_readiness.v1` artifacts。
+    - 多个 package readiness artifacts 会进入 `opencap.release_evidence.v1` 的 packages components，并将各自 blocker 汇总进 release blockers。
+    - 任一 artifact invalid 时作为用户错误 exit `1` 且不打印 stack；不会写 release evidence output partial file。
+    - 多个 `--package-readiness` 仍不得与 `--package`/`--pack-json` 混用。
+    - 命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T352 P2：记录多个 package readiness artifacts 的 release evidence 文档。
+  - 验收标准：
+    - Release checklist、package publishing 文档、alpha evidence 样例和测试文档说明多个 package release 时可重复传入 `--package-readiness <file>`。
+    - 文档明确多个 artifacts 仍只是本地 package evidence inputs，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。
+    - 文档说明任一 artifact invalid 或包含 blocker 时应阻断对应 npm package 发布，并记录到 release evidence/handoff。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`

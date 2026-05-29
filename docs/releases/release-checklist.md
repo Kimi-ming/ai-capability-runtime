@@ -267,8 +267,7 @@ opencap release package report \
 opencap release evidence \
   --registry registry \
   --records packages/runtime/test/fixtures/conformance \
-  --package <package> \
-  --pack-json <pack-json> \
+  --package-readiness "$PACKAGE_READINESS_PATH" \
   --generated-at "$RELEASE_GENERATED_AT" \
   --output "$RELEASE_EVIDENCE_PATH" \
   --json
@@ -282,7 +281,7 @@ opencap release artifact validate \
 
 `opencap release artifact validate --file <artifact> --output <report-json> --json` 输出并保存 `opencap.release_artifact_validation.v1`。发布者应把 validation report path、`valid`、finding count、`findings` 摘要和 `policyEffect: none` 写入 release notes、PR 描述或 handoff；如果 validation 为 invalid，不能继续 release/tag/publish。
 
-`opencap.release_evidence.v1` 只汇总本地 reports 和命令状态；它不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
+`opencap release evidence --package-readiness <file>` 会读取并校验已保存的 `opencap.npm_package_readiness.v1` artifact，再把它纳入 `opencap.release_evidence.v1` bundle。它不能与 `--package`/`--pack-json` 混用；invalid artifact 会作为用户错误阻断，且不得写出半截 release evidence output。`opencap.release_evidence.v1` 只汇总本地 reports 和命令状态；它不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
 发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --output <file> --json` 生成并保存本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 
@@ -299,7 +298,7 @@ npm package readiness evidence 核对步骤：
 
 Package readiness JSON artifact 只证明本地 package metadata 和可选 tarball 摘要审查；它不替代 `npm pack --dry-run --json` 原始摘要、GitHub workflow publish dry-run、npm trusted publisher、正式 provenance、release approval 或 npm 发布。
 
-顺序必须是：package `files` allowlist -> 本地 `npm pack --dry-run --json` -> `opencap release package report` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。前一步存在 blocker 时不得进入后一步。
+顺序必须是：package `files` allowlist -> 本地 `npm pack --dry-run --json` -> `opencap release package report --output <file>` -> `opencap release evidence --package-readiness <file>` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。前一步存在 blocker 时不得进入后一步。
 
 如果 release 涉及 npm package，发布者应先手动运行 `.github/workflows/npm-publish.yml` 的 dry-run，记录 package、version、workflow run URL、dry-run 结果和 `real_publish: false` 边界。真实 npm 发布仍需要 npm trusted publisher、受保护的 `npm-production` environment 和人工批准；dry-run evidence 不能写成 npm package 已发布。
 
