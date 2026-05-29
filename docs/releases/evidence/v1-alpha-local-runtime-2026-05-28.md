@@ -103,7 +103,12 @@ npm_publish:
 
 ```bash
 pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
-opencap release package report --package <package> --pack-json <pack-json> --json
+PACKAGE_READINESS_OUTPUT="docs/releases/evidence/<release-id>-package-readiness.json"
+opencap release package report \
+  --package <package> \
+  --pack-json <pack-json> \
+  --output "$PACKAGE_READINESS_OUTPUT" \
+  --json
 ```
 
 新的 release evidence 应记录：
@@ -117,10 +122,11 @@ package_readiness:
   warnings: []
   pack_evidence: provided
   forbidden_files: []
+  artifact_path: docs/releases/evidence/<release-id>-package-readiness.json
   policy_effect: none
 ```
 
-如果当前 package 仍有 blocker，例如 `NPM_PACKAGE_PRIVATE` 或 forbidden pack file，发布者必须把 report 作为 blocker evidence，而不能创建 npm release。该 report 只证明本地 metadata/tarball 摘要审查，不替代 npm publish dry-run、trusted publisher、正式 provenance、release tag 或 GitHub required checks。
+如果当前 package 仍有 blocker，例如 `NPM_PACKAGE_PRIVATE` 或 forbidden pack file，发布者必须把 report 作为 blocker evidence，而不能创建 npm release。`--output` artifact 只证明本地 metadata/tarball 摘要审查；它不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval、release tag 或 GitHub required checks。输出路径必须避开 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
 
 当前 alpha 候选包已经声明 `files` allowlist，但仍保持 `private: true`，因此预期 package readiness report 至少会包含 `NPM_PACKAGE_PRIVATE` blocker。该 blocker 是刻意保留的发布闸门，不应在没有 maintainer release decision、tag/CI/release notes 和 npm trusted publisher 准备前移除。
 

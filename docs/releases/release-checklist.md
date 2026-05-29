@@ -166,13 +166,15 @@ release_evidence:
     npm_pack_dry_run: pass | fail | not-run
     npm_publish_dry_run: pass | fail | not-run
   package_readiness:
-    command: opencap release package report --package <package> --pack-json <pack-json> --json
+    command: opencap release package report --package <package> --pack-json <pack-json> --output <package-readiness-json> --json
     package: <package-name-or-not-applicable>
     version: <version-or-not-applicable>
     blockers: []
     warnings: []
     pack_evidence: provided | not-run
     forbidden_files: []
+    artifact_path: <package-readiness-json-or-not-generated>
+    artifact_schema: opencap.npm_package_readiness.v1
     policy_effect: none
   npm_publish:
     package: <package-name-or-not-applicable>
@@ -197,6 +199,10 @@ release_evidence:
       schema: opencap.release_artifact_validation.v1
       valid: true | false | not-run
       finding_count: <number-or-not-run>
+      policy_effect: none
+    package_readiness_report:
+      path: <package-readiness-json-path-or-not-generated>
+      schema: opencap.npm_package_readiness.v1
       policy_effect: none
   hard_gates:
     runtime: pass
@@ -246,12 +252,18 @@ opencap conformance report \
 
 这两类 artifact 只是本地 evidence input，不替代 `opencap release evidence` bundle、`opencap release artifact validate` validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。它们不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
-如果 release 涉及 npm package，可先生成 pack JSON，再把 package readiness 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录 release evidence path、validation report path、commit、date、`generatedAt`、validation `valid`、finding count 和 `policyEffect: none`：
+如果 release 涉及 npm package，可先生成 pack JSON 和 package readiness JSON artifact，再把 package readiness 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录 package readiness artifact path、release evidence path、validation report path、commit、date、`generatedAt`、validation `valid`、finding count 和 `policyEffect: none`：
 
 ```bash
 pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
+PACKAGE_READINESS_PATH="docs/releases/evidence/<release-id>-package-readiness.json"
 RELEASE_EVIDENCE_PATH="docs/releases/evidence/<release-id>-release-evidence.json"
 RELEASE_VALIDATION_REPORT_PATH="docs/releases/evidence/<release-id>-release-artifact-validation.json"
+opencap release package report \
+  --package <package> \
+  --pack-json <pack-json> \
+  --output "$PACKAGE_READINESS_PATH" \
+  --json
 opencap release evidence \
   --registry registry \
   --records packages/runtime/test/fixtures/conformance \
@@ -266,7 +278,7 @@ opencap release artifact validate \
   --json
 ```
 
-`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 registry quality、conformance summary、release evidence artifact 或 validation report artifact 写入本地状态目录、凭据文件或日志/数据库路径。
+`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 registry quality、conformance summary、package readiness、release evidence artifact 或 validation report artifact 写入本地状态目录、凭据文件或日志/数据库路径。
 
 `opencap release artifact validate --file <artifact> --output <report-json> --json` 输出并保存 `opencap.release_artifact_validation.v1`。发布者应把 validation report path、`valid`、finding count、`findings` 摘要和 `policyEffect: none` 写入 release notes、PR 描述或 handoff；如果 validation 为 invalid，不能继续 release/tag/publish。
 
@@ -278,11 +290,14 @@ npm package readiness evidence 核对步骤：
 
 - [ ] 确认 package `files` allowlist 已声明且只覆盖发布所需文件；候选包当前应先保持 `private: true`，直到发布者明确解除。
 - [ ] 运行 `pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>`，只生成本地 pack 摘要，不发布 package。
-- [ ] 运行 `opencap release package report --package <package> --pack-json <pack-json> --json`。
-- [ ] Evidence 记录 `opencap.npm_package_readiness.v1` 的 package、version、blockers、warnings、pack evidence、forbidden files 和 `policyEffect: none`。
+- [ ] 运行 `opencap release package report --package <package> --pack-json <pack-json> --output <package-readiness-json> --json`，保存 `opencap.npm_package_readiness.v1` JSON artifact。
+- [ ] Evidence 记录 package readiness artifact path、package、version、blockers、warnings、pack evidence、forbidden files 和 `policyEffect: none`。
 - [ ] 如果 `blockers` 非空，不能发布该 npm package；可把 report 作为 blocker evidence 写入 release notes/handoff。
 - [ ] 如果没有运行 pack dry-run，必须把 `pack_evidence: not-run` 写入 evidence，不能伪造 tarball 内容审查已完成。
+- [ ] `--output` 路径不在 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 或目录路径下；失败时不得留下半截文件。
 - [ ] Report 不包含 token、`NPM_TOKEN`、`NODE_AUTH_TOKEN`、`.env` 内容、`opencap.local/` 内容、数据库内容、provider raw response 或私有日志正文。
+
+Package readiness JSON artifact 只证明本地 package metadata 和可选 tarball 摘要审查；它不替代 `npm pack --dry-run --json` 原始摘要、GitHub workflow publish dry-run、npm trusted publisher、正式 provenance、release approval 或 npm 发布。
 
 顺序必须是：package `files` allowlist -> 本地 `npm pack --dry-run --json` -> `opencap release package report` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。前一步存在 blocker 时不得进入后一步。
 

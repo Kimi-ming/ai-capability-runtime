@@ -209,12 +209,17 @@ Dry-run run 完成后，release evidence 必须记录 package、version、workfl
 
 ```bash
 pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
-opencap release package report --package <package> --pack-json <pack-json> --json
+PACKAGE_READINESS_OUTPUT="docs/releases/evidence/<release-id>-package-readiness.json"
+opencap release package report \
+  --package <package> \
+  --pack-json <pack-json> \
+  --output "$PACKAGE_READINESS_OUTPUT" \
+  --json
 ```
 
-该 report 用于确认 package metadata、候选包 allowlist、tarball file count/size 和 forbidden files。它不发布 package、不读取 npm token、不替代 workflow dry-run 或 trusted publishing；如果存在 blocker，应先修复或在 release evidence 中记录为阻断。
+该 report 保存 `opencap.npm_package_readiness.v1` JSON artifact，用于确认 package metadata、候选包 allowlist、tarball file count/size 和 forbidden files。`--output` 会拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；命令不发布 package、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。该 artifact 不替代 `npm pack --dry-run --json` 原始摘要、workflow dry-run、trusted publishing、正式 provenance、release approval 或 npm 发布；如果存在 blocker，应先修复或在 release evidence 中记录为阻断。
 
-Workflow dry-run 前的顺序固定为：package `files` allowlist -> 本地 pack dry-run smoke -> package readiness report -> workflow npm publish dry-run。当前 `@opencap/spec` 和 `@opencap/cli` 仍保持 `private: true`，因此 readiness report 会保留发布 blocker；这不是 workflow 故障，而是正式 release decision 前的安全闸门。
+Workflow dry-run 前的顺序固定为：package `files` allowlist -> 本地 pack dry-run smoke -> package readiness report output artifact -> workflow npm publish dry-run。当前 `@opencap/spec` 和 `@opencap/cli` 仍保持 `private: true`，因此 readiness report 会保留发布 blocker；这不是 workflow 故障，而是正式 release decision 前的安全闸门。
 
 ## 后续实现任务
 

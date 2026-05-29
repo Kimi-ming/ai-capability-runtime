@@ -2053,11 +2053,45 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap release package report --package <workspace-name>` 新增 `--output <file>`，可把当前 `opencap.npm_package_readiness.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。unsupported package 和 invalid pack JSON 仍作为用户错误 exit `1` 且不打印 stack，并且不会写 output 文件。输出路径使用 package readiness evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不运行 npm publish、不触网、不读取 npm token、不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-package-report-command.test.ts` 从 5 个测试增至 7 个，CLI 包合计从 84 个测试增至 86 个。
 
-- [ ] T347 P2：把 release package report output artifact 纳入发布文档。
+- [x] T347 P2：把 release package report output artifact 纳入发布文档。
   - 验收标准：
     - Release checklist、package publishing 文档和测试文档说明 `opencap release package report --output <file>` 可保存 `opencap.npm_package_readiness.v1` JSON artifact。
     - 文档明确该 artifact 只证明本地 package metadata/tarball 摘要审查，不替代 npm pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。
     - 文档说明安全输出路径、不触网、不读取 npm token、不写 state dir，以及不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充 `opencap release package report --output <file>`。文档说明该命令可保存 `opencap.npm_package_readiness.v1` JSON artifact，并要求 release evidence 记录 artifact path、schema、package、version、blockers、warnings、pack evidence、forbidden files 和 `policyEffect: none`。文档同时明确该 artifact 只证明本地 package metadata/tarball 摘要审查，不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；输出路径需避开 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径，命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+
+- [ ] T348 P2：新增 npm package readiness artifact validation helper。
+  - 验收标准：
+    - `@opencap/spec` 导出可验证保存后的 `opencap.npm_package_readiness.v1` JSON artifact 的 helper 和类型。
+    - helper 校验 `schemaVersion`、package name/version、candidate/private metadata、pack evidence、blockers、warnings、forbidden files 和 `policyEffect: "none"` 基础结构。
+    - invalid artifact 返回结构化 finding，不抛出未脱敏 stack；不读取 npm token、不运行 npm、不触网、不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+    - 测试覆盖有效 artifact、schemaVersion/policyEffect 错误、缺失核心字段和非对象输入。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- npm-package-readiness-artifact.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T349 P2：让 release evidence 支持读取 package readiness artifact。
+  - 验收标准：
+    - CLI `opencap release evidence --package-readiness <file>` 可读取 T348 helper 验证后的 `opencap.npm_package_readiness.v1` artifact，并把它纳入 `opencap.release_evidence.v1` bundle。
+    - `--package-readiness` 与 `--package`/`--pack-json` 的组合规则明确，避免同一次命令混用两个 package readiness 来源。
+    - invalid package readiness artifact 作为用户错误 exit `1` 且不打印 stack；不会写 release evidence output partial file。
+    - 命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T350 P2：记录 package readiness artifact 输入到 release evidence 的发布文档。
+  - 验收标准：
+    - Release checklist、package publishing 文档、alpha evidence 样例和测试文档说明 `opencap release evidence --package-readiness <file>` 可复用已保存的 package readiness artifact。
+    - 文档明确该输入只是 release evidence bundle 的本地 evidence source，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。
+    - 文档说明 invalid artifact、危险 output path、不触网、不读取 npm token、不写 state dir 和不改变 package publish state/trust/policy/authorization/Runtime execution 边界。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
