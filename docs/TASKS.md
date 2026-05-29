@@ -1618,7 +1618,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增 `buildReleaseEvidenceBundle()`、`RELEASE_EVIDENCE_SCHEMA_VERSION` 和 `opencap.release_evidence.v1` bundle 类型。Helper 只接受调用方传入的 registry quality summary、conformance summary、package readiness report、commands 和 known gaps，本地聚合 status/counts/blocker code，不触网、不读取 GitHub/npm/CI、不创建 tag、不发布 package；输出固定 `policyEffect: "none"`，并将 `candidate` / `block-release-tag` decision 与 blockers 分离。`packages/spec/src/release-evidence.test.ts` 覆盖 candidate bundle、registry/conformance/package/command blockers 和 token/path/secret 文本脱敏。Spec 包测试数从 82 增至 84。
 
-- [ ] T311 P1：新增 CLI release evidence 命令。
+- [x] T311 P1：新增 CLI release evidence 命令。
   - 验收标准：
     - CLI 新增 `opencap release evidence --registry <path> --records <path> [--package <name> --pack-json <path>] [--json]`，复用 T310 helper 输出本地 release evidence bundle。
     - 缺少 package/pack evidence 时必须标记 `not-run`，不能伪造 npm dry-run、trusted publishing、provenance 或 publish evidence。
@@ -1628,6 +1628,7 @@
     - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap release evidence --registry <path> --records <path> [--package <name> --pack-json <path>] [--json]`，复用 T310 helper 从本地 Registry quality summary、conformance summary 和可选 package readiness report 生成 `opencap.release_evidence.v1` bundle。缺少 package/pack evidence 时标记 `package_readiness_report: not-run`，不伪造 npm dry-run、trusted publishing、provenance 或 publish evidence。命令不写 state dir、不调用 provider、不触网、不发布 package；registry/package blockers 进入 bundle blockers，命令本身仍成功输出 JSON/人类摘要。新增 `packages/cli/src/release-evidence-command.test.ts` 覆盖 JSON、人类输出、package readiness 输入和用户错误；CLI 包测试数从 29 增至 33。
 
 - [ ] T312 P2：把 release evidence bundle 纳入发布文档。
   - 验收标准：

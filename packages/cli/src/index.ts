@@ -11,11 +11,13 @@ import {
   buildConformanceSummary,
   buildNpmPackageReadinessReportFromFile,
   buildRegistryQualitySummary,
+  buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
   validateManifestPath,
   type CapabilityManifest,
   type NpmPackagePackFile,
   type NpmPackageReadinessReport,
+  type ReleaseEvidenceBundle,
 } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
 import {
@@ -460,6 +462,38 @@ function printNpmPackageReadinessReport(report: NpmPackageReadinessReport): void
     for (const file of report.pack.forbiddenFiles) {
       console.log(`- ${file.reasonCode}: ${file.path}`);
     }
+  }
+}
+
+function printReleaseEvidenceBundle(bundle: ReleaseEvidenceBundle): void {
+  console.log("OpenCap release evidence");
+  console.log(`target: ${bundle.target}`);
+  console.log(`commit: ${bundle.commit}`);
+  console.log(`decision: ${bundle.decision}`);
+  console.log(`registry: ${bundle.components.registry.status}`);
+  console.log(`conformance: ${bundle.components.conformance.status}`);
+  console.log(`packages: ${bundle.components.packages.length}`);
+
+  if (bundle.components.packages.length > 0) {
+    console.log("package readiness:");
+    for (const packageReport of bundle.components.packages) {
+      console.log([
+        packageReport.packageName ?? "<missing>",
+        packageReport.status,
+        `pack=${packageReport.packEvidence}`,
+        `blockers=${packageReport.blockerCodes.length === 0 ? "none" : packageReport.blockerCodes.join(",")}`,
+      ].join(" "));
+    }
+  }
+
+  if (bundle.blockers.length === 0) {
+    console.log("blockers: none");
+    return;
+  }
+
+  console.log("blockers:");
+  for (const blocker of bundle.blockers) {
+    console.log(`- ${blocker.code} ${blocker.source}${blocker.ref ? ` ${blocker.ref}` : ""}`);
   }
 }
 
@@ -1350,6 +1384,60 @@ releasePackageCommand
 
     printNpmPackageReadinessReport(report);
   }, "Failed to generate release package report"));
+
+releaseCommand
+  .command("evidence")
+  .requiredOption("--registry <path>", "Registry root directory")
+  .requiredOption("--records <path>", "Conformance records root directory")
+  .option("--package <workspace-name>", "Workspace package name to include")
+  .option("--pack-json <path>", "Path to npm pack --dry-run --json output")
+  .option("--target <name>", "Release target name", "v0.1 Local Runtime")
+  .option("--commit <sha>", "Release source commit", "local")
+  .option("--date <date>", "Release evidence date", new Date(0).toISOString().slice(0, 10))
+  .option("--json", "Output JSON")
+  .description("Generate a local release evidence bundle.")
+  .action((options: { registry: string; records: string; package?: string; packJson?: string; target?: string; commit?: string; date?: string; json?: boolean }) => runCliAction(async () => {
+    if (options.package !== undefined && options.packJson === undefined) {
+      throw new CliUserInputError("Use --pack-json when --package is provided.");
+    }
+    if (options.package === undefined && options.packJson !== undefined) {
+      throw new CliUserInputError("Use --package when --pack-json is provided.");
+    }
+
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const registryRoot = resolveCliPath(options.registry);
+    const recordsRoot = resolveCliPath(options.records);
+    const registryQualitySummary = await buildRegistryQualitySummary(registryRoot);
+    const conformanceSummary = await buildConformanceSummary(recordsRoot);
+    const packageReadinessReports: NpmPackageReadinessReport[] = [];
+
+    if (options.package !== undefined && options.packJson !== undefined) {
+      const packageJsonPath = releasePackageJsonPath(options.package, cwd);
+      const packFiles = await readNpmPackJsonFiles(resolveCliPath(options.packJson));
+      packageReadinessReports.push(await buildNpmPackageReadinessReportFromFile(packageJsonPath, { packFiles }));
+    }
+
+    const bundle = buildReleaseEvidenceBundle({
+      target: options.target ?? "v0.1 Local Runtime",
+      commit: options.commit ?? "local",
+      date: options.date ?? new Date(0).toISOString().slice(0, 10),
+      registryQualitySummary,
+      conformanceSummary,
+      packageReadinessReports,
+      commands: {
+        registry_report: "pass",
+        conformance_report: "pass",
+        package_readiness_report: packageReadinessReports.length > 0 ? "pass" : "not-run",
+      },
+    });
+
+    if (options.json) {
+      console.log(JSON.stringify(bundle, null, 2));
+      return;
+    }
+
+    printReleaseEvidenceBundle(bundle);
+  }, "Failed to generate release evidence"));
 
 ledgerCommand
   .command("export")
