@@ -15,6 +15,7 @@ import {
   buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
   searchRegistryCapabilities,
+  validateNpmPackageReadinessArtifact,
   validateReleaseEvidenceArtifact,
   validateCapabilityAdvisoryPath,
   validateManifestPath,
@@ -1485,6 +1486,29 @@ async function readReleaseArtifactJson(filePath: string): Promise<unknown> {
   }
 }
 
+async function readPackageReadinessArtifact(filePath: string): Promise<NpmPackageReadinessReport> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(filePath, "utf8"));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new CliUserInputError("Invalid --package-readiness: expected valid JSON.");
+    }
+    throw error;
+  }
+
+  const validation = validateNpmPackageReadinessArtifact(parsed);
+  if (!validation.ok) {
+    const details = validation.findings
+      .slice(0, 5)
+      .map((finding) => `${finding.path} ${finding.message}`)
+      .join("; ");
+    throw new CliUserInputError(`Invalid --package-readiness: ${details}`);
+  }
+
+  return validation.artifact;
+}
+
 function printReleaseArtifactValidationReport(report: ReturnType<typeof validateReleaseEvidenceArtifact>): void {
   console.log("OpenCap release artifact validation");
   console.log(`valid: ${report.valid ? "yes" : "no"}`);
@@ -2602,6 +2626,7 @@ releaseCommand
   .requiredOption("--records <path>", "Conformance records root directory")
   .option("--package <workspace-name>", "Workspace package name to include")
   .option("--pack-json <path>", "Path to npm pack --dry-run --json output")
+  .option("--package-readiness <path>", "Path to saved npm package readiness JSON artifact")
   .option("--target <name>", "Release target name", "v0.1 Local Runtime")
   .option("--commit <sha>", "Release source commit", "local")
   .option("--date <date>", "Release evidence date")
@@ -2609,7 +2634,10 @@ releaseCommand
   .option("--output <path>", "Write release evidence JSON bundle to a file")
   .option("--json", "Output JSON")
   .description("Generate a local release evidence bundle.")
-  .action((options: { registry: string; records: string; package?: string; packJson?: string; target?: string; commit?: string; date?: string; generatedAt?: string; output?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { registry: string; records: string; package?: string; packJson?: string; packageReadiness?: string; target?: string; commit?: string; date?: string; generatedAt?: string; output?: string; json?: boolean }) => runCliAction(async () => {
+    if (options.packageReadiness !== undefined && (options.package !== undefined || options.packJson !== undefined)) {
+      throw new CliUserInputError("Use either --package-readiness or --package/--pack-json, not both.");
+    }
     if (options.package !== undefined && options.packJson === undefined) {
       throw new CliUserInputError("Use --pack-json when --package is provided.");
     }
@@ -2630,6 +2658,8 @@ releaseCommand
       const packageJsonPath = releasePackageJsonPath(options.package, cwd);
       const packFiles = await readNpmPackJsonFiles(resolveCliPath(options.packJson));
       packageReadinessReports.push(await buildNpmPackageReadinessReportFromFile(packageJsonPath, { packFiles }));
+    } else if (options.packageReadiness !== undefined) {
+      packageReadinessReports.push(await readPackageReadinessArtifact(resolveCliPath(options.packageReadiness)));
     }
 
     const bundle = buildReleaseEvidenceBundle({

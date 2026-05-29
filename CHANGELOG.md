@@ -100,6 +100,7 @@
 - CLI 新增 `opencap release evidence`，可从本地 registry、conformance records 和可选 package readiness 输入生成脱敏 release evidence bundle。
 - CLI `opencap release evidence` 默认使用当前 UTC `generatedAt` 和派生 `date`，支持 `--generated-at <iso>` 复现 release evidence 时间戳，并在人类输出中显示时间字段。
 - CLI `opencap release evidence --output <path>` 可安全写入脱敏 release evidence JSON artifact，并拒绝 `.env`、token/secret/password、`opencap.local/`、DB/log 和目录输出路径。
+- CLI `opencap release evidence` 新增 `--package-readiness <file>`，可复用已保存并校验过的 npm package readiness artifact。
 - `@opencap/spec` 新增 release evidence artifact validation helper，可校验保存后的 `opencap.release_evidence.v1` JSON 结构、`policyEffect: none` 和 secret/path/log 文本边界。
 - Release evidence artifact validation helper 增加 decision consistency 校验，可拒绝 blockers、失败证据或未运行本地证据与 `release`/`candidate` 决策不一致的 artifact。
 - CLI 新增 `opencap release artifact validate`，可验证本地 release evidence JSON artifact 并输出 JSON/人类 validation report。

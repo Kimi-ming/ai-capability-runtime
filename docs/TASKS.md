@@ -2077,7 +2077,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/spec` 新增并导出 `validateNpmPackageReadinessArtifact()`、`NpmPackageReadinessArtifactFinding`、finding code 和 validation result 类型，用于验证保存后的 `opencap.npm_package_readiness.v1` JSON artifact。Helper 校验 schemaVersion、package name/version、candidate、metadata、pack evidence、forbidden files、blockers、warnings 和 `policyEffect: "none"` 基础结构；invalid artifact 返回结构化 findings，不运行 npm、不触网、不读取 npm token，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。新增 `packages/spec/src/npm-package-readiness-artifact.test.ts` 覆盖有效 artifact、schemaVersion/policyEffect drift、缺失核心字段和非对象输入；spec 包测试数从 92 增至 96。
 
-- [ ] T349 P2：让 release evidence 支持读取 package readiness artifact。
+- [x] T349 P2：让 release evidence 支持读取 package readiness artifact。
   - 验收标准：
     - CLI `opencap release evidence --package-readiness <file>` 可读取 T348 helper 验证后的 `opencap.npm_package_readiness.v1` artifact，并把它纳入 `opencap.release_evidence.v1` bundle。
     - `--package-readiness` 与 `--package`/`--pack-json` 的组合规则明确，避免同一次命令混用两个 package readiness 来源。
@@ -2087,6 +2087,7 @@
     - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap release evidence` 新增 `--package-readiness <file>`，可读取 T348 helper 验证后的 `opencap.npm_package_readiness.v1` artifact，并把它纳入 `opencap.release_evidence.v1` bundle 的 package component 和 blocker 汇总。命令禁止 `--package-readiness` 与 `--package`/`--pack-json` 混用；invalid package readiness artifact 作为用户错误 exit `1` 且不打印 stack，并且不会写 release evidence output partial file。命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-evidence-command.test.ts` 从 8 个测试增至 10 个，CLI 包合计从 86 个测试增至 88 个。
 
 - [ ] T350 P2：记录 package readiness artifact 输入到 release evidence 的发布文档。
   - 验收标准：

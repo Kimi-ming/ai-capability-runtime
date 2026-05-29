@@ -45,6 +45,44 @@ async function writePackJson(files: Array<{ path: string; size: number }>): Prom
   return { dir, file };
 }
 
+async function writePackageReadinessArtifact(overrides: Record<string, unknown> = {}): Promise<{ dir: string; file: string }> {
+  const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-package-readiness-artifact-"));
+  const file = join(dir, "package-readiness.json");
+  await writeFile(file, JSON.stringify({
+    schemaVersion: "opencap.npm_package_readiness.v1",
+    packageName: "@opencap/spec",
+    version: "0.1.0",
+    candidate: true,
+    metadata: {
+      private: true,
+      hasMain: true,
+      hasTypes: true,
+      hasBin: false,
+      hasFilesAllowlist: true,
+      files: ["dist", "package.json", "schema"],
+      exportKeys: [".", "./package.json", "./schema/manifest.schema.json"],
+    },
+    pack: {
+      evidence: "provided",
+      fileCount: 3,
+      totalSize: 60,
+      forbiddenFiles: [],
+    },
+    blockers: [
+      {
+        code: "NPM_PACKAGE_PRIVATE",
+        severity: "blocker",
+        path: "/private",
+        message: "package is still marked private.",
+      },
+    ],
+    warnings: [],
+    policyEffect: "none",
+    ...overrides,
+  }), "utf8");
+  return { dir, file };
+}
+
 async function fileExists(path: string): Promise<boolean> {
   try {
     await readFile(path, "utf8");
@@ -189,6 +227,39 @@ describe("OpenCap CLI release evidence command", () => {
     }
   }, 60_000);
 
+  it("includes a saved package readiness artifact when --package-readiness is provided", async () => {
+    const fixture = await writePackageReadinessArtifact();
+
+    try {
+      const result = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--package-readiness",
+        fixture.file,
+        "--json",
+      ]);
+      const bundle = JSON.parse(result.stdout);
+
+      expect(result.exitCode).toBe(0);
+      expect(bundle.components.packages).toEqual([
+        expect.objectContaining({
+          packageName: "@opencap/spec",
+          packEvidence: "provided",
+          packFileCount: 3,
+          blockerCodes: expect.arrayContaining(["NPM_PACKAGE_PRIVATE"]),
+        }),
+      ]);
+      expect(bundle.blockers.map((blocker: { code: string }) => blocker.code)).toContain("PACKAGE_READINESS_BLOCKER");
+      expect(result.stderr).toBe("");
+    } finally {
+      await rm(fixture.dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a human-readable release evidence summary", async () => {
     const result = await runOpenCapCli([
       "release",
@@ -286,38 +357,93 @@ describe("OpenCap CLI release evidence command", () => {
   }, 60_000);
 
   it("returns user errors for package options without stack traces", async () => {
-    const missingPack = await runOpenCapCli([
-      "release",
-      "evidence",
-      "--registry",
-      registryRoot,
-      "--records",
-      conformanceRoot,
-      "--package",
-      "@opencap/spec",
-    ], { allowFailure: true });
+    const fixture = await writePackageReadinessArtifact();
+    try {
+      const missingPack = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--package",
+        "@opencap/spec",
+      ], { allowFailure: true });
 
-    expect(missingPack.exitCode).toBe(1);
-    expect(missingPack.stderr).toContain("Use --pack-json when --package is provided.");
-    expect(missingPack.stderr).not.toContain("Error:");
-    expect(missingPack.stderr).not.toContain("at ");
+      expect(missingPack.exitCode).toBe(1);
+      expect(missingPack.stderr).toContain("Use --pack-json when --package is provided.");
+      expect(missingPack.stderr).not.toContain("Error:");
+      expect(missingPack.stderr).not.toContain("at ");
 
-    const unsupported = await runOpenCapCli([
-      "release",
-      "evidence",
-      "--registry",
-      registryRoot,
-      "--records",
-      conformanceRoot,
-      "--package",
-      "@opencap/runtime",
-      "--pack-json",
-      "missing.json",
-    ], { allowFailure: true });
+      const unsupported = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--package",
+        "@opencap/runtime",
+        "--pack-json",
+        "missing.json",
+      ], { allowFailure: true });
 
-    expect(unsupported.exitCode).toBe(1);
-    expect(unsupported.stderr).toContain("Unsupported --package value: @opencap/runtime");
-    expect(unsupported.stderr).not.toContain("Error:");
-    expect(unsupported.stderr).not.toContain("at ");
+      expect(unsupported.exitCode).toBe(1);
+      expect(unsupported.stderr).toContain("Unsupported --package value: @opencap/runtime");
+      expect(unsupported.stderr).not.toContain("Error:");
+      expect(unsupported.stderr).not.toContain("at ");
+
+      const mixedSource = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--package",
+        "@opencap/spec",
+        "--pack-json",
+        "pack.json",
+        "--package-readiness",
+        fixture.file,
+      ], { allowFailure: true });
+
+      expect(mixedSource.exitCode).toBe(1);
+      expect(mixedSource.stderr).toContain("Use either --package-readiness or --package/--pack-json, not both.");
+      expect(mixedSource.stderr).not.toContain("Error:");
+      expect(mixedSource.stderr).not.toContain("at ");
+    } finally {
+      await rm(fixture.dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects invalid package readiness artifacts without writing release evidence output", async () => {
+    const fixture = await writePackageReadinessArtifact({ policyEffect: "allow" });
+    const outputPath = join(fixture.dir, "release-evidence.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--package-readiness",
+        fixture.file,
+        "--output",
+        outputPath,
+      ], { allowFailure: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Invalid --package-readiness:");
+      expect(result.stderr).toContain("/policyEffect");
+      expect(result.stderr).not.toContain("Error:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      expect(await fileExists(outputPath)).toBe(false);
+    } finally {
+      await rm(fixture.dir, { recursive: true, force: true });
+    }
   }, 60_000);
 });
