@@ -19,14 +19,14 @@
 
 ## 当前完成度快照
 
-截至 2026-05-28，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP SDK server wiring、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests、CLI user-error exit code tests、CLI Capability Card output 和 usage export format。最近一次验证通过 MCP/CLI focused build/test、`pnpm validate`、`pnpm build`、`pnpm lint` 和 `pnpm test`。
+截至 2026-05-29，OpenCap 已完成 V1 最小运行时主链路的大部分基础能力：manifest 校验、registry tests、Capability package lint、Capability advisory YAML schema、Registry revocation metadata、installed capability advisory check、lifecycle status schema、install/list/invoke lifecycle warnings、registry search lifecycle filtering、quality score rubric helper、Capability authoring loop、release maturity gate matrix、least-privilege auth lint、credential lifecycle runbook lint、GitHub fine-grained token setup guide lint、SECURITY.md private reporting lint、execution semantics evidence、unknown outcome audit tests、retry policy tests、score cannot override policy tests、quota/budget policy gates、provider rate limit handling、local abuse throttle、financial consent/spend cap gate、install/list lifecycle trust fields、policy、confirmation、consent receipt audit fields、audit、HTTP dry-run/execute、Secret Resolver、credential lifecycle smoke、Result Envelope、data egress、outbound policy 私网阻断、state dir precedence tests、credential descriptor schema、policy governance、Runtime public contract、Runtime Gate contract、Ledger storage contract、Card schema contract、Trust Card generation rules、Trust level transition tests、revoked invoke lifecycle gate、Capability identity contract、package public exports、MCP SDK server wiring、MCP tool mapping contract tests、CLI smoke test、CLI command snapshot tests、CLI user-error exit code tests、CLI Capability Card output、usage export format、release evidence artifact、package readiness artifacts 和 Registry index build/validate evidence。最近一次验证通过 MCP/CLI focused build/test、`pnpm validate`、`pnpm build`、`pnpm lint` 和 `pnpm test`。
 
 当前主要缺口：
 
 - `opencap serve --mcp` 已接入最小 stdio server；真实 Claude Desktop/Cursor Host smoke 需要本机 Host 应用和人工证据，先列为外部证据任务。
-- V1 需要把具体 ledger writer/迁移策略继续落到类型、测试和实现里。
-- Registry trust/lifecycle/advisory/quality/usage/commerce 等生态闭环仍是任务队列主体。
-- Console、Registry Web、SDK/adapters 仍是 V1 后续或 alpha 后增强。
+- T291 真实 Host smoke 是当前唯一外部阻塞项；不能用自动化 MCP SDK smoke 替代。
+- 下一批本地 ready 任务转向 post-alpha 开发者集成：`@opencap/sdk` manifest authoring boundary、SDK 文档闭环和 OpenAPI operation selection evidence helper。
+- Console、Registry Web 和更完整 adapters 仍是 V1 后续或 alpha 后增强。
 
 下一批 ready 任务规划原则：
 
@@ -47,6 +47,7 @@
 | M4 | Registry、Trust、Lifecycle 和供应链 | 建立能力包、信任卡、生命周期、安全公告和供应链闭环 | 下一批 ready |
 | M5 | Conformance、Abuse Cases、隐私和运维 | 把设计风险转为一致性测试、smoke、runbook 和文档门禁 | 下一批 ready |
 | M6 | Composition、Capability Graph 和 Agentic Commerce | 规划多步组合、能力图、用量计费和商业边界 | V1 后续扩展 ready |
+| M7 | SDK、Adapters 和开发者集成 | 把 post-alpha 作者/适配器入口做成本地可验证能力 | 下一批 ready |
 
 ## 可执行任务队列
 
@@ -2197,6 +2198,42 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
   - 完成记录：README、中文文档中心、`docs/生态/registry-distribution.md`、`docs/releases/release-checklist.md`、V1 alpha evidence 样例和测试策略已补充 `opencap registry index validate --file <registry-index-json> --output <registry-index-validation-json> --json` 的用途和边界。文档明确 validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计；validation 不签名、不触网、不读取 provider secret、不安装、不执行 Capability、不写 state dir，也不改变 trust、policy、authorization 或 Runtime execution。已验证 `check_docs.py`、`audit_docs.py` 和 `git diff --check`。
+
+### 模块 M7：SDK、Adapters 和开发者集成
+
+- [ ] T359 P2：定义 `@opencap/sdk` V1 manifest authoring helper。
+  - 验收标准：
+    - `@opencap/sdk` 导出 V1 manifest authoring helper 和类型，用于定义 HTTP Capability Manifest draft，并保持 manifest 仍是 Registry/Runtime 的事实契约。
+    - Helper 必须复用 `@opencap/spec` manifest validation，返回结构化 validation issues 或抛出可测试错误；不得绕过 manifest schema、model-visible metadata lint、least-privilege/risk lint 或 authoring loop。
+    - SDK V1 不暴露 runtime plugin/executor API，不要求或接受 `run()` handler，不安装 Capability、不执行 Capability、不读取 provider secret、不写 state dir、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+    - `packages/sdk-js` 增加本地测试入口，覆盖 valid HTTP manifest draft、invalid manifest issue propagation、拒绝 runtime handler 边界和 root export。
+  - 验证方式：
+    - `pnpm --filter @opencap/sdk test -- index.test.ts`
+    - `pnpm --filter @opencap/sdk build`
+    - `pnpm --filter @opencap/sdk lint`
+    - `pnpm validate`
+
+- [ ] T360 P2：把 SDK manifest authoring helper 纳入作者教程和测试文档。
+  - 验收标准：
+    - README、中文文档中心、`docs/设计/sdk-and-adapter-boundary.md`、作者教程和测试策略说明 SDK helper 的用途和边界。
+    - 文档明确 SDK helper 只生成/校验 manifest draft，不是 Runtime plugin API，不执行代码、不安装能力、不读取 secret、不触网、不改变 policy/audit/trust。
+    - 文档说明 SDK output 仍必须经过 `opencap validate`、package lint、model-visible metadata lint、least-privilege/risk lint、registry tests 和 review。
+    - Handoff 指向下一项 ready 或明确外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
+- [ ] T361 P2：新增 OpenAPI operation selection evidence helper。
+  - 验收标准：
+    - `@opencap/spec` 导出 OpenAPI operation selection evidence helper 和 report 类型，输出本地 `opencap.openapi_operation_selection.v1` report。
+    - Helper 只校验调用方传入的 OpenAPI-like JSON 对象和显式 operation selection，确认 method/path 存在、deprecated 状态、server HTTPS 边界、cookie/unsupported security scheme、request/response schema warning 和 reviewer-provided capability id/category/risk hints。
+    - Helper 不生成最终 manifest、不安装、不执行、不触网、不读取 provider secret、不信任 OpenAPI description/examples/securitySchemes，不改变 trust、policy、authorization 或 Runtime execution；report 固定 `policyEffect: "none"` 并脱敏 token/path/log/raw body 文本。
+    - 测试覆盖 valid selected operation、deprecated/unsupported operation warnings、unsafe server/security blockers 和 sensitive text redaction。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- openapi-operation-selection.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
