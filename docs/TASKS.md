@@ -1751,6 +1751,39 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已明确 release evidence JSON 和 validation report JSON 两类 artifact 的保存、路径、schema、引用字段和安全写入边界；发布者需要记录 release evidence path、validation report path、validation `valid`、finding count 和 `policyEffect: none`，validation invalid 时不得继续 release/tag/publish。V1 alpha evidence 样例已说明当前样例没有生成持久 release evidence JSON 或 validation report JSON artifact，后续 release 必须保存并引用两类 artifact。`docs/TESTING.md` 的 Release evidence bundle 命令已加入 `opencap release artifact validate --output "$RELEASE_VALIDATION_OUTPUT"`。
 
+- [ ] T322 P1：新增 Capability scaffold 生成 helper。
+  - 验收标准：
+    - `@opencap/spec` 导出 V1 HTTP Capability scaffold helper，输入 capability id、title、description、category、method、url template 和 auth mode，输出 `manifest.yml`、`README.md`、`tests/basic.yml` 的文件内容。
+    - Scaffold 生成的 manifest 默认 `type: http`，包含最小 permission、input/output schema、execution、lifecycle、metadata 和 registry test skeleton，且能通过现有 manifest/package/authoring validation。
+    - Helper 拒绝非法 capability id、非 HTTP type、危险 category/path 片段、secret/token/password/opencap.local/数据库日志文件名和空 title/description。
+    - 输出内容不包含真实 token、Authorization header、provider raw response、用户私有路径或本地 state dir。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- capability-scaffold.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T323 P1：实现 `opencap init` 本地 Capability scaffold 命令。
+  - 验收标准：
+    - CLI `opencap init <capability-id> --category <name> --output <dir>` 调用 T322 helper 写入 `manifest.yml`、`README.md` 和 `tests/basic.yml`。
+    - 默认 output 基于 `INIT_CWD`/当前工作目录解析；命令自动创建目标目录，但拒绝覆盖已有文件，拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 路径和目录穿越。
+    - 成功后输出下一步命令：`opencap validate <dir>` 和 `pnpm validate`，不自动安装、不读取 secret、不写 state dir、不触网。
+    - 用户错误返回 exit `1` 且不打印 stack。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- init-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T324 P2：把 `opencap init` 纳入作者教程和测试文档。
+  - 验收标准：
+    - 作者教程说明 `opencap init` 的输入、生成文件、后续 validate/authoring loop 和安全边界。
+    - README 或中文文档中心补充 `opencap init` 入口，避免继续把 init 写成占位能力。
+    - `docs/TESTING.md` 记录 `init-command.test.ts` 和 scaffold helper 测试入口、测试计数和不写 state dir 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。

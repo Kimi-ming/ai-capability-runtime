@@ -104,6 +104,10 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 当前 release artifact validation 批次 T319-T321 已闭环；剩余 T291 为真实 Claude Desktop/Cursor Host UI smoke 外部证据阻塞项。下一步需要重新规划下一批本地 ready 任务，或在用户确认本机 Host 环境可用后处理 T291。
 
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T322-T324，把 Capability authoring UX 从文档合约推进到本地 scaffold 能力。顺序为先在 `@opencap/spec` 增加 V1 HTTP Capability scaffold helper，再实现 CLI `opencap init <id> --category <name> --output <dir>`，最后把 init 流程写入作者教程和测试文档。该批任务只写本地示例文件，不安装 Capability、不读取 secret、不写 state dir、不触网。
+
+下一项 ready：T322 P1：新增 Capability scaffold 生成 helper。
+
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
 本轮已把产品定位和架构完善方向同步到正式架构文档：`docs/ARCHITECTURE.md` 明确 OpenCap 是 AI Host 和真实 API 之间的本地优先 Capability Runtime，不是 Agent、聊天入口、模型路由或 marketplace；`docs/规划/v1-architecture.md` 已补充产品分层、Runtime Kernel 边界、gate 顺序、Result Envelope 边界和 Architecture Convergence 实施顺序。
@@ -181,9 +185,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320 和 T321 均已完成；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320 和 T321 均已完成；T322 是下一项本地 Capability authoring ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：重新规划下一批本地 ready 任务，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T322，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
