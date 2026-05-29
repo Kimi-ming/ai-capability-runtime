@@ -14,14 +14,18 @@ import {
   buildRegistryQualitySummary,
   buildReleaseEvidenceBundle,
   formatManifestValidationIssue,
+  searchRegistryCapabilities,
   validateReleaseEvidenceArtifact,
   validateManifestPath,
   type CapabilityScaffoldAuth,
   type CapabilityScaffoldFile,
   type CapabilityScaffoldHttpMethod,
   type CapabilityManifest,
+  type CapabilityManifestLifecycleStatus,
+  type ManifestValidationFailure,
   type NpmPackagePackFile,
   type NpmPackageReadinessReport,
+  type RegistryCapabilitySearchResult,
   type ReleaseEvidenceBundle,
 } from "@opencap/spec";
 import { serveOpenCapMcpStdio } from "@opencap/mcp";
@@ -219,6 +223,7 @@ const POLICY_DECISION_VALUES = new Set<PolicyDecision>(["allow", "ask", "deny"])
 const LEDGER_RECORD_KINDS = new Set<LedgerRecordKind>(["capability", "policy", "invocation", "compatibility"]);
 const CAPABILITY_SCAFFOLD_METHODS = new Set<CapabilityScaffoldHttpMethod>(["GET", "POST", "PUT", "PATCH", "DELETE"]);
 const CAPABILITY_SCAFFOLD_AUTH_MODES = new Set(["none", "api-key-bearer"]);
+const REGISTRY_SEARCH_INCLUDE_LIFECYCLES = new Set<CapabilityManifestLifecycleStatus>(["yanked", "revoked"]);
 
 interface InitCommandOptions {
   category: string;
@@ -231,6 +236,42 @@ interface InitCommandOptions {
   provider?: string;
   env?: string;
   scope?: string[];
+}
+
+interface RegistrySearchCommandOptions {
+  registry?: string;
+  includeLifecycle?: string;
+  json?: boolean;
+}
+
+interface RegistrySearchReportResult {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  lifecycle: CapabilityManifestLifecycleStatus | "active";
+  category: string;
+  filePath: string;
+}
+
+interface RegistrySearchInvalidResult {
+  filePath: string;
+  issues: string[];
+}
+
+interface RegistrySearchReport {
+  schemaVersion: "opencap.registry_search.v1";
+  registryPath: string;
+  query?: string;
+  resultCount: number;
+  results: RegistrySearchReportResult[];
+  excludedByLifecycle: {
+    count: number;
+    results: RegistrySearchReportResult[];
+  };
+  invalidCount: number;
+  invalid: RegistrySearchInvalidResult[];
+  policyEffect: "none";
 }
 
 function parseLedgerKind(value: string | undefined): LedgerRecordKind | undefined {
@@ -380,6 +421,103 @@ function buildCliCapabilityScaffold(input: Parameters<typeof buildCapabilityScaf
     return buildCapabilityScaffold(input);
   } catch (error) {
     throw new CliUserInputError(error instanceof Error ? error.message : "Invalid Capability scaffold input.");
+  }
+}
+
+function parseRegistrySearchIncludeLifecycle(value: string | undefined): CapabilityManifestLifecycleStatus[] {
+  if (value === undefined) {
+    return [];
+  }
+
+  const lifecycles = value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+  if (lifecycles.length === 0) {
+    throw new CliUserInputError("Invalid --include-lifecycle value: expected yanked,revoked.");
+  }
+
+  const parsed = new Set<CapabilityManifestLifecycleStatus>();
+  for (const lifecycle of lifecycles) {
+    if (!REGISTRY_SEARCH_INCLUDE_LIFECYCLES.has(lifecycle as CapabilityManifestLifecycleStatus)) {
+      throw new CliUserInputError(`Invalid --include-lifecycle value: ${lifecycle}`);
+    }
+    parsed.add(lifecycle as CapabilityManifestLifecycleStatus);
+  }
+
+  return [...parsed];
+}
+
+function registrySearchCategory(result: RegistryCapabilitySearchResult): string {
+  const category = result.manifest.metadata.category;
+  return typeof category === "string" ? category : "unknown";
+}
+
+function registrySearchReportResult(result: RegistryCapabilitySearchResult): RegistrySearchReportResult {
+  return {
+    id: result.id,
+    name: result.name,
+    description: result.description,
+    version: result.version,
+    lifecycle: result.lifecycle,
+    category: registrySearchCategory(result),
+    filePath: result.filePath,
+  };
+}
+
+function registrySearchInvalidResult(invalid: ManifestValidationFailure): RegistrySearchInvalidResult {
+  return {
+    filePath: invalid.filePath,
+    issues: invalid.issues.map((issue) => formatManifestValidationIssue(issue)),
+  };
+}
+
+function buildRegistrySearchReport(search: Awaited<ReturnType<typeof searchRegistryCapabilities>>): RegistrySearchReport {
+  const results = search.results.map(registrySearchReportResult);
+  const excludedByLifecycle = search.excludedByLifecycle.map(registrySearchReportResult);
+
+  return {
+    schemaVersion: "opencap.registry_search.v1",
+    registryPath: search.targetPath,
+    ...(search.query === undefined ? {} : { query: search.query }),
+    resultCount: results.length,
+    results,
+    excludedByLifecycle: {
+      count: excludedByLifecycle.length,
+      results: excludedByLifecycle,
+    },
+    invalidCount: search.invalid.length,
+    invalid: search.invalid.map(registrySearchInvalidResult),
+    policyEffect: "none",
+  };
+}
+
+function printRegistrySearchReport(report: RegistrySearchReport): void {
+  if (report.results.length === 0) {
+    console.log("No registry capabilities found.");
+  } else {
+    console.log("id version lifecycle category description");
+    for (const capability of report.results) {
+      console.log([
+        capability.id,
+        capability.version,
+        capability.lifecycle,
+        capability.category,
+        capability.description,
+      ].join(" "));
+    }
+  }
+
+  console.log(`excluded_by_lifecycle: ${report.excludedByLifecycle.count}`);
+
+  if (report.invalidCount === 0) {
+    return;
+  }
+
+  console.error(`Invalid registry manifests: ${report.invalidCount}`);
+  for (const invalid of report.invalid) {
+    console.error(`- ${invalid.filePath}: ${invalid.issues.join("; ")}`);
   }
 }
 
@@ -1625,6 +1763,33 @@ conformanceCommand
       process.exitCode = 1;
     }
   }, "Failed to generate conformance report"));
+
+registryCommand
+  .command("search")
+  .argument("[query]", "Search query matched against id, name, and description")
+  .option("--registry <path>", "Registry root directory", "registry")
+  .option("--include-lifecycle <values>", "Comma-separated lifecycle statuses to include: yanked,revoked")
+  .option("--json", "Output JSON")
+  .description("Search local Registry capabilities without installing them.")
+  .action((query: string | undefined, options: RegistrySearchCommandOptions) => runCliAction(async () => {
+    const registryRoot = resolveCliPath(options.registry ?? "registry");
+    const includeLifecycle = parseRegistrySearchIncludeLifecycle(options.includeLifecycle);
+    const search = await searchRegistryCapabilities(registryRoot, { query, includeLifecycle });
+    const report = buildRegistrySearchReport(search);
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      if (report.invalidCount > 0) {
+        process.exitCode = 1;
+      }
+      return;
+    }
+
+    printRegistrySearchReport(report);
+    if (report.invalidCount > 0) {
+      process.exitCode = 1;
+    }
+  }, "Failed to search Registry"));
 
 registryCommand
   .command("report")

@@ -1787,7 +1787,7 @@
     - `git diff --check`
   - 完成记录：`docs/教程/write-a-capability.md` 已把 `opencap init` 作为推荐作者入口，说明必填输入、可选 auth 参数、生成的 `manifest.yml` / `README.md` / `tests/basic.yml`、后续 `opencap validate <dir>` 和 `pnpm validate`，并记录不安装、不读 secret、不写 `opencap.local/`、不触网、拒绝覆盖和危险路径的安全边界。`README.md` 增加临时目录 scaffold 示例，`docs/README.md` 在 Capability/Registry 贡献入口提示先用 `opencap init` 生成 V1 HTTP 初稿。`docs/TESTING.md` 已记录 `capability-scaffold.test.ts`、`init-command.test.ts`、CLI 49 个测试和不写 state dir 边界。
 
-- [ ] T325 P1：新增 `opencap registry search` 本地发现命令。
+- [x] T325 P1：新增 `opencap registry search` 本地发现命令。
   - 验收标准：
     - CLI `opencap registry search [query] --registry <path> [--json]` 复用 `@opencap/spec` 的 `searchRegistryCapabilities()`，按 id、name、description 搜索本地 registry。
     - 默认隐藏 yanked/revoked Capability，并在输出中报告被 lifecycle 过滤的数量；支持显式 `--include-lifecycle yanked,revoked` 纳入不可默认发现的条目。
@@ -1797,6 +1797,7 @@
     - `pnpm --filter @opencap/cli test -- registry-search-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap registry search [query] --registry <path> [--json]`，复用 `searchRegistryCapabilities()` 按 id、name 和 description 搜索本地 registry。JSON 输出为 `opencap.registry_search.v1`，包含 registry path、query、results、excludedByLifecycle、invalidCount、invalid summary 和 `policyEffect: none`；人类输出包含 id、version、lifecycle、category、description 和 lifecycle 过滤计数。命令默认隐藏 yanked/revoked，并支持 `--include-lifecycle yanked,revoked` 显式纳入；invalid manifest 会输出 report 后 exit `1`，非法 include lifecycle 返回用户错误 exit `1` 且不打印 stack。命令不安装 Capability、不读取/写入 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-search-command.test.ts` 新增 4 个测试，CLI 包测试数从 49 增至 53。
 
 - [ ] T326 P1：新增 `opencap registry show` 本地详情命令。
   - 验收标准：
