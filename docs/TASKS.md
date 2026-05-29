@@ -1942,7 +1942,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap advisory check --state-dir <path> --registry <path>` 新增 `--output <file>`，可把当前 `opencap.advisory_check.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。输出路径复用安全 JSON artifact 策略并使用 advisory evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。revoked/revoke/deny matches 和 invalid advisory summary 仍保持既有 exit `1` 语义；输出 report 不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。`packages/cli/src/advisory-check-command.test.ts` 从 7 个测试增至 9 个，CLI 包测试数从 72 增至 74。
 
-- [ ] T338 P2：增强 `opencap advisory check` 人类摘要的 filters 和 match counts。
+- [x] T338 P2：增强 `opencap advisory check` 人类摘要的 filters 和 match counts。
   - 验收标准：
     - 非 JSON 输出展示 checked installed capability count、当前 filters，以及 raw/filtered advisory match counts。
     - 空结果、warning-only、revoked/deny 和 invalid advisory summary 均保持现有 exit code 与安全边界。
@@ -1951,6 +1951,7 @@
     - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap advisory check` 非 JSON 输出现在展示 `checked: <filtered>/<installed>`、`filters: <...|none>` 和 `matches: <filtered>/<raw>`，同时保留原有 match 表格、空结果提示和 invalid advisory summary。空结果、warning-only、revoked/deny 和 invalid advisory summary 均保持现有 exit code 与安全边界；人类摘要不输出 input/output、secret、Authorization/Cookie、provider raw response 或本地数据库日志路径。`packages/cli/src/advisory-check-command.test.ts` 从 9 个测试增至 10 个，CLI 包测试数从 74 增至 75。
 
 - [ ] T339 P2：把 advisory check output 和人类摘要纳入文档。
   - 验收标准：

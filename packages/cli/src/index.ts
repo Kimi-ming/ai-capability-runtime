@@ -881,8 +881,20 @@ function advisoryCheckExitCode(report: AdvisoryCheckReport): CliExitCode | undef
   return undefined;
 }
 
+function formatAdvisoryCheckFilters(filters: AdvisoryCheckFilters): string {
+  const parts = [
+    filters.capability === undefined ? undefined : `capability=${filters.capability}`,
+    filters.severity === undefined ? undefined : `severity=${filters.severity}`,
+    filters.status === undefined ? undefined : `status=${filters.status}`,
+  ].filter((part): part is string => part !== undefined);
+
+  return parts.length === 0 ? "none" : parts.join(" ");
+}
+
 function printAdvisoryCheckReport(report: AdvisoryCheckReport): void {
-  console.log(`checked: ${report.checkedCapabilityCount}`);
+  console.log(`checked: ${report.checkedCapabilityCount}/${report.installedCapabilityCount}`);
+  console.log(`filters: ${formatAdvisoryCheckFilters(report.filters)}`);
+  console.log(`matches: ${report.filteredMatchCount}/${report.matchCount}`);
 
   if (report.matches.length === 0) {
     console.log("No installed capability advisories found.");

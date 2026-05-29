@@ -80,6 +80,7 @@
 - CLI `opencap advisory check` 新增 `--capability <id>` 本地筛选参数，并在 JSON report 中输出 installed/filter counts。
 - CLI `opencap advisory check` 新增 `--severity` 和 `--status` 本地筛选参数，并在 JSON report 中输出 raw/filtered match counts。
 - CLI `opencap advisory check` 新增 `--output <file>`，可安全写出本地 JSON evidence report。
+- CLI `opencap advisory check` 人类摘要现在展示 filters 和 raw/filtered match counts。
 - README、Registry、安全和运营文档已补充 `opencap advisory check --capability/--severity/--status` 本地 evidence 查询边界。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。
 - Release checklist、V1 alpha evidence 样例和 npm 发布文档已纳入 package readiness report 与 `npm pack --dry-run --json` 记录步骤，明确它不能替代 npm publish dry-run、trusted publishing 或正式 provenance。

@@ -482,6 +482,40 @@ describe("OpenCap CLI advisory check command", () => {
     }
   }, 60_000);
 
+  it("prints human advisory check filters and match counts", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
+
+    try {
+      await runOpenCapCli(["install", "http.request_demo", "--state-dir", stateDir, "--registry", registryRoot]);
+
+      const result = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--capability",
+        "http.request_demo",
+        "--severity",
+        "critical",
+        "--status",
+        "revoked",
+      ], { allowFailure: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toContain("checked: 1/1");
+      expect(result.stdout).toContain("filters: capability=http.request_demo severity=critical status=revoked");
+      expect(result.stdout).toContain("matches: 1/1");
+      expect(result.stdout).toContain("http.request_demo 0.1.0 OCAP-2026-0001 critical revoked revoke deny");
+      expect(result.stdout).not.toContain("Authorization");
+      expect(result.stdout).not.toContain("provider raw response");
+      expect(result.stdout).not.toContain("OpenCap smoke test message");
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a friendly empty human summary without writing audit logs", async () => {
     const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
 
@@ -489,8 +523,10 @@ describe("OpenCap CLI advisory check command", () => {
       const result = await runOpenCapCli(["advisory", "check", "--state-dir", stateDir, "--registry", registryRoot]);
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain("No installed capability advisories found.");
       expect(result.stdout).toContain("checked: 0");
+      expect(result.stdout).toContain("filters: none");
+      expect(result.stdout).toContain("matches: 0/0");
+      expect(result.stdout).toContain("No installed capability advisories found.");
       await expect(readFile(join(stateDir, "logs.sqlite"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     } finally {
       await rm(stateDir, { recursive: true, force: true });
