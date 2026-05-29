@@ -1642,7 +1642,7 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已把 `opencap release evidence --registry registry --records packages/runtime/test/fixtures/conformance --json` 纳入 release evidence 执行顺序，YAML 模板新增 `release_evidence_bundle` 状态字段，并说明带 `--package` / `--pack-json` 时可把 package readiness 汇入 bundle。`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 已新增 Release Evidence Bundle 段落和 blocked/pending 表项，明确 `opencap.release_evidence.v1` 只汇总本地 Registry quality、conformance、可选 package readiness 和命令状态，不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 或真实 npm 发布。`docs/TESTING.md` 已新增 release evidence bundle 命令和对应 CLI 测试入口。
 
-- [ ] T313 P1：修正 release evidence 时间戳默认值和可复现输入。
+- [x] T313 P1：修正 release evidence 时间戳默认值和可复现输入。
   - 验收标准：
     - CLI `opencap release evidence` 默认 `date` 和 bundle `generatedAt` 使用当前 UTC 时间，不再输出 Unix epoch / `1970-01-01`。
     - CLI 新增 `--generated-at <iso>`，用于测试和 release 复现；未显式传 `--date` 时，`date` 从 `generatedAt` 的 UTC 日期派生。
@@ -1653,6 +1653,7 @@
     - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap release evidence` 默认 `date` 现在从当前 UTC `generatedAt` 派生，不再输出 `1970-01-01`；命令新增 `--generated-at <iso>`，用于复现 release evidence 时间戳，且人类输出会显示 `date` 和 `generatedAt`。非法 `--generated-at` 或 `--date` 会作为用户错误 exit `1`，不打印 stack。`packages/cli/src/release-evidence-command.test.ts` 新增默认时间戳、可复现 `--generated-at`、人类输出时间字段和非法时间参数测试，CLI 包测试数从 33 增至 35。
 
 - [ ] T314 P1：支持 release evidence bundle 安全写入文件。
   - 验收标准：

@@ -72,12 +72,35 @@ describe("OpenCap CLI release evidence command", () => {
         },
       },
     });
+    expect(bundle.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(bundle.date).not.toBe("1970-01-01");
+    expect(Date.parse(bundle.generatedAt)).not.toBeNaN();
+    expect(bundle.generatedAt).not.toBe("1970-01-01T00:00:00.000Z");
     expect(bundle.components.packages).toEqual([]);
     expect(bundle.blockers.map((blocker: { code: string }) => blocker.code)).toContain("REGISTRY_CAPABILITY_BLOCKER");
     expect(result.stdout).not.toContain("NPM_TOKEN");
     expect(result.stdout).not.toContain("Authorization");
     expect(result.stdout).not.toContain("super-secret-token");
     expect(result.stderr).toBe("");
+  }, 60_000);
+
+  it("uses --generated-at for reproducible release evidence timestamps", async () => {
+    const result = await runOpenCapCli([
+      "release",
+      "evidence",
+      "--registry",
+      registryRoot,
+      "--records",
+      conformanceRoot,
+      "--generated-at",
+      "2026-05-29T12:34:56.789Z",
+      "--json",
+    ]);
+    const bundle = JSON.parse(result.stdout);
+
+    expect(result.exitCode).toBe(0);
+    expect(bundle.generatedAt).toBe("2026-05-29T12:34:56.789Z");
+    expect(bundle.date).toBe("2026-05-29");
   }, 60_000);
 
   it("includes package readiness evidence when package and pack JSON are provided", async () => {
@@ -126,14 +149,52 @@ describe("OpenCap CLI release evidence command", () => {
       registryRoot,
       "--records",
       conformanceRoot,
+      "--generated-at",
+      "2026-05-29T12:34:56.789Z",
     ]);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain("OpenCap release evidence");
+    expect(result.stdout).toContain("date: 2026-05-29");
+    expect(result.stdout).toContain("generatedAt: 2026-05-29T12:34:56.789Z");
     expect(result.stdout).toContain("decision: block-release-tag");
     expect(result.stdout).toContain("registry: fail");
     expect(result.stdout).toContain("conformance: pass");
     expect(result.stdout).toContain("blockers:");
+  }, 60_000);
+
+  it("returns user errors for invalid release evidence timestamps without stack traces", async () => {
+    const invalidGeneratedAt = await runOpenCapCli([
+      "release",
+      "evidence",
+      "--registry",
+      registryRoot,
+      "--records",
+      conformanceRoot,
+      "--generated-at",
+      "not-a-date",
+    ], { allowFailure: true });
+
+    expect(invalidGeneratedAt.exitCode).toBe(1);
+    expect(invalidGeneratedAt.stderr).toContain("Invalid --generated-at value: expected ISO timestamp.");
+    expect(invalidGeneratedAt.stderr).not.toContain("Error:");
+    expect(invalidGeneratedAt.stderr).not.toMatch(/\n\s+at /);
+
+    const invalidDate = await runOpenCapCli([
+      "release",
+      "evidence",
+      "--registry",
+      registryRoot,
+      "--records",
+      conformanceRoot,
+      "--date",
+      "2026-99-99",
+    ], { allowFailure: true });
+
+    expect(invalidDate.exitCode).toBe(1);
+    expect(invalidDate.stderr).toContain("Invalid --date value: expected YYYY-MM-DD.");
+    expect(invalidDate.stderr).not.toContain("Error:");
+    expect(invalidDate.stderr).not.toMatch(/\n\s+at /);
   }, 60_000);
 
   it("returns user errors for package options without stack traces", async () => {

@@ -428,6 +428,32 @@ async function readNpmPackJsonFiles(packJsonPath: string): Promise<NpmPackagePac
   });
 }
 
+function resolveReleaseGeneratedAt(value: string | undefined): string {
+  const generatedAt = value === undefined ? new Date() : new Date(value);
+  if (Number.isNaN(generatedAt.getTime())) {
+    throw new CliUserInputError("Invalid --generated-at value: expected ISO timestamp.");
+  }
+
+  return generatedAt.toISOString();
+}
+
+function resolveReleaseDate(value: string | undefined, generatedAt: string): string {
+  if (value === undefined) {
+    return generatedAt.slice(0, 10);
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new CliUserInputError("Invalid --date value: expected YYYY-MM-DD.");
+  }
+
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== value) {
+    throw new CliUserInputError("Invalid --date value: expected YYYY-MM-DD.");
+  }
+
+  return value;
+}
+
 function printNpmPackageReadinessReport(report: NpmPackageReadinessReport): void {
   console.log("OpenCap package readiness");
   console.log(`package: ${report.packageName ?? "<missing>"}`);
@@ -469,6 +495,8 @@ function printReleaseEvidenceBundle(bundle: ReleaseEvidenceBundle): void {
   console.log("OpenCap release evidence");
   console.log(`target: ${bundle.target}`);
   console.log(`commit: ${bundle.commit}`);
+  console.log(`date: ${bundle.date}`);
+  console.log(`generatedAt: ${bundle.generatedAt}`);
   console.log(`decision: ${bundle.decision}`);
   console.log(`registry: ${bundle.components.registry.status}`);
   console.log(`conformance: ${bundle.components.conformance.status}`);
@@ -1393,10 +1421,11 @@ releaseCommand
   .option("--pack-json <path>", "Path to npm pack --dry-run --json output")
   .option("--target <name>", "Release target name", "v0.1 Local Runtime")
   .option("--commit <sha>", "Release source commit", "local")
-  .option("--date <date>", "Release evidence date", new Date(0).toISOString().slice(0, 10))
+  .option("--date <date>", "Release evidence date")
+  .option("--generated-at <iso>", "Release evidence generation timestamp")
   .option("--json", "Output JSON")
   .description("Generate a local release evidence bundle.")
-  .action((options: { registry: string; records: string; package?: string; packJson?: string; target?: string; commit?: string; date?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { registry: string; records: string; package?: string; packJson?: string; target?: string; commit?: string; date?: string; generatedAt?: string; json?: boolean }) => runCliAction(async () => {
     if (options.package !== undefined && options.packJson === undefined) {
       throw new CliUserInputError("Use --pack-json when --package is provided.");
     }
@@ -1405,6 +1434,8 @@ releaseCommand
     }
 
     const cwd = process.env.INIT_CWD ?? process.cwd();
+    const generatedAt = resolveReleaseGeneratedAt(options.generatedAt);
+    const releaseDate = resolveReleaseDate(options.date, generatedAt);
     const registryRoot = resolveCliPath(options.registry);
     const recordsRoot = resolveCliPath(options.records);
     const registryQualitySummary = await buildRegistryQualitySummary(registryRoot);
@@ -1420,7 +1451,8 @@ releaseCommand
     const bundle = buildReleaseEvidenceBundle({
       target: options.target ?? "v0.1 Local Runtime",
       commit: options.commit ?? "local",
-      date: options.date ?? new Date(0).toISOString().slice(0, 10),
+      date: releaseDate,
+      generatedAt,
       registryQualitySummary,
       conformanceSummary,
       packageReadinessReports,
