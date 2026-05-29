@@ -1739,7 +1739,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap release artifact validate --file <artifact> --output <report-json>` 现在可把脱敏 `opencap.release_artifact_validation.v1` report 写入本地文件，`--json` 仍可同时输出 stdout。输出复用 release artifact 安全路径策略，自动创建父目录并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录路径；invalid artifact 会先写出 validation report 再以 exit `1` 结束，非法 JSON artifact 不写 report。`packages/cli/src/release-artifact-command.test.ts` 从 4 个测试增至 8 个。
 
-- [ ] T321 P2：把 validation report artifact 纳入发布文档。
+- [x] T321 P2：把 validation report artifact 纳入发布文档。
   - 验收标准：
     - `docs/releases/release-checklist.md` 说明 release evidence JSON 和 validation report JSON 两类 artifact 的保存与引用方式。
     - V1 alpha evidence 样例说明当前样例未生成 validation report artifact；后续 release 必须记录 report path、valid、finding count 和 `policyEffect: none`。
@@ -1749,6 +1749,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：`docs/releases/release-checklist.md` 已明确 release evidence JSON 和 validation report JSON 两类 artifact 的保存、路径、schema、引用字段和安全写入边界；发布者需要记录 release evidence path、validation report path、validation `valid`、finding count 和 `policyEffect: none`，validation invalid 时不得继续 release/tag/publish。V1 alpha evidence 样例已说明当前样例没有生成持久 release evidence JSON 或 validation report JSON artifact，后续 release 必须保存并引用两类 artifact。`docs/TESTING.md` 的 Release evidence bundle 命令已加入 `opencap release artifact validate --output "$RELEASE_VALIDATION_OUTPUT"`。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
