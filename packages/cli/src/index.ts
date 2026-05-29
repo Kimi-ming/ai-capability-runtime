@@ -274,6 +274,40 @@ interface RegistrySearchReport {
   policyEffect: "none";
 }
 
+interface RegistryCapabilityDetailAuth {
+  type: string;
+  provider?: string;
+  env?: string;
+  placement?: string;
+  scopes: string[];
+}
+
+interface RegistryCapabilityDetail {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  lifecycle: CapabilityManifestLifecycleStatus | "active";
+  category: string;
+  maintainer: string;
+  license: string;
+  trustLevel: string;
+  manifestPath: string;
+  auth: RegistryCapabilityDetailAuth;
+  permissions: CapabilityManifest["permissions"];
+  execution: {
+    method: string;
+    origin: string;
+  };
+}
+
+interface RegistryCapabilityDetailReport {
+  schemaVersion: "opencap.registry_capability_detail.v1";
+  registryPath: string;
+  capability: RegistryCapabilityDetail;
+  policyEffect: "none";
+}
+
 function parseLedgerKind(value: string | undefined): LedgerRecordKind | undefined {
   if (value === undefined) {
     return undefined;
@@ -519,6 +553,130 @@ function printRegistrySearchReport(report: RegistrySearchReport): void {
   for (const invalid of report.invalid) {
     console.error(`- ${invalid.filePath}: ${invalid.issues.join("; ")}`);
   }
+}
+
+function registryMetadataString(manifest: CapabilityManifest, field: string): string {
+  const value = manifest.metadata[field];
+  return typeof value === "string" && value.length > 0 ? value : "unknown";
+}
+
+function registryAuthPlacement(auth: Record<string, unknown>): string | undefined {
+  const placement = auth.placement;
+  if (isRecord(placement) && typeof placement.type === "string") {
+    return placement.type;
+  }
+  return undefined;
+}
+
+function registryCapabilityAuthDetail(manifest: CapabilityManifest): RegistryCapabilityDetailAuth {
+  return {
+    type: typeof manifest.auth.type === "string" ? manifest.auth.type : "unknown",
+    ...(typeof manifest.auth.provider === "string" ? { provider: manifest.auth.provider } : {}),
+    ...(typeof manifest.auth.env === "string" ? { env: manifest.auth.env } : {}),
+    ...(registryAuthPlacement(manifest.auth) === undefined ? {} : { placement: registryAuthPlacement(manifest.auth) }),
+    scopes: Array.isArray(manifest.auth.scopes)
+      ? manifest.auth.scopes.filter((scope): scope is string => typeof scope === "string")
+      : [],
+  };
+}
+
+function registryExecutionOrigin(manifest: CapabilityManifest): string {
+  const url = typeof manifest.execution.url === "string" ? manifest.execution.url : "";
+  try {
+    return new URL(url).origin;
+  } catch {
+    const match = url.match(/^[a-z][a-z0-9+.-]*:\/\/[^/?#]+/i);
+    return match?.[0] ?? "unknown";
+  }
+}
+
+function registryCapabilityDetail(result: RegistryCapabilitySearchResult): RegistryCapabilityDetail {
+  return {
+    id: result.id,
+    name: result.name,
+    description: result.description,
+    version: result.version,
+    lifecycle: result.lifecycle,
+    category: registrySearchCategory(result),
+    maintainer: registryMetadataString(result.manifest, "maintainer"),
+    license: registryMetadataString(result.manifest, "license"),
+    trustLevel: registryMetadataString(result.manifest, "trust_level"),
+    manifestPath: result.filePath,
+    auth: registryCapabilityAuthDetail(result.manifest),
+    permissions: result.manifest.permissions.map((permission) => ({ ...permission })),
+    execution: {
+      method: result.manifest.execution.method ?? "unknown",
+      origin: registryExecutionOrigin(result.manifest),
+    },
+  };
+}
+
+function buildRegistryCapabilityDetailReport(
+  registryPath: string,
+  result: RegistryCapabilitySearchResult,
+): RegistryCapabilityDetailReport {
+  return {
+    schemaVersion: "opencap.registry_capability_detail.v1",
+    registryPath,
+    capability: registryCapabilityDetail(result),
+    policyEffect: "none",
+  };
+}
+
+function formatRegistryCapabilityAuth(auth: RegistryCapabilityDetailAuth): string {
+  const parts = [auth.type];
+  if (auth.provider !== undefined) {
+    parts.push(`provider=${auth.provider}`);
+  }
+  if (auth.env !== undefined) {
+    parts.push(`env=${auth.env}`);
+  }
+  if (auth.placement !== undefined) {
+    parts.push(`placement=${auth.placement}`);
+  }
+  if (auth.scopes.length > 0) {
+    parts.push(`scopes=${auth.scopes.join(",")}`);
+  }
+  return parts.join(" ");
+}
+
+function printRegistryCapabilityDetailReport(report: RegistryCapabilityDetailReport): void {
+  const capability = report.capability;
+  console.log("OpenCap registry capability");
+  console.log(`id: ${capability.id}`);
+  console.log(`name: ${capability.name}`);
+  console.log(`description: ${capability.description}`);
+  console.log(`version: ${capability.version}`);
+  console.log(`lifecycle: ${capability.lifecycle}`);
+  console.log(`category: ${capability.category}`);
+  console.log(`maintainer: ${capability.maintainer}`);
+  console.log(`license: ${capability.license}`);
+  console.log(`trust: ${capability.trustLevel}`);
+  console.log(`auth: ${formatRegistryCapabilityAuth(capability.auth)}`);
+  for (const permission of capability.permissions) {
+    console.log(`permission: ${permission.resource} ${permission.action} ${permission.risk} ${permission.confirmation}`);
+  }
+  console.log(`execution: ${capability.execution.method} ${capability.execution.origin}`);
+  console.log(`manifest: ${capability.manifestPath}`);
+}
+
+function selectRegistryCapabilityResult(
+  id: string,
+  search: Awaited<ReturnType<typeof searchRegistryCapabilities>>,
+): RegistryCapabilitySearchResult {
+  if (search.invalid.length > 0) {
+    throw new CliUserInputError(`Invalid registry manifests: ${search.invalid.length}`);
+  }
+
+  const matches = search.results.filter((result) => result.id === id);
+  if (matches.length === 0) {
+    throw new CliUserInputError(`Capability not found in registry: ${id}`);
+  }
+  if (matches.length > 1) {
+    throw new CliUserInputError(`Multiple registry capabilities found for id: ${id}`);
+  }
+
+  return matches[0];
 }
 
 function parsePolicyDecision(value: string | undefined): PolicyDecision | undefined {
@@ -1790,6 +1948,28 @@ registryCommand
       process.exitCode = 1;
     }
   }, "Failed to search Registry"));
+
+registryCommand
+  .command("show")
+  .argument("<id>", "Capability id to inspect")
+  .option("--registry <path>", "Registry root directory", "registry")
+  .option("--include-lifecycle <values>", "Comma-separated lifecycle statuses to include: yanked,revoked")
+  .option("--json", "Output JSON")
+  .description("Show a local Registry Capability summary without installing it.")
+  .action((id: string, options: RegistrySearchCommandOptions) => runCliAction(async () => {
+    const registryRoot = resolveCliPath(options.registry ?? "registry");
+    const includeLifecycle = parseRegistrySearchIncludeLifecycle(options.includeLifecycle);
+    const search = await searchRegistryCapabilities(registryRoot, { query: id, includeLifecycle });
+    const selected = selectRegistryCapabilityResult(id, search);
+    const report = buildRegistryCapabilityDetailReport(search.targetPath, selected);
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      return;
+    }
+
+    printRegistryCapabilityDetailReport(report);
+  }, "Failed to show Registry capability"));
 
 registryCommand
   .command("report")

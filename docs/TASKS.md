@@ -1799,7 +1799,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap registry search [query] --registry <path> [--json]`，复用 `searchRegistryCapabilities()` 按 id、name 和 description 搜索本地 registry。JSON 输出为 `opencap.registry_search.v1`，包含 registry path、query、results、excludedByLifecycle、invalidCount、invalid summary 和 `policyEffect: none`；人类输出包含 id、version、lifecycle、category、description 和 lifecycle 过滤计数。命令默认隐藏 yanked/revoked，并支持 `--include-lifecycle yanked,revoked` 显式纳入；invalid manifest 会输出 report 后 exit `1`，非法 include lifecycle 返回用户错误 exit `1` 且不打印 stack。命令不安装 Capability、不读取/写入 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-search-command.test.ts` 新增 4 个测试，CLI 包测试数从 49 增至 53。
 
-- [ ] T326 P1：新增 `opencap registry show` 本地详情命令。
+- [x] T326 P1：新增 `opencap registry show` 本地详情命令。
   - 验收标准：
     - CLI `opencap registry show <capability-id> --registry <path> [--json]` 读取本地 registry 中的精确 Capability，并输出可审查详情。
     - 输出包含 id、name、description、version、lifecycle、category、maintainer、license、trust level、auth descriptor 摘要、permissions、execution method/origin 和 manifest path；不得输出 secret 值、Authorization header、provider raw response、registry test input/output 原文或用户本地状态。
@@ -1809,6 +1809,7 @@
     - `pnpm --filter @opencap/cli test -- registry-show-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap registry show <capability-id> --registry <path> [--json]`，基于本地 registry 精确读取单个 Capability 并输出审查摘要。JSON 输出为 `opencap.registry_capability_detail.v1`，包含 id、name、description、version、lifecycle、category、maintainer、license、trustLevel、manifestPath、auth descriptor 摘要、permissions、execution method/origin 和 `policyEffect: none`；人类输出显示同等摘要。命令默认遵循 registry search lifecycle 过滤，隐藏 yanked/revoked，并支持 `--include-lifecycle yanked,revoked` 审查不可默认发现条目；未找到、多重匹配、非法 include lifecycle 和 invalid registry manifest 返回用户错误 exit `1` 且不打印 stack。命令不安装 Capability、不读取/写入 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-show-command.test.ts` 新增 4 个测试，CLI 包测试数从 53 增至 57。
 
 - [ ] T327 P2：把 registry search/show 纳入发现与贡献文档。
   - 验收标准：
