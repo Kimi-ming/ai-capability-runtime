@@ -1835,7 +1835,7 @@
     - `pnpm validate`
   - 完成记录：CLI 新增 `opencap advisory check --state-dir <path> --registry <path> [--json]`，复用 Runtime `checkInstalledCapabilityAdvisories()` 比对本地 installed capabilities 与 Registry advisory metadata。JSON 输出为 `opencap.advisory_check.v1`，包含 stateDir、registryPath、checkedInstalledCapabilities、matches、invalidAdvisoryCount、invalidAdvisories 和 `policyEffect: none`；人类输出包含 checked 数量、capability id、version、advisory id、severity、status、registry action 和 runtime default。无已安装能力时输出友好空结果；revoked/revoke/deny 类 advisory 返回 exit `1`，warning-only advisory 返回 exit `0`；invalid advisory JSON 模式输出 invalid summary 后 exit `1`。命令不执行 Capability、不读取 provider secret、不调用 provider、不触网，也不写 audit logs。`packages/cli/src/advisory-check-command.test.ts` 新增 4 个测试，CLI 包测试数从 57 增至 61。
 
-- [ ] T329 P2：新增 `opencap registry advisory list` 本地公告列表命令。
+- [x] T329 P2：新增 `opencap registry advisory list` 本地公告列表命令。
   - 验收标准：
     - CLI `opencap registry advisory list --registry <path> [--json]` 读取本地 `registry/advisories/*` 并输出 Capability Advisory metadata。
     - JSON 输出使用稳定 schema `opencap.registry_advisory_list.v1`，包含 valid advisories、invalid advisories、counts 和 `policyEffect: none`；人类输出包含 advisory id、capability、severity、status、registry action、runtime default 和 modified_at。
@@ -1844,6 +1844,7 @@
     - `pnpm --filter @opencap/cli test -- registry-advisory-list-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap registry advisory list --registry <path> [--json]`，读取本地 Registry Capability Advisory metadata 并输出 `opencap.registry_advisory_list.v1` report。JSON 输出包含 valid advisories、invalidAdvisoryCount、invalidAdvisories、counts 和 `policyEffect: none`；人类输出包含 advisory id、capability、severity、status、registry action、runtime default 和 modified_at。invalid advisory 会在 JSON 模式输出 invalid summary 后返回 exit `1`；命令不安装 Capability、不写 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-advisory-list-command.test.ts` 新增 3 个测试，CLI 包测试数从 61 增至 64。
 
 - [ ] T330 P2：把 advisory check/list 纳入安全和运维文档。
   - 验收标准：

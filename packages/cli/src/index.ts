@@ -16,7 +16,9 @@ import {
   formatManifestValidationIssue,
   searchRegistryCapabilities,
   validateReleaseEvidenceArtifact,
+  validateCapabilityAdvisoryPath,
   validateManifestPath,
+  type CapabilityAdvisory,
   type CapabilityScaffoldAuth,
   type CapabilityScaffoldFile,
   type CapabilityScaffoldHttpMethod,
@@ -323,6 +325,30 @@ interface AdvisoryCheckReport {
   checkedCapabilityCount: number;
   checkedInstalledCapabilities: string[];
   matches: InstalledCapabilityAdvisoryMatch[];
+  invalidAdvisoryCount: number;
+  invalidAdvisories: AdvisoryCheckInvalidAdvisory[];
+  policyEffect: "none";
+}
+
+interface RegistryAdvisoryListItem {
+  id: string;
+  capability: string;
+  severity: CapabilityAdvisory["severity"];
+  status: CapabilityAdvisory["status"];
+  type: CapabilityAdvisory["type"];
+  registryAction: CapabilityAdvisory["actions"]["registry"];
+  runtimeDefault: CapabilityAdvisory["actions"]["runtime_default"];
+  fixedVersion?: string | null;
+  modifiedAt: string;
+  summary: string;
+  filePath: string;
+}
+
+interface RegistryAdvisoryListReport {
+  schemaVersion: "opencap.registry_advisory_list.v1";
+  registryPath: string;
+  advisoryCount: number;
+  advisories: RegistryAdvisoryListItem[];
   invalidAdvisoryCount: number;
   invalidAdvisories: AdvisoryCheckInvalidAdvisory[];
   policyEffect: "none";
@@ -753,6 +779,80 @@ function printAdvisoryCheckReport(report: AdvisoryCheckReport): void {
         match.status,
         match.registryAction,
         match.runtimeDefault,
+      ].join(" "));
+    }
+  }
+
+  if (report.invalidAdvisoryCount === 0) {
+    return;
+  }
+
+  console.error(`Invalid capability advisories: ${report.invalidAdvisoryCount}`);
+  for (const invalid of report.invalidAdvisories) {
+    console.error(`- ${invalid.filePath}: ${invalid.issues.join("; ")}`);
+  }
+}
+
+function registryAdvisoryListItem(
+  valid: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>["valid"][number],
+): RegistryAdvisoryListItem {
+  const advisory = valid.advisory;
+  return {
+    id: advisory.id,
+    capability: advisory.capability,
+    severity: advisory.severity,
+    status: advisory.status,
+    type: advisory.type,
+    registryAction: advisory.actions.registry,
+    runtimeDefault: advisory.actions.runtime_default,
+    fixedVersion: advisory.actions.fixed_version,
+    modifiedAt: advisory.modified_at,
+    summary: advisory.summary,
+    filePath: valid.filePath,
+  };
+}
+
+function registryAdvisoryListInvalidAdvisory(
+  invalid: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>["invalid"][number],
+): AdvisoryCheckInvalidAdvisory {
+  return {
+    filePath: invalid.filePath,
+    issues: invalid.issues.map((issue) => formatManifestValidationIssue(issue)),
+  };
+}
+
+function buildRegistryAdvisoryListReport(
+  result: Awaited<ReturnType<typeof validateCapabilityAdvisoryPath>>,
+): RegistryAdvisoryListReport {
+  const advisories = result.valid
+    .map(registryAdvisoryListItem)
+    .sort((left, right) => left.id.localeCompare(right.id));
+
+  return {
+    schemaVersion: "opencap.registry_advisory_list.v1",
+    registryPath: result.targetPath,
+    advisoryCount: advisories.length,
+    advisories,
+    invalidAdvisoryCount: result.invalid.length,
+    invalidAdvisories: result.invalid.map(registryAdvisoryListInvalidAdvisory),
+    policyEffect: "none",
+  };
+}
+
+function printRegistryAdvisoryListReport(report: RegistryAdvisoryListReport): void {
+  if (report.advisories.length === 0) {
+    console.log("No registry advisories found.");
+  } else {
+    console.log("advisory capability severity status registry_action runtime_default modified_at");
+    for (const advisory of report.advisories) {
+      console.log([
+        advisory.id,
+        advisory.capability,
+        advisory.severity,
+        advisory.status,
+        advisory.registryAction,
+        advisory.runtimeDefault,
+        advisory.modifiedAt,
       ].join(" "));
     }
   }
@@ -1951,6 +2051,10 @@ const registryCommand = program
   .command("registry")
   .description("Inspect local Registry evidence.");
 
+const registryAdvisoryCommand = registryCommand
+  .command("advisory")
+  .description("Inspect local Registry advisory evidence.");
+
 const advisoryCommand = program
   .command("advisory")
   .description("Inspect local Capability advisory evidence.");
@@ -2046,6 +2150,30 @@ advisoryCommand
       process.exitCode = exitCode;
     }
   }, "Failed to check Capability advisories"));
+
+registryAdvisoryCommand
+  .command("list")
+  .requiredOption("--registry <path>", "Registry root directory")
+  .option("--json", "Output JSON")
+  .description("List local Registry Capability advisories.")
+  .action((options: { registry: string; json?: boolean }) => runCliAction(async () => {
+    const registryPath = resolveCliPath(options.registry);
+    const result = await validateCapabilityAdvisoryPath(registryPath);
+    const report = buildRegistryAdvisoryListReport(result);
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      if (report.invalidAdvisoryCount > 0) {
+        process.exitCode = 1;
+      }
+      return;
+    }
+
+    printRegistryAdvisoryListReport(report);
+    if (report.invalidAdvisoryCount > 0) {
+      process.exitCode = 1;
+    }
+  }, "Failed to list Registry advisories"));
 
 registryCommand
   .command("search")
