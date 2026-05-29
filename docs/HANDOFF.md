@@ -186,7 +186,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T351：CLI `opencap release evidence` 现在支持重复传入 `--package-readiness <file>`。多个已保存并通过 `validateNpmPackageReadinessArtifact()` 校验的 `opencap.npm_package_readiness.v1` artifacts 会按传入顺序进入 `opencap.release_evidence.v1` 的 package components，并把各自 blocker 汇总进 release blockers；任一 artifact invalid 时仍作为用户错误 exit `1` 且不打印 stack、不写半截 release evidence output。重复 `--package-readiness` 仍不能与 `--package`/`--pack-json` 混用。`packages/cli/src/release-evidence-command.test.ts` 从 10 个测试增至 11 个，CLI 包合计从 88 个测试增至 89 个。
 
-下一项 ready：T352 P2：记录多个 package readiness artifacts 的 release evidence 文档。
+本轮继续完成 T352：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充多 package release evidence 口径。文档说明发布者应为每个待发布 package 分别保存 pack JSON 和 `opencap.npm_package_readiness.v1` artifact，再用 `opencap release evidence` 重复传入多个 `--package-readiness <file>` 汇入 bundle。多个 artifacts 仍只是本地 package evidence inputs，不替代 pack dry-run 原始输出、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；任一 artifact invalid 应阻断 release evidence 生成，任一 artifact 包含 blocker 应阻断对应 npm package 发布，并记录到 release evidence、release notes 或 handoff。
+
+下一项 ready：暂无未阻塞 ready 任务；`next_task.py` 当前只剩 T291 真实 Claude Desktop/Cursor Host UI smoke evidence 阻塞于外部 Host 环境和人工 evidence。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -265,9 +267,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344、T345、T346、T347、T348、T349、T350 和 T351 均已完成；T352 是下一项 multi package readiness artifact documentation ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344、T345、T346、T347、T348、T349、T350、T351 和 T352 均已完成；T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T352，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：等待用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291，或先重新规划下一批 V1.1/post-alpha ready 任务。
 
 当前阻塞：
 

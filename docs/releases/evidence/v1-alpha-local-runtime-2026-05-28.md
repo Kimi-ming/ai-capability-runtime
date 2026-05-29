@@ -99,39 +99,56 @@ npm_publish:
 
 ## Package Readiness Evidence
 
-当前 evidence bundle 未为 release target 手动运行 package readiness report 或 npm pack dry-run，因此 release evidence 中 package readiness 记录为 `not-run`。仓库自动化测试已经覆盖 `@opencap/spec` / `@opencap/cli` 的本地 pack dry-run smoke，但这只证明测试路径可运行，不等于某次 release 的 package evidence 已采集。发布者准备 npm alpha package 时，应先运行：
+当前 evidence bundle 未为 release target 手动运行 package readiness report 或 npm pack dry-run，因此 release evidence 中 package readiness 记录为 `not-run`。仓库自动化测试已经覆盖 `@opencap/spec` / `@opencap/cli` 的本地 pack dry-run smoke，但这只证明测试路径可运行，不等于某次 release 的 package evidence 已采集。发布者准备 npm alpha package 时，应先为每个待发布 package 运行：
 
 ```bash
-pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
-PACKAGE_READINESS_OUTPUT="docs/releases/evidence/<release-id>-package-readiness.json"
+pnpm --filter @opencap/spec exec npm pack --dry-run --json > spec-pack.json
+pnpm --filter @opencap/cli exec npm pack --dry-run --json > cli-pack.json
+PACKAGE_READINESS_SPEC_OUTPUT="docs/releases/evidence/<release-id>-spec-package-readiness.json"
+PACKAGE_READINESS_CLI_OUTPUT="docs/releases/evidence/<release-id>-cli-package-readiness.json"
 opencap release package report \
-  --package <package> \
-  --pack-json <pack-json> \
-  --output "$PACKAGE_READINESS_OUTPUT" \
+  --package @opencap/spec \
+  --pack-json spec-pack.json \
+  --output "$PACKAGE_READINESS_SPEC_OUTPUT" \
+  --json
+opencap release package report \
+  --package @opencap/cli \
+  --pack-json cli-pack.json \
+  --output "$PACKAGE_READINESS_CLI_OUTPUT" \
   --json
 opencap release evidence \
   --registry registry \
   --records packages/runtime/test/fixtures/conformance \
-  --package-readiness "$PACKAGE_READINESS_OUTPUT" \
+  --package-readiness "$PACKAGE_READINESS_SPEC_OUTPUT" \
+  --package-readiness "$PACKAGE_READINESS_CLI_OUTPUT" \
   --json
 ```
 
 新的 release evidence 应记录：
 
 ```yaml
-package_readiness:
-  schemaVersion: opencap.npm_package_readiness.v1
-  package: "@opencap/spec | @opencap/cli"
-  version: "<package-version>"
-  blockers: []
-  warnings: []
-  pack_evidence: provided
-  forbidden_files: []
-  artifact_path: docs/releases/evidence/<release-id>-package-readiness.json
-  policy_effect: none
+package_readiness_reports:
+  - schemaVersion: opencap.npm_package_readiness.v1
+    package: "@opencap/spec"
+    version: "<package-version>"
+    blockers: []
+    warnings: []
+    pack_evidence: provided
+    forbidden_files: []
+    artifact_path: docs/releases/evidence/<release-id>-spec-package-readiness.json
+    policy_effect: none
+  - schemaVersion: opencap.npm_package_readiness.v1
+    package: "@opencap/cli"
+    version: "<package-version>"
+    blockers: []
+    warnings: []
+    pack_evidence: provided
+    forbidden_files: []
+    artifact_path: docs/releases/evidence/<release-id>-cli-package-readiness.json
+    policy_effect: none
 ```
 
-如果当前 package 仍有 blocker，例如 `NPM_PACKAGE_PRIVATE` 或 forbidden pack file，发布者必须把 report 作为 blocker evidence，并可用 `opencap release evidence --package-readiness <file>` 把该 blocker 汇入 release bundle，而不能创建 npm release。`--output` artifact 只证明本地 metadata/tarball 摘要审查；它不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval、release tag 或 GitHub required checks。输出路径必须避开 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+如果当前 package 仍有 blocker，例如 `NPM_PACKAGE_PRIVATE` 或 forbidden pack file，发布者必须把 report 作为 blocker evidence，并可用 `opencap release evidence` 重复传入 `--package-readiness <file>` 把多个 package 的 blocker 汇入 release bundle，而不能创建对应 npm release。任一 artifact invalid 时，应停止 release evidence 生成并记录到 handoff；任一 artifact 包含 blocker 时，应阻断对应 npm package 发布。`--output` artifact 只证明本地 metadata/tarball 摘要审查；它不替代 `npm pack --dry-run --json` 原始摘要、workflow publish dry-run、trusted publisher、正式 provenance、release approval、release tag 或 GitHub required checks。输出路径必须避开 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
 
 当前 alpha 候选包已经声明 `files` allowlist，但仍保持 `private: true`，因此预期 package readiness report 至少会包含 `NPM_PACKAGE_PRIVATE` blocker。该 blocker 是刻意保留的发布闸门，不应在没有 maintainer release decision、tag/CI/release notes 和 npm trusted publisher 准备前移除。
 

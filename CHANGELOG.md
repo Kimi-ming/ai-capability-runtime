@@ -90,6 +90,7 @@
 - README、Release checklist、alpha evidence 样例和测试文档已补充 Registry quality / Conformance summary output artifacts 的 release evidence 边界。
 - Release checklist、npm 发布文档、alpha evidence 样例和测试文档已补充 `opencap release package report --output <file>` 的 package readiness artifact 边界。
 - Release checklist、npm 发布文档、alpha evidence 样例和测试文档已补充 `opencap release evidence --package-readiness <file>` 的 artifact 输入边界。
+- Release checklist、npm 发布文档、alpha evidence 样例和测试文档已补充重复 `--package-readiness <file>` 的多 package release evidence 边界。
 - `@opencap/spec` 新增 npm package readiness artifact validation helper，可校验保存后的 `opencap.npm_package_readiness.v1` JSON artifact。
 - README、Registry、安全和运营文档已补充 `opencap advisory check --capability/--severity/--status` 本地 evidence 查询边界。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。

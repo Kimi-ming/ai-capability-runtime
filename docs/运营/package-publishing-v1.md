@@ -65,24 +65,32 @@ pnpm build
 
 如果准备 npm alpha package，必须先运行 `.github/workflows/npm-publish.yml` 的 manual dry-run，并把 package、version、workflow run、tarball/provenance dry-run 摘要和 `real_publish: false` 写入 release evidence。该 dry-run 只是发布前证据，不代表 package 已发布、npm trusted publisher 已配置或 provenance 已正式生成。
 
-在运行 publish dry-run 前，应先生成 package readiness evidence：
+在运行 publish dry-run 前，应先为每个待发布 package 生成 package readiness evidence。多包 release 时，每个 package 使用独立的 pack JSON 和 readiness artifact，再由 release evidence 重复读取：
 
 ```bash
-pnpm --filter <package> exec npm pack --dry-run --json > <pack-json>
-PACKAGE_READINESS_OUTPUT="docs/releases/evidence/<release-id>-package-readiness.json"
+pnpm --filter @opencap/spec exec npm pack --dry-run --json > spec-pack.json
+pnpm --filter @opencap/cli exec npm pack --dry-run --json > cli-pack.json
+PACKAGE_READINESS_SPEC_OUTPUT="docs/releases/evidence/<release-id>-spec-package-readiness.json"
+PACKAGE_READINESS_CLI_OUTPUT="docs/releases/evidence/<release-id>-cli-package-readiness.json"
 opencap release package report \
-  --package <package> \
-  --pack-json <pack-json> \
-  --output "$PACKAGE_READINESS_OUTPUT" \
+  --package @opencap/spec \
+  --pack-json spec-pack.json \
+  --output "$PACKAGE_READINESS_SPEC_OUTPUT" \
+  --json
+opencap release package report \
+  --package @opencap/cli \
+  --pack-json cli-pack.json \
+  --output "$PACKAGE_READINESS_CLI_OUTPUT" \
   --json
 opencap release evidence \
   --registry registry \
   --records packages/runtime/test/fixtures/conformance \
-  --package-readiness "$PACKAGE_READINESS_OUTPUT" \
+  --package-readiness "$PACKAGE_READINESS_SPEC_OUTPUT" \
+  --package-readiness "$PACKAGE_READINESS_CLI_OUTPUT" \
   --json
 ```
 
-该 report 会保存 `opencap.npm_package_readiness.v1` JSON artifact，只检查 package metadata 和本地 pack file 摘要，固定 `policyEffect: none`。随后 `opencap release evidence --package-readiness <file>` 会复用并校验该 artifact，把它纳入 release evidence bundle；它不能与 `--package`/`--pack-json` 混用。`--output` 会拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。如果 report 包含 `NPM_PACKAGE_PRIVATE`、forbidden pack file 或其他 blocker，不能进入 npm publish dry-run 或真实发布。
+每个 report 会保存一个 `opencap.npm_package_readiness.v1` JSON artifact，只检查 package metadata 和本地 pack file 摘要，固定 `policyEffect: none`。随后 `opencap release evidence --package-readiness <file>` 可重复传入多个 artifacts，按传入顺序把它们纳入 release evidence bundle；它不能与 `--package`/`--pack-json` 混用。`--output` 会拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。如果任一 artifact invalid，不能生成 release evidence；如果 report 包含 `NPM_PACKAGE_PRIVATE`、forbidden pack file 或其他 blocker，不能进入该 package 的 npm publish dry-run 或真实发布，并且必须记录到 release evidence/handoff。
 
 Alpha 候选 package 必须声明 `files` allowlist，先收窄 npm pack 输入范围，再运行 pack dry-run。当前 allowlist：
 
@@ -91,7 +99,7 @@ Alpha 候选 package 必须声明 `files` allowlist，先收窄 npm pack 输入�
 | `@opencap/spec` | `dist`, `schema`, `package.json` | 仍为 `private: true`，不得发布 |
 | `@opencap/cli` | `dist`, `package.json` | 仍为 `private: true`，不得发布 |
 
-发布前顺序固定为：确认 `files` allowlist -> 本地 `npm pack --dry-run --json` -> `opencap release package report --output <file>` -> `opencap release evidence --package-readiness <file>` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。Package readiness JSON artifact 只证明本地 package metadata/tarball 摘要审查，不替代 pack dry-run 原始输出、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。`private: true` 是当前刻意保留的 blocker，不应在没有 maintainer release decision、release tag、CI/release notes 和 npm trusted publisher 准备前移除。
+发布前顺序固定为：确认 `files` allowlist -> 每个 package 的本地 `npm pack --dry-run --json` -> 每个 package 的 `opencap release package report --output <file>` -> `opencap release evidence` 重复传入所有 `--package-readiness <file>` -> GitHub workflow npm publish dry-run -> 真实 npm 发布审批。Package readiness JSON artifact 只证明本地 package metadata/tarball 摘要审查，不替代 pack dry-run 原始输出、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。`private: true` 是当前刻意保留的 blocker，不应在没有 maintainer release decision、release tag、CI/release notes 和 npm trusted publisher 准备前移除。
 
 ## 不发布条件
 

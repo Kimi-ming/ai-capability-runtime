@@ -53,15 +53,21 @@ pnpm --filter @opencap/cli dev -- registry report --registry registry --output "
 ### Package readiness evidence
 
 ```bash
-PACKAGE_READINESS_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-package-readiness.XXXXXX")"
+PACKAGE_READINESS_SPEC_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-package-readiness-spec.XXXXXX")"
+PACKAGE_READINESS_CLI_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-package-readiness-cli.XXXXXX")"
 pnpm --filter @opencap/cli dev -- release package report \
   --package @opencap/spec \
-  --output "$PACKAGE_READINESS_OUTPUT" \
+  --output "$PACKAGE_READINESS_SPEC_OUTPUT" \
+  --json
+pnpm --filter @opencap/cli dev -- release package report \
+  --package @opencap/cli \
+  --output "$PACKAGE_READINESS_CLI_OUTPUT" \
   --json
 pnpm --filter @opencap/cli dev -- release evidence \
   --registry registry \
   --records packages/runtime/test/fixtures/conformance \
-  --package-readiness "$PACKAGE_READINESS_OUTPUT" \
+  --package-readiness "$PACKAGE_READINESS_SPEC_OUTPUT" \
+  --package-readiness "$PACKAGE_READINESS_CLI_OUTPUT" \
   --json
 ```
 
@@ -200,7 +206,7 @@ pnpm build
 
 ### `@opencap/cli`
 
-当前状态：CLI 包已配置 `test` 脚本，并通过 `packages/cli/src/init-command.test.ts` 覆盖 `opencap init` scaffold 生成、validate 后续命令、不写 state、覆盖保护和用户错误，通过 `packages/cli/src/registry-search-command.test.ts` 覆盖 `opencap registry search` JSON/人类输出、lifecycle 过滤、invalid manifest 和不写 state 边界，通过 `packages/cli/src/registry-show-command.test.ts` 覆盖 `opencap registry show` JSON/人类输出、auth/permission/execution 摘要、lifecycle 过滤、invalid manifest 和不写 state 边界，通过 `packages/cli/src/advisory-check-command.test.ts` 覆盖 `opencap advisory check` JSON、人类输出、warning/deny exit code、invalid advisory 和不写 audit logs 边界，通过 `packages/cli/src/smoke.test.ts` 覆盖 validate/install/list/invoke dry-run/logs 的最小闭环，通过 `packages/cli/src/command-snapshot.test.ts` 锁定 validate/list/logs/decision-log/policy validate 的稳定 stdout/stderr/exit code，通过 `packages/cli/src/error-exit-code.test.ts` 覆盖用户可修正错误 exit `1`，通过 `packages/cli/src/card-command.test.ts` 覆盖 `opencap card` 的脱敏 Capability Card JSON 输出、Trust Card JSON 输出、未安装错误和非法 kind 错误，通过 `packages/cli/src/doctor-command.test.ts` 覆盖 `opencap doctor --json` 的脱敏 diagnostics、installed/invalid count 和人类输出兼容，通过 `packages/cli/src/conformance-report-command.test.ts` 覆盖 `opencap conformance report` JSON/人类输出、invalid record、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不写 state 边界，通过 `packages/cli/src/ledger-command.test.ts` 覆盖 `opencap ledger export` 脱敏导出，通过 `packages/cli/src/registry-report-command.test.ts` 覆盖 `opencap registry report` JSON/人类输出、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不写 state 边界，通过 `packages/cli/src/release-evidence-command.test.ts` 覆盖 `opencap release evidence` JSON/人类输出、`--output`、`--package`/`--pack-json`、`--package-readiness` artifact 输入和 invalid artifact 用户错误，通过 `packages/cli/src/release-package-report-command.test.ts` 覆盖 `opencap release package report` JSON/人类输出、`--pack-json`、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不运行 npm publish/不触网边界。后续补测试时仍应优先使用临时 state dir，避免污染真实 `opencap.local/`。
+当前状态：CLI 包已配置 `test` 脚本，并通过 `packages/cli/src/init-command.test.ts` 覆盖 `opencap init` scaffold 生成、validate 后续命令、不写 state、覆盖保护和用户错误，通过 `packages/cli/src/registry-search-command.test.ts` 覆盖 `opencap registry search` JSON/人类输出、lifecycle 过滤、invalid manifest 和不写 state 边界，通过 `packages/cli/src/registry-show-command.test.ts` 覆盖 `opencap registry show` JSON/人类输出、auth/permission/execution 摘要、lifecycle 过滤、invalid manifest 和不写 state 边界，通过 `packages/cli/src/advisory-check-command.test.ts` 覆盖 `opencap advisory check` JSON、人类输出、warning/deny exit code、invalid advisory 和不写 audit logs 边界，通过 `packages/cli/src/smoke.test.ts` 覆盖 validate/install/list/invoke dry-run/logs 的最小闭环，通过 `packages/cli/src/command-snapshot.test.ts` 锁定 validate/list/logs/decision-log/policy validate 的稳定 stdout/stderr/exit code，通过 `packages/cli/src/error-exit-code.test.ts` 覆盖用户可修正错误 exit `1`，通过 `packages/cli/src/card-command.test.ts` 覆盖 `opencap card` 的脱敏 Capability Card JSON 输出、Trust Card JSON 输出、未安装错误和非法 kind 错误，通过 `packages/cli/src/doctor-command.test.ts` 覆盖 `opencap doctor --json` 的脱敏 diagnostics、installed/invalid count 和人类输出兼容，通过 `packages/cli/src/conformance-report-command.test.ts` 覆盖 `opencap conformance report` JSON/人类输出、invalid record、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不写 state 边界，通过 `packages/cli/src/ledger-command.test.ts` 覆盖 `opencap ledger export` 脱敏导出，通过 `packages/cli/src/registry-report-command.test.ts` 覆盖 `opencap registry report` JSON/人类输出、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不写 state 边界，通过 `packages/cli/src/release-evidence-command.test.ts` 覆盖 `opencap release evidence` JSON/人类输出、`--output`、`--package`/`--pack-json`、`--package-readiness` artifact 输入、重复 artifact 输入和 invalid artifact 用户错误，通过 `packages/cli/src/release-package-report-command.test.ts` 覆盖 `opencap release package report` JSON/人类输出、`--pack-json`、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不运行 npm publish/不触网边界。后续补测试时仍应优先使用临时 state dir，避免污染真实 `opencap.local/`。
 
 必须覆盖：
 

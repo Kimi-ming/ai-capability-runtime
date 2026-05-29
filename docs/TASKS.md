@@ -2114,7 +2114,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap release evidence` 的 `--package-readiness <file>` 现在支持重复传入多个 artifact，并按命令行传入顺序读取、验证和汇入 `opencap.release_evidence.v1` 的 package components。每个 artifact 的 package blocker 会汇总到 release blockers；任一 artifact invalid 时仍作为用户错误 exit `1` 且不打印 stack，并且不会写 release evidence output partial file。重复 `--package-readiness` 仍禁止与 `--package`/`--pack-json` 混用。命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-evidence-command.test.ts` 从 10 个测试增至 11 个，CLI 包合计从 88 个测试增至 89 个。
 
-- [ ] T352 P2：记录多个 package readiness artifacts 的 release evidence 文档。
+- [x] T352 P2：记录多个 package readiness artifacts 的 release evidence 文档。
   - 验收标准：
     - Release checklist、package publishing 文档、alpha evidence 样例和测试文档说明多个 package release 时可重复传入 `--package-readiness <file>`。
     - 文档明确多个 artifacts 仍只是本地 package evidence inputs，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。
@@ -2124,6 +2124,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充多 package release evidence 口径。文档说明发布者应为每个待发布 package 分别运行 `npm pack --dry-run --json` 和 `opencap release package report --output <file>`，再用 `opencap release evidence` 重复传入多个 `--package-readiness <file>`，按顺序汇入 `opencap.release_evidence.v1`。文档明确多个 artifacts 仍只是本地 package evidence inputs，不替代 pack dry-run 原始输出、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；任一 artifact invalid 应阻断 release evidence 生成，任一 artifact 包含 blocker 应阻断对应 npm package 发布，并记录到 release evidence、release notes 或 handoff。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
