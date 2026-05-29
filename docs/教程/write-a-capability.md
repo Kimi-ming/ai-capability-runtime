@@ -222,6 +222,19 @@ pnpm validate
 
 如果你只是在本地练习，提交前可以删除 `registry/developer-tools/demo.get_status/`。如果你要贡献这个 Capability，请保留目录并按 Registry 指南提交 PR。
 
+## 8. 本地发现和审查
+
+提交前可以用本地 Registry discovery 命令查看当前条目是否容易被找到，以及 reviewer 会看到哪些摘要：
+
+```bash
+pnpm --filter @opencap/cli dev -- registry search demo --registry registry
+pnpm --filter @opencap/cli dev -- registry show demo.get_status --registry registry --json
+```
+
+`registry search` 只按 id、name 和 description 搜索本地 registry，并默认隐藏 yanked/revoked 条目。`registry show` 只展示单个 Capability 的审查摘要，包括 lifecycle、category、maintainer、auth descriptor、permissions、execution origin 和 manifest path。
+
+这两个命令只用于本地发现和审查：不会安装 Capability，不会授权或修改 policy，不会读取 secret，不会写 `opencap.local/`，不会调用 provider，也不会把未安装 Capability 暴露到 MCP Host 的 `tools/list`。
+
 ## 常见错误
 
 ### 忘记 `metadata.trust_level`

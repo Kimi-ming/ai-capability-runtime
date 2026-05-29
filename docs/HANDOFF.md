@@ -118,7 +118,11 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T326：CLI 新增 `opencap registry show <capability-id> --registry <path> [--json]`，基于本地 registry 精确读取单个 Capability 并输出审查摘要。JSON 输出为 `opencap.registry_capability_detail.v1`，包含 id、name、description、version、lifecycle、category、maintainer、license、trustLevel、manifestPath、auth descriptor 摘要、permissions、execution method/origin 和 `policyEffect: none`；人类输出显示同等摘要。命令默认遵循 registry search lifecycle 过滤，隐藏 yanked/revoked，并支持 `--include-lifecycle yanked,revoked` 审查不可默认发现条目；未找到、多重匹配、非法 include lifecycle 和 invalid registry manifest 返回用户错误 exit `1` 且不打印 stack。命令不安装 Capability、不读取/写入 state dir、不读取 secret、不调用 provider、不触网。`packages/cli/src/registry-show-command.test.ts` 新增 4 个测试，CLI 包合计从 53 个测试增至 57 个。
 
-下一项 ready：T327 P2：把 registry search/show 纳入发现与贡献文档。
+本轮继续完成 T327：`README.md` 的快速开始已加入 `opencap registry search github --registry registry` 和 `opencap registry show github.search_repo --registry registry --json` 示例；`docs/README.md` 在 Capability/Registry 贡献入口说明 search/show 是本地发现和审查命令；`docs/教程/write-a-capability.md` 新增本地发现和审查段落，明确 search/show 不安装、不授权、不改变 policy、不读取 secret、不写 `opencap.local/`、不调用 provider，也不会把未安装 Capability 暴露到 MCP Host。`docs/TESTING.md` 已记录 `registry-search-command.test.ts`、`registry-show-command.test.ts`、CLI 57 个测试和不写 state dir 边界。
+
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T328-T330，把已实现的 Capability advisory schema 和 Runtime installed advisory check 推进到 CLI 检查、Registry advisory list 和安全/运维文档闭环。该批任务只读取本地 state/registry/advisory metadata，不执行 Capability、不读取 provider secret、不触网，也不自动卸载、授权或修改 policy。
+
+下一项 ready：T328 P1：新增 `opencap advisory check` 已安装能力公告检查命令。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -197,9 +201,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325 和 T326 均已完成；T327 是下一项本地 Registry discovery ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326 和 T327 均已完成；T328 是下一项本地 advisory ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T327，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T328，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

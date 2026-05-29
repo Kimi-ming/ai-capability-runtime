@@ -96,6 +96,7 @@
 ### 我要贡献 Capability 或 Registry 条目
 
 - 先用 `opencap init <capability-id> --category <name> --output <dir>` 生成本地 V1 HTTP Capability 初稿，再按作者教程检查 manifest、README、registry test 和安全边界。
+- 用 `opencap registry search <query> --registry registry` 和 `opencap registry show <capability-id> --registry registry` 做本地发现与审查；这两个命令不安装、不授权、不改变 policy，也不会把未安装 Capability 暴露给 MCP Host。
 - [编写一个 Capability](教程/write-a-capability.md)
 - [GitHub fine-grained token 设置指南](教程/github-fine-grained-token-setup.md)
 - [评审一个 Capability PR](教程/review-a-capability.md)
