@@ -76,9 +76,11 @@ pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --c
 pnpm --filter @opencap/cli dev -- registry advisory show OCAP-2026-0001 --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --json
+ADVISORY_CHECK_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-advisory-check.XXXXXX")"
+pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --output "$ADVISORY_CHECK_OUTPUT"
 ```
 
-对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts`、`packages/cli/src/registry-advisory-show-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 18 个 CLI 测试，CLI 包总数为 75 个测试。`advisory-check-command.test.ts` 覆盖 `--capability`、`--severity`、`--status`、`--output`、raw/filtered match counts、安全 JSON evidence 写入、人类摘要 filters/match counts、非法 filter/output 用户错误、invalid advisory summary 和不写 audit logs 边界。这些命令只读取本地 Registry advisory metadata 和本地 installed capability metadata，不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
+对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts`、`packages/cli/src/registry-advisory-show-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 18 个 CLI 测试，CLI 包总数为 75 个测试。`advisory-check-command.test.ts` 覆盖 `--capability`、`--severity`、`--status`、`--output`、raw/filtered match counts、安全 JSON evidence 写入、人类摘要 filters/match counts、非法 filter/output 用户错误、invalid advisory summary 和不写 audit logs 边界。`--output` 会拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径，失败时不留下半截文件。这些命令只读取本地 Registry advisory metadata 和本地 installed capability metadata，不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
 
 ## Workspace 校验
 

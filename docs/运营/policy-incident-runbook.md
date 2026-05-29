@@ -152,7 +152,7 @@ rules:
 4. 本地 Runtime 应把 revoked/malicious 视为 breakglass 不可覆盖的硬边界。
 5. 在事故复盘中记录 advisory id、affected versions 和 replacement。
 
-本地取证时可以运行 `opencap advisory check --state-dir <path> --registry registry --capability <id> --severity <level> --status <status>`，把已安装能力命中的 advisory evidence 收敛到某个 incident 范围。这个筛选只影响本地报告和计数，不改变 installed state、trust、policy、authorization、Runtime execution 或上述处置流程。
+本地取证时可以运行 `opencap advisory check --state-dir <path> --registry registry --capability <id> --severity <level> --status <status> --output <file>`，把已安装能力命中的 advisory evidence 收敛到某个 incident 范围并保存 JSON report。非 JSON 摘要会显示 checked count、filters 和 raw/filtered match counts。筛选、output artifact 和 human summary 只影响本地报告和计数，不改变 installed state、trust、policy、authorization、Runtime execution 或上述处置流程。
 
 ## 复盘清单
 

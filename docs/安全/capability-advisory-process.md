@@ -88,9 +88,10 @@ opencap registry advisory list --registry registry --capability http.request_dem
 opencap registry advisory show OCAP-2026-0001 --registry registry --json
 opencap advisory check --state-dir opencap.local --registry registry --json
 opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --json
+opencap advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --output /tmp/opencap-advisory-check.json
 ```
 
-`opencap registry advisory list` 只读取本地 Registry 的 `registry/advisories/*`，用于列出 valid/invalid Capability Advisory metadata，并可用 capability、severity 和 status 做本地筛选。`opencap registry advisory show` 精确展示单条 advisory detail。`opencap advisory check` 只读取本地 installed capabilities 和本地 Registry advisory metadata，用于判断已安装能力是否命中公告；它可用 `--capability` 收敛到某个已安装能力，也可用 `--severity` 和 `--status` 只查看特定等级或状态的 matches。check filters 只是本地 evidence 查询，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
+`opencap registry advisory list` 只读取本地 Registry 的 `registry/advisories/*`，用于列出 valid/invalid Capability Advisory metadata，并可用 capability、severity 和 status 做本地筛选。`opencap registry advisory show` 精确展示单条 advisory detail。`opencap advisory check` 只读取本地 installed capabilities 和本地 Registry advisory metadata，用于判断已安装能力是否命中公告；它可用 `--capability` 收敛到某个已安装能力，也可用 `--severity` 和 `--status` 只查看特定等级或状态的 matches。非 JSON 摘要会展示 checked installed count、filters 和 raw/filtered match counts；`--output <file>` 会保存同一个 `opencap.advisory_check.v1` JSON evidence report。check filters、output artifact 和 human summary 都只是本地 evidence 查询，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
 
 这些命令只产生 evidence 和本地告警：
 

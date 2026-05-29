@@ -150,7 +150,11 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T338：CLI `opencap advisory check` 非 JSON 输出现在展示 `checked: <filtered>/<installed>`、`filters: <...|none>` 和 `matches: <filtered>/<raw>`，同时保留原有 match 表格、空结果提示和 invalid advisory summary。空结果、warning-only、revoked/deny 和 invalid advisory summary 均保持现有 exit code 与安全边界；人类摘要不输出 input/output、secret、Authorization/Cookie、provider raw response 或本地数据库日志路径。`packages/cli/src/advisory-check-command.test.ts` 从 9 个测试增至 10 个，CLI 包合计从 74 个测试增至 75 个。
 
-下一项 ready：T339 P2：把 advisory check output 和人类摘要纳入文档。
+本轮继续完成 T339：README 快速开始、中文文档中心、`docs/安全/capability-advisory-process.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/社区/registry-guidelines.md`、`registry/README.md`、`docs/运营/policy-incident-runbook.md` 和 `docs/TESTING.md` 已补充 `opencap advisory check --output <file>`、非 JSON 摘要 filters/match counts 和安全输出路径边界。安全、Registry 和运营文档已明确 output artifact 和 human summary 仍只是本地 evidence，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
+
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T340-T342，把 Registry advisory list/show evidence 从 stdout 推进到可安全保存的本地 JSON artifact 和文档闭环。该批任务继续只读取本地 Registry metadata，不写 state dir、不读取 provider secret、不触网，也不修改 installed state、trust、policy、authorization 或 Runtime execution。T291 真实 Claude Desktop/Cursor Host UI smoke 仍是外部环境限制项。
+
+下一项 ready：T340 P2：为 `opencap registry advisory list` 增加安全 JSON evidence 输出文件。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -229,9 +233,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337 和 T338 均已完成；T339 是下一项 advisory check output/human summary docs ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338 和 T339 均已完成；T340 是下一项 registry advisory list JSON evidence output ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T339，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T340，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

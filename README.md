@@ -137,6 +137,7 @@ pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --c
 pnpm --filter @opencap/cli dev -- registry advisory show OCAP-2026-0001 --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --json
+pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --output "$SMOKE_STATE_DIR/advisory-check.json"
 pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --json
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run

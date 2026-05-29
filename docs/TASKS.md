@@ -1953,11 +1953,47 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap advisory check` 非 JSON 输出现在展示 `checked: <filtered>/<installed>`、`filters: <...|none>` 和 `matches: <filtered>/<raw>`，同时保留原有 match 表格、空结果提示和 invalid advisory summary。空结果、warning-only、revoked/deny 和 invalid advisory summary 均保持现有 exit code 与安全边界；人类摘要不输出 input/output、secret、Authorization/Cookie、provider raw response 或本地数据库日志路径。`packages/cli/src/advisory-check-command.test.ts` 从 9 个测试增至 10 个，CLI 包测试数从 74 增至 75。
 
-- [ ] T339 P2：把 advisory check output 和人类摘要纳入文档。
+- [x] T339 P2：把 advisory check output 和人类摘要纳入文档。
   - 验收标准：
     - README 或中文文档中心补充 `opencap advisory check --output <file>` 的本地 evidence artifact 入口。
     - 安全/Registry/运营文档说明 output artifact 和 human summary 仍只是本地 evidence，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
     - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数、安全输出路径和不触网/不读取 secret/不写 audit logs 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：README 快速开始、中文文档中心、`docs/安全/capability-advisory-process.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/社区/registry-guidelines.md`、`registry/README.md`、`docs/运营/policy-incident-runbook.md` 和 `docs/TESTING.md` 已补充 `opencap advisory check --output <file>`、非 JSON 摘要 filters/match counts 和安全输出路径边界。安全、Registry 和运营文档已明确 output artifact 和 human summary 仍只是本地 evidence，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。`docs/TESTING.md` 记录新增 CLI 测试入口、测试计数、安全输出路径和不触网/不读取 secret/不写 audit logs 边界。
+
+- [ ] T340 P2：为 `opencap registry advisory list` 增加安全 JSON evidence 输出文件。
+  - 验收标准：
+    - CLI `opencap registry advisory list --registry <path> --output <file> [--json]` 可把当前 `opencap.registry_advisory_list.v1` report 写入本地 JSON 文件。
+    - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
+    - invalid advisory summary 和 invalid exit `1` 语义保持不变，且 invalid report 仍可写入安全输出文件。
+    - 输出路径拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径；失败时不留下半截文件。
+    - 命令不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-advisory-list-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T341 P2：为 `opencap registry advisory show` 增加安全 JSON evidence 输出文件。
+  - 验收标准：
+    - CLI `opencap registry advisory show <advisory-id> --registry <path> --output <file> [--json]` 可把当前 `opencap.registry_advisory_detail.v1` report 写入本地 JSON 文件。
+    - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
+    - not found、重复 id 和 invalid advisory 用户错误保持 exit `1` 且不打印 stack；这些无法形成 detail report 的错误不写 output 文件。
+    - 输出路径拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径；失败时不留下半截文件。
+    - 命令不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- registry-advisory-show-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T342 P2：把 registry advisory output artifacts 纳入安全和 Registry 文档。
+  - 验收标准：
+    - README 或中文文档中心补充 `opencap registry advisory list/show --output <file>` 的本地 evidence artifact 入口。
+    - 安全/Registry/运营文档说明 registry advisory output artifacts 只是本地 Registry evidence，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
+    - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数、安全输出路径和不触网/不读取 secret/不写 state dir 边界。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
