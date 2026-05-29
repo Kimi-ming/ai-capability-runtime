@@ -265,6 +265,7 @@ interface RegistryAdvisoryListCommandOptions {
   capability?: string;
   severity?: string;
   status?: string;
+  output?: string;
   json?: boolean;
 }
 
@@ -1370,6 +1371,13 @@ async function writeAdvisoryJsonOutput(outputPath: string, value: unknown): Prom
   });
 }
 
+async function writeRegistryAdvisoryJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "registry advisory evidence files",
+    fileName: "registry advisory evidence file names",
+  });
+}
+
 async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
   await writeReleaseJsonOutput(outputPath, bundle);
 }
@@ -2418,6 +2426,7 @@ registryAdvisoryCommand
   .option("--capability <id>", "Filter advisories by capability id")
   .option("--severity <value>", "Filter advisories by severity: low,medium,high,critical")
   .option("--status <value>", "Filter advisories by advisory status")
+  .option("--output <path>", "Write registry advisory list JSON report to a file")
   .option("--json", "Output JSON")
   .description("List local Registry Capability advisories.")
   .action((options: RegistryAdvisoryListCommandOptions) => runCliAction(async () => {
@@ -2425,6 +2434,10 @@ registryAdvisoryCommand
     const filters = resolveRegistryAdvisoryListFilters(options);
     const result = await validateCapabilityAdvisoryPath(registryPath);
     const report = buildRegistryAdvisoryListReport(result, filters);
+
+    if (options.output !== undefined) {
+      await writeRegistryAdvisoryJsonOutput(options.output, report);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(report, null, 2));

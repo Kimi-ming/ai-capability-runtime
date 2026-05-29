@@ -239,6 +239,101 @@ describe("OpenCap CLI registry advisory list command", () => {
     }
   }, 60_000);
 
+  it("writes registry advisory list JSON evidence to safe output files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-list-output-"));
+    const jsonOutput = join(cwd, "reports", "registry-advisories.json");
+    const humanOutput = join(cwd, "reports", "registry-advisories-human.json");
+    const invalidRegistry = join(cwd, "invalid-registry");
+    const invalidOutput = join(cwd, "reports", "registry-advisories-invalid.json");
+
+    try {
+      const json = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "list",
+        "--registry",
+        registryRoot,
+        "--output",
+        jsonOutput,
+        "--json",
+      ], { cwd });
+      const stdoutReport = JSON.parse(json.stdout) as { schemaVersion: string; advisories: Array<{ id: string }> };
+      const fileReport = JSON.parse(await readFile(jsonOutput, "utf8")) as typeof stdoutReport;
+
+      expect(json.exitCode).toBe(0);
+      expect(fileReport).toEqual(stdoutReport);
+      expect(fileReport.schemaVersion).toBe("opencap.registry_advisory_list.v1");
+      expect(fileReport.advisories).toEqual([
+        expect.objectContaining({ id: "OCAP-2026-0001" }),
+      ]);
+
+      const human = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "list",
+        "--registry",
+        registryRoot,
+        "--output",
+        humanOutput,
+      ], { cwd });
+      const humanFileReport = JSON.parse(await readFile(humanOutput, "utf8")) as { schemaVersion: string; advisories: Array<{ id: string }> };
+
+      expect(human.exitCode).toBe(0);
+      expect(human.stdout).toContain("advisory capability severity status registry_action runtime_default modified_at");
+      expect(human.stdout.trim().startsWith("{")).toBe(false);
+      expect(humanFileReport.schemaVersion).toBe("opencap.registry_advisory_list.v1");
+      expect(humanFileReport.advisories).toEqual([
+        expect.objectContaining({ id: "OCAP-2026-0001" }),
+      ]);
+
+      await writeInvalidAdvisory(invalidRegistry);
+      const invalid = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "list",
+        "--registry",
+        invalidRegistry,
+        "--output",
+        invalidOutput,
+        "--json",
+      ], { allowFailure: true, cwd });
+      const invalidStdoutReport = JSON.parse(invalid.stdout) as { invalidAdvisoryCount: number };
+      const invalidFileReport = JSON.parse(await readFile(invalidOutput, "utf8")) as typeof invalidStdoutReport;
+
+      expect(invalid.exitCode).toBe(1);
+      expect(invalidFileReport).toEqual(invalidStdoutReport);
+      expect(invalidFileReport.invalidAdvisoryCount).toBe(1);
+      await expect(readFile(join(cwd, "opencap.local", "logs.sqlite"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects unsafe registry advisory list output paths without partial files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-list-output-"));
+    const outputPath = join(cwd, ".env.registry-advisories.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "list",
+        "--registry",
+        registryRoot,
+        "--output",
+        outputPath,
+      ], { allowFailure: true, cwd });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Unsafe --output path:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(outputPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("emits invalid advisory summaries and exits 1 in JSON mode", async () => {
     const dir = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-list-"));
 
