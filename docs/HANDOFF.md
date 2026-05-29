@@ -162,7 +162,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T343-T345，把 Registry quality summary 和 Conformance summary 从 stdout 推进到可安全保存的本地 JSON artifact，并把这些 artifact 纳入 release evidence 文档路径。该批任务只汇总本地 Registry/conformance metadata，不安装或执行 Capability、不写 state dir、不读取 provider secret、不触网，也不改变 installed state、trust、policy、authorization 或 Runtime execution。T291 真实 Claude Desktop/Cursor Host UI smoke 仍是外部环境限制项。
 
-下一项 ready：T343 P2：为 `opencap registry report` 增加安全 JSON evidence 输出文件。
+本轮继续完成 T343：CLI `opencap registry report --registry <path>` 新增 `--output <file>`，可把当前 `opencap.registry_quality_summary.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。输出路径使用 Registry quality evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不安装 Capability、不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。`packages/cli/src/registry-report-command.test.ts` 从 2 个测试增至 4 个，CLI 包合计从 79 个测试增至 81 个。
+
+下一项 ready：T344 P2：为 `opencap conformance report` 增加安全 JSON evidence 输出文件。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -241,9 +243,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341 和 T342 均已完成；T343 是下一项 Registry quality summary JSON evidence output ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342 和 T343 均已完成；T344 是下一项 Conformance summary JSON evidence output ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T343，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T344，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

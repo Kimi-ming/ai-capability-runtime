@@ -1378,6 +1378,13 @@ async function writeRegistryAdvisoryJsonOutput(outputPath: string, value: unknow
   });
 }
 
+async function writeRegistryReportJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "registry quality evidence files",
+    fileName: "registry quality evidence file names",
+  });
+}
+
 async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
   await writeReleaseJsonOutput(outputPath, bundle);
 }
@@ -2510,14 +2517,19 @@ registryCommand
 registryCommand
   .command("report")
   .option("--registry <path>", "Registry root directory", "registry")
+  .option("--output <path>", "Write registry quality summary JSON report to a file")
   .option("--json", "Output JSON")
   .description("Generate a local Registry quality summary report.")
-  .action((options: { registry?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { registry?: string; output?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const registryRoot = isAbsolute(options.registry ?? "registry")
       ? options.registry ?? "registry"
       : resolve(cwd, options.registry ?? "registry");
     const summary = await buildRegistryQualitySummary(registryRoot);
+
+    if (options.output !== undefined) {
+      await writeRegistryReportJsonOutput(options.output, summary);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(summary, null, 2));

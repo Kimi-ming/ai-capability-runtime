@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, stat } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -99,5 +99,73 @@ describe("OpenCap CLI registry report command", () => {
     expect(result.stdout).toContain("http.request_demo developer-tools active revoked");
     expect(result.stdout).toContain("advisory:OCAP-2026-0001:revoked");
     expect(result.stdout).toContain("metadata:unsafe_by_default");
+  }, 60_000);
+
+  it("writes registry quality summary JSON evidence to safe output files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-registry-report-output-"));
+    const jsonOutput = join(cwd, "reports", "registry-quality.json");
+    const humanOutput = join(cwd, "reports", "registry-quality-human.json");
+
+    try {
+      const json = await runOpenCapCli([
+        "registry",
+        "report",
+        "--registry",
+        registryRoot,
+        "--output",
+        jsonOutput,
+        "--json",
+      ], { cwd });
+      const stdoutReport = JSON.parse(json.stdout) as { schemaVersion: string; capabilities: unknown[] };
+      const fileReport = JSON.parse(await readFile(jsonOutput, "utf8")) as typeof stdoutReport;
+
+      expect(json.exitCode).toBe(0);
+      expect(fileReport).toEqual(stdoutReport);
+      expect(fileReport.schemaVersion).toBe("opencap.registry_quality_summary.v1");
+      expect(fileReport.capabilities).toHaveLength(5);
+
+      const human = await runOpenCapCli([
+        "registry",
+        "report",
+        "--registry",
+        registryRoot,
+        "--output",
+        humanOutput,
+      ], { cwd });
+      const humanFileReport = JSON.parse(await readFile(humanOutput, "utf8")) as { schemaVersion: string; capabilities: unknown[] };
+
+      expect(human.exitCode).toBe(0);
+      expect(human.stdout).toContain("id category lifecycle advisory quality default_install blocking_reasons");
+      expect(human.stdout.trim().startsWith("{")).toBe(false);
+      expect(humanFileReport.schemaVersion).toBe("opencap.registry_quality_summary.v1");
+      expect(humanFileReport.capabilities).toHaveLength(5);
+      expect(await pathExists(join(cwd, "opencap.local"))).toBe(false);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects unsafe registry report output paths without partial files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-registry-report-output-"));
+    const outputPath = join(cwd, ".env.registry-quality.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "registry",
+        "report",
+        "--registry",
+        registryRoot,
+        "--output",
+        outputPath,
+      ], { allowFailure: true, cwd });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Unsafe --output path:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      expect(await pathExists(outputPath)).toBe(false);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
   }, 60_000);
 });
