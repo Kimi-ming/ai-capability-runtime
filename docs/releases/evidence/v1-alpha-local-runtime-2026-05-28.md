@@ -36,10 +36,24 @@
 后续刷新本 evidence 或准备新的 release evidence 时，可以运行：
 
 ```bash
-opencap conformance report --records packages/runtime/test/fixtures/conformance --json
+opencap conformance report \
+  --records packages/runtime/test/fixtures/conformance \
+  --output docs/releases/evidence/<release-id>-conformance-summary.json \
+  --json
 ```
 
-该命令输出 `opencap.conformance_summary.v1`，汇总本地 conformance YAML records 的 suite version、profile、pass/fail/invalid count、checks 和 artifacts。它只作为 release/conformance evidence，不改变 Runtime policy、trust、consent、install decision 或 Host compatibility claim；也不得扩展解读为 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+该命令输出并保存 `opencap.conformance_summary.v1`，汇总本地 conformance YAML records 的 suite version、profile、pass/fail/invalid count、checks 和 artifacts。它只作为 release/conformance evidence，不改变 Runtime policy、trust、consent、install decision 或 Host compatibility claim；也不得扩展解读为 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
+
+后续也可以保存 Registry quality summary input artifact：
+
+```bash
+opencap registry report \
+  --registry registry \
+  --output docs/releases/evidence/<release-id>-registry-quality.json \
+  --json
+```
+
+该命令输出并保存 `opencap.registry_quality_summary.v1`，只汇总本地 Registry manifest、package lint、tests、auth、lifecycle、advisory 和 quality evidence。它不安装或执行 Capability、不读取 secret、不写 state dir、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
 ## Release Evidence Bundle
 
@@ -60,7 +74,7 @@ opencap release artifact validate \
 
 该命令输出 `opencap.release_evidence.v1`，把 Registry quality summary、conformance summary、可选 package readiness report 和本地命令状态汇总为一个脱敏 bundle。Bundle 中的 `decision` 只表达本地 evidence 判断；如果包含 registry advisory、package `private: true`、failed conformance 或 failed command 等 blocker，应保持 `block-release-tag`。该 bundle 不替代 GitHub required checks、真实 Claude Desktop/Cursor Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
-当前样例没有生成持久 release evidence JSON artifact，也没有生成 validation report JSON artifact；它只在本文中记录 2026-05-28 本地 evidence 摘要。后续准备具体 release 时，发布者应保存 `opencap release evidence --output <release-evidence-json>` 生成的 JSON artifact，运行 `opencap release artifact validate --file <artifact> --output <validation-report-json> --json`，并在 release notes 或 handoff 中记录 release evidence path、validation report path、commit、date、`generatedAt`、decision、blockers、validation `valid`、finding count 和 `policyEffect: none`。
+当前样例没有生成持久 registry quality、conformance summary、release evidence JSON artifact，也没有生成 validation report JSON artifact；它只在本文中记录 2026-05-28 本地 evidence 摘要。后续准备具体 release 时，发布者应保存 `opencap registry report --output <registry-quality-json>`、`opencap conformance report --output <conformance-summary-json>`、`opencap release evidence --output <release-evidence-json>` 生成的 JSON artifact，运行 `opencap release artifact validate --file <artifact> --output <validation-report-json> --json`，并在 release notes 或 handoff 中记录 evidence path、validation report path、commit、date、`generatedAt`、decision、blockers、validation `valid`、finding count 和 `policyEffect: none`。
 
 ## npm Publish Dry-run Evidence
 

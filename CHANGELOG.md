@@ -86,6 +86,7 @@
 - CLI `opencap registry report` 新增 `--output <file>`，可安全写出本地 Registry quality summary evidence report。
 - CLI `opencap conformance report` 新增 `--output <file>`，可安全写出本地 conformance summary evidence report。
 - README、Registry、安全、生态和运营文档已补充 `opencap registry advisory list/show --output <file>` 本地 evidence artifact 边界。
+- README、Release checklist、alpha evidence 样例和测试文档已补充 Registry quality / Conformance summary output artifacts 的 release evidence 边界。
 - README、Registry、安全和运营文档已补充 `opencap advisory check --capability/--severity/--status` 本地 evidence 查询边界。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。
 - Release checklist、V1 alpha evidence 样例和 npm 发布文档已纳入 package readiness report 与 `npm pack --dry-run --json` 记录步骤，明确它不能替代 npm publish dry-run、trusted publishing 或正式 provenance。

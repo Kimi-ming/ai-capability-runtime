@@ -40,6 +40,16 @@ pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/
 
 该命令只汇总本地 conformance YAML records，用于 release/conformance evidence；`--output` 会安全写出 `opencap.conformance_summary.v1` JSON evidence report，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。对应测试入口是 `packages/cli/src/conformance-report-command.test.ts`，当前覆盖 JSON、人类输出、invalid record exit `1`、`--output` 安全 JSON evidence 写入、invalid summary output 脱敏和非法 output 用户错误，共 6 个测试。该命令不读取/写入 state dir，不调用 provider，不代表 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。
 
+### Registry quality evidence
+
+```bash
+pnpm --filter @opencap/cli dev -- registry report --registry registry --json
+REGISTRY_QUALITY_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/opencap-registry-quality.XXXXXX")"
+pnpm --filter @opencap/cli dev -- registry report --registry registry --output "$REGISTRY_QUALITY_OUTPUT"
+```
+
+该命令只汇总本地 Registry manifest、package lint、tests、auth、lifecycle、advisory 和 quality evidence；`--output` 会安全写出 `opencap.registry_quality_summary.v1` JSON evidence report，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。对应测试入口是 `packages/cli/src/registry-report-command.test.ts`，当前覆盖 JSON、人类输出、`--output` 安全 JSON evidence 写入、非法 output 用户错误和不写 state dir 边界，共 4 个测试。该 artifact 只是本地 evidence，不替代 GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布；命令不安装或执行 Capability、不读取 secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+
 ### Release evidence bundle
 
 ```bash

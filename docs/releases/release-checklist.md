@@ -229,6 +229,23 @@ opencap release artifact validate \
   --json
 ```
 
+发布者也可以先保存 Registry quality summary 和 conformance summary 两类输入 evidence，便于 release notes、PR 描述或 handoff 引用：
+
+```bash
+REGISTRY_QUALITY_PATH="docs/releases/evidence/<release-id>-registry-quality.json"
+CONFORMANCE_SUMMARY_PATH="docs/releases/evidence/<release-id>-conformance-summary.json"
+opencap registry report \
+  --registry registry \
+  --output "$REGISTRY_QUALITY_PATH" \
+  --json
+opencap conformance report \
+  --records packages/runtime/test/fixtures/conformance \
+  --output "$CONFORMANCE_SUMMARY_PATH" \
+  --json
+```
+
+这两类 artifact 只是本地 evidence input，不替代 `opencap release evidence` bundle、`opencap release artifact validate` validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。它们不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+
 如果 release 涉及 npm package，可先生成 pack JSON，再把 package readiness 纳入 bundle。发布者应在 release notes、PR 描述或 handoff 中记录 release evidence path、validation report path、commit、date、`generatedAt`、validation `valid`、finding count 和 `policyEffect: none`：
 
 ```bash
@@ -249,13 +266,13 @@ opencap release artifact validate \
   --json
 ```
 
-`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 release evidence artifact 或 validation report artifact 写入本地状态目录、凭据文件或日志/数据库路径。
+`--output` 会创建父目录，并拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径。发布者不得把 registry quality、conformance summary、release evidence artifact 或 validation report artifact 写入本地状态目录、凭据文件或日志/数据库路径。
 
 `opencap release artifact validate --file <artifact> --output <report-json> --json` 输出并保存 `opencap.release_artifact_validation.v1`。发布者应把 validation report path、`valid`、finding count、`findings` 摘要和 `policyEffect: none` 写入 release notes、PR 描述或 handoff；如果 validation 为 invalid，不能继续 release/tag/publish。
 
 `opencap.release_evidence.v1` 只汇总本地 reports 和命令状态；它不替代 GitHub required checks、真实 Host UI smoke、npm trusted publishing、workflow publish dry-run、release approval、tag 创建或真实 npm 发布。
 
-发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --json` 生成本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
+发布者可以用 `opencap conformance report --records packages/runtime/test/fixtures/conformance --output <file> --json` 生成并保存本地 conformance summary，并把 `opencap.conformance_summary.v1` 摘要写入 release evidence。该 report 只汇总本地 evidence records，不代表真实 Host UI、Cloud、Console、OAuth、marketplace、payment、npm provenance 或 provider API end-to-end 已完成。
 
 npm package readiness evidence 核对步骤：
 

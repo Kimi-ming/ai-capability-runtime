@@ -2028,11 +2028,35 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap conformance report --records <path>` 新增 `--output <file>`，可把当前 `opencap.conformance_summary.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。invalid 或 failed record 仍保持 exit `1`，并在能形成 summary report 时写出安全 output 文件；非法 records 原文、secret、token 或 provider raw body 不进入 stdout/stderr/output。输出路径使用 Conformance evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不读取/写入 state dir、不调用 provider、不触网、不改变 policy、trust、install decision、authorization 或 Runtime execution。`packages/cli/src/conformance-report-command.test.ts` 从 3 个测试增至 6 个，CLI 包测试数从 81 增至 84。
 
-- [ ] T345 P2：把 registry/conformance report output artifacts 纳入 release evidence 文档路径。
+- [x] T345 P2：把 registry/conformance report output artifacts 纳入 release evidence 文档路径。
   - 验收标准：
     - README 或中文文档中心补充 `opencap registry report --output <file>` 和 `opencap conformance report --output <file>` 的本地 evidence artifact 入口。
     - Release checklist、alpha evidence 样例和 `docs/TESTING.md` 说明这两类 output artifact 只是本地 evidence，不能替代 GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布。
     - 文档说明安全输出路径、不触网、不读取 secret、不写 state dir，以及不改变 trust、policy、authorization 或 Runtime execution。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：README、中文文档中心、`docs/releases/release-checklist.md`、`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 和 `docs/TESTING.md` 已补充 `opencap registry report --output <file>` 与 `opencap conformance report --output <file>`。文档明确 Registry quality / Conformance summary output artifacts 只是本地 evidence input，不替代 release evidence bundle、artifact validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布；这些命令不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+
+- [ ] T346 P2：为 `opencap release package report` 增加安全 JSON evidence 输出文件。
+  - 验收标准：
+    - CLI `opencap release package report --package <workspace-name> --output <file> [--pack-json <path>] [--json]` 可把当前 `opencap.npm_package_readiness.v1` report 写入本地 JSON 文件。
+    - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
+    - unsupported package 和 invalid pack JSON 仍作为用户错误 exit `1` 且不打印 stack；这些无法形成 readiness report 的错误不会写 output 文件。
+    - 输出路径拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。
+    - 命令不运行 npm publish、不触网、不读取 npm token、不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-package-report-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T347 P2：把 release package report output artifact 纳入发布文档。
+  - 验收标准：
+    - Release checklist、package publishing 文档和测试文档说明 `opencap release package report --output <file>` 可保存 `opencap.npm_package_readiness.v1` JSON artifact。
+    - 文档明确该 artifact 只证明本地 package metadata/tarball 摘要审查，不替代 npm pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布。
+    - 文档说明安全输出路径、不触网、不读取 npm token、不写 state dir，以及不改变 package publish state、trust、policy、authorization 或 Runtime execution。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`

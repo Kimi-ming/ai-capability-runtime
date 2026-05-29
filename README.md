@@ -133,6 +133,7 @@ pnpm --filter @opencap/cli dev -- doctor --state-dir "$SMOKE_STATE_DIR" --regist
 pnpm --filter @opencap/cli dev -- registry search github --registry registry
 pnpm --filter @opencap/cli dev -- registry show github.search_repo --registry registry --json
 pnpm --filter @opencap/cli dev -- registry report --registry registry --json
+pnpm --filter @opencap/cli dev -- registry report --registry registry --output "$SMOKE_OUTPUT_DIR/registry-quality.json"
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --json
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --output "$SMOKE_OUTPUT_DIR/registry-advisory-list.json"
@@ -142,6 +143,7 @@ pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" 
 pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir "$SMOKE_STATE_DIR" --registry registry --capability github.create_issue --severity critical --status revoked --output "$SMOKE_OUTPUT_DIR/advisory-check.json"
 pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --json
+pnpm --filter @opencap/cli dev -- conformance report --records packages/runtime/test/fixtures/conformance --output "$SMOKE_OUTPUT_DIR/conformance-summary.json"
 pnpm --filter @opencap/cli dev -- invoke github.create_issue --dry-run --state-dir "$SMOKE_STATE_DIR" --input examples/github-issue-capability/input.json --json
 pnpm --filter @opencap/cli dev -- logs --state-dir "$SMOKE_STATE_DIR" --status dry_run
 pnpm --filter @opencap/cli dev -- metrics summary --state-dir "$SMOKE_STATE_DIR" --json

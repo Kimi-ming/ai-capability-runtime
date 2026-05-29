@@ -166,7 +166,11 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T344：CLI `opencap conformance report --records <path>` 新增 `--output <file>`，可把当前 `opencap.conformance_summary.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。invalid 或 failed record 仍保持 exit `1`，并在能形成 summary report 时写出安全 output 文件；非法 records 原文、secret、token 或 provider raw body 不进入 stdout/stderr/output。输出路径使用 Conformance evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不读取/写入 state dir、不调用 provider、不触网、不改变 policy、trust、install decision、authorization 或 Runtime execution。`packages/cli/src/conformance-report-command.test.ts` 从 3 个测试增至 6 个，CLI 包合计从 81 个测试增至 84 个。
 
-下一项 ready：T345 P2：把 registry/conformance report output artifacts 纳入 release evidence 文档路径。
+本轮继续完成 T345：README、中文文档中心、`docs/releases/release-checklist.md`、`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 和 `docs/TESTING.md` 已补充 `opencap registry report --output <file>` 与 `opencap conformance report --output <file>`。文档明确 Registry quality / Conformance summary output artifacts 只是本地 evidence input，不替代 release evidence bundle、artifact validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布；这些命令不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
+
+本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T346-T347，把 npm package readiness report 从 stdout 推进到可安全保存的本地 JSON artifact，并把该 artifact 纳入发布文档。该批任务只汇总本地 package metadata 和可选 pack summary，不运行 npm publish、不触网、不读取 npm token，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
+
+下一项 ready：T346 P2：为 `opencap release package report` 增加安全 JSON evidence 输出文件。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -245,9 +249,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343 和 T344 均已完成；T345 是下一项 report output artifacts 文档闭环 ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344 和 T345 均已完成；T346 是下一项 npm package readiness JSON evidence output ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T345，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T346，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
