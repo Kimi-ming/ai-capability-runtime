@@ -2101,7 +2101,7 @@
     - `git diff --check`
   - 完成记录：Release checklist、package publishing 策略、npm trusted publishing workflow、V1 alpha evidence 样例和测试策略已补充 `opencap release evidence --package-readiness <file>`。文档说明发布者应先用 `opencap release package report --output <file>` 保存并校验 `opencap.npm_package_readiness.v1` artifact，再用 `release evidence --package-readiness` 复用该 artifact 汇入 `opencap.release_evidence.v1` bundle；该输入不能与 `--package`/`--pack-json` 混用，invalid artifact 会阻断且不得写半截 output。文档明确该输入只是 release evidence bundle 的本地 evidence source，不替代 pack dry-run、workflow publish dry-run、trusted publisher、正式 provenance、release approval 或 npm 发布；这些命令不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
 
-- [ ] T351 P2：支持多个 package readiness artifacts 输入 release evidence。
+- [x] T351 P2：支持多个 package readiness artifacts 输入 release evidence。
   - 验收标准：
     - CLI `opencap release evidence` 支持重复传入 `--package-readiness <file>`，按传入顺序读取多个 `opencap.npm_package_readiness.v1` artifacts。
     - 多个 package readiness artifacts 会进入 `opencap.release_evidence.v1` 的 packages components，并将各自 blocker 汇总进 release blockers。
@@ -2112,6 +2112,7 @@
     - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap release evidence` 的 `--package-readiness <file>` 现在支持重复传入多个 artifact，并按命令行传入顺序读取、验证和汇入 `opencap.release_evidence.v1` 的 package components。每个 artifact 的 package blocker 会汇总到 release blockers；任一 artifact invalid 时仍作为用户错误 exit `1` 且不打印 stack，并且不会写 release evidence output partial file。重复 `--package-readiness` 仍禁止与 `--package`/`--pack-json` 混用。命令不运行 npm、不触网、不读取 npm token、不写 state dir，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-evidence-command.test.ts` 从 10 个测试增至 11 个，CLI 包合计从 88 个测试增至 89 个。
 
 - [ ] T352 P2：记录多个 package readiness artifacts 的 release evidence 文档。
   - 验收标准：

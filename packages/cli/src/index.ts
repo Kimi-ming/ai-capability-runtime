@@ -223,6 +223,10 @@ function parseLimit(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
+function collectRepeatedOption(value: string, previous: string[] = []): string[] {
+  return [...previous, value];
+}
+
 const AUDIT_INVOCATION_STATUSES = new Set<AuditInvocationStatus>(["blocked", "denied", "executed", "dry_run"]);
 
 const POLICY_DECISION_VALUES = new Set<PolicyDecision>(["allow", "ask", "deny"]);
@@ -2626,7 +2630,7 @@ releaseCommand
   .requiredOption("--records <path>", "Conformance records root directory")
   .option("--package <workspace-name>", "Workspace package name to include")
   .option("--pack-json <path>", "Path to npm pack --dry-run --json output")
-  .option("--package-readiness <path>", "Path to saved npm package readiness JSON artifact")
+  .option("--package-readiness <path>", "Path to saved npm package readiness JSON artifact", collectRepeatedOption, [])
   .option("--target <name>", "Release target name", "v0.1 Local Runtime")
   .option("--commit <sha>", "Release source commit", "local")
   .option("--date <date>", "Release evidence date")
@@ -2634,8 +2638,8 @@ releaseCommand
   .option("--output <path>", "Write release evidence JSON bundle to a file")
   .option("--json", "Output JSON")
   .description("Generate a local release evidence bundle.")
-  .action((options: { registry: string; records: string; package?: string; packJson?: string; packageReadiness?: string; target?: string; commit?: string; date?: string; generatedAt?: string; output?: string; json?: boolean }) => runCliAction(async () => {
-    if (options.packageReadiness !== undefined && (options.package !== undefined || options.packJson !== undefined)) {
+  .action((options: { registry: string; records: string; package?: string; packJson?: string; packageReadiness: string[]; target?: string; commit?: string; date?: string; generatedAt?: string; output?: string; json?: boolean }) => runCliAction(async () => {
+    if (options.packageReadiness.length > 0 && (options.package !== undefined || options.packJson !== undefined)) {
       throw new CliUserInputError("Use either --package-readiness or --package/--pack-json, not both.");
     }
     if (options.package !== undefined && options.packJson === undefined) {
@@ -2658,8 +2662,10 @@ releaseCommand
       const packageJsonPath = releasePackageJsonPath(options.package, cwd);
       const packFiles = await readNpmPackJsonFiles(resolveCliPath(options.packJson));
       packageReadinessReports.push(await buildNpmPackageReadinessReportFromFile(packageJsonPath, { packFiles }));
-    } else if (options.packageReadiness !== undefined) {
-      packageReadinessReports.push(await readPackageReadinessArtifact(resolveCliPath(options.packageReadiness)));
+    } else if (options.packageReadiness.length > 0) {
+      for (const packageReadinessPath of options.packageReadiness) {
+        packageReadinessReports.push(await readPackageReadinessArtifact(resolveCliPath(packageReadinessPath)));
+      }
     }
 
     const bundle = buildReleaseEvidenceBundle({

@@ -260,6 +260,64 @@ describe("OpenCap CLI release evidence command", () => {
     }
   }, 60_000);
 
+  it("includes multiple saved package readiness artifacts in input order", async () => {
+    const spec = await writePackageReadinessArtifact();
+    const cli = await writePackageReadinessArtifact({
+      packageName: "@opencap/cli",
+      metadata: {
+        private: true,
+        hasMain: false,
+        hasTypes: false,
+        hasBin: true,
+        hasFilesAllowlist: true,
+        files: ["dist", "package.json"],
+        exportKeys: [],
+      },
+      pack: {
+        evidence: "provided",
+        fileCount: 2,
+        totalSize: 40,
+        forbiddenFiles: [],
+      },
+      blockers: [
+        {
+          code: "NPM_PACKAGE_PRIVATE",
+          severity: "blocker",
+          path: "/private",
+          message: "package is still marked private.",
+        },
+      ],
+    });
+
+    try {
+      const result = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--package-readiness",
+        spec.file,
+        "--package-readiness",
+        cli.file,
+        "--json",
+      ]);
+      const bundle = JSON.parse(result.stdout);
+
+      expect(result.exitCode).toBe(0);
+      expect(bundle.components.packages.map((entry: { packageName: string }) => entry.packageName)).toEqual([
+        "@opencap/spec",
+        "@opencap/cli",
+      ]);
+      expect(bundle.components.packages.map((entry: { packFileCount: number }) => entry.packFileCount)).toEqual([3, 2]);
+      expect(bundle.blockers.filter((blocker: { code: string }) => blocker.code === "PACKAGE_READINESS_BLOCKER")).toHaveLength(2);
+    } finally {
+      await rm(spec.dir, { recursive: true, force: true });
+      await rm(cli.dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a human-readable release evidence summary", async () => {
     const result = await runOpenCapCli([
       "release",
