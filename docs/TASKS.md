@@ -2162,7 +2162,7 @@
     - `git diff --check`
   - 完成记录：`docs/生态/registry-distribution.md` 已新增本地 Registry index artifact 段落，README、中文文档中心、release checklist、V1 alpha evidence 样例和测试策略已补充 `opencap registry index build --registry registry --output <file> --json` 的本地发现索引用途。文档明确 unsigned Registry index 只是 discovery/cache input，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计；index 不包含 manifest 原文、auth env、secret、provider raw response、input/output/execution 原文、`opencap.local/`、DB/log 或私有绝对路径。测试策略已记录 Registry index evidence 命令和 `packages/spec/src/registry-index.test.ts` / `packages/cli/src/registry-index-command.test.ts` 覆盖边界，并同步当前 spec 98、CLI 93 测试计数。
 
-- [ ] T356 P2：新增 Registry index artifact validation helper。
+- [x] T356 P2：新增 Registry index artifact validation helper。
   - 验收标准：
     - `@opencap/spec` 导出 `validateRegistryIndexArtifact()`、`REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION` 和 validation report 类型，输出 `opencap.registry_index_validation.v1`。
     - Helper 校验保存后的 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` JSON artifact：schema/profile、generatedAt、capabilityCount、invalidManifestCount、capabilities、relative manifest path、manifest digest、quality score 摘要、advisory refs、`signatureStatus: "none"`、`policyEffect: "none"` 和 `indexDigest` 一致性。
@@ -2172,6 +2172,7 @@
     - `pnpm --filter @opencap/spec test -- registry-index-artifact.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 已新增 `validateRegistryIndexArtifact()`、`REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION` 和 `opencap.registry_index_validation.v1` validation report 类型。Helper 校验保存后的 `opencap.registry.index.v1` / `opencap.registry.index_cache_sync.v1` JSON artifact 的 schema/profile、generatedAt、capabilityCount、invalidManifestCount、capabilities、relative manifest path、manifest digest、quality score 摘要、advisory refs、`signatureStatus: "none"`、`policyEffect: "none"` 和 `indexDigest` 一致性；会拒绝明显 secret/token/password、Authorization/Cookie、raw manifest/auth/input/output/execution/provider 字段、`opencap.local/`、SQLite/DB/log 和私有绝对路径文本，且 validation report 不回显原文。新增 `packages/spec/src/registry-index-artifact.test.ts` 覆盖 valid artifact、tampered/unsafe artifact 和 non-object artifact 脱敏报告；已验证 `pnpm --filter @opencap/spec test -- registry-index-artifact.test.ts`、`pnpm --filter @opencap/spec build` 和 `pnpm validate`。
 
 - [ ] T357 P2：新增 CLI registry index validate 安全验证命令。
   - 验收标准：

@@ -247,12 +247,32 @@ export const REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION = "opencap.registry_quality
 export const REGISTRY_QUALITY_SCORE_RUBRIC_VERSION = "opencap.quality_score.v1" as const;
 export const REGISTRY_INDEX_SCHEMA_VERSION = "opencap.registry.index.v1" as const;
 export const REGISTRY_INDEX_PROFILE = "opencap.registry.index_cache_sync.v1" as const;
+export const REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION = "opencap.registry_index_validation.v1" as const;
 
 export type RegistryQualitySummarySchemaVersion = typeof REGISTRY_QUALITY_SUMMARY_SCHEMA_VERSION;
 export type RegistryIndexSchemaVersion = typeof REGISTRY_INDEX_SCHEMA_VERSION;
 export type RegistryIndexProfile = typeof REGISTRY_INDEX_PROFILE;
 export type RegistryIndexSource = "local" | "git";
 export type RegistryIndexSignatureStatus = "none";
+export type RegistryIndexValidationSchemaVersion = typeof REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION;
+export type RegistryIndexArtifactFindingCode =
+  | "REGISTRY_INDEX_ARTIFACT_NOT_OBJECT"
+  | "REGISTRY_INDEX_SCHEMA_VERSION_INVALID"
+  | "REGISTRY_INDEX_PROFILE_INVALID"
+  | "REGISTRY_INDEX_GENERATED_AT_INVALID"
+  | "REGISTRY_INDEX_CAPABILITY_COUNT_INVALID"
+  | "REGISTRY_INDEX_CAPABILITY_COUNT_MISMATCH"
+  | "REGISTRY_INDEX_INVALID_MANIFEST_COUNT_INVALID"
+  | "REGISTRY_INDEX_SIGNATURE_STATUS_INVALID"
+  | "REGISTRY_INDEX_POLICY_EFFECT_INVALID"
+  | "REGISTRY_INDEX_DIGEST_INVALID"
+  | "REGISTRY_INDEX_DIGEST_MISMATCH"
+  | "REGISTRY_INDEX_CAPABILITY_INVALID"
+  | "REGISTRY_INDEX_CAPABILITY_PATH_UNSAFE"
+  | "REGISTRY_INDEX_CAPABILITY_DIGEST_INVALID"
+  | "REGISTRY_INDEX_CAPABILITY_POLICY_EFFECT_INVALID"
+  | "REGISTRY_INDEX_CAPABILITY_QUALITY_INVALID"
+  | "REGISTRY_INDEX_SENSITIVE_TEXT";
 export type RegistryQualityEvidenceStatus = "pass" | "fail";
 export type RegistryQualityAdvisoryStatus = "none" | CapabilityAdvisoryStatus;
 export type RegistryQualityScoreBand = "incomplete" | "experimental" | "listed" | "tested" | "verified";
@@ -310,6 +330,24 @@ export interface BuildRegistryIndexOptions {
   generatedAt?: string;
   registry?: Partial<RegistryIndexRegistryMetadata> & { source?: RegistryIndexSource };
   generator?: Partial<RegistryIndexGeneratorMetadata>;
+}
+
+export interface RegistryIndexArtifactFinding {
+  code: RegistryIndexArtifactFindingCode;
+  severity: "blocker";
+  path: string;
+  message: string;
+}
+
+export interface RegistryIndexArtifactValidationReport {
+  schemaVersion: RegistryIndexValidationSchemaVersion;
+  valid: boolean;
+  artifactSchemaVersion?: string;
+  profile?: string;
+  indexDigest?: string;
+  findingCount: number;
+  findings: RegistryIndexArtifactFinding[];
+  policyEffect: "none";
 }
 
 export interface RegistryQualityScoreDimensions {
@@ -1277,6 +1315,231 @@ export async function buildRegistryIndex(
   return {
     ...indexWithoutDigest,
     indexDigest: stableJsonDigest(indexWithoutDigest),
+  };
+}
+
+const SHA256_DIGEST_PATTERN = /^sha256:[0-9a-f]{64}$/;
+const REGISTRY_INDEX_BANDS = new Set<RegistryQualityScoreBand>([
+  "incomplete",
+  "experimental",
+  "listed",
+  "tested",
+  "verified",
+]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function registryIndexArtifactString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function registryIndexArtifactNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function registryIndexArtifactPolicyEffect(value: unknown): value is "none" {
+  return value === "none";
+}
+
+function registryIndexArtifactDate(value: unknown): boolean {
+  return typeof value === "string" && !Number.isNaN(Date.parse(value));
+}
+
+function registryIndexArtifactRelativePath(value: unknown): boolean {
+  if (typeof value !== "string" || value.length === 0) {
+    return false;
+  }
+
+  return !value.startsWith("/")
+    && !value.startsWith("\\")
+    && !value.split(/[/\\]+/).includes("..")
+    && !/^[A-Za-z]:[\\/]/.test(value);
+}
+
+function pushRegistryIndexFinding(
+  findings: RegistryIndexArtifactFinding[],
+  code: RegistryIndexArtifactFindingCode,
+  path: string,
+  message: string,
+): void {
+  findings.push({
+    code,
+    severity: "blocker",
+    path,
+    message,
+  });
+}
+
+function validateRegistryIndexQuality(
+  value: unknown,
+  path: string,
+  findings: RegistryIndexArtifactFinding[],
+): void {
+  if (!isRecord(value)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_QUALITY_INVALID", path, "Capability quality summary must be an object.");
+    return;
+  }
+
+  if (value.rubricVersion !== REGISTRY_QUALITY_SCORE_RUBRIC_VERSION) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_QUALITY_INVALID", `${path}.rubricVersion`, "Capability quality rubric version is invalid.");
+  }
+  const total = registryIndexArtifactNumber(value.total);
+  if (total === undefined || total < 0 || total > 100) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_QUALITY_INVALID", `${path}.total`, "Capability quality total must be between 0 and 100.");
+  }
+  if (typeof value.band !== "string" || !REGISTRY_INDEX_BANDS.has(value.band as RegistryQualityScoreBand)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_QUALITY_INVALID", `${path}.band`, "Capability quality band is invalid.");
+  }
+  if (!registryIndexArtifactPolicyEffect(value.policyEffect)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_QUALITY_INVALID", `${path}.policyEffect`, "Capability quality policyEffect must be none.");
+  }
+}
+
+function validateRegistryIndexCapability(
+  value: unknown,
+  path: string,
+  findings: RegistryIndexArtifactFinding[],
+): void {
+  if (!isRecord(value)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_INVALID", path, "Capability index entry must be an object.");
+    return;
+  }
+
+  for (const field of ["id", "name", "version", "category", "lifecycle", "trustLevel"] as const) {
+    if (registryIndexArtifactString(value[field]) === undefined) {
+      pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_INVALID", `${path}.${field}`, `Capability ${field} must be a string.`);
+    }
+  }
+  if (!registryIndexArtifactRelativePath(value.path)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_PATH_UNSAFE", `${path}.path`, "Capability manifest path must be relative and stay within the Registry checkout.");
+  }
+  if (typeof value.manifestDigest !== "string" || !SHA256_DIGEST_PATTERN.test(value.manifestDigest)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_DIGEST_INVALID", `${path}.manifestDigest`, "Capability manifestDigest must use sha256:<64 lowercase hex>.");
+  }
+  validateRegistryIndexQuality(value.quality, `${path}.quality`, findings);
+  if (!Array.isArray(value.advisoryRefs) || !value.advisoryRefs.every((entry) => typeof entry === "string")) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_INVALID", `${path}.advisoryRefs`, "Capability advisoryRefs must be an array of strings.");
+  }
+  if (typeof value.defaultInstallTrusted !== "boolean") {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_INVALID", `${path}.defaultInstallTrusted`, "Capability defaultInstallTrusted must be a boolean.");
+  }
+  if (!Array.isArray(value.blockingReasons) || !value.blockingReasons.every((entry) => typeof entry === "string")) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_INVALID", `${path}.blockingReasons`, "Capability blockingReasons must be an array of strings.");
+  }
+  if (!registryIndexArtifactPolicyEffect(value.policyEffect)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_POLICY_EFFECT_INVALID", `${path}.policyEffect`, "Capability policyEffect must be none.");
+  }
+}
+
+function walkRegistryIndexArtifact(value: unknown, path: string, findings: RegistryIndexArtifactFinding[]): void {
+  if (typeof value === "string") {
+    if (
+      /\b[A-Z0-9_]*(TOKEN|SECRET|PASSWORD|API_KEY)[A-Z0-9_]*\b/.test(value)
+      || /Authorization|Cookie/i.test(value)
+      || /provider raw response/i.test(value)
+      || /https:\/\/api\./i.test(value)
+      || /opencap\.local/i.test(value)
+      || /\/Users\//.test(value)
+      || /\.(sqlite|sqlite3|db|log)\b/i.test(value)
+    ) {
+      pushRegistryIndexFinding(findings, "REGISTRY_INDEX_SENSITIVE_TEXT", path, "Artifact contains disallowed sensitive or raw runtime text.");
+    }
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => walkRegistryIndexArtifact(entry, `${path}[${index}]`, findings));
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  for (const [key, entry] of Object.entries(value)) {
+    const entryPath = path === "$" ? `$.${key}` : `${path}.${key}`;
+    if (["auth", "env", "input", "output", "execution", "providerRawResponse", "rawResponse"].includes(key)) {
+      pushRegistryIndexFinding(findings, "REGISTRY_INDEX_SENSITIVE_TEXT", entryPath, "Artifact contains a disallowed raw manifest, auth, input/output, execution, or provider field.");
+    }
+    walkRegistryIndexArtifact(entry, entryPath, findings);
+  }
+}
+
+export function validateRegistryIndexArtifact(artifact: unknown): RegistryIndexArtifactValidationReport {
+  const findings: RegistryIndexArtifactFinding[] = [];
+
+  if (!isRecord(artifact)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_ARTIFACT_NOT_OBJECT", "$", "Registry index artifact must be a JSON object.");
+    return {
+      schemaVersion: REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION,
+      valid: false,
+      findingCount: findings.length,
+      findings,
+      policyEffect: "none",
+    };
+  }
+
+  const artifactSchemaVersion = registryIndexArtifactString(artifact.schemaVersion);
+  const profile = registryIndexArtifactString(artifact.profile);
+  const indexDigest = registryIndexArtifactString(artifact.indexDigest);
+
+  if (artifactSchemaVersion !== REGISTRY_INDEX_SCHEMA_VERSION) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_SCHEMA_VERSION_INVALID", "$.schemaVersion", "Registry index schemaVersion is invalid.");
+  }
+  if (profile !== REGISTRY_INDEX_PROFILE) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_PROFILE_INVALID", "$.profile", "Registry index profile is invalid.");
+  }
+  if (!registryIndexArtifactDate(artifact.generatedAt)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_GENERATED_AT_INVALID", "$.generatedAt", "Registry index generatedAt must be an ISO-like timestamp.");
+  }
+
+  const capabilityCount = registryIndexArtifactNumber(artifact.capabilityCount);
+  if (capabilityCount === undefined || !Number.isInteger(capabilityCount) || capabilityCount < 0) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_COUNT_INVALID", "$.capabilityCount", "Registry index capabilityCount must be a non-negative integer.");
+  }
+  const invalidManifestCount = registryIndexArtifactNumber(artifact.invalidManifestCount);
+  if (invalidManifestCount === undefined || !Number.isInteger(invalidManifestCount) || invalidManifestCount < 0) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_INVALID_MANIFEST_COUNT_INVALID", "$.invalidManifestCount", "Registry index invalidManifestCount must be a non-negative integer.");
+  }
+
+  const capabilities = Array.isArray(artifact.capabilities) ? artifact.capabilities : undefined;
+  if (!capabilities) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_INVALID", "$.capabilities", "Registry index capabilities must be an array.");
+  } else {
+    if (capabilityCount !== undefined && capabilityCount !== capabilities.length) {
+      pushRegistryIndexFinding(findings, "REGISTRY_INDEX_CAPABILITY_COUNT_MISMATCH", "$.capabilityCount", "Registry index capabilityCount must equal capabilities length.");
+    }
+    capabilities.forEach((capability, index) => validateRegistryIndexCapability(capability, `$.capabilities[${index}]`, findings));
+  }
+
+  if (artifact.signatureStatus !== "none") {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_SIGNATURE_STATUS_INVALID", "$.signatureStatus", "Registry index signatureStatus must be none.");
+  }
+  if (!registryIndexArtifactPolicyEffect(artifact.policyEffect)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_POLICY_EFFECT_INVALID", "$.policyEffect", "Registry index policyEffect must be none.");
+  }
+  if (indexDigest === undefined || !SHA256_DIGEST_PATTERN.test(indexDigest)) {
+    pushRegistryIndexFinding(findings, "REGISTRY_INDEX_DIGEST_INVALID", "$.indexDigest", "Registry indexDigest must use sha256:<64 lowercase hex>.");
+  } else {
+    const { indexDigest: _indexDigest, ...withoutDigest } = artifact;
+    if (stableJsonDigest(withoutDigest) !== indexDigest) {
+      pushRegistryIndexFinding(findings, "REGISTRY_INDEX_DIGEST_MISMATCH", "$.indexDigest", "Registry indexDigest does not match artifact content.");
+    }
+  }
+
+  walkRegistryIndexArtifact(artifact, "$", findings);
+
+  return {
+    schemaVersion: REGISTRY_INDEX_VALIDATION_SCHEMA_VERSION,
+    valid: findings.length === 0,
+    artifactSchemaVersion,
+    profile,
+    indexDigest,
+    findingCount: findings.length,
+    findings,
+    policyEffect: "none",
   };
 }
 
