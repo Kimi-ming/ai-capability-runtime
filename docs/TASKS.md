@@ -1930,7 +1930,7 @@
     - `git diff --check`
   - 完成记录：README 快速开始、中文文档中心、`docs/安全/capability-advisory-process.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/社区/registry-guidelines.md`、`registry/README.md`、`docs/运营/policy-incident-runbook.md` 和 `docs/TESTING.md` 已补充 `opencap advisory check --capability/--severity/--status` 入口。安全、Registry 和运营文档已明确 check filters 只是本地 evidence 查询，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。`docs/TESTING.md` 记录新增 CLI 测试入口、测试计数和不触网/不读取 secret/不写 audit logs 边界。Handoff 已指向下一批 ready 任务 T337-T339，并保留 T291 外部 Host UI smoke evidence 限制。
 
-- [ ] T337 P2：为 `opencap advisory check` 增加安全 JSON evidence 输出文件。
+- [x] T337 P2：为 `opencap advisory check` 增加安全 JSON evidence 输出文件。
   - 验收标准：
     - CLI `opencap advisory check --state-dir <path> --registry <path> --output <file> [--json]` 可把当前 `opencap.advisory_check.v1` report 写入本地 JSON 文件。
     - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
@@ -1940,6 +1940,7 @@
     - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap advisory check --state-dir <path> --registry <path>` 新增 `--output <file>`，可把当前 `opencap.advisory_check.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。输出路径复用安全 JSON artifact 策略并使用 advisory evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。revoked/revoke/deny matches 和 invalid advisory summary 仍保持既有 exit `1` 语义；输出 report 不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。`packages/cli/src/advisory-check-command.test.ts` 从 7 个测试增至 9 个，CLI 包测试数从 72 增至 74。
 
 - [ ] T338 P2：增强 `opencap advisory check` 人类摘要的 filters 和 match counts。
   - 验收标准：

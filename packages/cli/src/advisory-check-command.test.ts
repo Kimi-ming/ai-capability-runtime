@@ -389,6 +389,99 @@ describe("OpenCap CLI advisory check command", () => {
     }
   }, 60_000);
 
+  it("writes advisory check JSON evidence to safe output files", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-output-"));
+    const stateDir = join(dir, "state");
+    const revokedOutput = join(dir, "evidence", "revoked-advisory-check.json");
+    const warningRegistry = join(dir, "warning-registry");
+    const warningOutput = join(dir, "evidence", "warning-advisory-check.json");
+
+    try {
+      await runOpenCapCli(["install", "http.request_demo", "--state-dir", stateDir, "--registry", registryRoot]);
+
+      const revoked = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--output",
+        revokedOutput,
+        "--json",
+      ], { allowFailure: true });
+      const revokedStdoutReport = JSON.parse(revoked.stdout) as { schemaVersion: string; matches: Array<{ advisoryId: string }> };
+      const revokedFileReport = JSON.parse(await readFile(revokedOutput, "utf8")) as typeof revokedStdoutReport;
+
+      expect(revoked.exitCode).toBe(1);
+      expect(revokedFileReport).toEqual(revokedStdoutReport);
+      expect(revokedFileReport.schemaVersion).toBe("opencap.advisory_check.v1");
+      expect(revokedFileReport.matches).toEqual([
+        expect.objectContaining({ advisoryId: "OCAP-2026-0001" }),
+      ]);
+      await expect(readFile(join(stateDir, "logs.sqlite"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+
+      await runOpenCapCli(["install", "github.create_issue", "--state-dir", stateDir, "--registry", registryRoot]);
+      await writeAdvisory(warningRegistry, warningAdvisory());
+
+      const warning = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        warningRegistry,
+        "--capability",
+        "github.create_issue",
+        "--output",
+        warningOutput,
+      ]);
+      const warningFileReport = JSON.parse(await readFile(warningOutput, "utf8")) as {
+        schemaVersion: string;
+        filters: { capability?: string };
+        matches: Array<{ advisoryId: string }>;
+      };
+
+      expect(warning.exitCode).toBe(0);
+      expect(warning.stdout).toContain("OCAP-2099-0001");
+      expect(warning.stdout.trim().startsWith("{")).toBe(false);
+      expect(warningFileReport.schemaVersion).toBe("opencap.advisory_check.v1");
+      expect(warningFileReport.filters).toEqual({ capability: "github.create_issue" });
+      expect(warningFileReport.matches).toEqual([
+        expect.objectContaining({ advisoryId: "OCAP-2099-0001" }),
+      ]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects unsafe advisory check output paths without partial files", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-output-"));
+    const stateDir = join(dir, "state");
+    const outputPath = join(dir, ".env.advisory-check.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--output",
+        outputPath,
+      ], { allowFailure: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Unsafe --output path:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(outputPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a friendly empty human summary without writing audit logs", async () => {
     const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
 

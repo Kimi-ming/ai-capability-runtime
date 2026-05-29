@@ -1292,29 +1292,34 @@ function resolveReleaseDate(value: string | undefined, generatedAt: string): str
   return value;
 }
 
-function resolveReleaseOutputPath(value: string): string {
+interface SafeJsonOutputLabels {
+  artifact: string;
+  fileName: string;
+}
+
+function resolveSafeJsonOutputPath(value: string, labels: SafeJsonOutputLabels): string {
   const resolved = resolveCliPath(value);
   const parts = resolved.split(/[\\/]+/).map((part) => part.toLowerCase());
   const fileName = basename(resolved).toLowerCase();
 
   if (parts.includes("opencap.local")) {
-    throw new CliUserInputError("Unsafe --output path: release artifacts must not be written under opencap.local.");
+    throw new CliUserInputError(`Unsafe --output path: ${labels.artifact} must not be written under opencap.local.`);
   }
   if (fileName === ".env" || fileName.startsWith(".env.")) {
-    throw new CliUserInputError("Unsafe --output path: release artifacts must not target .env files.");
+    throw new CliUserInputError(`Unsafe --output path: ${labels.artifact} must not target .env files.`);
   }
   if (/(token|secret|password)/i.test(fileName)) {
-    throw new CliUserInputError("Unsafe --output path: release artifact names must not contain token, secret, or password.");
+    throw new CliUserInputError(`Unsafe --output path: ${labels.fileName} must not contain token, secret, or password.`);
   }
   if (/\.(sqlite|sqlite3|db|log)$/i.test(fileName)) {
-    throw new CliUserInputError("Unsafe --output path: release artifacts must not target database or log files.");
+    throw new CliUserInputError(`Unsafe --output path: ${labels.artifact} must not target database or log files.`);
   }
 
   return resolved;
 }
 
-async function writeReleaseJsonOutput(outputPath: string, value: unknown): Promise<void> {
-  const resolved = resolveReleaseOutputPath(outputPath);
+async function writeSafeJsonOutput(outputPath: string, value: unknown, labels: SafeJsonOutputLabels): Promise<void> {
+  const resolved = resolveSafeJsonOutputPath(outputPath, labels);
   const existing = await stat(resolved).catch((error: unknown) => {
     if (isNodeError(error) && error.code === "ENOENT") {
       return undefined;
@@ -1337,6 +1342,20 @@ async function writeReleaseJsonOutput(outputPath: string, value: unknown): Promi
     await unlink(tempPath).catch(() => undefined);
     throw error;
   }
+}
+
+async function writeReleaseJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "release artifacts",
+    fileName: "release artifact names",
+  });
+}
+
+async function writeAdvisoryJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "advisory evidence files",
+    fileName: "advisory evidence file names",
+  });
 }
 
 async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
@@ -2321,9 +2340,10 @@ advisoryCommand
   .option("--capability <id>", "Filter checks by installed capability id")
   .option("--severity <value>", "Filter advisory matches by severity")
   .option("--status <value>", "Filter advisory matches by status")
+  .option("--output <path>", "Write advisory check JSON report to a file")
   .option("--json", "Output JSON")
   .description("Check installed capabilities against local Registry advisories.")
-  .action((options: { stateDir: string; registry: string; capability?: string; severity?: string; status?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { stateDir: string; registry: string; capability?: string; severity?: string; status?: string; output?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const filters = resolveAdvisoryCheckFilters(options);
     const stateDir = getLocalStatePaths({ cwd, env: process.env, stateDir: options.stateDir }).root;
@@ -2341,6 +2361,10 @@ advisoryCommand
       filters,
     });
     const exitCode = advisoryCheckExitCode(report);
+
+    if (options.output !== undefined) {
+      await writeAdvisoryJsonOutput(options.output, report);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(report, null, 2));
