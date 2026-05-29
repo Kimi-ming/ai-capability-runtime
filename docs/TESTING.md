@@ -75,9 +75,10 @@ pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --j
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
 pnpm --filter @opencap/cli dev -- registry advisory show OCAP-2026-0001 --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --json
+pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --capability http.request_demo --severity critical --status revoked --json
 ```
 
-对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts`、`packages/cli/src/registry-advisory-show-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 15 个 CLI 测试，CLI 包总数为 72 个测试。这些命令只读取本地 Registry advisory metadata 和本地 installed capability metadata，不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
+对应测试入口是 `packages/cli/src/registry-advisory-list-command.test.ts`、`packages/cli/src/registry-advisory-show-command.test.ts` 和 `packages/cli/src/advisory-check-command.test.ts`；当前合计覆盖 15 个 CLI 测试，CLI 包总数为 72 个测试。`advisory-check-command.test.ts` 覆盖 `--capability`、`--severity`、`--status`、raw/filtered match counts、非法 filter 用户错误、invalid advisory summary 和不写 audit logs 边界。这些命令只读取本地 Registry advisory metadata 和本地 installed capability metadata，不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网、不自动卸载、不自动授权、不自动修改 policy。
 
 ## Workspace 校验
 

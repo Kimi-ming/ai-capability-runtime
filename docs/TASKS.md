@@ -1918,11 +1918,44 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap advisory check --state-dir <path> --registry <path>` 新增 `--severity <low|medium|high|critical>` 和 `--status <status>` 本地筛选。JSON 输出仍使用 `opencap.advisory_check.v1`，新增 `filters.severity` / `filters.status`、`matchCount` 和 `filteredMatchCount`，并保持 `policyEffect: none`；exit code 基于筛选后的 revoked/revoke/deny matches 和 invalid advisory summary。非法 severity/status 作为用户错误 exit `1` 且不打印 stack；筛选不会隐藏 invalid advisory summary，也不会改变 invalid advisory exit `1` 语义。命令不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。`packages/cli/src/advisory-check-command.test.ts` 从 5 个测试增至 7 个，CLI 包测试数从 70 增至 72。
 
-- [ ] T336 P2：把 advisory check filters 纳入安全和运维文档。
+- [x] T336 P2：把 advisory check filters 纳入安全和运维文档。
   - 验收标准：
     - README 或中文文档中心补充 `opencap advisory check --capability/--severity/--status` 的入口。
     - 安全/Registry/运营文档说明 check filters 只是本地 evidence 查询，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
     - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数和不触网/不读取 secret/不写 audit logs 边界。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+  - 完成记录：README 快速开始、中文文档中心、`docs/安全/capability-advisory-process.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/社区/registry-guidelines.md`、`registry/README.md`、`docs/运营/policy-incident-runbook.md` 和 `docs/TESTING.md` 已补充 `opencap advisory check --capability/--severity/--status` 入口。安全、Registry 和运营文档已明确 check filters 只是本地 evidence 查询，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。`docs/TESTING.md` 记录新增 CLI 测试入口、测试计数和不触网/不读取 secret/不写 audit logs 边界。Handoff 已指向下一批 ready 任务 T337-T339，并保留 T291 外部 Host UI smoke evidence 限制。
+
+- [ ] T337 P2：为 `opencap advisory check` 增加安全 JSON evidence 输出文件。
+  - 验收标准：
+    - CLI `opencap advisory check --state-dir <path> --registry <path> --output <file> [--json]` 可把当前 `opencap.advisory_check.v1` report 写入本地 JSON 文件。
+    - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
+    - 输出路径必须拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径；失败时不留下半截文件。
+    - revoked/revoke/deny matches 和 invalid advisory summary 仍保持既有 exit `1` 语义；输出 report 不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T338 P2：增强 `opencap advisory check` 人类摘要的 filters 和 match counts。
+  - 验收标准：
+    - 非 JSON 输出展示 checked installed capability count、当前 filters，以及 raw/filtered advisory match counts。
+    - 空结果、warning-only、revoked/deny 和 invalid advisory summary 均保持现有 exit code 与安全边界。
+    - 人类摘要不输出 input/output、secret、Authorization/Cookie、provider raw response 或本地数据库日志路径。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T339 P2：把 advisory check output 和人类摘要纳入文档。
+  - 验收标准：
+    - README 或中文文档中心补充 `opencap advisory check --output <file>` 的本地 evidence artifact 入口。
+    - 安全/Registry/运营文档说明 output artifact 和 human summary 仍只是本地 evidence，不改变 installed state、trust、policy、authorization、Runtime execution 或 incident 处置流程。
+    - `docs/TESTING.md` 记录新增 CLI 测试入口、测试计数、安全输出路径和不触网/不读取 secret/不写 audit logs 边界。
     - Handoff 指向下一项 ready 或明确剩余外部限制。
   - 验证方式：
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
