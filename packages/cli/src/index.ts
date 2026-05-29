@@ -2404,13 +2404,18 @@ registryAdvisoryCommand
   .command("show")
   .argument("<advisory-id>", "Capability advisory id to inspect")
   .requiredOption("--registry <path>", "Registry root directory")
+  .option("--output <path>", "Write registry advisory detail JSON report to a file")
   .option("--json", "Output JSON")
   .description("Show a local Registry Capability advisory detail.")
-  .action((id: string, options: { registry: string; json?: boolean }) => runCliAction(async () => {
+  .action((id: string, options: { registry: string; output?: string; json?: boolean }) => runCliAction(async () => {
     const registryPath = resolveCliPath(options.registry);
     const result = await validateCapabilityAdvisoryPath(registryPath);
     const selected = selectRegistryAdvisory(id, result);
     const report = buildRegistryAdvisoryDetailReport(result.targetPath, selected);
+
+    if (options.output !== undefined) {
+      await writeRegistryAdvisoryJsonOutput(options.output, report);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(report, null, 2));

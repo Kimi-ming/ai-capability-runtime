@@ -1978,7 +1978,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap registry advisory list --registry <path>` 新增 `--output <file>`，可把当前 `opencap.registry_advisory_list.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。invalid advisory summary 和 invalid exit `1` 语义保持不变，且 invalid report 可写入安全输出文件。输出路径使用 Registry advisory evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。`packages/cli/src/registry-advisory-list-command.test.ts` 从 5 个测试增至 7 个，CLI 包测试数从 75 增至 77。
 
-- [ ] T341 P2：为 `opencap registry advisory show` 增加安全 JSON evidence 输出文件。
+- [x] T341 P2：为 `opencap registry advisory show` 增加安全 JSON evidence 输出文件。
   - 验收标准：
     - CLI `opencap registry advisory show <advisory-id> --registry <path> --output <file> [--json]` 可把当前 `opencap.registry_advisory_detail.v1` report 写入本地 JSON 文件。
     - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
@@ -1989,6 +1989,7 @@
     - `pnpm --filter @opencap/cli test -- registry-advisory-show-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap registry advisory show <advisory-id> --registry <path>` 新增 `--output <file>`，可把当前 `opencap.registry_advisory_detail.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。not found、重复 id 和 invalid advisory 用户错误保持 exit `1` 且不打印 stack；这些无法形成 detail report 的错误不会写 output 文件。输出路径使用 Registry advisory evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。`packages/cli/src/registry-advisory-show-command.test.ts` 从 3 个测试增至 5 个，CLI 包测试数从 77 增至 79。
 
 - [ ] T342 P2：把 registry advisory output artifacts 纳入安全和 Registry 文档。
   - 验收标准：

@@ -142,8 +142,59 @@ describe("OpenCap CLI registry advisory show command", () => {
     expect(result.stdout).toContain("modified_at: 2026-05-14T00:00:00Z");
   }, 60_000);
 
+  it("writes registry advisory detail JSON evidence to safe output files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-show-output-"));
+    const jsonOutput = join(cwd, "reports", "registry-advisory-detail.json");
+    const humanOutput = join(cwd, "reports", "registry-advisory-detail-human.json");
+
+    try {
+      const json = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "show",
+        "OCAP-2026-0001",
+        "--registry",
+        registryRoot,
+        "--output",
+        jsonOutput,
+        "--json",
+      ], { cwd });
+      const stdoutReport = JSON.parse(json.stdout) as { schemaVersion: string; advisory: { id: string } };
+      const fileReport = JSON.parse(await readFile(jsonOutput, "utf8")) as typeof stdoutReport;
+
+      expect(json.exitCode).toBe(0);
+      expect(fileReport).toEqual(stdoutReport);
+      expect(fileReport.schemaVersion).toBe("opencap.registry_advisory_detail.v1");
+      expect(fileReport.advisory.id).toBe("OCAP-2026-0001");
+
+      const human = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "show",
+        "OCAP-2026-0001",
+        "--registry",
+        registryRoot,
+        "--output",
+        humanOutput,
+      ], { cwd });
+      const humanFileReport = JSON.parse(await readFile(humanOutput, "utf8")) as { schemaVersion: string; advisory: { id: string } };
+
+      expect(human.exitCode).toBe(0);
+      expect(human.stdout).toContain("OpenCap registry advisory");
+      expect(human.stdout.trim().startsWith("{")).toBe(false);
+      expect(humanFileReport.schemaVersion).toBe("opencap.registry_advisory_detail.v1");
+      expect(humanFileReport.advisory.id).toBe("OCAP-2026-0001");
+      await expect(readFile(join(cwd, "opencap.local", "logs.sqlite"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("returns user errors for not found, duplicate ids, and invalid advisory files", async () => {
     const dir = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-show-"));
+    const notFoundOutput = join(dir, "not-found.json");
+    const duplicateOutput = join(dir, "duplicate.json");
+    const invalidOutput = join(dir, "invalid.json");
 
     try {
       const notFound = await runOpenCapCli([
@@ -153,11 +204,14 @@ describe("OpenCap CLI registry advisory show command", () => {
         "OCAP-2099-9999",
         "--registry",
         registryRoot,
+        "--output",
+        notFoundOutput,
       ], { allowFailure: true });
       expect(notFound.exitCode).toBe(1);
       expect(notFound.stdout).toBe("");
       expect(notFound.stderr).toContain("Capability advisory not found in registry: OCAP-2099-9999");
       expect(notFound.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(notFoundOutput, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
 
       await writeAdvisoryFile(dir, "advisories/OCAP-2099-0001.yml", advisory("OCAP-2099-0001"));
       await writeAdvisoryFile(dir, "other/advisory.yml", advisory("OCAP-2099-0001", { capability: "demo.other" }));
@@ -168,11 +222,14 @@ describe("OpenCap CLI registry advisory show command", () => {
         "OCAP-2099-0001",
         "--registry",
         dir,
+        "--output",
+        duplicateOutput,
       ], { allowFailure: true });
       expect(duplicate.exitCode).toBe(1);
       expect(duplicate.stdout).toBe("");
       expect(duplicate.stderr).toContain("Multiple registry advisories found for id: OCAP-2099-0001");
       expect(duplicate.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(duplicateOutput, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
 
       await rm(dir, { recursive: true, force: true });
       const invalidDir = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-show-"));
@@ -184,14 +241,43 @@ describe("OpenCap CLI registry advisory show command", () => {
         "OCAP-2099-0003",
         "--registry",
         invalidDir,
+        "--output",
+        invalidOutput,
       ], { allowFailure: true });
       expect(invalid.exitCode).toBe(1);
       expect(invalid.stdout).toBe("");
       expect(invalid.stderr).toContain("Invalid capability advisories: 1");
       expect(invalid.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(invalidOutput, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
       await rm(invalidDir, { recursive: true, force: true });
     } finally {
       await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects unsafe registry advisory show output paths without partial files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-registry-advisory-show-output-"));
+    const outputPath = join(cwd, ".env.registry-advisory-detail.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "registry",
+        "advisory",
+        "show",
+        "OCAP-2026-0001",
+        "--registry",
+        registryRoot,
+        "--output",
+        outputPath,
+      ], { allowFailure: true, cwd });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Unsafe --output path:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(outputPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
     }
   }, 60_000);
 });
