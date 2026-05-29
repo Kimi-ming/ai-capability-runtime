@@ -455,29 +455,29 @@ function resolveReleaseDate(value: string | undefined, generatedAt: string): str
   return value;
 }
 
-function resolveReleaseEvidenceOutputPath(value: string): string {
+function resolveReleaseOutputPath(value: string): string {
   const resolved = resolveCliPath(value);
   const parts = resolved.split(/[\\/]+/).map((part) => part.toLowerCase());
   const fileName = basename(resolved).toLowerCase();
 
   if (parts.includes("opencap.local")) {
-    throw new CliUserInputError("Unsafe --output path: release evidence artifacts must not be written under opencap.local.");
+    throw new CliUserInputError("Unsafe --output path: release artifacts must not be written under opencap.local.");
   }
   if (fileName === ".env" || fileName.startsWith(".env.")) {
-    throw new CliUserInputError("Unsafe --output path: release evidence artifacts must not target .env files.");
+    throw new CliUserInputError("Unsafe --output path: release artifacts must not target .env files.");
   }
   if (/(token|secret|password)/i.test(fileName)) {
-    throw new CliUserInputError("Unsafe --output path: release evidence artifact names must not contain token, secret, or password.");
+    throw new CliUserInputError("Unsafe --output path: release artifact names must not contain token, secret, or password.");
   }
   if (/\.(sqlite|sqlite3|db|log)$/i.test(fileName)) {
-    throw new CliUserInputError("Unsafe --output path: release evidence artifacts must not target database or log files.");
+    throw new CliUserInputError("Unsafe --output path: release artifacts must not target database or log files.");
   }
 
   return resolved;
 }
 
-async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
-  const resolved = resolveReleaseEvidenceOutputPath(outputPath);
+async function writeReleaseJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  const resolved = resolveReleaseOutputPath(outputPath);
   const existing = await stat(resolved).catch((error: unknown) => {
     if (isNodeError(error) && error.code === "ENOENT") {
       return undefined;
@@ -494,12 +494,16 @@ async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvi
   const tempPath = join(parentDir, `.${basename(resolved)}.${process.pid}.${Date.now()}.tmp`);
 
   try {
-    await writeFile(tempPath, `${JSON.stringify(bundle, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+    await writeFile(tempPath, `${JSON.stringify(value, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
     await rename(tempPath, resolved);
   } catch (error) {
     await unlink(tempPath).catch(() => undefined);
     throw error;
   }
+}
+
+async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
+  await writeReleaseJsonOutput(outputPath, bundle);
 }
 
 function printNpmPackageReadinessReport(report: NpmPackageReadinessReport): void {
@@ -1560,11 +1564,16 @@ releaseCommand
 releaseArtifactCommand
   .command("validate")
   .requiredOption("--file <path>", "Release evidence JSON artifact to validate")
+  .option("--output <path>", "Write validation report JSON to a file")
   .option("--json", "Output JSON")
   .description("Validate a saved release evidence artifact.")
-  .action((options: { file: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { file: string; output?: string; json?: boolean }) => runCliAction(async () => {
     const artifact = await readReleaseArtifactJson(resolveCliPath(options.file));
     const report = validateReleaseEvidenceArtifact(artifact);
+
+    if (options.output !== undefined) {
+      await writeReleaseJsonOutput(options.output, report);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(report, null, 2));

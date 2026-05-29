@@ -105,6 +105,29 @@ describe("OpenCap CLI release artifact validate command", () => {
     }
   }, 60_000);
 
+  it("writes a release artifact validation report to a safe output file", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-artifact-"));
+
+    try {
+      const filePath = await writeArtifact(dir, releaseEvidenceArtifact());
+      const outputPath = join(dir, "reports", "validation-report.json");
+      const result = await runOpenCapCli(["release", "artifact", "validate", "--file", filePath, "--output", outputPath, "--json"]);
+      const stdoutReport = JSON.parse(result.stdout);
+      const fileReport = JSON.parse(await readFile(outputPath, "utf8"));
+
+      expect(result.exitCode).toBe(0);
+      expect(stdoutReport).toEqual(fileReport);
+      expect(fileReport).toMatchObject({
+        schemaVersion: "opencap.release_artifact_validation.v1",
+        valid: true,
+        policyEffect: "none",
+      });
+      expect(result.stderr).toBe("");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a human-readable release artifact validation summary", async () => {
     const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-artifact-"));
 
@@ -147,6 +170,29 @@ describe("OpenCap CLI release artifact validate command", () => {
     }
   }, 60_000);
 
+  it("writes invalid validation reports before exiting 1", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-artifact-"));
+
+    try {
+      const filePath = await writeArtifact(dir, releaseEvidenceArtifact({
+        knownGaps: ["NPM_TOKEN leaked in /Users/example/private/path and opencap.local/audit.sqlite"],
+      }));
+      const outputPath = join(dir, "validation-report.json");
+      const result = await runOpenCapCli(["release", "artifact", "validate", "--file", filePath, "--output", outputPath, "--json"], { allowFailure: true });
+      const stdoutReport = JSON.parse(result.stdout);
+      const fileReport = JSON.parse(await readFile(outputPath, "utf8"));
+
+      expect(result.exitCode).toBe(1);
+      expect(stdoutReport).toEqual(fileReport);
+      expect(fileReport.valid).toBe(false);
+      expect(fileReport.findings.map((finding: { code: string }) => finding.code)).toContain("RELEASE_ARTIFACT_SENSITIVE_TEXT");
+      expect(JSON.stringify(fileReport)).not.toContain("NPM_TOKEN");
+      expect(result.stderr).toBe("");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("returns a user error for invalid artifact JSON without a stack trace", async () => {
     const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-artifact-"));
 
@@ -159,6 +205,42 @@ describe("OpenCap CLI release artifact validate command", () => {
       expect(result.stderr).toContain("Invalid release artifact JSON: expected valid JSON.");
       expect(result.stderr).not.toContain("Error:");
       expect(result.stderr).not.toMatch(/\n\s+at /);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("does not write a validation report for invalid artifact JSON", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-artifact-"));
+
+    try {
+      const filePath = await writeArtifact(dir, "{not json", "broken.json");
+      const outputPath = join(dir, "validation-report.json");
+      const result = await runOpenCapCli(["release", "artifact", "validate", "--file", filePath, "--output", outputPath, "--json"], { allowFailure: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Invalid release artifact JSON: expected valid JSON.");
+      await expect(readFile(outputPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects unsafe validation report output paths without a stack trace", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-artifact-"));
+
+    try {
+      const filePath = await writeArtifact(dir, releaseEvidenceArtifact());
+      const outputPath = join(dir, "opencap.local", "validation-report.json");
+      const result = await runOpenCapCli(["release", "artifact", "validate", "--file", filePath, "--output", outputPath, "--json"], { allowFailure: true });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Unsafe --output path:");
+      expect(result.stderr).not.toContain("Error:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      await expect(readFile(outputPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

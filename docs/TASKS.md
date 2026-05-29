@@ -1727,7 +1727,7 @@
     - `pnpm validate`
   - 完成记录：`validateReleaseEvidenceArtifact()` 现在会汇总 artifact 中合法的 command/component status，并在 `decision` 与 blockers、failed commands、failed components 或 `not-run` release evidence 不一致时返回 invalid finding。新增 `RELEASE_ARTIFACT_DECISION_INCONSISTENT` 和 `RELEASE_ARTIFACT_DECISION_INCOMPLETE` finding code，finding 只描述结构化路径与原因，不复制 secret、provider raw response、input/output 原文、`opencap.local/` 内容、数据库日志或私有路径。`packages/spec/src/release-evidence-artifact.test.ts` 从 3 个测试增至 5 个。
 
-- [ ] T320 P1：支持 release artifact validation report 安全写入文件。
+- [x] T320 P1：支持 release artifact validation report 安全写入文件。
   - 验收标准：
     - CLI `opencap release artifact validate --file <artifact> --output <report-json>` 可把 `opencap.release_artifact_validation.v1` report 写入本地文件；`--json` 仍可同时打印 stdout。
     - 输出路径默认基于 `INIT_CWD`/当前工作目录解析，自动创建父目录，但拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 路径和目录路径。
@@ -1737,6 +1737,7 @@
     - `pnpm --filter @opencap/cli test -- release-artifact-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap release artifact validate --file <artifact> --output <report-json>` 现在可把脱敏 `opencap.release_artifact_validation.v1` report 写入本地文件，`--json` 仍可同时输出 stdout。输出复用 release artifact 安全路径策略，自动创建父目录并拒绝 `.env`、token/secret/password、`opencap.local/`、SQLite/DB/log 和目录路径；invalid artifact 会先写出 validation report 再以 exit `1` 结束，非法 JSON artifact 不写 report。`packages/cli/src/release-artifact-command.test.ts` 从 4 个测试增至 8 个。
 
 - [ ] T321 P2：把 validation report artifact 纳入发布文档。
   - 验收标准：
