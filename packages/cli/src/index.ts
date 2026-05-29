@@ -1385,6 +1385,13 @@ async function writeRegistryReportJsonOutput(outputPath: string, value: unknown)
   });
 }
 
+async function writeConformanceJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "conformance evidence files",
+    fileName: "conformance evidence file names",
+  });
+}
+
 async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
   await writeReleaseJsonOutput(outputPath, bundle);
 }
@@ -2320,11 +2327,16 @@ const releaseArtifactCommand = releaseCommand
 conformanceCommand
   .command("report")
   .requiredOption("--records <path>", "Conformance records root directory")
+  .option("--output <path>", "Write conformance summary JSON report to a file")
   .option("--json", "Output JSON")
   .description("Generate a conformance evidence summary report.")
-  .action((options: { records: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { records: string; output?: string; json?: boolean }) => runCliAction(async () => {
     const recordsRoot = resolveCliPath(options.records);
     const summary = await buildConformanceSummary(recordsRoot);
+
+    if (options.output !== undefined) {
+      await writeConformanceJsonOutput(options.output, summary);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(summary, null, 2));

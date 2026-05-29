@@ -2015,7 +2015,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap registry report --registry <path>` 新增 `--output <file>`，可把当前 `opencap.registry_quality_summary.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。输出路径使用 Registry quality evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不安装 Capability、不写 state dir、不读取 provider secret、不调用 provider、不触网、不改变 install、trust、policy、authorization 或 Runtime execution。`packages/cli/src/registry-report-command.test.ts` 从 2 个测试增至 4 个，CLI 包测试数从 79 增至 81。
 
-- [ ] T344 P2：为 `opencap conformance report` 增加安全 JSON evidence 输出文件。
+- [x] T344 P2：为 `opencap conformance report` 增加安全 JSON evidence 输出文件。
   - 验收标准：
     - CLI `opencap conformance report --records <path> --output <file> [--json]` 可把当前 `opencap.conformance_summary.v1` report 写入本地 JSON 文件。
     - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
@@ -2026,6 +2026,7 @@
     - `pnpm --filter @opencap/cli test -- conformance-report-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap conformance report --records <path>` 新增 `--output <file>`，可把当前 `opencap.conformance_summary.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。invalid 或 failed record 仍保持 exit `1`，并在能形成 summary report 时写出安全 output 文件；非法 records 原文、secret、token 或 provider raw body 不进入 stdout/stderr/output。输出路径使用 Conformance evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不读取/写入 state dir、不调用 provider、不触网、不改变 policy、trust、install decision、authorization 或 Runtime execution。`packages/cli/src/conformance-report-command.test.ts` 从 3 个测试增至 6 个，CLI 包测试数从 81 增至 84。
 
 - [ ] T345 P2：把 registry/conformance report output artifacts 纳入 release evidence 文档路径。
   - 验收标准：

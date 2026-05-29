@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -107,6 +107,111 @@ artifacts: []
       expect(result.stderr).toBe("");
     } finally {
       await rm(recordsRoot, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("writes conformance summary JSON evidence to safe output files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-conformance-report-output-"));
+    const jsonOutput = join(cwd, "reports", "conformance-summary.json");
+    const humanOutput = join(cwd, "reports", "conformance-summary-human.json");
+
+    try {
+      const json = await runOpenCapCli([
+        "conformance",
+        "report",
+        "--records",
+        conformanceRoot,
+        "--output",
+        jsonOutput,
+        "--json",
+      ], { cwd });
+      const stdoutReport = JSON.parse(json.stdout) as { schemaVersion: string; recordCount: number };
+      const fileReport = JSON.parse(await readFile(jsonOutput, "utf8")) as typeof stdoutReport;
+
+      expect(json.exitCode).toBe(0);
+      expect(fileReport).toEqual(stdoutReport);
+      expect(fileReport.schemaVersion).toBe("opencap.conformance_summary.v1");
+      expect(fileReport.recordCount).toBe(6);
+
+      const human = await runOpenCapCli([
+        "conformance",
+        "report",
+        "--records",
+        conformanceRoot,
+        "--output",
+        humanOutput,
+      ], { cwd });
+      const humanFileReport = JSON.parse(await readFile(humanOutput, "utf8")) as { schemaVersion: string; recordCount: number };
+
+      expect(human.exitCode).toBe(0);
+      expect(human.stdout).toContain("profile result checks artifacts path");
+      expect(human.stdout.trim().startsWith("{")).toBe(false);
+      expect(humanFileReport.schemaVersion).toBe("opencap.conformance_summary.v1");
+      expect(humanFileReport.recordCount).toBe(6);
+      expect(await pathExists(join(cwd, "opencap.local"))).toBe(false);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("writes invalid conformance summary output without raw record secrets", async () => {
+    const recordsRoot = await mkdtemp(join(tmpdir(), "opencap-cli-conformance-invalid-output-"));
+    const outputPath = join(recordsRoot, "reports", "conformance-invalid.json");
+    await mkdir(join(recordsRoot, "nested"), { recursive: true });
+    await writeFile(join(recordsRoot, "nested", "bad.yml"), `subject:
+  type: runtime
+profile: invalid
+result: passed
+secret: super-secret-token
+checks: {}
+artifacts: []
+`, "utf8");
+
+    try {
+      const result = await runOpenCapCli([
+        "conformance",
+        "report",
+        "--records",
+        recordsRoot,
+        "--output",
+        outputPath,
+        "--json",
+      ], { allowFailure: true });
+      const stdoutReport = JSON.parse(result.stdout);
+      const fileReport = JSON.parse(await readFile(outputPath, "utf8"));
+
+      expect(result.exitCode).toBe(1);
+      expect(fileReport).toEqual(stdoutReport);
+      expect(fileReport.invalidRecords).toBe(1);
+      expect(JSON.stringify(fileReport)).not.toContain("super-secret-token");
+      expect(result.stdout).not.toContain("super-secret-token");
+      expect(result.stderr).toBe("");
+    } finally {
+      await rm(recordsRoot, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("rejects unsafe conformance report output paths without partial files", async () => {
+    const cwd = await mkdtemp(join(tmpdir(), "opencap-cli-conformance-report-output-"));
+    const outputPath = join(cwd, ".env.conformance-summary.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "conformance",
+        "report",
+        "--records",
+        conformanceRoot,
+        "--output",
+        outputPath,
+      ], { allowFailure: true, cwd });
+
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toContain("Unsafe --output path:");
+      expect(result.stderr).not.toMatch(/\n\s+at /);
+      expect(await pathExists(outputPath)).toBe(false);
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
     }
   }, 60_000);
 });
