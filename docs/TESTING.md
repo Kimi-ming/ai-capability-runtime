@@ -72,6 +72,7 @@ pnpm --filter @opencap/cli dev -- metrics security --state-dir opencap.local --j
 
 ```bash
 pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --json
+pnpm --filter @opencap/cli dev -- registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
 pnpm --filter @opencap/cli dev -- registry advisory show OCAP-2026-0001 --registry registry --json
 pnpm --filter @opencap/cli dev -- advisory check --state-dir opencap.local --registry registry --json
 ```

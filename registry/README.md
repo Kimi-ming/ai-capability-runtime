@@ -104,10 +104,12 @@ Revoked capability 的目录和历史记录必须保留，不能通过删除目�
 
 ```bash
 opencap registry advisory list --registry registry --json
+opencap registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
+opencap registry advisory show OCAP-2026-0001 --registry registry --json
 opencap advisory check --state-dir opencap.local --registry registry --json
 ```
 
-这两个命令只读取本地 Registry 和本地 state evidence，不执行 Capability、不读取 secret、不调用 provider、不触网；它们不会自动卸载、自动授权或自动修改 policy。
+这些命令只读取本地 Registry 和本地 state evidence，不执行 Capability、不读取 secret、不调用 provider、不触网；它们不会自动卸载、自动授权、自动修改 policy、提升 trust 或改变 Runtime execution。`registry advisory list` 可按 capability、severity 和 status 做本地筛选；`registry advisory show` 用于查看单条公告详情。
 
 ## 提交流程
 

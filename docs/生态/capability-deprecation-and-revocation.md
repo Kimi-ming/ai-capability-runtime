@@ -89,10 +89,12 @@ V1 CLI 提供两个本地 advisory 检查入口：
 
 ```bash
 opencap registry advisory list --registry registry
+opencap registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked
+opencap registry advisory show OCAP-2026-0001 --registry registry
 opencap advisory check --state-dir opencap.local --registry registry
 ```
 
-`registry advisory list` 用于审查 Registry 中的 advisory/revocation metadata；`advisory check` 用于把本地已安装能力和 Registry advisory metadata 做匹配。它们只输出 evidence、计数和告警，不会删除 installed capability，不会把 revoked capability 自动加入 deny policy，也不会因为没有命中本地缓存就授予 trust 或授权执行。
+`registry advisory list` 用于审查 Registry 中的 advisory/revocation metadata，并可按 capability、severity 和 status 做本地筛选；`registry advisory show` 用于查看单条公告详情；`advisory check` 用于把本地已安装能力和 Registry advisory metadata 做匹配。它们只输出 evidence、计数和告警，不会删除 installed capability，不会把 revoked capability 自动加入 deny policy，也不会因为没有命中本地缓存就授予 trust 或授权执行。
 
 ## Registry 行为
 
@@ -101,7 +103,8 @@ opencap advisory check --state-dir opencap.local --registry registry
 - revoked 保留记录，不能直接删除历史。
 - replacement 需要独立 review。
 - `pnpm validate` 会校验已有 advisory/revocation metadata 的 schema。
-- `opencap registry advisory list --registry registry` 可列出本地 advisory metadata 和 invalid advisory summary。
+- `opencap registry advisory list --registry registry` 可列出本地 advisory metadata、filter metadata 和 invalid advisory summary。
+- `opencap registry advisory show <advisory-id> --registry registry` 可审查单条 advisory detail。
 
 ## 关联任务
 

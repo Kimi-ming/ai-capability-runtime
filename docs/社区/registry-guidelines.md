@@ -135,12 +135,15 @@ Registry advisory metadata 放在 `registry/advisories/`，用于记录安全公
 
 ```bash
 opencap registry advisory list --registry registry --json
+opencap registry advisory list --registry registry --capability http.request_demo --severity critical --status revoked --json
+opencap registry advisory show OCAP-2026-0001 --registry registry --json
 opencap advisory check --state-dir opencap.local --registry registry --json
 ```
 
 这些命令只读取本地文件并输出 evidence：
 
-- `registry advisory list` 列出 valid/invalid advisory metadata。
+- `registry advisory list` 列出 valid/invalid advisory metadata，并可用 capability、severity 和 status 做本地筛选。
+- `registry advisory show` 显示单条 advisory detail，便于 review/incident 记录引用。
 - `advisory check` 比对本地已安装能力与 advisory metadata。
 - 命令不安装或执行 Capability，不读取 secret，不调用 provider，不触网。
-- 命令不自动卸载、不自动授权、不自动修改 policy；后续处置仍由维护者按 review/incident 流程完成。
+- 命令不自动卸载、不自动授权、不自动修改 policy，不改变 trust 或 Runtime execution；后续处置仍由维护者按 review/incident 流程完成。
