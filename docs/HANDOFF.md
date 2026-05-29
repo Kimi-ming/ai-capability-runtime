@@ -122,7 +122,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T328-T330，把已实现的 Capability advisory schema 和 Runtime installed advisory check 推进到 CLI 检查、Registry advisory list 和安全/运维文档闭环。该批任务只读取本地 state/registry/advisory metadata，不执行 Capability、不读取 provider secret、不触网，也不自动卸载、授权或修改 policy。
 
-下一项 ready：T328 P1：新增 `opencap advisory check` 已安装能力公告检查命令。
+本轮继续完成 T328：CLI 新增 `opencap advisory check --state-dir <path> --registry <path> [--json]`，复用 Runtime `checkInstalledCapabilityAdvisories()` 比对本地 installed capabilities 与 Registry advisory metadata。JSON 输出为 `opencap.advisory_check.v1`，包含 stateDir、registryPath、checkedInstalledCapabilities、matches、invalidAdvisoryCount、invalidAdvisories 和 `policyEffect: none`；人类输出包含 checked 数量、capability id、version、advisory id、severity、status、registry action 和 runtime default。无已安装能力时输出友好空结果；revoked/revoke/deny 类 advisory 返回 exit `1`，warning-only advisory 返回 exit `0`；invalid advisory JSON 模式输出 invalid summary 后 exit `1`。命令不执行 Capability、不读取 provider secret、不调用 provider、不触网，也不写 audit logs。`packages/cli/src/advisory-check-command.test.ts` 新增 4 个测试，CLI 包合计从 57 个测试增至 61 个。
+
+下一项 ready：T329 P2：新增 `opencap registry advisory list` 本地公告列表命令。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -201,9 +203,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326 和 T327 均已完成；T328 是下一项本地 advisory ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327 和 T328 均已完成；T329 是下一项本地 advisory ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T328，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T329，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

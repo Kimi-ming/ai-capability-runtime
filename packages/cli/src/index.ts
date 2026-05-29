@@ -47,6 +47,7 @@ import {
   createCapabilityLifecycleWarning,
   createConfirmationAuditEvent,
   createConsentReceiptAuditEvidence,
+  checkInstalledCapabilityAdvisories,
   evaluatePolicy,
   executeHttpCapability,
   exportDecisionLogRecords,
@@ -66,6 +67,8 @@ import {
   type CapabilityLifecycleWarning,
   type CapabilityLifecycleState,
   type InstalledCapability,
+  type InstalledCapabilityAdvisoryCheckResult,
+  type InstalledCapabilityAdvisoryMatch,
   type InstalledCapabilityRecord,
   type LedgerRecordKind,
   type LedgerRecordV1,
@@ -305,6 +308,23 @@ interface RegistryCapabilityDetailReport {
   schemaVersion: "opencap.registry_capability_detail.v1";
   registryPath: string;
   capability: RegistryCapabilityDetail;
+  policyEffect: "none";
+}
+
+interface AdvisoryCheckInvalidAdvisory {
+  filePath: string;
+  issues: string[];
+}
+
+interface AdvisoryCheckReport {
+  schemaVersion: "opencap.advisory_check.v1";
+  stateDir: string;
+  registryPath: string;
+  checkedCapabilityCount: number;
+  checkedInstalledCapabilities: string[];
+  matches: InstalledCapabilityAdvisoryMatch[];
+  invalidAdvisoryCount: number;
+  invalidAdvisories: AdvisoryCheckInvalidAdvisory[];
   policyEffect: "none";
 }
 
@@ -677,6 +697,74 @@ function selectRegistryCapabilityResult(
   }
 
   return matches[0];
+}
+
+function advisoryCheckInvalidAdvisory(
+  invalid: InstalledCapabilityAdvisoryCheckResult["invalidAdvisories"][number],
+): AdvisoryCheckInvalidAdvisory {
+  return {
+    filePath: invalid.filePath,
+    issues: invalid.issues.map((issue) => formatManifestValidationIssue(issue)),
+  };
+}
+
+function buildAdvisoryCheckReport(input: {
+  stateDir: string;
+  registryPath: string;
+  result: InstalledCapabilityAdvisoryCheckResult;
+}): AdvisoryCheckReport {
+  return {
+    schemaVersion: "opencap.advisory_check.v1",
+    stateDir: input.stateDir,
+    registryPath: input.registryPath,
+    checkedCapabilityCount: input.result.checkedInstalledCapabilities.length,
+    checkedInstalledCapabilities: [...input.result.checkedInstalledCapabilities],
+    matches: input.result.matches.map((match) => ({ ...match, affectedVersions: [...match.affectedVersions] })),
+    invalidAdvisoryCount: input.result.invalidAdvisories.length,
+    invalidAdvisories: input.result.invalidAdvisories.map(advisoryCheckInvalidAdvisory),
+    policyEffect: "none",
+  };
+}
+
+function advisoryMatchRequiresAction(match: InstalledCapabilityAdvisoryMatch): boolean {
+  return match.status === "revoked" || match.registryAction === "revoke" || match.runtimeDefault === "deny";
+}
+
+function advisoryCheckExitCode(report: AdvisoryCheckReport): CliExitCode | undefined {
+  if (report.invalidAdvisoryCount > 0 || report.matches.some(advisoryMatchRequiresAction)) {
+    return 1;
+  }
+  return undefined;
+}
+
+function printAdvisoryCheckReport(report: AdvisoryCheckReport): void {
+  console.log(`checked: ${report.checkedCapabilityCount}`);
+
+  if (report.matches.length === 0) {
+    console.log("No installed capability advisories found.");
+  } else {
+    console.log("capability version advisory severity status registry_action runtime_default");
+    for (const match of report.matches) {
+      console.log([
+        match.capabilityId,
+        match.installedVersion,
+        match.advisoryId,
+        match.severity,
+        match.status,
+        match.registryAction,
+        match.runtimeDefault,
+      ].join(" "));
+    }
+  }
+
+  if (report.invalidAdvisoryCount === 0) {
+    return;
+  }
+
+  console.error(`Invalid capability advisories: ${report.invalidAdvisoryCount}`);
+  for (const invalid of report.invalidAdvisories) {
+    console.error(`- ${invalid.filePath}: ${invalid.issues.join("; ")}`);
+  }
 }
 
 function parsePolicyDecision(value: string | undefined): PolicyDecision | undefined {
@@ -1863,6 +1951,10 @@ const registryCommand = program
   .command("registry")
   .description("Inspect local Registry evidence.");
 
+const advisoryCommand = program
+  .command("advisory")
+  .description("Inspect local Capability advisory evidence.");
+
 const metricsCommand = program
   .command("metrics")
   .description("Inspect local audit metrics.");
@@ -1921,6 +2013,39 @@ conformanceCommand
       process.exitCode = 1;
     }
   }, "Failed to generate conformance report"));
+
+advisoryCommand
+  .command("check")
+  .requiredOption("--state-dir <path>", "Local OpenCap state directory")
+  .requiredOption("--registry <path>", "Registry root directory")
+  .option("--json", "Output JSON")
+  .description("Check installed capabilities against local Registry advisories.")
+  .action((options: { stateDir: string; registry: string; json?: boolean }) => runCliAction(async () => {
+    const cwd = process.env.INIT_CWD ?? process.cwd();
+    const stateDir = getLocalStatePaths({ cwd, env: process.env, stateDir: options.stateDir }).root;
+    const registryPath = resolveRegistryDir({ cwd, env: process.env, registryDir: options.registry });
+    const result = await checkInstalledCapabilityAdvisories({
+      cwd,
+      env: process.env,
+      stateDir: options.stateDir,
+      registryDir: options.registry,
+    });
+    const report = buildAdvisoryCheckReport({ stateDir, registryPath, result });
+    const exitCode = advisoryCheckExitCode(report);
+
+    if (options.json) {
+      console.log(JSON.stringify(report, null, 2));
+      if (exitCode !== undefined) {
+        process.exitCode = exitCode;
+      }
+      return;
+    }
+
+    printAdvisoryCheckReport(report);
+    if (exitCode !== undefined) {
+      process.exitCode = exitCode;
+    }
+  }, "Failed to check Capability advisories"));
 
 registryCommand
   .command("search")

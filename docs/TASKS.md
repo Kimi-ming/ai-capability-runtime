@@ -1823,7 +1823,7 @@
     - `git diff --check`
   - 完成记录：`README.md` 的快速开始已加入 `opencap registry search github --registry registry` 和 `opencap registry show github.search_repo --registry registry --json` 示例；`docs/README.md` 在 Capability/Registry 贡献入口说明 search/show 是本地发现和审查命令；`docs/教程/write-a-capability.md` 新增本地发现和审查段落，明确 search/show 不安装、不授权、不改变 policy、不读取 secret、不写 `opencap.local/`、不调用 provider，也不会把未安装 Capability 暴露到 MCP Host。`docs/TESTING.md` 已记录 `registry-search-command.test.ts`、`registry-show-command.test.ts`、CLI 57 个测试和不写 state dir 边界。
 
-- [ ] T328 P1：新增 `opencap advisory check` 已安装能力公告检查命令。
+- [x] T328 P1：新增 `opencap advisory check` 已安装能力公告检查命令。
   - 验收标准：
     - CLI `opencap advisory check --state-dir <path> --registry <path> [--json]` 复用 Runtime `checkInstalledCapabilityAdvisories()`，比对本地 installed capabilities 与 Registry advisory metadata。
     - JSON 输出使用稳定 schema `opencap.advisory_check.v1`，包含 stateDir、registryPath、matches、invalidAdvisoryCount、checked capability count 和 `policyEffect: none`；人类输出包含 capability id、version、advisory id、severity、status、registry action 和 runtime default。
@@ -1833,6 +1833,7 @@
     - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI 新增 `opencap advisory check --state-dir <path> --registry <path> [--json]`，复用 Runtime `checkInstalledCapabilityAdvisories()` 比对本地 installed capabilities 与 Registry advisory metadata。JSON 输出为 `opencap.advisory_check.v1`，包含 stateDir、registryPath、checkedInstalledCapabilities、matches、invalidAdvisoryCount、invalidAdvisories 和 `policyEffect: none`；人类输出包含 checked 数量、capability id、version、advisory id、severity、status、registry action 和 runtime default。无已安装能力时输出友好空结果；revoked/revoke/deny 类 advisory 返回 exit `1`，warning-only advisory 返回 exit `0`；invalid advisory JSON 模式输出 invalid summary 后 exit `1`。命令不执行 Capability、不读取 provider secret、不调用 provider、不触网，也不写 audit logs。`packages/cli/src/advisory-check-command.test.ts` 新增 4 个测试，CLI 包测试数从 57 增至 61。
 
 - [ ] T329 P2：新增 `opencap registry advisory list` 本地公告列表命令。
   - 验收标准：

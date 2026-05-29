@@ -73,6 +73,7 @@
 - CLI 新增 `opencap init`，可调用 Capability scaffold helper 在本地生成 V1 HTTP Capability package，并拒绝覆盖、危险 output 路径、secret-shaped 路径和本地 state/log/DB 路径。
 - CLI 新增 `opencap registry search`，可本地搜索 Registry Capability，默认隐藏 yanked/revoked，支持 JSON 和人类输出，且不安装、不写 state、不触网。
 - CLI 新增 `opencap registry show`，可本地查看单个 Registry Capability 的审查摘要，包含 auth、permissions 和 execution origin，且不安装、不写 state、不触网。
+- CLI 新增 `opencap advisory check`，可比对本地已安装 Capability 与 Registry advisory metadata，输出脱敏检查报告并对 revoked/deny 类公告返回 exit `1`。
 - CLI 新增 `opencap release package report`，可输出本地 npm package readiness report，支持可选 `npm pack --dry-run --json` 摘要并保持 `not-run`/`real_publish: false` 证据边界。
 - Release checklist、V1 alpha evidence 样例和 npm 发布文档已纳入 package readiness report 与 `npm pack --dry-run --json` 记录步骤，明确它不能替代 npm publish dry-run、trusted publishing 或正式 provenance。
 - `@opencap/spec` 和 `@opencap/cli` 新增 package `files` allowlist；npm package readiness report 会检查缺失或危险 allowlist entry 并作为发布 blocker。
