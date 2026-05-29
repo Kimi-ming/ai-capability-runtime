@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { access, readFile, stat } from "node:fs/promises";
+import { access, mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { Command } from "commander";
-import { dirname, isAbsolute, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 import {
@@ -452,6 +452,53 @@ function resolveReleaseDate(value: string | undefined, generatedAt: string): str
   }
 
   return value;
+}
+
+function resolveReleaseEvidenceOutputPath(value: string): string {
+  const resolved = resolveCliPath(value);
+  const parts = resolved.split(/[\\/]+/).map((part) => part.toLowerCase());
+  const fileName = basename(resolved).toLowerCase();
+
+  if (parts.includes("opencap.local")) {
+    throw new CliUserInputError("Unsafe --output path: release evidence artifacts must not be written under opencap.local.");
+  }
+  if (fileName === ".env" || fileName.startsWith(".env.")) {
+    throw new CliUserInputError("Unsafe --output path: release evidence artifacts must not target .env files.");
+  }
+  if (/(token|secret|password)/i.test(fileName)) {
+    throw new CliUserInputError("Unsafe --output path: release evidence artifact names must not contain token, secret, or password.");
+  }
+  if (/\.(sqlite|sqlite3|db|log)$/i.test(fileName)) {
+    throw new CliUserInputError("Unsafe --output path: release evidence artifacts must not target database or log files.");
+  }
+
+  return resolved;
+}
+
+async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
+  const resolved = resolveReleaseEvidenceOutputPath(outputPath);
+  const existing = await stat(resolved).catch((error: unknown) => {
+    if (isNodeError(error) && error.code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  });
+
+  if (existing?.isDirectory()) {
+    throw new CliUserInputError("Unsafe --output path: expected a file path, received a directory.");
+  }
+
+  const parentDir = dirname(resolved);
+  await mkdir(parentDir, { recursive: true });
+  const tempPath = join(parentDir, `.${basename(resolved)}.${process.pid}.${Date.now()}.tmp`);
+
+  try {
+    await writeFile(tempPath, `${JSON.stringify(bundle, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+    await rename(tempPath, resolved);
+  } catch (error) {
+    await unlink(tempPath).catch(() => undefined);
+    throw error;
+  }
 }
 
 function printNpmPackageReadinessReport(report: NpmPackageReadinessReport): void {
@@ -1423,9 +1470,10 @@ releaseCommand
   .option("--commit <sha>", "Release source commit", "local")
   .option("--date <date>", "Release evidence date")
   .option("--generated-at <iso>", "Release evidence generation timestamp")
+  .option("--output <path>", "Write release evidence JSON bundle to a file")
   .option("--json", "Output JSON")
   .description("Generate a local release evidence bundle.")
-  .action((options: { registry: string; records: string; package?: string; packJson?: string; target?: string; commit?: string; date?: string; generatedAt?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { registry: string; records: string; package?: string; packJson?: string; target?: string; commit?: string; date?: string; generatedAt?: string; output?: string; json?: boolean }) => runCliAction(async () => {
     if (options.package !== undefined && options.packJson === undefined) {
       throw new CliUserInputError("Use --pack-json when --package is provided.");
     }
@@ -1462,6 +1510,10 @@ releaseCommand
         package_readiness_report: packageReadinessReports.length > 0 ? "pass" : "not-run",
       },
     });
+
+    if (options.output !== undefined) {
+      await writeReleaseEvidenceOutput(options.output, bundle);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(bundle, null, 2));

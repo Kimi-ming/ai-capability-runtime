@@ -1655,7 +1655,7 @@
     - `pnpm validate`
   - 完成记录：CLI `opencap release evidence` 默认 `date` 现在从当前 UTC `generatedAt` 派生，不再输出 `1970-01-01`；命令新增 `--generated-at <iso>`，用于复现 release evidence 时间戳，且人类输出会显示 `date` 和 `generatedAt`。非法 `--generated-at` 或 `--date` 会作为用户错误 exit `1`，不打印 stack。`packages/cli/src/release-evidence-command.test.ts` 新增默认时间戳、可复现 `--generated-at`、人类输出时间字段和非法时间参数测试，CLI 包测试数从 33 增至 35。
 
-- [ ] T314 P1：支持 release evidence bundle 安全写入文件。
+- [x] T314 P1：支持 release evidence bundle 安全写入文件。
   - 验收标准：
     - CLI `opencap release evidence --output <path>` 可把 `opencap.release_evidence.v1` JSON 写入发布者指定文件；`--json` 仍可同时打印到 stdout。
     - 写入路径默认基于 `INIT_CWD`/当前工作目录解析，自动创建父目录，但拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 路径和目录路径。
@@ -1665,6 +1665,7 @@
     - `pnpm --filter @opencap/cli test -- release-evidence-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap release evidence` 新增 `--output <path>`，可把脱敏 `opencap.release_evidence.v1` JSON 写入指定文件，且 `--json` 仍同时打印 stdout。输出路径基于 `INIT_CWD`/当前工作目录解析，会自动创建父目录；危险路径 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径会作为用户错误 exit `1`，不打印 stack，且不会留下半截 evidence 文件。`packages/cli/src/release-evidence-command.test.ts` 覆盖安全写文件、stdout/file bundle 一致、危险路径拒绝和脱敏边界，CLI 包测试数从 35 增至 37。
 
 - [ ] T315 P2：把 release evidence artifact 输出纳入发布文档。
   - 验收标准：

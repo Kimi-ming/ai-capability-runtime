@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,6 +43,15 @@ async function writePackJson(files: Array<{ path: string; size: number }>): Prom
   const file = join(dir, "pack.json");
   await writeFile(file, JSON.stringify([{ files }]), "utf8");
   return { dir, file };
+}
+
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await readFile(path, "utf8");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 describe("OpenCap CLI release evidence command", () => {
@@ -101,6 +110,45 @@ describe("OpenCap CLI release evidence command", () => {
     expect(result.exitCode).toBe(0);
     expect(bundle.generatedAt).toBe("2026-05-29T12:34:56.789Z");
     expect(bundle.date).toBe("2026-05-29");
+  }, 60_000);
+
+  it("writes a redacted release evidence bundle to --output and keeps JSON stdout", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-evidence-output-"));
+    const outputPath = join(dir, "nested", "release-evidence.json");
+
+    try {
+      const result = await runOpenCapCli([
+        "release",
+        "evidence",
+        "--registry",
+        registryRoot,
+        "--records",
+        conformanceRoot,
+        "--generated-at",
+        "2026-05-29T12:34:56.789Z",
+        "--output",
+        outputPath,
+        "--json",
+      ]);
+      const stdoutBundle = JSON.parse(result.stdout);
+      const fileContent = await readFile(outputPath, "utf8");
+      const fileBundle = JSON.parse(fileContent);
+
+      expect(result.exitCode).toBe(0);
+      expect(fileBundle).toEqual(stdoutBundle);
+      expect(fileBundle).toMatchObject({
+        schemaVersion: "opencap.release_evidence.v1",
+        generatedAt: "2026-05-29T12:34:56.789Z",
+        date: "2026-05-29",
+        policyEffect: "none",
+      });
+      expect(fileContent).not.toContain("NPM_TOKEN");
+      expect(fileContent).not.toContain("Authorization");
+      expect(fileContent).not.toContain("super-secret-token");
+      expect(result.stderr).toBe("");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   }, 60_000);
 
   it("includes package readiness evidence when package and pack JSON are provided", async () => {
@@ -195,6 +243,46 @@ describe("OpenCap CLI release evidence command", () => {
     expect(invalidDate.stderr).toContain("Invalid --date value: expected YYYY-MM-DD.");
     expect(invalidDate.stderr).not.toContain("Error:");
     expect(invalidDate.stderr).not.toMatch(/\n\s+at /);
+  }, 60_000);
+
+  it("rejects unsafe release evidence output paths without partial files", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "opencap-cli-release-evidence-unsafe-output-"));
+    const outputDir = join(dir, "artifact-dir");
+    await mkdir(outputDir);
+
+    const unsafeOutputs = [
+      join(dir, ".env"),
+      join(dir, "release-token.json"),
+      join(dir, "opencap.local", "release-evidence.json"),
+      join(dir, "release.sqlite"),
+      join(dir, "release.log"),
+      outputDir,
+    ];
+
+    try {
+      for (const outputPath of unsafeOutputs) {
+        const result = await runOpenCapCli([
+          "release",
+          "evidence",
+          "--registry",
+          registryRoot,
+          "--records",
+          conformanceRoot,
+          "--output",
+          outputPath,
+        ], { allowFailure: true });
+
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toContain("Unsafe --output path:");
+        expect(result.stderr).not.toContain("Error:");
+        expect(result.stderr).not.toMatch(/\n\s+at /);
+        if (outputPath !== outputDir) {
+          expect(await fileExists(outputPath)).toBe(false);
+        }
+      }
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   }, 60_000);
 
   it("returns user errors for package options without stack traces", async () => {

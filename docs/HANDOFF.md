@@ -78,7 +78,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续完成 T313：CLI `opencap release evidence` 默认 `date` 现在从当前 UTC `generatedAt` 派生，不再输出 Unix epoch / `1970-01-01`；命令新增 `--generated-at <iso>`，用于复现 release evidence 时间戳。人类输出新增 `date` 和 `generatedAt`，非法 `--generated-at` 或 `--date` 会作为用户错误 exit `1` 且不打印 stack。`packages/cli/src/release-evidence-command.test.ts` 覆盖默认时间戳、可复现输入、人类输出时间字段和非法时间参数，CLI 包测试数从 33 增至 35。
 
-下一项 ready：T314 P1：支持 release evidence bundle 安全写入文件。
+本轮继续完成 T314：CLI `opencap release evidence` 新增 `--output <path>`，可把脱敏 `opencap.release_evidence.v1` JSON 写入指定文件，且 `--json` 仍同时打印 stdout。输出路径基于 `INIT_CWD`/当前工作目录解析，会自动创建父目录；危险路径 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 和目录路径会作为用户错误 exit `1`，不打印 stack，且不会留下半截 evidence 文件。`packages/cli/src/release-evidence-command.test.ts` 覆盖安全写文件、stdout/file bundle 一致、危险路径拒绝和脱敏边界，CLI 包测试数从 35 增至 37。
+
+下一项 ready：T315 P2：把 release evidence artifact 输出纳入发布文档。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 ready 队列已完成；下一轮需要解除 T291 外部 Host UI 阻塞，或重新规划下一批 ready 任务。
 
@@ -157,9 +159,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312 和 T313 均已完成；T314 是下一项本地 release evidence artifact ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313 和 T314 均已完成；T315 是下一项本地 release evidence artifact ready 任务；剩余 T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T314，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T315，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 
