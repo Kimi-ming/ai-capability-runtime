@@ -1715,6 +1715,39 @@
     - `git diff --check`
   - 完成记录：`docs/releases/release-checklist.md` 已在保存 release evidence JSON artifact 后增加 `opencap release artifact validate --file <artifact> --json` 步骤，并要求 release notes、PR 描述或 handoff 记录 validation report 的 `valid`、`findings` 和 `policyEffect: none`；validation invalid 时不得继续 release/tag/publish。V1 alpha evidence 样例已说明当前样例没有持久 artifact、未运行 artifact validation，后续 release 必须保存 JSON artifact 并记录 validation report。`docs/TESTING.md` 已记录带临时 `--output` 和 `release artifact validate` 的验证命令入口。
 
+- [ ] T319 P1：增强 release artifact decision consistency 校验。
+  - 验收标准：
+    - `validateReleaseEvidenceArtifact()` 能发现 artifact 中 `decision` 与 blockers、failed commands、failed components 不一致的情况。
+    - 如果 `blockers.length > 0`、任一 command 为 `fail`、任一 component status 为 `fail`，但 `decision` 不是 `block-release-tag`，validation report 必须返回 invalid finding。
+    - 如果 `decision: release` 但存在任何 `not-run` command 或 `not-run` registry/conformance component，validation report 必须返回 invalid finding，避免把 incomplete local evidence 写成 release-ready。
+    - Finding 不包含 secret、provider raw response、input/output 原文、`opencap.local/` 内容、数据库日志或私有路径。
+  - 验证方式：
+    - `pnpm --filter @opencap/spec test -- release-evidence-artifact.test.ts`
+    - `pnpm --filter @opencap/spec build`
+    - `pnpm validate`
+
+- [ ] T320 P1：支持 release artifact validation report 安全写入文件。
+  - 验收标准：
+    - CLI `opencap release artifact validate --file <artifact> --output <report-json>` 可把 `opencap.release_artifact_validation.v1` report 写入本地文件；`--json` 仍可同时打印 stdout。
+    - 输出路径默认基于 `INIT_CWD`/当前工作目录解析，自动创建父目录，但拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 路径和目录路径。
+    - 对 invalid artifact，命令仍写出脱敏 validation report 并以 exit `1` 结束；对非法 JSON artifact，不写 validation report。
+    - 非法 `--output` 作为用户错误 exit `1`，stderr 不打印 stack，且不留下半截 report 文件。
+  - 验证方式：
+    - `pnpm --filter @opencap/cli test -- release-artifact-command.test.ts`
+    - `pnpm --filter @opencap/cli build`
+    - `pnpm validate`
+
+- [ ] T321 P2：把 validation report artifact 纳入发布文档。
+  - 验收标准：
+    - `docs/releases/release-checklist.md` 说明 release evidence JSON 和 validation report JSON 两类 artifact 的保存与引用方式。
+    - V1 alpha evidence 样例说明当前样例未生成 validation report artifact；后续 release 必须记录 report path、valid、finding count 和 `policyEffect: none`。
+    - `docs/TESTING.md` 记录 `opencap release artifact validate --output` 命令测试入口。
+    - Handoff 指向下一项 ready 或明确剩余外部限制。
+  - 验证方式：
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
+    - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
+    - `git diff --check`
+
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：
     - 新增 OpenAPI Adapter Profile V1 RFC，明确 OpenAPI adapter 是 future profile，不改变 V1 HTTP-only Runtime 主路径。
