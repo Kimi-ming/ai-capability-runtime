@@ -170,7 +170,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 本轮继续重新规划下一批 ready 任务：`docs/TASKS.md` 已新增 T346-T347，把 npm package readiness report 从 stdout 推进到可安全保存的本地 JSON artifact，并把该 artifact 纳入发布文档。该批任务只汇总本地 package metadata 和可选 pack summary，不运行 npm publish、不触网、不读取 npm token，也不改变 package publish state、trust、policy、authorization 或 Runtime execution。
 
-下一项 ready：T346 P2：为 `opencap release package report` 增加安全 JSON evidence 输出文件。
+本轮继续完成 T346：CLI `opencap release package report --package <workspace-name>` 新增 `--output <file>`，可把当前 `opencap.npm_package_readiness.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。unsupported package 和 invalid pack JSON 仍作为用户错误 exit `1` 且不打印 stack，并且不会写 output 文件。输出路径使用 package readiness evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不运行 npm publish、不触网、不读取 npm token、不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-package-report-command.test.ts` 从 5 个测试增至 7 个，CLI 包合计从 84 个测试增至 86 个。
+
+下一项 ready：T347 P2：把 release package report output artifact 纳入发布文档。
 
 已新增 Superpowers 架构设计：`docs/superpowers/specs/2026-05-26-v1-architecture-convergence-design.md`。该设计把后续开发收敛为 MCP 主链路闭环、Usage/Evidence/Problem Details 证据线，以及整体架构与任务队列重整三条线。当前 Capability authoring scaffold 批次 T322-T324 已完成；T291 真实 Host UI smoke 仍需要外部环境 evidence。
 
@@ -249,9 +251,9 @@ OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当�
 
 下一步从 `docs/TASKS.md` 开始。
 
-`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344 和 T345 均已完成；T346 是下一项 npm package readiness JSON evidence output ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
+`docs/TASKS.md` 已重新拆成 M0-M6 七个模块化任务队列。T070、T198、T205、T282、T283、T284、T285、T286、T287、T288、T289、T290、T292、T293、T294、T295、T296、T297、T298、T299、T300、T301、T302、T303、T304、T305、T306、T307、T308、T309、T310、T311、T312、T313、T314、T315、T316、T317、T318、T319、T320、T321、T322、T323、T324、T325、T326、T327、T328、T329、T330、T331、T332、T333、T334、T335、T336、T337、T338、T339、T340、T341、T342、T343、T344、T345 和 T346 均已完成；T347 是下一项 release package report output artifact 文档 ready 任务；T291 为外部 Host UI smoke evidence 阻塞项。
 
-下一步推荐：执行 T346，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
+下一步推荐：执行 T347，或在用户确认本机 Claude Desktop/Cursor Host 环境可用后处理 T291。
 
 当前阻塞：
 

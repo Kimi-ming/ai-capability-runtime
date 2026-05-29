@@ -2040,7 +2040,7 @@
     - `git diff --check`
   - 完成记录：README、中文文档中心、`docs/releases/release-checklist.md`、`docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md` 和 `docs/TESTING.md` 已补充 `opencap registry report --output <file>` 与 `opencap conformance report --output <file>`。文档明确 Registry quality / Conformance summary output artifacts 只是本地 evidence input，不替代 release evidence bundle、artifact validation report、GitHub required checks、真实 Host UI smoke、release approval、tag 创建或 npm 发布；这些命令不写 state dir、不读取 provider secret、不触网，也不改变 trust、policy、authorization 或 Runtime execution。
 
-- [ ] T346 P2：为 `opencap release package report` 增加安全 JSON evidence 输出文件。
+- [x] T346 P2：为 `opencap release package report` 增加安全 JSON evidence 输出文件。
   - 验收标准：
     - CLI `opencap release package report --package <workspace-name> --output <file> [--pack-json <path>] [--json]` 可把当前 `opencap.npm_package_readiness.v1` report 写入本地 JSON 文件。
     - `--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。
@@ -2051,6 +2051,7 @@
     - `pnpm --filter @opencap/cli test -- release-package-report-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap release package report --package <workspace-name>` 新增 `--output <file>`，可把当前 `opencap.npm_package_readiness.v1` report 原子写入本地 JSON 文件。`--json` 仍同时输出 stdout；未传 `--json` 时保持人类摘要输出并写入 JSON 文件。unsupported package 和 invalid pack JSON 仍作为用户错误 exit `1` 且不打印 stack，并且不会写 output 文件。输出路径使用 package readiness evidence 文案，拒绝 `.env`、token/secret/password 命名、`opencap.local/`、SQLite/DB/log 文件和目录路径，失败时不留下半截文件。命令不运行 npm publish、不触网、不读取 npm token、不改变 package publish state、trust、policy、authorization 或 Runtime execution。`packages/cli/src/release-package-report-command.test.ts` 从 5 个测试增至 7 个，CLI 包合计从 84 个测试增至 86 个。
 
 - [ ] T347 P2：把 release package report output artifact 纳入发布文档。
   - 验收标准：

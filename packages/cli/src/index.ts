@@ -1392,6 +1392,13 @@ async function writeConformanceJsonOutput(outputPath: string, value: unknown): P
   });
 }
 
+async function writePackageReadinessJsonOutput(outputPath: string, value: unknown): Promise<void> {
+  await writeSafeJsonOutput(outputPath, value, {
+    artifact: "package readiness evidence files",
+    fileName: "package readiness evidence file names",
+  });
+}
+
 async function writeReleaseEvidenceOutput(outputPath: string, bundle: ReleaseEvidenceBundle): Promise<void> {
   await writeReleaseJsonOutput(outputPath, bundle);
 }
@@ -2566,15 +2573,20 @@ releasePackageCommand
   .command("report")
   .requiredOption("--package <workspace-name>", "Workspace package name to inspect")
   .option("--pack-json <path>", "Path to npm pack --dry-run --json output")
+  .option("--output <path>", "Write package readiness JSON report to a file")
   .option("--json", "Output JSON")
   .description("Generate a local npm package readiness report.")
-  .action((options: { package: string; packJson?: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { package: string; packJson?: string; output?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const packageJsonPath = releasePackageJsonPath(options.package, cwd);
     const packFiles = options.packJson === undefined
       ? undefined
       : await readNpmPackJsonFiles(resolveCliPath(options.packJson));
     const report = await buildNpmPackageReadinessReportFromFile(packageJsonPath, { packFiles });
+
+    if (options.output !== undefined) {
+      await writePackageReadinessJsonOutput(options.output, report);
+    }
 
     if (options.json) {
       console.log(JSON.stringify(report, null, 2));
