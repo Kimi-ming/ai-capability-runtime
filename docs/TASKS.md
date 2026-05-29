@@ -1894,7 +1894,7 @@
     - `git diff --check`
   - 完成记录：README 快速开始、中文文档中心、`docs/安全/capability-advisory-process.md`、`docs/生态/capability-deprecation-and-revocation.md`、`docs/社区/registry-guidelines.md`、`registry/README.md` 和 `docs/TESTING.md` 已补充 `opencap registry advisory show` 与 `registry advisory list --capability/--severity/--status` 入口；安全/Registry 文档已说明 show/filter 只是本地审查和 evidence，不改变 install、trust、policy、authorization 或 Runtime execution，不读取 secret、不调用 provider、不触网。Handoff 已指向下一批 ready 任务 T334-T336。
 
-- [ ] T334 P2：为 `opencap advisory check` 增加已安装能力筛选参数。
+- [x] T334 P2：为 `opencap advisory check` 增加已安装能力筛选参数。
   - 验收标准：
     - CLI `opencap advisory check --state-dir <path> --registry <path> --capability <id> [--json]` 只检查本地已安装的指定 Capability。
     - JSON 输出仍使用 `opencap.advisory_check.v1`，包含 `filters.capability`、原始 installed count、checked capability count、checkedInstalledCapabilities 和 matches。
@@ -1904,6 +1904,7 @@
     - `pnpm --filter @opencap/cli test -- advisory-check-command.test.ts`
     - `pnpm --filter @opencap/cli build`
     - `pnpm validate`
+  - 完成记录：CLI `opencap advisory check --state-dir <path> --registry <path>` 新增 `--capability <id>` 本地筛选。JSON 输出仍使用 `opencap.advisory_check.v1`，新增 `filters.capability` 和 `installedCapabilityCount`，并将 checkedInstalledCapabilities、checkedCapabilityCount 与 matches 收敛到指定 Capability；未安装匹配 Capability 时输出友好空结果并保持 exit `0`。invalid advisory 和 revoked/revoke/deny 匹配仍按既有 exit `1` 语义。命令不执行 Capability、不写 audit logs、不读取 provider secret、不调用 provider、不触网。`packages/cli/src/advisory-check-command.test.ts` 从 4 个测试增至 5 个，CLI 包测试数从 69 增至 70。
 
 - [ ] T335 P2：为 `opencap advisory check` 增加 severity/status 本地筛选参数。
   - 验收标准：

@@ -161,6 +161,91 @@ describe("OpenCap CLI advisory check command", () => {
     }
   }, 60_000);
 
+  it("filters advisory checks to one installed capability while preserving installed counts", async () => {
+    const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
+
+    try {
+      await runOpenCapCli(["install", "github.create_issue", "--state-dir", stateDir, "--registry", registryRoot]);
+      await runOpenCapCli(["install", "http.request_demo", "--state-dir", stateDir, "--registry", registryRoot]);
+
+      const safe = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--capability",
+        "github.create_issue",
+        "--json",
+      ]);
+      const safeReport = JSON.parse(safe.stdout) as {
+        filters: { capability?: string };
+        installedCapabilityCount: number;
+        checkedCapabilityCount: number;
+        checkedInstalledCapabilities: string[];
+        matches: unknown[];
+      };
+
+      expect(safe.exitCode).toBe(0);
+      expect(safeReport.filters).toEqual({ capability: "github.create_issue" });
+      expect(safeReport.installedCapabilityCount).toBe(2);
+      expect(safeReport.checkedCapabilityCount).toBe(1);
+      expect(safeReport.checkedInstalledCapabilities).toEqual(["github.create_issue"]);
+      expect(safeReport.matches).toEqual([]);
+
+      const revoked = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--capability",
+        "http.request_demo",
+        "--json",
+      ], { allowFailure: true });
+      const revokedReport = JSON.parse(revoked.stdout) as {
+        filters: { capability?: string };
+        installedCapabilityCount: number;
+        checkedCapabilityCount: number;
+        checkedInstalledCapabilities: string[];
+        matches: Array<{ capabilityId: string; advisoryId: string; runtimeDefault: string }>;
+      };
+
+      expect(revoked.exitCode).toBe(1);
+      expect(revokedReport.filters).toEqual({ capability: "http.request_demo" });
+      expect(revokedReport.installedCapabilityCount).toBe(2);
+      expect(revokedReport.checkedCapabilityCount).toBe(1);
+      expect(revokedReport.checkedInstalledCapabilities).toEqual(["http.request_demo"]);
+      expect(revokedReport.matches).toEqual([
+        expect.objectContaining({
+          capabilityId: "http.request_demo",
+          advisoryId: "OCAP-2026-0001",
+          runtimeDefault: "deny",
+        }),
+      ]);
+
+      const missing = await runOpenCapCli([
+        "advisory",
+        "check",
+        "--state-dir",
+        stateDir,
+        "--registry",
+        registryRoot,
+        "--capability",
+        "demo.missing",
+      ]);
+
+      expect(missing.exitCode).toBe(0);
+      expect(missing.stdout).toContain("checked: 0");
+      expect(missing.stdout).toContain("No installed capability advisories found.");
+      await expect(readFile(join(stateDir, "logs.sqlite"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      await rm(stateDir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
   it("prints a friendly empty human summary without writing audit logs", async () => {
     const stateDir = await mkdtemp(join(tmpdir(), "opencap-cli-advisory-check-"));
 

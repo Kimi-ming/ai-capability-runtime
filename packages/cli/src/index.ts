@@ -337,12 +337,18 @@ interface AdvisoryCheckInvalidAdvisory {
   issues: string[];
 }
 
+interface AdvisoryCheckFilters {
+  capability?: string;
+}
+
 interface AdvisoryCheckReport {
   schemaVersion: "opencap.advisory_check.v1";
   stateDir: string;
   registryPath: string;
+  installedCapabilityCount: number;
   checkedCapabilityCount: number;
   checkedInstalledCapabilities: string[];
+  filters: AdvisoryCheckFilters;
   matches: InstalledCapabilityAdvisoryMatch[];
   invalidAdvisoryCount: number;
   invalidAdvisories: AdvisoryCheckInvalidAdvisory[];
@@ -814,14 +820,23 @@ function buildAdvisoryCheckReport(input: {
   stateDir: string;
   registryPath: string;
   result: InstalledCapabilityAdvisoryCheckResult;
+  filters?: AdvisoryCheckFilters;
 }): AdvisoryCheckReport {
+  const filters = input.filters ?? {};
+  const checkedInstalledCapabilities = input.result.checkedInstalledCapabilities
+    .filter((capabilityId) => filters.capability === undefined || capabilityId === filters.capability);
+  const matches = input.result.matches
+    .filter((match) => filters.capability === undefined || match.capabilityId === filters.capability);
+
   return {
     schemaVersion: "opencap.advisory_check.v1",
     stateDir: input.stateDir,
     registryPath: input.registryPath,
-    checkedCapabilityCount: input.result.checkedInstalledCapabilities.length,
-    checkedInstalledCapabilities: [...input.result.checkedInstalledCapabilities],
-    matches: input.result.matches.map((match) => ({ ...match, affectedVersions: [...match.affectedVersions] })),
+    installedCapabilityCount: input.result.checkedInstalledCapabilities.length,
+    checkedCapabilityCount: checkedInstalledCapabilities.length,
+    checkedInstalledCapabilities,
+    filters,
+    matches: matches.map((match) => ({ ...match, affectedVersions: [...match.affectedVersions] })),
     invalidAdvisoryCount: input.result.invalidAdvisories.length,
     invalidAdvisories: input.result.invalidAdvisories.map(advisoryCheckInvalidAdvisory),
     policyEffect: "none",
@@ -2276,9 +2291,10 @@ advisoryCommand
   .command("check")
   .requiredOption("--state-dir <path>", "Local OpenCap state directory")
   .requiredOption("--registry <path>", "Registry root directory")
+  .option("--capability <id>", "Filter checks by installed capability id")
   .option("--json", "Output JSON")
   .description("Check installed capabilities against local Registry advisories.")
-  .action((options: { stateDir: string; registry: string; json?: boolean }) => runCliAction(async () => {
+  .action((options: { stateDir: string; registry: string; capability?: string; json?: boolean }) => runCliAction(async () => {
     const cwd = process.env.INIT_CWD ?? process.cwd();
     const stateDir = getLocalStatePaths({ cwd, env: process.env, stateDir: options.stateDir }).root;
     const registryPath = resolveRegistryDir({ cwd, env: process.env, registryDir: options.registry });
@@ -2288,7 +2304,12 @@ advisoryCommand
       stateDir: options.stateDir,
       registryDir: options.registry,
     });
-    const report = buildAdvisoryCheckReport({ stateDir, registryPath, result });
+    const report = buildAdvisoryCheckReport({
+      stateDir,
+      registryPath,
+      result,
+      filters: options.capability === undefined ? {} : { capability: options.capability },
+    });
     const exitCode = advisoryCheckExitCode(report);
 
     if (options.json) {
