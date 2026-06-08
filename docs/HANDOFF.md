@@ -1,12 +1,14 @@
 # 当前状态交接
 
-更新时间：2026-05-29
+更新时间：2026-06-08
 
 ## 当前阶段
 
 OpenCap 处于 V1 最小运行时实现阶段。文档体系已经建立，当前循环按 `docs/TASKS.md` 从小任务连续推进实现、验证、同步文档并提交 GitHub。
 
-本轮重新规划下一批 ready 任务：T359-T361 将 post-alpha 开发者集成拆成三个本地可验证任务，顺序为先实现 `@opencap/sdk` V1 manifest authoring helper，再把 SDK helper 纳入 README/中文文档中心/作者教程/测试文档，最后实现 OpenAPI operation selection evidence helper。该批任务不需要真实 Host UI、外部账号、provider 调用、网络发布权限或生产凭据；T291 真实 Claude Desktop/Cursor Host UI smoke 仍保持 `[!]` 外部阻塞。下一项 ready：T359 P2：定义 `@opencap/sdk` V1 manifest authoring helper。
+本轮继续完成 T359：`@opencap/sdk` 已导出 `defineHttpCapabilityManifest()`、`defineValidHttpCapabilityManifest()`、`SdkCapabilityAuthoringError`、`SDK_AUTHORING_BOUNDARY` 和相关类型，用于定义并校验 V1 HTTP Capability Manifest draft。Helper 复用 `@opencap/spec` 的 `validateCapabilityAuthoringManifest()`，因此不会绕过 manifest schema、model-visible metadata lint、least-privilege/risk lint 或 authoring loop；invalid draft 返回结构化 issues，strict helper 抛出可测试错误。SDK V1 明确不暴露 runtime plugin/executor API，不接受 `run()` handler，不安装或执行 Capability、不读取 provider secret、不写 state dir、不触网，也不改变 trust、policy、authorization 或 Runtime execution。`packages/sdk-js/src/index.test.ts` 覆盖 valid draft、invalid issue propagation、strict error、拒绝 runtime handler 和 root export 边界；已验证 `pnpm --filter @opencap/sdk test -- index.test.ts`、`pnpm --filter @opencap/sdk build`、`pnpm --filter @opencap/sdk lint`、`pnpm validate` 和 `pnpm test`。下一项 ready：T360 P2：把 SDK manifest authoring helper 纳入作者教程和测试文档。
+
+本轮重新规划下一批 ready 任务：T359-T361 将 post-alpha 开发者集成拆成三个本地可验证任务，顺序为先实现 `@opencap/sdk` V1 manifest authoring helper，再把 SDK helper 纳入 README/中文文档中心/作者教程/测试文档，最后实现 OpenAPI operation selection evidence helper。该批任务不需要真实 Host UI、外部账号、provider 调用、网络发布权限或生产凭据；T291 真实 Claude Desktop/Cursor Host UI smoke 仍保持 `[!]` 外部阻塞。
 
 本轮继续完成 T358：README、中文文档中心、`docs/生态/registry-distribution.md`、`docs/releases/release-checklist.md`、V1 alpha evidence 样例和测试策略已补充 `opencap registry index validate --file <registry-index-json> --output <registry-index-validation-json> --json` 的用途和边界。文档明确 `opencap.registry_index_validation.v1` validation report 只证明 saved unsigned index artifact 的结构、脱敏边界和 digest 一致性，不替代 manifest validation、Registry review、package lint、advisory/lifecycle gates、本地 policy、release evidence validation、签名验证或 install/execute 审计；validation 不签名、不触网、不读取 provider secret、不安装、不执行 Capability、不写 state dir，也不改变 trust、policy、authorization 或 Runtime execution。已验证 `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`、`python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .` 和 `git diff --check`。T358 完成后当前没有未阻塞 ready 任务；唯一剩余项是 T291 真实 Claude Desktop/Cursor Host smoke evidence，阻塞于本机 Host 应用和人工证据。
 

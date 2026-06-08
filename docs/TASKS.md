@@ -2201,7 +2201,7 @@
 
 ### 模块 M7：SDK、Adapters 和开发者集成
 
-- [ ] T359 P2：定义 `@opencap/sdk` V1 manifest authoring helper。
+- [x] T359 P2：定义 `@opencap/sdk` V1 manifest authoring helper。
   - 验收标准：
     - `@opencap/sdk` 导出 V1 manifest authoring helper 和类型，用于定义 HTTP Capability Manifest draft，并保持 manifest 仍是 Registry/Runtime 的事实契约。
     - Helper 必须复用 `@opencap/spec` manifest validation，返回结构化 validation issues 或抛出可测试错误；不得绕过 manifest schema、model-visible metadata lint、least-privilege/risk lint 或 authoring loop。
@@ -2212,6 +2212,7 @@
     - `pnpm --filter @opencap/sdk build`
     - `pnpm --filter @opencap/sdk lint`
     - `pnpm validate`
+  - 完成记录：`@opencap/sdk` 已导出 `defineHttpCapabilityManifest()`、`defineValidHttpCapabilityManifest()`、`SdkCapabilityAuthoringError`、`SDK_AUTHORING_BOUNDARY` 和相关类型，用于定义并校验 V1 HTTP Capability Manifest draft。Helper 复用 `@opencap/spec` 的 `validateCapabilityAuthoringManifest()`，因此会经过 manifest schema、model-visible metadata lint、least-privilege/risk lint 和 authoring loop 顺序；invalid draft 返回结构化 issues，strict helper 会抛出可测试错误。SDK V1 明确不暴露 runtime plugin/executor API，不接受 `run()` handler，不安装或执行 Capability、不读取 provider secret、不写 state dir、不触网，也不改变 trust、policy、authorization 或 Runtime execution。`packages/sdk-js` 新增 `vitest` 测试入口，`packages/sdk-js/src/index.test.ts` 覆盖 valid HTTP manifest draft、invalid issue propagation、strict error、拒绝 runtime handler 和 root export 边界；已验证 `pnpm --filter @opencap/sdk test -- index.test.ts`、`pnpm --filter @opencap/sdk build`、`pnpm --filter @opencap/sdk lint`、`pnpm validate` 和 `pnpm test`。
 
 - [ ] T360 P2：把 SDK manifest authoring helper 纳入作者教程和测试文档。
   - 验收标准：
