@@ -2214,7 +2214,7 @@
     - `pnpm validate`
   - 完成记录：`@opencap/sdk` 已导出 `defineHttpCapabilityManifest()`、`defineValidHttpCapabilityManifest()`、`SdkCapabilityAuthoringError`、`SDK_AUTHORING_BOUNDARY` 和相关类型，用于定义并校验 V1 HTTP Capability Manifest draft。Helper 复用 `@opencap/spec` 的 `validateCapabilityAuthoringManifest()`，因此会经过 manifest schema、model-visible metadata lint、least-privilege/risk lint 和 authoring loop 顺序；invalid draft 返回结构化 issues，strict helper 会抛出可测试错误。SDK V1 明确不暴露 runtime plugin/executor API，不接受 `run()` handler，不安装或执行 Capability、不读取 provider secret、不写 state dir、不触网，也不改变 trust、policy、authorization 或 Runtime execution。`packages/sdk-js` 新增 `vitest` 测试入口，`packages/sdk-js/src/index.test.ts` 覆盖 valid HTTP manifest draft、invalid issue propagation、strict error、拒绝 runtime handler 和 root export 边界；已验证 `pnpm --filter @opencap/sdk test -- index.test.ts`、`pnpm --filter @opencap/sdk build`、`pnpm --filter @opencap/sdk lint`、`pnpm validate` 和 `pnpm test`。
 
-- [ ] T360 P2：把 SDK manifest authoring helper 纳入作者教程和测试文档。
+- [x] T360 P2：把 SDK manifest authoring helper 纳入作者教程和测试文档。
   - 验收标准：
     - README、中文文档中心、`docs/设计/sdk-and-adapter-boundary.md`、作者教程和测试策略说明 SDK helper 的用途和边界。
     - 文档明确 SDK helper 只生成/校验 manifest draft，不是 Runtime plugin API，不执行代码、不安装能力、不读取 secret、不触网、不改变 policy/audit/trust。
@@ -2224,6 +2224,7 @@
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/check_docs.py .`
     - `python3 /Users/kimi/.codex/skills/continuous-doc-dev/scripts/audit_docs.py .`
     - `git diff --check`
+  - 完成记录：README、中文文档中心、`docs/设计/sdk-and-adapter-boundary.md`、`docs/教程/write-a-capability.md`、`docs/TESTING.md`、架构总览和 V1 架构文档已说明 `@opencap/sdk` manifest authoring helper 的用途与边界。文档明确 `defineHttpCapabilityManifest()` / `defineValidHttpCapabilityManifest()` 只定义和校验 V1 HTTP manifest draft，不是 Runtime plugin API，不接受 `run()` handler，不执行代码、不安装 Capability、不读取 secret、不写 state dir、不触网，也不改变 policy、audit、trust、authorization 或 Runtime execution。文档同步说明 SDK output 仍必须落成 Capability package，并继续经过 `opencap validate`、Capability package lint、model-visible metadata lint、least-privilege/risk lint、registry tests 和 human review。已验证 `check_docs.py`、`audit_docs.py`、`git diff --check`、`pnpm --filter @opencap/sdk test -- index.test.ts`、`pnpm --filter @opencap/sdk build` 和 `pnpm --filter @opencap/sdk lint`。
 
 - [ ] T361 P2：新增 OpenAPI operation selection evidence helper。
   - 验收标准：

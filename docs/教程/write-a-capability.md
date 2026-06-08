@@ -120,6 +120,42 @@ metadata:
 
 分类应来自 [能力分类体系](../生态/capability-taxonomy.md)。分类只帮助 Registry 展示、review 和未来 Host 分组；它不参与授权，也不能降低 permissions、risk、confirmation 或 outbound policy 要求。
 
+### 可选：用 SDK 定义 manifest draft
+
+如果你在 TypeScript 项目里维护 Capability 草稿，可以用 `@opencap/sdk` 先定义并校验 manifest draft：
+
+```ts
+import { defineHttpCapabilityManifest, defineValidHttpCapabilityManifest } from "@opencap/sdk";
+
+const result = await defineHttpCapabilityManifest({
+  id: "demo.get_status",
+  name: "Demo Get Status",
+  description: "Fetch a public demo endpoint with a name parameter.",
+  version: "0.1.0",
+  type: "http",
+  input: {
+    type: "object",
+    required: ["name"],
+    properties: {
+      name: { type: "string", description: "Name to include in the demo request." },
+    },
+  },
+  output: { type: "object" },
+  auth: { type: "none" },
+  permissions: [{ resource: "demo.status", action: "read", risk: "read_only", confirmation: "allow" }],
+  execution: { method: "GET", url: "https://httpbin.org/anything?name={{name}}", timeout_ms: 10000 },
+  metadata: { category: "developer-tools", maintainer: "your-name", license: "MIT", trust_level: "experimental" },
+});
+
+if (!result.ok) {
+  console.error(result.issues);
+}
+```
+
+`defineValidHttpCapabilityManifest()` 适合测试或脚本中需要失败即抛错的场景，会抛出 `SdkCapabilityAuthoringError`。SDK helper 只生成和校验 manifest draft；它不是 Runtime plugin API，不接受 `run()` handler，不执行代码、不安装 Capability、不读取 secret、不写 state dir、不触网，也不改变 policy、audit、trust、authorization 或 Runtime execution。
+
+无论 draft 来自 SDK 还是手写 YAML，最终都必须保存为 Capability package 中的 `manifest.yml`，并继续通过 `opencap validate`、Capability package lint、model-visible metadata lint、least-privilege/risk lint、registry tests 和人工 review。SDK 校验不能替代 Registry/Runtime 的事实契约。
+
 ## 3. 按作者门禁顺序自查
 
 Capability 从草稿到可评审必须按同一条 authoring loop 推进：

@@ -117,6 +117,32 @@ pnpm --filter @opencap/cli dev -- validate "$SCAFFOLD_ROOT/demo.get_status"
 rm -rf "$SCAFFOLD_ROOT"
 ```
 
+也可以在 TypeScript 中用 `@opencap/sdk` 的 authoring helper 定义和校验 manifest draft。这个 helper 只返回校验后的 manifest 数据或结构化 issues；它不是 Runtime plugin API，不接受 `run()` handler，不执行代码、不安装能力、不读取 secret、不触网，也不改变 policy、audit 或 trust。SDK 产出的 draft 仍必须保存为 Capability package，并继续通过 `opencap validate`、package lint、model-visible metadata lint、least-privilege/risk lint、registry tests 和 review。
+
+```ts
+import { defineValidHttpCapabilityManifest } from "@opencap/sdk";
+
+const manifest = await defineValidHttpCapabilityManifest({
+  id: "demo.get_status",
+  name: "Demo Get Status",
+  description: "Fetch a public demo endpoint with a name parameter.",
+  version: "0.1.0",
+  type: "http",
+  input: {
+    type: "object",
+    required: ["name"],
+    properties: {
+      name: { type: "string", description: "Name to include in the demo request." },
+    },
+  },
+  output: { type: "object" },
+  auth: { type: "none" },
+  permissions: [{ resource: "demo.status", action: "read", risk: "read_only", confirmation: "allow" }],
+  execution: { method: "GET", url: "https://httpbin.org/anything?name={{name}}", timeout_ms: 10000 },
+  metadata: { category: "developer-tools", maintainer: "your-name", license: "MIT", trust_level: "experimental" },
+});
+```
+
 ```bash
 pnpm install
 pnpm validate

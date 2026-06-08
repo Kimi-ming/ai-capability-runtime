@@ -138,8 +138,10 @@ flowchart TD
 
 ### `@opencap/sdk`
 
-- V1 暂不实现
-- 后续用于代码式 Capability 定义
+- V1 不进入 Runtime 主路径
+- 当前只提供 manifest authoring helper：定义和校验 HTTP Capability Manifest draft
+- 不提供 Runtime plugin/executor API，不接受 `run()` handler
+- 不安装、不执行、不读取 secret、不写 state dir、不触网，也不改变 policy、audit 或 trust
 
 ## 本地状态结构
 

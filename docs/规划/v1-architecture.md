@@ -111,7 +111,7 @@ opencap.local/
 
 ### `@opencap/sdk`
 
-V1 暂缓实现，不阻塞本地 Runtime。
+V1 不依赖 SDK 成立。当前 `@opencap/sdk` 只提供 manifest authoring helper，用于定义和校验 HTTP Capability Manifest draft；它不是 Runtime plugin/executor API，不接受 `run()` handler，不安装、不执行、不读取 secret、不写 state dir、不触网，也不改变 policy、audit 或 trust。
 
 ## 调用生命周期
 

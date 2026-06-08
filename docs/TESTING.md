@@ -148,6 +148,16 @@ pnpm lint
 
 如果因为网络或依赖未安装不能运行，需要在交接文档中记录。
 
+修改 `@opencap/sdk` manifest authoring helper、SDK 边界文档或作者教程时，至少运行：
+
+```bash
+pnpm --filter @opencap/sdk test -- index.test.ts
+pnpm --filter @opencap/sdk build
+pnpm --filter @opencap/sdk lint
+```
+
+这些测试只证明 SDK helper 能复用 `@opencap/spec` authoring validation 定义/校验 HTTP manifest draft，并验证 invalid issue propagation、strict error 和拒绝 `run()` handler 边界。它们不证明 SDK 可以安装、执行、读取 secret、写 state dir、触网或改变 policy/audit/trust；SDK output 仍必须进入 `opencap validate`、Capability package lint、model-visible metadata lint、least-privilege/risk lint、registry tests 和 review。
+
 最近全量验证：2026-05-28 在项目 conda 环境中通过 `pnpm validate`、`pnpm lint`、`pnpm build` 和 `pnpm test`。当前 `pnpm validate` 覆盖 5 个 registry manifest、5 个 manifest 的 model-visible metadata lint、5 个 manifest 的 least-privilege auth lint、5 个 Capability package lint、5 个 registry test 和 1 个 Capability advisory/revocation metadata 文件；当前测试清单登记 spec 101 个、runtime 295 个、mcp 26 个、cli 97 个、sdk 4 个测试。V1 alpha/local runtime evidence bundle 见 `docs/releases/evidence/v1-alpha-local-runtime-2026-05-28.md`；该证据不宣称 Cloud、Console、OAuth、marketplace、payment 或真实 Host UI 全兼容。`node:sqlite` ExperimentalWarning 仍是已知环境提示。
 
 ## 当前单元测试基础设施
