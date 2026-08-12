@@ -2226,7 +2226,7 @@
     - `git diff --check`
   - 完成记录：README、中文文档中心、`docs/设计/sdk-and-adapter-boundary.md`、`docs/教程/write-a-capability.md`、`docs/TESTING.md`、架构总览和 V1 架构文档已说明 `@opencap/sdk` manifest authoring helper 的用途与边界。文档明确 `defineHttpCapabilityManifest()` / `defineValidHttpCapabilityManifest()` 只定义和校验 V1 HTTP manifest draft，不是 Runtime plugin API，不接受 `run()` handler，不执行代码、不安装 Capability、不读取 secret、不写 state dir、不触网，也不改变 policy、audit、trust、authorization 或 Runtime execution。文档同步说明 SDK output 仍必须落成 Capability package，并继续经过 `opencap validate`、Capability package lint、model-visible metadata lint、least-privilege/risk lint、registry tests 和 human review。已验证 `check_docs.py`、`audit_docs.py`、`git diff --check`、`pnpm --filter @opencap/sdk test -- index.test.ts`、`pnpm --filter @opencap/sdk build` 和 `pnpm --filter @opencap/sdk lint`。
 
-- [ ] T361 P2：新增 OpenAPI operation selection evidence helper。
+- [x] T361 P2：新增 OpenAPI operation selection evidence helper。
   - 验收标准：
     - `@opencap/spec` 导出 OpenAPI operation selection evidence helper 和 report 类型，输出本地 `opencap.openapi_operation_selection.v1` report。
     - Helper 只校验调用方传入的 OpenAPI-like JSON 对象和显式 operation selection，确认 method/path 存在、deprecated 状态、server HTTPS 边界、cookie/unsupported security scheme、request/response schema warning 和 reviewer-provided capability id/category/risk hints。
@@ -2236,6 +2236,7 @@
     - `pnpm --filter @opencap/spec test -- openapi-operation-selection.test.ts`
     - `pnpm --filter @opencap/spec build`
     - `pnpm validate`
+  - 完成记录：`@opencap/spec` 已导出 `OPENAPI_OPERATION_SELECTION_SCHEMA_VERSION`、`buildOpenApiOperationSelectionReport()` 和 `OpenApiOperationSelectionReport` 等类型，输出本地 `opencap.openapi_operation_selection.v1` evidence report。Helper 只检查调用方传入的 OpenAPI-like JSON 对象和显式 method/path selection，记录 operation 是否存在、deprecated 状态、server HTTPS 边界、cookie/unsupported security scheme、request/response schema review warning 和 reviewer-provided capability id/category/risk hints；不会生成最终 manifest、不安装、不执行、不触网、不读取 provider secret、不信任 OpenAPI description/examples/securitySchemes，也不改变 trust、policy、authorization 或 Runtime execution。Report 固定 `manifestGenerated: false`、`runtimeExecution: false`、`policyEffect: "none"`，并对 token、Authorization、`/Users/`、`opencap.local`、SQLite/DB/log 和 raw body/provider raw response 文本做脱敏 finding。新增 `packages/spec/src/openapi-operation-selection.test.ts` 覆盖 valid selected operation、missing method/path blocker、deprecated/schema warnings、unsafe server/security blockers 和 sensitive text redaction；已验证 `pnpm --filter @opencap/spec test -- openapi-operation-selection.test.ts`、`pnpm --filter @opencap/spec test`、`pnpm --filter @opencap/spec build`、`pnpm --filter @opencap/spec lint` 和 `pnpm validate`。
 
 - [x] T146 P2：OpenAPI adapter RFC 草案。
   - 验收标准：

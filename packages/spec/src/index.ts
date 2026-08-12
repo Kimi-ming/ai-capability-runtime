@@ -9,6 +9,23 @@ export type {
   CapabilityScaffoldHttpMethod,
 } from "./capability-scaffold.js";
 export {
+  OPENAPI_OPERATION_SELECTION_SCHEMA_VERSION,
+  buildOpenApiOperationSelectionReport,
+} from "./openapi-operation-selection.js";
+export type {
+  BuildOpenApiOperationSelectionReportOptions,
+  OpenApiOperationReviewerHints,
+  OpenApiOperationSelectionFinding,
+  OpenApiOperationSelectionFindingCode,
+  OpenApiOperationSelectionInput,
+  OpenApiOperationSelectionReport,
+  OpenApiOperationSelectionRisk,
+  OpenApiSecurityEvidence,
+  OpenApiSecurityRequirementEvidence,
+  OpenApiSelectedOperationEvidence,
+  OpenApiSelectedServerEvidence,
+} from "./openapi-operation-selection.js";
+export {
   CONFORMANCE_SUMMARY_SCHEMA_VERSION,
   CONFORMANCE_SUITE_VERSION,
   CORE_CONFORMANCE_GROUPS,
